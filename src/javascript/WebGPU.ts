@@ -1,3 +1,5 @@
+import { clockCreate, clockInit, clockTick } from "./Clock";
+
 export async function setupAndRenderWebGPU() {
 	const adapter = await navigator.gpu?.requestAdapter();
 	const device = await adapter?.requestDevice();
@@ -40,9 +42,7 @@ export async function setupAndRenderWebGPU() {
 	 
 		@group(0) @binding(0) var<uniform> ourStruct: OurStruct;
 
-		@vertex fn vs(
-			@builtin(vertex_index) vertexIndex : u32
-			) -> @builtin(position) vec4f {
+		@vertex fn vs( @builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4f {
 			let pos = array(
 				vec2f( 0.0,  0.5+ourStruct.offset),  // top center
 				vec2f(-0.5, -0.5),  // bottom left
@@ -50,11 +50,11 @@ export async function setupAndRenderWebGPU() {
 			);
 		
 			return vec4f(pos[vertexIndex], 0.0, 1.0);
-			}
+		}
 		
-			@fragment fn fs() -> @location(0) vec4f {
+		@fragment fn fs() -> @location(0) vec4f {
 			return vec4f(1.0, 0.0, 0.0, 1.0);
-			}
+		}
 			`,
 	});
 
@@ -106,19 +106,16 @@ export async function setupAndRenderWebGPU() {
 	});
 
 	window.offset = 0;
-	let time = 0;
-	const getCurrentTime = () => Math.floor(performance.now());
-	let previousTime = getCurrentTime();
+	const clockData = clockCreate();
+	clockInit(clockData);
+	// const getCurrentTime = () => Math.floor(performance.now());
+	// let previousTime = getCurrentTime();
 	function render() {
 		if (!(device && context)) {
 			return;
 		}
-		const now = getCurrentTime();
-		const delta = now - previousTime;
-		time += delta;
-		previousTime = now;
-		// console.log(time);
-		window.set_time(BigInt(0), BigInt(time));
+		clockTick(clockData);
+		window.set_time(BigInt(0), BigInt(clockData.time));
 		// const offset = Math.sin(performance.now() / 1000);
 		uniformValues.set([window.offset], offsetOffset); // set the scale
 		device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
