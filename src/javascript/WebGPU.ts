@@ -57,7 +57,7 @@ fn vs( @builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4f {
 fn fs() -> @location(0) vec4f {
 	return vec4f(1.0, 0.0, 0.0, 1.0);
 }
-			`,
+`,
 	});
 
 	const pipeline = device.createRenderPipeline({
