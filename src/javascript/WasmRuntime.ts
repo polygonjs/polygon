@@ -1,4 +1,5 @@
 import { Allocated, SetTimeFunction } from "./Common";
+import { logGreenBg } from "./Logger";
 
 let allocated: Allocated | undefined; // A global reference of the WASM’s memory area so that we can look up pointers
 
@@ -43,9 +44,9 @@ const exported_js_functions = {
 		// console.log({ content });
 		// setupAndRenderWebGPU(content);
 	},
-	main_call_completed: () => {
-		console.log("___main_call_completed___");
-	},
+	// main_call_completed: () => {
+	// 	console.log("___main_call_completed___");
+	// },
 	set_webgpu_data: (offset: number) => {
 		// console.log("set_webgpu_data", offset);
 		window.offset = Number(offset);
@@ -76,12 +77,9 @@ export function loadWasm(): Promise<void> {
 			fetch("/polygon-next.wasm"),
 			imports
 		).then((obj) => {
-			console.log("obj", obj);
 			const memory = obj.instance.exports["memory"];
-			console.log(obj.instance.exports["memory"]);
-			allocated = memory as any;
+			allocated = memory as any as Allocated;
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
-			console.log(mainFunc);
 			mainFunc(0, BigInt(0));
 
 			const getSetTimeFunction = () => {
@@ -104,11 +102,15 @@ export function loadWasm(): Promise<void> {
 }
 if (import.meta.hot) {
 	import.meta.hot.on("jai-wasm-update", () => {
-		console.log("-----------------------------------------");
-		console.log("-----------------------------------------");
-		console.log("------------ WASM HOT RELOAD ------------");
-		console.log("-----------------------------------------");
-		console.log("-----------------------------------------");
+		// logGreenBg("-----------------------------------------");
+		// logGreenBg("-----------------------------------------");
+		logGreenBg(
+			`------------ WASM HOT RELOAD ------------ ${Math.floor(
+				performance.now()
+			)}`
+		);
+		// logGreenBg("-----------------------------------------");
+		// logGreenBg("-----------------------------------------");
 		loadWasm();
 	});
 	import.meta.hot.on("jai-wasm-error", (d) => {

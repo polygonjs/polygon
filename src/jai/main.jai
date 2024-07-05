@@ -2,44 +2,44 @@
 #import "Math";
 // A basic "Hello WASM World" program
 
-time :s64= 0;
+time :float= 0;
 
 main :: () {
-	print("Hello Jai 24!\n");
+	// print("Hello Jai 24!\n");
 	// write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
 	// log("Hello logger");
 
-	numbers: [..] int;
-	array_add(*numbers, 10);
-	array_add(*numbers, 20);
-	array_add(*numbers, 30);
+	// numbers: [..] int;
+	// array_add(*numbers, 10);
+	// array_add(*numbers, 20);
+	// array_add(*numbers, 30);
 
 	// for numbers {
 	// 	print("numbers[%]: %\n", it_index, it);
 	// }
 
-	debug_break();
+	// debug_break();
 
-	builder: String_Builder;
+	// builder: String_Builder;
 	// for 0..10 {
 	// 	append(*builder, sprint("Entry-%\n", it));
 	// }
-	print("Builder result: \n%", builder_to_string(*builder));
+	// print("Builder result: \n%", builder_to_string(*builder));
 
 	// Enable this if you want to see a nice stack trace:
 	// assert(false, "Assert test");
 
-	log("Type info test: The type of the builder is %", type_of(builder));
-	info := type_info(type_of(builder));
-	log("It contains the following members:");
-	for info.members {
-		log("%: % of type %", it_index, it.name, type_to_string(it.type));
-	}
+	// log("Type info test: The type of the builder is %", type_of(builder));
+	// info := type_info(type_of(builder));
+	// log("It contains the following members:");
+	// for info.members {
+	// 	log("%: % of type %", it_index, it.name, type_to_string(it.type));
+	// }
 
 	// Lets try something fancier
 	context.logger = dom_logger;
-	log("Logging to the DOM via Jai.");
-	log_error("We can also log errors.");
+	// log("Logging to the DOM via Jai.");
+	// log_error("We can also log errors.");
 
 	shader :: #string __MY_SHADER__
 		@vertex fn vs(
@@ -66,7 +66,7 @@ main :: () {
 	// 	set_webgpu_data(offset);
 	// }
 
-	main_call_completed();
+	// main_call_completed();
 }
 
 dom_logger :: (message: string, data: *void, info: Log_Info) {
@@ -83,15 +83,15 @@ set_webgpu_shader :: (message: string) {
 wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
 set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
 set_webgpu_data :: (value: float) #foreign;
-main_call_completed :: () #foreign;
+// main_call_completed :: () #foreign;
 
 set_time :: (new_time: s64) {
-	time = new_time;// / 1000.0;
+	time = new_time / 1000.0;
 	// context.logger = dom_logger;
 	// log("time");
 	// log(time);
 
-	offset := 0.2*sin(time/1000.0);
+	offset := 0.2*sin(time);
 	// log(offset);
 	// d :s64 = 1;
 	set_webgpu_data(offset);
