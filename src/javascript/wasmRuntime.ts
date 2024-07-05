@@ -99,6 +99,12 @@ export function loadWasm(): Promise<void> {
 		});
 	});
 }
+if (import.meta.hot) {
+	import.meta.hot.on("jai-wasm-update", () => {
+		console.log("------------ WASM HOT RELOAD ------------");
+		loadWasm();
+	});
+}
 
 const text_decoder = new TextDecoder();
 function js_string_from_jai_string(pointer: number, length: number) {

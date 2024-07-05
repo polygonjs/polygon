@@ -5,18 +5,18 @@
 time :s64= 0;
 
 main :: ()  {
-	print("Hello Jai!\n");
-	write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
-	log("Hello logger");
+	print("Hello Jai 17!\n");
+	// write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
+	// log("Hello logger");
 
 	numbers: [..] int;
 	array_add(*numbers, 10);
 	array_add(*numbers, 20);
 	array_add(*numbers, 30);
 
-	for numbers {
-		print("numbers[%]: %\n", it_index, it);
-	}
+	// for numbers {
+	// 	print("numbers[%]: %\n", it_index, it);
+	// }
 
 	debug_break();
 
