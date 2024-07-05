@@ -73,11 +73,12 @@ export async function setupAndRenderWebGPU() {
 	});
 
 	const colorAttachment: GPURenderPassColorAttachment = {
-		view: null as any, //<- to be filled out when we render
+		view: context.getCurrentTexture().createView(), //null as any, //<- to be filled out when we render
 		clearValue: [0.3, 0.3, 0.3, 1],
 		loadOp: "clear",
 		storeOp: "store",
 	};
+	// colorAttachment.view = context.getCurrentTexture().createView();
 	const renderPassDescriptor: GPURenderPassDescriptor = {
 		label: "our basic canvas renderPass",
 		colorAttachments: [colorAttachment],
@@ -116,8 +117,8 @@ export async function setupAndRenderWebGPU() {
 		}
 		clockTick(clockData);
 		window.set_time(BigInt(0), BigInt(clockData.time));
-		// const offset = Math.sin(performance.now() / 1000);
-		uniformValues.set([window.offset], offsetOffset); // set the scale
+		// uniformValues.set([window.offset], offsetOffset); // set the scale
+		uniformValues[offsetOffset] = window.offset;
 		device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 		// Get the current texture from the canvas context and
 		// set it as the texture to render to.
