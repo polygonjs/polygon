@@ -24,6 +24,13 @@ function jaiPlugin() {
 							console.error(
 								`Error compiling .jai files: ${stderr}`
 							);
+							server.ws.send({
+								type: "custom",
+								event: "jai-wasm-error",
+								data: {
+									message: stderr,
+								},
+							});
 						} else {
 							console.log(`Compiled .jai files: ${stdout}`);
 

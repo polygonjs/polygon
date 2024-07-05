@@ -1,8 +1,9 @@
-export type SetTimeFunction = (time: number) => void;
+export type SetTimeFunction = (uselessArg: BigInt, time: BigInt) => void;
 
 declare global {
 	interface Window {
 		set_time: SetTimeFunction;
+		offset: number;
 	}
 }
 

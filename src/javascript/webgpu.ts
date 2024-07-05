@@ -105,20 +105,22 @@ export async function setupAndRenderWebGPU() {
 		entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
 	});
 
-	(window as any).offset = 0;
+	window.offset = 0;
 	let time = 0;
-	const now = () => Math.floor(performance.now());
-	const startTime = now();
+	const getCurrentTime = () => Math.floor(performance.now());
+	let previousTime = getCurrentTime();
 	function render() {
 		if (!(device && context)) {
 			return;
 		}
-		const delta = now() - startTime;
+		const now = getCurrentTime();
+		const delta = now - previousTime;
 		time += delta;
+		previousTime = now;
 		// console.log(time);
-		// (window as any).set_time(BigInt(time), BigInt(time));
+		window.set_time(BigInt(0), BigInt(time));
 		// const offset = Math.sin(performance.now() / 1000);
-		uniformValues.set([(window as any).offset], offsetOffset); // set the scale
+		uniformValues.set([window.offset], offsetOffset); // set the scale
 		device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 		// Get the current texture from the canvas context and
 		// set it as the texture to render to.

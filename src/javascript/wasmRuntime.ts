@@ -10,7 +10,7 @@ window.set_time = (time) => console.log(`default set_time:${time}`);
 const exported_js_functions = {
 	wasm_write_string: (
 		s_count: number,
-		s_data: number,
+		s_data: BigInt,
 		to_standard_error: boolean
 	) => {
 		const string = js_string_from_jai_string(s_data, s_count);
@@ -20,7 +20,7 @@ const exported_js_functions = {
 	wasm_debug_break: () => {
 		// debugger;
 	},
-	wasm_log_dom: (s_count: number, s_data: number, is_error: boolean) => {
+	wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
 		const log = document.getElementById("log");
 		if (!log) {
 			console.error("No log element found");
@@ -43,9 +43,12 @@ const exported_js_functions = {
 		// console.log({ content });
 		// setupAndRenderWebGPU(content);
 	},
+	main_call_completed: () => {
+		console.log("___main_call_completed___");
+	},
 	set_webgpu_data: (offset: number) => {
-		console.log("set_webgpu_data", offset);
-		// window.offset = Number(offset);
+		// console.log("set_webgpu_data", offset);
+		window.offset = Number(offset);
 	},
 };
 
@@ -54,7 +57,7 @@ const exported_js_functions = {
 const imports = {
 	env: new Proxy(exported_js_functions, {
 		get(target, prop) {
-			// console.log("get",  prop);
+			// console.log("get", prop);
 			if (target.hasOwnProperty(prop)) {
 				return (target as any)[prop];
 			}
@@ -101,18 +104,28 @@ export function loadWasm(): Promise<void> {
 }
 if (import.meta.hot) {
 	import.meta.hot.on("jai-wasm-update", () => {
+		console.log("-----------------------------------------");
+		console.log("-----------------------------------------");
 		console.log("------------ WASM HOT RELOAD ------------");
+		console.log("-----------------------------------------");
+		console.log("-----------------------------------------");
 		loadWasm();
+	});
+	import.meta.hot.on("jai-wasm-error", (d) => {
+		console.error("Jai WASM error", d);
+		console.log(d["message"]);
 	});
 }
 
 const text_decoder = new TextDecoder();
-function js_string_from_jai_string(pointer: number, length: number) {
+function js_string_from_jai_string(pointer: BigInt, length: number) {
+	// console.log({ pointer });
 	// if(!allocated){
 	// 	console.error("Memory not allocated")
 	// 	return
 	// }
 	const u8 = new Uint8Array(allocated!.buffer);
+	// console.log({ buffer: allocated!.buffer, u8, allocated });
 	const bytes = u8.subarray(
 		Number(pointer),
 		Number(pointer) + Number(length)
