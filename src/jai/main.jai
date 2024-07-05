@@ -5,7 +5,7 @@
 time :s64= 0;
 
 main :: ()  {
-	print("Hello Jai 17!\n");
+	print("Hello Jai 20!\n");
 	// write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
 	// log("Hello logger");
 
