@@ -46,7 +46,7 @@ main :: () {
 	// log("Logging to the DOM via Jai.");
 	// log_error("We can also log errors.");
 
-	SCENE_DATA.vertices = create_vertices();
+	SCENE_DATA.vertices, SCENE_DATA.indices = create_vertices();
 	// SCENE_DATA.buffer  = [2*3*SCENE_DATA.vertices.count]float32;
 	// SCENE_DATA.buffer.count = 2*3*SCENE_DATA.vertices.count;
 	// vertices_to_buffer(SCENE_DATA.vertices, SCENE_DATA.buffer);
@@ -65,6 +65,7 @@ main :: () {
 	// }
 
 	set_webgpu_vertex_data(SCENE_DATA.vertices);
+	set_webgpu_index_data(SCENE_DATA.indices);
 	set_webgpu_shader(SHADER);
 	// time:float=0;
 	// while (true) {
@@ -99,6 +100,9 @@ set_webgpu_shader :: (message: string) {
 set_webgpu_vertex_data :: (vertices: []Vertex) {
 	set_webgpu_vertex_data_js(vertices.count*3*2, vertices.data, size_of(float32));
 }
+set_webgpu_index_data :: (indices: []VertexIndex) {
+	set_webgpu_index_data_js(indices.count, indices.data, size_of(VertexIndex));
+}
 
 
 // We need to declare all the JS functions that will be passed to our WebAssembly
@@ -106,6 +110,7 @@ set_webgpu_vertex_data :: (vertices: []Vertex) {
 wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
 set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
 set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
+set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 

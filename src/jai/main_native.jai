@@ -37,7 +37,7 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 main :: () {
 	SHADER :: #run create_shaders();
 	SCENE_DATA : SceneData;
-	SCENE_DATA.vertices = create_vertices();
+	SCENE_DATA.vertices, SCENE_DATA.indices = create_vertices();
 	// vertices_to_buffer(SCENE_DATA.vertices, SCENE_DATA.buffer);
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -72,6 +72,7 @@ main :: () {
 	assert(shader != null, "Shader is not created correctly");
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
+	index_buffer, index_buffer_size := index_array_to_buffer(device, queue, SCENE_DATA.indices);
 	// SCENE_DATA.buffer = vertex_buffer;
 
 	pipeline := create_pipeline(surface, adapter, device, shader, Vertex);
@@ -102,6 +103,7 @@ main :: () {
 		update_scene_data(*SCENE_DATA, time);
 		// VERTICES[0].position.y = sin(4*time) / 2.0;
 		update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
+		
 
 		cmd_encoder := wgpu.DeviceCreateCommandEncoder(
 			device,
@@ -124,8 +126,9 @@ main :: () {
 
 		wgpu.RenderPassEncoderSetPipeline(render_pass, pipeline);
 		wgpu.RenderPassEncoderSetVertexBuffer(render_pass, 0, vertex_buffer, 0, vertex_buffer_size);
+		wgpu.RenderPassEncoderSetIndexBuffer(render_pass, index_buffer, wgpu.IndexFormat.Uint32, 0, index_buffer_size);
 
-		wgpu.RenderPassEncoderDraw(render_pass, cast(u32) SCENE_DATA.vertices.count, 1, 0, 0);
+		wgpu.RenderPassEncoderDrawIndexed(render_pass, cast(u32) SCENE_DATA.indices.count, 1, 0, 0, 0);
 		wgpu.RenderPassEncoderEnd(render_pass);
 		wgpu.TextureViewRelease(current_view);
 

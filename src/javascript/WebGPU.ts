@@ -1,6 +1,7 @@
 import { clockInit, clockTick } from "./Clock";
 import { SHADERS } from "./Common";
 import {
+	indexArrayToBuffer,
 	SCENE_DATA,
 	updateVertexArrayToBuffer,
 	// updateVertexArrayToBuffer,
@@ -93,7 +94,11 @@ export async function setupAndRenderWebGPU() {
 		device,
 		SCENE_DATA.vertexBuffer
 	);
-	if (vertexArrayBufferResult == null) {
+	const indexArrayToBufferResult = indexArrayToBuffer(
+		device,
+		SCENE_DATA.indexBuffer
+	);
+	if (!(vertexArrayBufferResult && indexArrayToBufferResult)) {
 		alert("failed to create vertex buffer");
 		return;
 	}
@@ -160,7 +165,14 @@ export async function setupAndRenderWebGPU() {
 	// const getCurrentTime = () => Math.floor(performance.now());
 	// let previousTime = getCurrentTime();
 	function render() {
-		if (!(device && context && vertexArrayBufferResult)) {
+		if (
+			!(
+				device &&
+				context &&
+				vertexArrayBufferResult &&
+				indexArrayToBufferResult
+			)
+		) {
 			return;
 		}
 		clockTick(clockData);
@@ -184,8 +196,8 @@ export async function setupAndRenderWebGPU() {
 		const pass = encoder.beginRenderPass(renderPassDescriptor);
 		pass.setPipeline(pipeline);
 		pass.setVertexBuffer(0, vertexArrayBufferResult.buffer);
-		// pass.setBindGroup(0, bindGroup);
-		pass.draw(3); // call our vertex shader 3 times
+		pass.setIndexBuffer(indexArrayToBufferResult.buffer, "uint32");
+		pass.drawIndexed(indexArrayToBufferResult.data.length);
 		pass.end();
 
 		const commandBuffer = encoder.finish();

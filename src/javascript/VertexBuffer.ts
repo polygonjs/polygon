@@ -11,9 +11,11 @@
 // const VERTEX_SIZE = VECTOR3_SIZE * 2;
 interface SceneData {
 	vertexBuffer: Float32Array;
+	indexBuffer: Uint32Array;
 }
 export const SCENE_DATA: SceneData = {
 	vertexBuffer: new Float32Array(0),
+	indexBuffer: new Uint32Array(0),
 };
 // export const VERTICES: Vertex[] = [
 // 	{
@@ -35,15 +37,15 @@ export interface VertexArrayToBufferResult {
 	size: number;
 	data: Float32Array;
 }
+export interface IndexArrayToBufferResult {
+	buffer: GPUBuffer;
+	size: number;
+	data: Uint32Array;
+}
 export function vertexArrayToBuffer(
 	device: GPUDevice,
 	data: Float32Array
-	// vertices: Vertex[]
 ): VertexArrayToBufferResult | undefined {
-	// size := cast(u64) vertices.count * size_of(Vertex);
-	// const size = VERTEX_SIZE * vertices.length;
-	// const data = new Float32Array(size / 4);
-
 	const buffer = device.createBuffer({
 		size: data.byteLength,
 		usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
@@ -56,6 +58,28 @@ export function vertexArrayToBuffer(
 	device.queue.writeBuffer(buffer, 0, data);
 
 	const result: VertexArrayToBufferResult = {
+		buffer,
+		size: data.byteLength,
+		data,
+	};
+	return result;
+}
+export function indexArrayToBuffer(
+	device: GPUDevice,
+	data: Uint32Array
+): IndexArrayToBufferResult | undefined {
+	const buffer = device.createBuffer({
+		size: data.byteLength,
+		usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+	});
+	if (buffer == null) {
+		console.error("buffer is null");
+		return;
+	}
+
+	device.queue.writeBuffer(buffer, 0, data);
+
+	const result: IndexArrayToBufferResult = {
 		buffer,
 		size: data.byteLength,
 		data,

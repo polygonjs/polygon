@@ -62,13 +62,22 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		// console.log("set_webgpu_vertex_data_js", s_count, s_data);
 		const buffer = float32_from_jai_buffer(s_data, s_count, elementSize);
 		if (!buffer) {
 			return;
 		}
-		console.log("buffer", s_data, s_count, buffer);
 		SCENE_DATA.vertexBuffer = buffer;
+	},
+	set_webgpu_index_data_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		const buffer = u32_from_jai_buffer(s_data, s_count, elementSize);
+		if (!buffer) {
+			return;
+		}
+		SCENE_DATA.indexBuffer = buffer;
 	},
 	// main_call_completed: () => {
 	// 	console.log("___main_call_completed___");
@@ -106,10 +115,10 @@ export function loadWasm(): Promise<void> {
 			const memory = obj.instance.exports["memory"];
 			allocatedMemoryContainer.allocatedMemory =
 				memory as any as AllocatedMemory;
-			console.log(
-				"WASM loaded",
-				allocatedMemoryContainer.allocatedMemory
-			);
+			// console.log(
+			// 	"WASM loaded",
+			// 	allocatedMemoryContainer.allocatedMemory
+			// );
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
 			mainFunc(0, BigInt(0));
 
@@ -174,11 +183,6 @@ function float32_from_jai_buffer(
 	length: number,
 	elementSize: number
 ) {
-	// console.log({ pointer });
-	// if(!allocated){
-	// 	console.error("Memory not allocated")
-	// 	return
-	// }
 	const f32 = new Float32Array(
 		allocatedMemoryContainer.allocatedMemory!.buffer
 	);
@@ -187,13 +191,24 @@ function float32_from_jai_buffer(
 		console.error("Pointer out of bounds", Number(pointer), f32.length);
 		return;
 	}
-	// console.log({ buffer: allocated!.buffer, u8, allocated });
 	const bytes = f32.subarray(start, start + Number(length));
-	// for (let i = 0; i < Number(length); i++) {
-	// 	console.log(i, bytes[i]);
-	// }
-	// console.log("length", Number(pointer), Number(length), bytes);
-	return bytes; //text_decoder.decode(bytes);
+	return bytes;
+}
+function u32_from_jai_buffer(
+	pointer: BigInt,
+	length: number,
+	elementSize: number
+) {
+	const u32 = new Uint32Array(
+		allocatedMemoryContainer.allocatedMemory!.buffer
+	);
+	const start = Number(pointer) / elementSize;
+	if (start > u32.length) {
+		console.error("Pointer out of bounds", Number(pointer), u32.length);
+		return;
+	}
+	const bytes = u32.subarray(start, start + Number(length));
+	return bytes;
 }
 
 // console.log and console.error always add newlines so we need to buffer the output from write_string

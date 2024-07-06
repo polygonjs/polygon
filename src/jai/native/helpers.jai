@@ -240,6 +240,19 @@ vertex_array_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, vertices: []V
 
 	return buffer, size;
 }
+index_array_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, indices: []VertexIndex) -> wgpu.Buffer, u64 {
+	size := cast(u64) indices.count * size_of(VertexIndex);
+
+	buffer := wgpu.DeviceCreateBuffer(device, *(wgpu.BufferDescriptor.{
+		usage = xx (wgpu.BufferUsage.Index | wgpu.BufferUsage.CopyDst),
+		size=size
+	}));
+	assert(buffer != null, "Buffer is not created correctly");
+
+	wgpu.QueueWriteBuffer(queue, buffer, 0, indices.data, size);
+
+	return buffer, size;
+}
 
 // update_vertex_array_to_buffer :: (buffer:wgpu.Buffer, queue: wgpu.Queue, vertices: []Vertex) {
 // 	size := cast(u64) vertices.count * size_of(Vertex);
