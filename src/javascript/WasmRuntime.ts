@@ -101,13 +101,12 @@ export function loadWasm(): Promise<void> {
 	});
 }
 if (import.meta.hot) {
+	let wamsRebuildCount = 0;
 	import.meta.hot.on("jai-wasm-update", () => {
 		// logGreenBg("-----------------------------------------");
 		// logGreenBg("-----------------------------------------");
 		logGreenBg(
-			`------------ WASM HOT RELOAD ------------ ${Math.floor(
-				performance.now()
-			)}`
+			`------------ WASM HOT RELOAD ------------ ${wamsRebuildCount++}`
 		);
 		// logGreenBg("-----------------------------------------");
 		// logGreenBg("-----------------------------------------");

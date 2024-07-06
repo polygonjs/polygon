@@ -31,6 +31,7 @@ function jaiPlugin() {
 									message: stderr,
 								},
 							});
+							exec(`xmessage -center '${stderr}' -timeout 2`);
 						} else {
 							console.log(`Compiled .jai files: ${stdout}`);
 
