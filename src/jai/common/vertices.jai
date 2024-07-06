@@ -4,18 +4,16 @@ Vertex :: struct {
 	color: Vector3;
 }
 
-create_vertices :: ()-> [3]Vertex {
-	VERTICES := Vertex.[
-		.{ position=.{0.0, 0.5, 0.0}, color=.{1.0, 0.0, 0.0} },
-		.{ position=.{-0.5, -0.5, 0.0}, color=.{0.0, 1.0, 0.0} },
-		.{ position=.{0.5, -0.5, 0.0}, color=.{0.0, 0.0, 1.0} },
-	];
-	return VERTICES;
+create_vertices :: ()-> [..]Vertex {
+	list : [..]Vertex;
+	array_add(*list, Vertex.{ position=.{0.0, 0.5, 0.0}, color=.{1.0, 0.0, 0.0} });
+	array_add(*list, Vertex.{ position=.{-0.5, -0.5, 0.0}, color=.{0.0, 1.0, 0.0} });
+	array_add(*list, Vertex.{ position=.{0.5, -0.5, 0.0}, color=.{0.0, 0.0, 1.0} });
+	return list;
 }
 
 SceneData :: struct {
-	vertices: [3]Vertex;
-	// buffer: []float32;
+	vertices: [..]Vertex;
 };
 
 update_scene_data :: (scene_data: *SceneData, time:float) {
