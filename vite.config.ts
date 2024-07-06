@@ -5,19 +5,28 @@ import { exec } from "child_process";
 // import * as fs from "fs";
 // import * as path from "path";
 
+function fileIsNotInDotBuildFolder(filePath: string): boolean {
+	return filePath.includes("/.build/") == false;
+}
+function fileHasValidExtension(filePath: string): boolean {
+	return filePath.endsWith(".jai") || filePath.endsWith(".wgsl");
+}
+function fileIsValid(filePath: string): boolean {
+	return (
+		fileHasValidExtension(filePath) && fileIsNotInDotBuildFolder(filePath)
+	);
+}
+
 function jaiPlugin() {
 	return {
 		name: "watch-jai-files",
 		configureServer(server) {
-			// Watch .jai files
+			//
 			server.watcher.add("src/**/*.jai");
+			server.watcher.add("src/**/*.wgsl");
 
-			// Handle file changes
 			server.watcher.on("change", (filePath) => {
-				if (
-					filePath.endsWith(".jai") == true &&
-					filePath.includes("/.build/") == false
-				) {
+				if (fileIsValid(filePath)) {
 					console.log(`File changed: ${filePath}`);
 					exec("jai src/jai/build.jai", (err, stdout, stderr) => {
 						if (err) {
@@ -31,20 +40,14 @@ function jaiPlugin() {
 									message: stderr,
 								},
 							});
-							exec(`xmessage -center '${stderr}' -timeout 2`);
+							// exec(`xmessage -center '${stderr}' -timeout 4`);
 						} else {
 							console.log(`Compiled .jai files: ${stdout}`);
+							// exec(`bin/polygon-next-native`);
 
-							// server.ws.send({
-							// 	type: "full-reload",
-							// 	path: "*",
-							// });
 							server.ws.send({
 								type: "custom",
 								event: "jai-wasm-update",
-								// data: {
-								//   path: '/public/output.wasm' // Adjust the path if necessary
-								// }
 							});
 						}
 					});

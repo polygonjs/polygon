@@ -1,8 +1,10 @@
 import { clockInit, clockTick } from "./Clock";
+import { SHADERS } from "./Common";
 import {
-	updateVertexArrayToBuffer,
+	SCENE_DATA,
+	// updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
-	VERTICES,
+	// VERTICES,
 } from "./VertexBuffer";
 
 export async function setupAndRenderWebGPU() {
@@ -12,7 +14,6 @@ export async function setupAndRenderWebGPU() {
 		alert("need a browser that supports WebGPU");
 		return;
 	}
-	console.log({ adapter, device });
 
 	const domElement = document.getElementById("app") as HTMLElement;
 	if (!domElement) {
@@ -59,35 +60,38 @@ export async function setupAndRenderWebGPU() {
 	// fn fs() -> @location(0) vec4f {
 	// 	return vec4f(1.0, 1.0, 0.0, 1.0);
 	// }`;
-	const shader = `
-struct VertexInput {
-	@location(0) position: vec3<f32>,
-	@location(1) color: vec3<f32>,
-};
+	// 	const shader = `
+	// struct VertexInput {
+	// 	@location(0) position: vec3<f32>,
+	// 	@location(1) color: vec3<f32>,
+	// };
 
-struct VertexOutput {
-	@builtin(position) clip_position: vec4<f32>,
-	@location(0) color: vec3<f32>,
-};
+	// struct VertexOutput {
+	// 	@builtin(position) clip_position: vec4<f32>,
+	// 	@location(0) color: vec3<f32>,
+	// };
 
-@vertex
-fn vertex(model: VertexInput) -> VertexOutput {
-	var out: VertexOutput;
-	out.clip_position = vec4<f32>(model.position, 1.0);
-	out.color = model.color;
-	return out;
-}
+	// @vertex
+	// fn vertex(model: VertexInput) -> VertexOutput {
+	// 	var out: VertexOutput;
+	// 	out.clip_position = vec4<f32>(model.position, 1.0);
+	// 	out.color = model.color;
+	// 	return out;
+	// }
 
-@fragment
-fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-	return vec4<f32>(in.color, 1.0);
-}
-	`;
+	// @fragment
+	// fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
+	// 	return vec4<f32>(in.color, 1.0);
+	// }
+	// 	`;
 	const module = device.createShaderModule({
-		code: shader,
+		code: SHADERS.basic,
 	});
 
-	const vertexArrayBufferResult = vertexArrayToBuffer(device, VERTICES);
+	const vertexArrayBufferResult = vertexArrayToBuffer(
+		device,
+		SCENE_DATA.vertexBuffer
+	);
 	if (vertexArrayBufferResult == null) {
 		alert("failed to create vertex buffer");
 		return;
@@ -150,7 +154,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 	// 	entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
 	// });
 
-	window.offset = 0;
+	// window.offset = 0;
 	const clockData = clockInit();
 	// const getCurrentTime = () => Math.floor(performance.now());
 	// let previousTime = getCurrentTime();
@@ -159,10 +163,10 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 			return;
 		}
 		clockTick(clockData);
-		window.set_time(BigInt(0), BigInt(clockData.time));
+		window.set_wasm_time(BigInt(0), BigInt(clockData.time));
 
-		VERTICES[0].position.y = Math.sin((4 * clockData.time) / 1000) / 2.0;
-		updateVertexArrayToBuffer(device, VERTICES, vertexArrayBufferResult);
+		// VERTICES[0].position.y = Math.sin((4 * clockData.time) / 1000) / 2.0;
+		// updateVertexArrayToBuffer(device, VERTICES, vertexArrayBufferResult);
 		// uniformValues.set([window.offset], offsetOffset); // set the scale
 		// uniformValues[offsetOffset] = window.offset;
 		// device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
@@ -185,7 +189,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 		const commandBuffer = encoder.finish();
 		device.queue.submit([commandBuffer]);
 
-		requestAnimationFrame(render);
+		// requestAnimationFrame(render);
 	}
 
 	requestAnimationFrame(render);

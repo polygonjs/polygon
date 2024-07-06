@@ -8,6 +8,17 @@
 // Thanks to Alexey Kutepov (Tsoding/rexim), Patrik Smělý (SogoCZE), and KujuKuju for laying the groundwork
 // for this by figuring out how to use Jai for WASM.
 
+WASM_INSERTION_STRING :: #string DONE
+
+SHADER :: #string WGSL
+%1;
+WGSL
+
+DONE
+
+#load "common/shaders.jai";
+
+
 #run {
 	set_build_options_dc(.{do_output = false});
 
@@ -40,7 +51,7 @@
 		//  -rluba, 2023-11-15
 		walloc_object_file_path := "modules/walloc/walloc.o";
 
-		STACK_SIZE :: 24 * 1024;
+		STACK_SIZE :: 64 * 1024;
 		options.additional_linker_arguments = .["--stack-first", "-z", tprint("stack-size=%", STACK_SIZE), walloc_object_file_path];
 
 		set_build_options(options, w);
@@ -52,6 +63,7 @@
 
 		add_build_file("main_wasm.jai", w);
 
+		generated_code := false;
 		while true {
 			message := compiler_wait_for_message();
 			if message.kind == {
@@ -60,6 +72,16 @@
 					for body: typechecked.procedure_bodies {
 						header := body.expression.header;
 						// You could replace individual procedure bodies here, if you needed to.
+					}
+				case .PHASE;
+					phase := cast(*Message_Phase) message;
+					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
+						if !generated_code {
+							SHADER :: #run create_shaders();
+							build_string := sprint(WASM_INSERTION_STRING, SHADER);
+							add_build_string(build_string, w);
+							generated_code = true;
+						}
 					}
 
 				case .COMPLETE;

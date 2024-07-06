@@ -11,6 +11,7 @@
 	// dl :: #library,system,link_always "libdl";
 	// pt :: #library,system,link_always "libpthread";
 }
+
 #import "Basic";
 #import "SDL";
 #import "Math";
@@ -25,49 +26,19 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 	print_c("[WGPU :: %]: %\n", level, to_string(msg));
 }
 
-Vertex :: struct {
-	position: Vector3;
-	color: Vector3;
-}
 
-SHADER :: #string WGSL
-	struct VertexInput {
-		@location(0) position: vec3<f32>,
-		@location(1) color: vec3<f32>,
-	};
 
-	struct VertexOutput {
-		@builtin(position) clip_position: vec4<f32>,
-		@location(0) color: vec3<f32>,
-	};
 
-	@vertex
-	fn vertex(model: VertexInput) -> VertexOutput {
-		var out: VertexOutput;
-		out.clip_position = vec4<f32>(model.position, 1.0);
-		out.color = model.color;
-		return out;
-	}
+#load "common/shaders.jai";
+#load "common/vertices.jai";
 
-	@fragment
-	fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-		return vec4<f32>(in.color, 1.0);
-	}
-WGSL;
 
-VERTICES := Vertex.[
-	.{ position=.{0.0, 0.5, 0.0}, color=.{1.0, 0.0, 0.0} },
-	.{ position=.{-0.5, -0.5, 0.0}, color=.{0.0, 1.0, 0.0} },
-	.{ position=.{0.5, -0.5, 0.0}, color=.{0.0, 0.0, 1.0} },
-];
-
-update_vertex_array_to_buffer :: (buffer:wgpu.Buffer, queue: wgpu.Queue, vertices: []Vertex) {
-	size := cast(u64) vertices.count * size_of(Vertex);
-	wgpu.QueueWriteBuffer(queue, buffer, 0, vertices.data, size);
-}
 
 main :: () {
-	 SDL_Init(SDL_INIT_VIDEO);
+	SHADER :: #run create_shaders();
+	VERTICES := create_vertices();
+
+	SDL_Init(SDL_INIT_VIDEO);
 
 	window := SDL_CreateWindow("Jai WGPU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
 	assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
@@ -107,12 +78,18 @@ main :: () {
 
 	wgpu.QueueSubmit(queue, 0, null);
 
-	exit := false;
-	while !exit {
+	do_exit := false;
+	while !do_exit {
 		event: SDL_Event;
 		while SDL_PollEvent(*event) {
-			if event.type == SDL_QUIT {
-				exit = true;
+			print("Event: %\n", event.type);
+			if event.type == {
+				case SDL_QUIT; {do_exit = true;}
+				case SDL_KEYDOWN; {
+					if event.key.keysym.sym == SDLK_ESCAPE {
+						do_exit = true;
+					}
+				}
 			}
 		}
 		time := SDL_GetTicks() / 1000.0;

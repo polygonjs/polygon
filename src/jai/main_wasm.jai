@@ -3,6 +3,8 @@
 // A basic "Hello WASM World" program
 
 time :float= 0;
+#load "common/vertices.jai";
+#placeholder SHADER;
 
 main :: () {
 	// print("Hello Jai 24!\n");
@@ -41,24 +43,25 @@ main :: () {
 	// log("Logging to the DOM via Jai.");
 	// log_error("We can also log errors.");
 
-	// shader :: #string __MY_SHADER__
-	// 	@vertex fn vs(
-	// 	@builtin(vertex_index) vertexIndex : u32
-	// 	) -> @builtin(position) vec4f {
-	// 	let pos = array(
-	// 		vec2f( 0.0,  0.5),  // top center
-	// 		vec2f(-0.5, -0.5),  // bottom left
-	// 		vec2f( 0.5, -0.5)   // bottom right
-	// 	);
 	
-	// 	return vec4f(pos[vertexIndex], 0.0, 1.0);
-	// 	}
-	
-	// 	@fragment fn fs() -> @location(0) vec4f {
-	// 	return vec4f(1.0, 0.0, 0.0, 1.0);
-	// 	}
-	// __MY_SHADER__
-	// set_webgpu_shader(shader);
+	VERTICES := create_vertices();
+	buffer :[2*3*VERTICES.count]float32;
+	// print("size of %\n", size_of(float32));
+	for vertex: VERTICES {
+		offset := it_index*6;
+		buffer[offset+0] = vertex.position.x;
+		buffer[offset+1] = vertex.position.y;
+		buffer[offset+2] = vertex.position.z;
+		buffer[offset+3] = vertex.color.x;
+		buffer[offset+4] = vertex.color.y;
+		buffer[offset+5] = vertex.color.z;
+	}
+	// for item: buffer {
+	// 	print("item %:%\n",it_index, item);
+	// }
+
+	set_webgpu_vertex_data(buffer);
+	set_webgpu_shader(SHADER);
 	// time:float=0;
 	// while (true) {
     //     time += 0.00001;
@@ -76,16 +79,20 @@ dom_logger :: (message: string, data: *void, info: Log_Info) {
 set_webgpu_shader :: (message: string) {
 	set_webgpu_shader_js(message.count, message.data);
 }
+set_webgpu_vertex_data :: (buffer: []float32) {
+	set_webgpu_vertex_data_js(buffer.count, buffer.data, size_of(float32));
+}
 
 
 // We need to declare all the JS functions that will be passed to our WebAssembly
 // instance from the JS file that loads us.
 wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
 set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
-set_webgpu_data :: (value: float) #foreign;
+set_webgpu_vertex_data_js :: (count: s64, data: *float32, element_size:u8) #foreign;
+// set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 
-set_time :: (new_time: s64) {
+set_wasm_time :: (new_time: s64) {
 	time = new_time / 1000.0;
 	// context.logger = dom_logger;
 	// log("time");
@@ -94,7 +101,7 @@ set_time :: (new_time: s64) {
 	offset := 0.2*sin(time);
 	// log(offset);
 	// d :s64 = 1;
-	set_webgpu_data(offset);
+	// set_webgpu_data(offset);
 }
 
 

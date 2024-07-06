@@ -1,9 +1,13 @@
-import { Allocated, SetTimeFunction } from "./Common";
+import {
+	AllocatedMemory,
+	AllocatedMemoryContainer,
+	SetTimeFunction,
+	SHADERS,
+} from "./Common";
 import { logGreenBg } from "./Logger";
+import { SCENE_DATA } from "./VertexBuffer";
 
-let allocated: Allocated | undefined; // A global reference of the WASM’s memory area so that we can look up pointers
-
-window.set_time = (time) => console.log(`default set_time:${time}`);
+const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
 
 // These are all the functions that we declared as "#foreign" in our Jai code.
 // They let you interact with the JS and DOM world from within Jai.
@@ -15,6 +19,9 @@ const exported_js_functions = {
 		to_standard_error: boolean
 	) => {
 		const string = js_string_from_jai_string(s_data, s_count);
+		if (!string) {
+			return;
+		}
 		write_to_console_log(string, to_standard_error);
 	},
 
@@ -28,6 +35,9 @@ const exported_js_functions = {
 			return;
 		}
 		const string = js_string_from_jai_string(s_data, s_count);
+		if (!string) {
+			return;
+		}
 		const lines = string.split("\n");
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
@@ -39,18 +49,34 @@ const exported_js_functions = {
 			log.appendChild(element);
 		}
 	},
-	set_webgpu_shader_js: (_s_count: number, _s_data: number) => {
-		// const content = js_string_from_jai_string(s_data, s_count);
-		// console.log({ content });
+	set_webgpu_shader_js: (s_count: number, s_data: BigInt) => {
+		const shader = js_string_from_jai_string(s_data, s_count);
+		if (!shader) {
+			return;
+		}
+		SHADERS.basic = shader;
 		// setupAndRenderWebGPU(content);
+	},
+	set_webgpu_vertex_data_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		// console.log("set_webgpu_vertex_data_js", s_count, s_data);
+		const buffer = float32_from_jai_buffer(s_data, s_count, elementSize);
+		if (!buffer) {
+			return;
+		}
+		console.log("buffer", s_data, s_count, buffer);
+		SCENE_DATA.vertexBuffer = buffer;
 	},
 	// main_call_completed: () => {
 	// 	console.log("___main_call_completed___");
 	// },
-	set_webgpu_data: (offset: number) => {
-		// console.log("set_webgpu_data", offset);
-		window.offset = Number(offset);
-	},
+	// set_webgpu_data: (offset: number) => {
+	// 	// console.log("set_webgpu_data", offset);
+	// 	window.offset = Number(offset);
+	// },
 };
 
 // Create the environment for the WASM file,
@@ -78,7 +104,12 @@ export function loadWasm(): Promise<void> {
 			imports
 		).then((obj) => {
 			const memory = obj.instance.exports["memory"];
-			allocated = memory as any as Allocated;
+			allocatedMemoryContainer.allocatedMemory =
+				memory as any as AllocatedMemory;
+			console.log(
+				"WASM loaded",
+				allocatedMemoryContainer.allocatedMemory
+			);
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
 			mainFunc(0, BigInt(0));
 
@@ -94,7 +125,7 @@ export function loadWasm(): Promise<void> {
 			};
 			const setTimeFunc = getSetTimeFunction();
 			if (setTimeFunc) {
-				window.set_time = setTimeFunc;
+				window.set_wasm_time = setTimeFunc;
 			}
 			resolve();
 		});
@@ -125,13 +156,44 @@ function js_string_from_jai_string(pointer: BigInt, length: number) {
 	// 	console.error("Memory not allocated")
 	// 	return
 	// }
-	const u8 = new Uint8Array(allocated!.buffer);
+	const u8 = new Uint8Array(allocatedMemoryContainer.allocatedMemory!.buffer);
+	if (Number(pointer) > u8.length) {
+		console.error("Pointer out of bounds", Number(pointer), u8.length);
+		return;
+	}
 	// console.log({ buffer: allocated!.buffer, u8, allocated });
 	const bytes = u8.subarray(
 		Number(pointer),
 		Number(pointer) + Number(length)
 	);
+	// console.log("length", Number(pointer), Number(length), bytes);
 	return text_decoder.decode(bytes);
+}
+function float32_from_jai_buffer(
+	pointer: BigInt,
+	length: number,
+	elementSize: number
+) {
+	// console.log({ pointer });
+	// if(!allocated){
+	// 	console.error("Memory not allocated")
+	// 	return
+	// }
+	const f32 = new Float32Array(
+		allocatedMemoryContainer.allocatedMemory!.buffer
+	);
+	const start = Number(pointer) / elementSize;
+	if (start > f32.length) {
+		console.error("Pointer out of bounds", Number(pointer), f32.length);
+		return;
+	}
+	// console.log({ buffer: allocated!.buffer, u8, allocated });
+	const bytes = f32.subarray(start, start + Number(length));
+	// for (let i = 0; i < Number(length); i++) {
+	// 	console.log(i, bytes[i]);
+	// }
+	// console.log("length", Number(pointer), Number(length), bytes);
+	return bytes; //text_decoder.decode(bytes);
 }
 
 // console.log and console.error always add newlines so we need to buffer the output from write_string

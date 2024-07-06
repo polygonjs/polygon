@@ -1,28 +1,34 @@
-export interface Vector3 {
-	x: number;
-	y: number;
-	z: number;
+// export interface Vector3 {
+// 	x: number;
+// 	y: number;
+// 	z: number;
+// }
+// const VECTOR3_SIZE = 4 * 3;
+// export interface Vertex {
+// 	position: Vector3;
+// 	color: Vector3;
+// }
+// const VERTEX_SIZE = VECTOR3_SIZE * 2;
+interface SceneData {
+	vertexBuffer: Float32Array;
 }
-const VECTOR3_SIZE = 4 * 3;
-export interface Vertex {
-	position: Vector3;
-	color: Vector3;
-}
-const VERTEX_SIZE = VECTOR3_SIZE * 2;
-export const VERTICES: Vertex[] = [
-	{
-		position: { x: 0.0, y: 0.5, z: 0.0 },
-		color: { x: 1.0, y: 0.0, z: 0.0 },
-	},
-	{
-		position: { x: -0.5, y: -0.5, z: 0.0 },
-		color: { x: 0.0, y: 1.0, z: 0.0 },
-	},
-	{
-		position: { x: 0.5, y: -0.5, z: 0.0 },
-		color: { x: 0.0, y: 0.0, z: 1.0 },
-	},
-];
+export const SCENE_DATA: SceneData = {
+	vertexBuffer: new Float32Array(0),
+};
+// export const VERTICES: Vertex[] = [
+// 	{
+// 		position: { x: 0.0, y: 0.5, z: 0.0 },
+// 		color: { x: 1.0, y: 0.0, z: 0.0 },
+// 	},
+// 	{
+// 		position: { x: -0.5, y: -0.5, z: 0.0 },
+// 		color: { x: 0.0, y: 1.0, z: 0.0 },
+// 	},
+// 	{
+// 		position: { x: 0.5, y: -0.5, z: 0.0 },
+// 		color: { x: 0.0, y: 0.0, z: 1.0 },
+// 	},
+// ];
 
 export interface VertexArrayToBufferResult {
 	buffer: GPUBuffer;
@@ -31,11 +37,12 @@ export interface VertexArrayToBufferResult {
 }
 export function vertexArrayToBuffer(
 	device: GPUDevice,
-	vertices: Vertex[]
+	data: Float32Array
+	// vertices: Vertex[]
 ): VertexArrayToBufferResult | undefined {
 	// size := cast(u64) vertices.count * size_of(Vertex);
-	const size = VERTEX_SIZE * vertices.length;
-	const data = new Float32Array(size / 4);
+	// const size = VERTEX_SIZE * vertices.length;
+	// const data = new Float32Array(size / 4);
 
 	const buffer = device.createBuffer({
 		size: data.byteLength,
@@ -50,7 +57,7 @@ export function vertexArrayToBuffer(
 
 	const result: VertexArrayToBufferResult = {
 		buffer,
-		size,
+		size: data.byteLength,
 		data,
 	};
 	return result;
@@ -58,18 +65,18 @@ export function vertexArrayToBuffer(
 
 export function updateVertexArrayToBuffer(
 	device: GPUDevice,
-	vertices: Vertex[],
+	// vertices: Vertex[],
 	data: VertexArrayToBufferResult
 ) {
-	for (let i = 0; i < vertices.length; i++) {
-		const vertex = vertices[i];
-		const offset = (i * VERTEX_SIZE) / 4;
-		data.data[offset + 0] = vertex.position.x;
-		data.data[offset + 1] = vertex.position.y;
-		data.data[offset + 2] = vertex.position.z;
-		data.data[offset + 3] = vertex.color.x;
-		data.data[offset + 4] = vertex.color.y;
-		data.data[offset + 5] = vertex.color.z;
-	}
+	// for (let i = 0; i < vertices.length; i++) {
+	// 	const vertex = vertices[i];
+	// 	const offset = (i * VERTEX_SIZE) / 4;
+	// 	data.data[offset + 0] = vertex.position.x;
+	// 	data.data[offset + 1] = vertex.position.y;
+	// 	data.data[offset + 2] = vertex.position.z;
+	// 	data.data[offset + 3] = vertex.color.x;
+	// 	data.data[offset + 4] = vertex.color.y;
+	// 	data.data[offset + 5] = vertex.color.z;
+	// }
 	device.queue.writeBuffer(data.buffer, 0, data.data);
 }
