@@ -36,7 +36,9 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 
 main :: () {
 	SHADER :: #run create_shaders();
-	VERTICES := create_vertices();
+	SCENE_DATA : SceneData;
+	SCENE_DATA.vertices = create_vertices();
+	// vertices_to_buffer(SCENE_DATA.vertices, SCENE_DATA.buffer);
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -69,7 +71,8 @@ main :: () {
 	shader := create_shader(device, SHADER);
 	assert(shader != null, "Shader is not created correctly");
 
-	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, VERTICES);
+	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
+	// SCENE_DATA.buffer = vertex_buffer;
 
 	pipeline := create_pipeline(surface, adapter, device, shader, Vertex);
 	assert(pipeline != null, "Pipeline is not created correctly");
@@ -82,7 +85,7 @@ main :: () {
 	while !do_exit {
 		event: SDL_Event;
 		while SDL_PollEvent(*event) {
-			print("Event: %\n", event.type);
+			// print("Event: %\n", event.type);
 			if event.type == {
 				case SDL_QUIT; {do_exit = true;}
 				case SDL_KEYDOWN; {
@@ -96,8 +99,9 @@ main :: () {
 
 		current_view := wgpu.SwapChainGetCurrentTextureView(swapchain);
 
-		VERTICES[0].position.y = sin(4*time) / 2.0;
-		update_vertex_array_to_buffer(vertex_buffer, queue, VERTICES);
+		update_scene_data(*SCENE_DATA, time);
+		// VERTICES[0].position.y = sin(4*time) / 2.0;
+		update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
 
 		cmd_encoder := wgpu.DeviceCreateCommandEncoder(
 			device,
@@ -121,7 +125,7 @@ main :: () {
 		wgpu.RenderPassEncoderSetPipeline(render_pass, pipeline);
 		wgpu.RenderPassEncoderSetVertexBuffer(render_pass, 0, vertex_buffer, 0, vertex_buffer_size);
 
-		wgpu.RenderPassEncoderDraw(render_pass, VERTICES.count, 1, 0, 0);
+		wgpu.RenderPassEncoderDraw(render_pass, cast(u32) SCENE_DATA.vertices.count, 1, 0, 0);
 		wgpu.RenderPassEncoderEnd(render_pass);
 		wgpu.TextureViewRelease(current_view);
 

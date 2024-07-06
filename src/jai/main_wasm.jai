@@ -2,9 +2,12 @@
 #import "Math";
 // A basic "Hello WASM World" program
 
-time :float= 0;
+// time :float= 0;
 #load "common/vertices.jai";
 #placeholder SHADER;
+
+
+SCENE_DATA : SceneData;
 
 main :: () {
 	// print("Hello Jai 24!\n");
@@ -43,24 +46,25 @@ main :: () {
 	// log("Logging to the DOM via Jai.");
 	// log_error("We can also log errors.");
 
-	
-	VERTICES := create_vertices();
-	buffer :[2*3*VERTICES.count]float32;
+	SCENE_DATA.vertices = create_vertices();
+	// SCENE_DATA.buffer  = [2*3*SCENE_DATA.vertices.count]float32;
+	// SCENE_DATA.buffer.count = 2*3*SCENE_DATA.vertices.count;
+	// vertices_to_buffer(SCENE_DATA.vertices, SCENE_DATA.buffer);
 	// print("size of %\n", size_of(float32));
-	for vertex: VERTICES {
-		offset := it_index*6;
-		buffer[offset+0] = vertex.position.x;
-		buffer[offset+1] = vertex.position.y;
-		buffer[offset+2] = vertex.position.z;
-		buffer[offset+3] = vertex.color.x;
-		buffer[offset+4] = vertex.color.y;
-		buffer[offset+5] = vertex.color.z;
-	}
+	// for vertex: VERTICES {
+	// 	offset := it_index*6;
+	// 	buffer[offset+0] = vertex.position.x;
+	// 	buffer[offset+1] = vertex.position.y;
+	// 	buffer[offset+2] = vertex.position.z;
+	// 	buffer[offset+3] = vertex.color.x;
+	// 	buffer[offset+4] = vertex.color.y;
+	// 	buffer[offset+5] = vertex.color.z;
+	// }
 	// for item: buffer {
 	// 	print("item %:%\n",it_index, item);
 	// }
 
-	set_webgpu_vertex_data(buffer);
+	set_webgpu_vertex_data(SCENE_DATA.vertices);
 	set_webgpu_shader(SHADER);
 	// time:float=0;
 	// while (true) {
@@ -72,6 +76,19 @@ main :: () {
 	// main_call_completed();
 }
 
+// vertices_to_buffer :: (vertices: []Vertex, buffer: []float32){
+// 	buffer.count = 2*3*vertices.count;
+// 	for vertex: vertices {
+// 		offset := it_index*6;
+// 		buffer[offset+0] = vertex.position.x;
+// 		buffer[offset+1] = vertex.position.y;
+// 		buffer[offset+2] = vertex.position.z;
+// 		buffer[offset+3] = vertex.color.x;
+// 		buffer[offset+4] = vertex.color.y;
+// 		buffer[offset+5] = vertex.color.z;
+// 	}
+// }
+
 dom_logger :: (message: string, data: *void, info: Log_Info) {
 	is_error := (info.common_flags & .ERROR) != 0;
 	wasm_log_dom(message.count, message.data, is_error);
@@ -79,8 +96,8 @@ dom_logger :: (message: string, data: *void, info: Log_Info) {
 set_webgpu_shader :: (message: string) {
 	set_webgpu_shader_js(message.count, message.data);
 }
-set_webgpu_vertex_data :: (buffer: []float32) {
-	set_webgpu_vertex_data_js(buffer.count, buffer.data, size_of(float32));
+set_webgpu_vertex_data :: (vertices: []Vertex) {
+	set_webgpu_vertex_data_js(vertices.count*3*2, vertices.data, size_of(float32));
 }
 
 
@@ -88,20 +105,14 @@ set_webgpu_vertex_data :: (buffer: []float32) {
 // instance from the JS file that loads us.
 wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
 set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
-set_webgpu_vertex_data_js :: (count: s64, data: *float32, element_size:u8) #foreign;
+set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 
 set_wasm_time :: (new_time: s64) {
-	time = new_time / 1000.0;
-	// context.logger = dom_logger;
-	// log("time");
-	// log(time);
+	time:float = new_time / 1000.0;
 
-	offset := 0.2*sin(time);
-	// log(offset);
-	// d :s64 = 1;
-	// set_webgpu_data(offset);
+	update_scene_data(*SCENE_DATA, time);
 }
 
 

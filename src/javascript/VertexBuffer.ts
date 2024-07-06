@@ -78,5 +78,6 @@ export function updateVertexArrayToBuffer(
 	// 	data.data[offset + 4] = vertex.color.y;
 	// 	data.data[offset + 5] = vertex.color.z;
 	// }
+	// console.log(data.data[0], data.data[1]);
 	device.queue.writeBuffer(data.buffer, 0, data.data);
 }

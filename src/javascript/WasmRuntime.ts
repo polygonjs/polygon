@@ -116,7 +116,7 @@ export function loadWasm(): Promise<void> {
 			const getSetTimeFunction = () => {
 				const methodNames = Object.keys(obj.instance.exports);
 				for (const methodName of methodNames) {
-					if (methodName.startsWith("set_time")) {
+					if (methodName.startsWith("set_wasm_time")) {
 						return obj.instance.exports[
 							methodName
 						] as SetTimeFunction;

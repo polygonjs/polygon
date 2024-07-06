@@ -2,6 +2,7 @@ import { clockInit, clockTick } from "./Clock";
 import { SHADERS } from "./Common";
 import {
 	SCENE_DATA,
+	updateVertexArrayToBuffer,
 	// updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
 	// VERTICES,
@@ -163,10 +164,11 @@ export async function setupAndRenderWebGPU() {
 			return;
 		}
 		clockTick(clockData);
+		// console.log(clockData.time);
 		window.set_wasm_time(BigInt(0), BigInt(clockData.time));
 
 		// VERTICES[0].position.y = Math.sin((4 * clockData.time) / 1000) / 2.0;
-		// updateVertexArrayToBuffer(device, VERTICES, vertexArrayBufferResult);
+		updateVertexArrayToBuffer(device, vertexArrayBufferResult);
 		// uniformValues.set([window.offset], offsetOffset); // set the scale
 		// uniformValues[offsetOffset] = window.offset;
 		// device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
@@ -189,7 +191,7 @@ export async function setupAndRenderWebGPU() {
 		const commandBuffer = encoder.finish();
 		device.queue.submit([commandBuffer]);
 
-		// requestAnimationFrame(render);
+		requestAnimationFrame(render);
 	}
 
 	requestAnimationFrame(render);

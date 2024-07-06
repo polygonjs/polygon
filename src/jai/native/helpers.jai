@@ -241,7 +241,11 @@ vertex_array_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, vertices: []V
 	return buffer, size;
 }
 
-update_vertex_array_to_buffer :: (buffer:wgpu.Buffer, queue: wgpu.Queue, vertices: []Vertex) {
-	size := cast(u64) vertices.count * size_of(Vertex);
-	wgpu.QueueWriteBuffer(queue, buffer, 0, vertices.data, size);
+// update_vertex_array_to_buffer :: (buffer:wgpu.Buffer, queue: wgpu.Queue, vertices: []Vertex) {
+// 	size := cast(u64) vertices.count * size_of(Vertex);
+// 	wgpu.QueueWriteBuffer(queue, buffer, 0, vertices.data, size);
+// }
+update_vertex_array_to_buffer :: (buffer:wgpu.Buffer, queue: wgpu.Queue, scene_data: *SceneData) {
+	size := cast(u64) scene_data.vertices.count * size_of(Vertex);
+	wgpu.QueueWriteBuffer(queue, buffer, 0, scene_data.vertices.data, size);
 }
