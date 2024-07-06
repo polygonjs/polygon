@@ -5,7 +5,7 @@ import {
 	SHADERS,
 } from "./Common";
 import { logGreenBg } from "./Logger";
-import { SCENE_DATA } from "./VertexBuffer";
+import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./VertexBuffer";
 
 const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
 
@@ -62,7 +62,12 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = float32_from_jai_buffer(s_data, s_count, elementSize);
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Float32Array
+		); //float32_from_jai_buffer(s_data, s_count, elementSize);
 		if (!buffer) {
 			return;
 		}
@@ -73,19 +78,60 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = u32_from_jai_buffer(s_data, s_count, elementSize);
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Uint32Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Uint32Array
+		);
 		if (!buffer) {
 			return;
 		}
+
 		SCENE_DATA.indexBuffer = buffer;
 	},
-	// main_call_completed: () => {
-	// 	console.log("___main_call_completed___");
-	// },
-	// set_webgpu_data: (offset: number) => {
-	// 	// console.log("set_webgpu_data", offset);
-	// 	window.offset = Number(offset);
-	// },
+	set_webgpu_vertex_layout_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Uint8Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Uint8Array
+		);
+		if (!buffer) {
+			console.error("set_webgpu_vertex_layout_js: No buffer");
+			return;
+		}
+		const layout = bufferToGPUVertexBufferLayout(buffer);
+		SCENE_DATA.vertexLayout = layout;
+	},
+	memcmp: (
+		str1Pointer: BigInt,
+		str2Pointer: BigInt,
+		sizeBig: BigInt
+	): number => {
+		// https://discord.com/channels/661732390355337246/1172463903943446548/1256763226847187127
+		// https://www.tutorialspoint.com/c_standard_library/c_function_memcmp.htm
+		const size = Number(sizeBig);
+		const str1 = js_string_from_jai_string(str1Pointer, size);
+		const str2 = js_string_from_jai_string(str2Pointer, size);
+		if (str1 == str2) {
+			return 0;
+		}
+		if (!(str1 && str2)) {
+			return -1;
+		}
+		if (str1 < str2) {
+			return -1;
+		}
+		if (str1 > str2) {
+			return 1;
+		}
+		return -1;
+	},
 };
 
 // Create the environment for the WASM file,
@@ -178,37 +224,106 @@ function js_string_from_jai_string(pointer: BigInt, length: number) {
 	// console.log("length", Number(pointer), Number(length), bytes);
 	return text_decoder.decode(bytes);
 }
-function float32_from_jai_buffer(
-	pointer: BigInt,
-	length: number,
-	elementSize: number
-) {
-	const f32 = new Float32Array(
-		allocatedMemoryContainer.allocatedMemory!.buffer
-	);
-	const start = Number(pointer) / elementSize;
-	if (start > f32.length) {
-		console.error("Pointer out of bounds", Number(pointer), f32.length);
-		return;
-	}
-	const bytes = f32.subarray(start, start + Number(length));
-	return bytes;
+// function float32_from_jai_buffer(
+// 	pointer: BigInt,
+// 	length: number,
+// 	elementSize: number
+// ) {
+// 	const f32 = new Float32Array(
+// 		allocatedMemoryContainer.allocatedMemory!.buffer
+// 	);
+// 	const start = Number(pointer) / elementSize;
+// 	if (start > f32.length) {
+// 		console.error("Pointer out of bounds", Number(pointer), f32.length);
+// 		return;
+// 	}
+// 	const bytes = f32.subarray(start, start + Number(length));
+// 	return bytes;
+// }
+// function u32_from_jai_buffer(
+// 	pointer: BigInt,
+// 	length: number,
+// 	elementSize: number
+// ) {
+// 	// const u32 = new Uint32Array(
+// 	// 	allocatedMemoryContainer.allocatedMemory!.buffer
+// 	// );
+// 	// const start = Number(pointer) / elementSize;
+// 	// if (start > u32.length) {
+// 	// 	console.error("Pointer out of bounds", Number(pointer), u32.length);
+// 	// 	return;
+// 	// }
+// 	// const bytes = u32.subarray(start, start + Number(length));
+// 	// return bytes;
+// }
+export enum TypeArrayType {
+	Uint8Array = "Uint8Array",
+	Int16Array = "Int16Array",
+	Uint16Array = "Uint16Array",
+	Int32Array = "Int32Array",
+	Uint32Array = "Uint32Array",
+	Float32Array = "Float32Array",
+	Float64Array = "Float64Array",
 }
-function u32_from_jai_buffer(
+type TypedArray =
+	| Uint8Array
+	| Int16Array
+	| Uint16Array
+	| Int32Array
+	| Uint32Array
+	| Float32Array
+	| Float64Array;
+type TypedArrayClass =
+	| typeof Uint8Array
+	| typeof Int16Array
+	| typeof Uint16Array
+	| typeof Int32Array
+	| typeof Uint32Array
+	| typeof Float32Array
+	| typeof Float64Array;
+type TypeArrayByTypedArrayGeneric = { [key in TypeArrayType]: TypedArray };
+type TypeArrayClassByTypedArrayGeneric = {
+	[key in TypeArrayType]: TypedArrayClass;
+};
+interface TypeArrayByType extends TypeArrayByTypedArrayGeneric {
+	Uint8Array: Uint8Array;
+	Int16Array: Int16Array;
+	Uint16Array: Uint16Array;
+	Int32Array: Int32Array;
+	Uint32Array: Uint32Array;
+	Float32Array: Float32Array;
+	Float64Array: Float64Array;
+}
+interface TypeArrayClassByType extends TypeArrayClassByTypedArrayGeneric {
+	Uint8Array: typeof Uint8Array;
+	Int16Array: typeof Int16Array;
+	Uint16Array: typeof Uint16Array;
+	Int32Array: typeof Int32Array;
+	Uint32Array: typeof Uint32Array;
+	Float32Array: typeof Float32Array;
+	Float64Array: typeof Float64Array;
+}
+
+function typedArrayFromJaiBuffer<T extends TypeArrayType>(
 	pointer: BigInt,
 	length: number,
-	elementSize: number
-) {
-	const u32 = new Uint32Array(
+	elementSize: number,
+	arrayClass: TypeArrayClassByType[T]
+): TypeArrayByType[T] | undefined {
+	const fullBuffer = new arrayClass(
 		allocatedMemoryContainer.allocatedMemory!.buffer
 	);
 	const start = Number(pointer) / elementSize;
-	if (start > u32.length) {
-		console.error("Pointer out of bounds", Number(pointer), u32.length);
+	if (start > fullBuffer.length) {
+		console.error(
+			"Pointer out of bounds",
+			Number(pointer),
+			fullBuffer.length
+		);
 		return;
 	}
-	const bytes = u32.subarray(start, start + Number(length));
-	return bytes;
+	const slice = fullBuffer.subarray(start, start + Number(length));
+	return slice as TypeArrayByType[T];
 }
 
 // console.log and console.error always add newlines so we need to buffer the output from write_string

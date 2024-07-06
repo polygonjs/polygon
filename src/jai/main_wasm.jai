@@ -4,6 +4,7 @@
 
 // time :float= 0;
 #load "common/vertices.jai";
+#load "common/wgpu_mock.jai";
 #placeholder SHADER;
 
 
@@ -64,6 +65,10 @@ main :: () {
 	// 	print("item %:%\n",it_index, item);
 	// }
 
+	vertex_buffer_layout := wasm_make_vertex_layout(Vertex);
+	vertex_buffer_layout_buffer := Wasm_VertexBufferLayout_to_buffer(*vertex_buffer_layout);
+	set_webgpu_vertex_layout(vertex_buffer_layout_buffer);
+
 	set_webgpu_vertex_data(SCENE_DATA.vertices);
 	set_webgpu_index_data(SCENE_DATA.indices);
 	set_webgpu_shader(SHADER);
@@ -103,6 +108,9 @@ set_webgpu_vertex_data :: (vertices: []Vertex) {
 set_webgpu_index_data :: (indices: []VertexIndex) {
 	set_webgpu_index_data_js(indices.count, indices.data, size_of(VertexIndex));
 }
+set_webgpu_vertex_layout :: (buffer: []VertexLayoutBuffer) {
+	set_webgpu_vertex_layout_js(buffer.count, buffer.data, size_of(VertexLayoutBuffer));
+}
 
 
 // We need to declare all the JS functions that will be passed to our WebAssembly
@@ -111,6 +119,7 @@ wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
 set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
 set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
 set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #foreign;
+set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 

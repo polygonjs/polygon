@@ -1,12 +1,9 @@
 import { clockInit, clockTick } from "./Clock";
 import { SHADERS } from "./Common";
 import {
-	FLOAT_SIZE,
 	indexArrayToBuffer,
 	SCENE_DATA,
 	updateVertexArrayToBuffer,
-	VERTEX_BUFFER_LAYOUT,
-	VERTEX_FLOATS_COUNT,
 	vertexArrayToBuffer,
 } from "./VertexBuffer";
 // import { webGPUListenToResize } from "./WebGPUResize";
@@ -63,7 +60,7 @@ export async function setupAndRenderWebGPU() {
 		vertex: {
 			//   entryPoint: 'vs',
 			module,
-			buffers: [VERTEX_BUFFER_LAYOUT],
+			buffers: [SCENE_DATA.vertexLayout],
 		},
 		fragment: {
 			//   entryPoint: 'fs',

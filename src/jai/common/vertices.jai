@@ -6,6 +6,7 @@ Vertex :: struct {
 }
 VERTEX_FLOATS_COUNT :: 3+3+2;
 VertexIndex :: u32;
+VertexLayoutBuffer :: u8;
 
 create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	vertices : [..]Vertex;

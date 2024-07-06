@@ -43,7 +43,7 @@ function jaiPlugin() {
 							// exec(`xmessage -center '${stderr}' -timeout 4`);
 						} else {
 							console.log(`Compiled .jai files: ${stdout}`);
-							// exec(`bin/polygon-next-native`);
+							exec(`bin/polygon-next-native`);
 
 							server.ws.send({
 								type: "custom",

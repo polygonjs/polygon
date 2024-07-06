@@ -15,6 +15,7 @@
 #import "Basic";
 #import "SDL";
 #import "Math";
+#load "common/wgpu_mock.jai";
 wgpu :: #import "wgpu";
 
 #load "native/helpers.jai";

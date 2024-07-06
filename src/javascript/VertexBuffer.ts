@@ -1,59 +1,101 @@
-// export interface Vector3 {
-// 	x: number;
-// 	y: number;
-// 	z: number;
-// }
-// const VECTOR3_SIZE = 4 * 3;
-// export interface Vertex {
-// 	position: Vector3;
-// 	color: Vector3;
-// }
-// const VERTEX_SIZE = VECTOR3_SIZE * 2;
 export const VERTEX_FLOATS_COUNT = 3 + 3 + 2;
 export const FLOAT_SIZE = 4;
 interface SceneData {
 	vertexBuffer: Float32Array;
 	indexBuffer: Uint32Array;
+	vertexLayout: GPUVertexBufferLayout;
 }
 export const SCENE_DATA: SceneData = {
 	vertexBuffer: new Float32Array(0),
 	indexBuffer: new Uint32Array(0),
+	vertexLayout: {
+		arrayStride: 0,
+		attributes: [],
+	},
 };
 
-export const VERTEX_BUFFER_LAYOUT: GPUVertexBufferLayout = {
-	arrayStride: VERTEX_FLOATS_COUNT * FLOAT_SIZE,
-	attributes: [
-		// position
-		{ shaderLocation: 0, offset: 0, format: "float32x3" },
-		// color
-		{
-			shaderLocation: 1,
-			offset: 3 * FLOAT_SIZE,
-			format: "float32x3",
-		},
-		// uv
-		{
-			shaderLocation: 2,
-			offset: (3 + 3) * FLOAT_SIZE,
-			format: "float32x2",
-		},
-	],
-};
+// export const VERTEX_BUFFER_LAYOUT: GPUVertexBufferLayout = {
+// 	arrayStride: VERTEX_FLOATS_COUNT * FLOAT_SIZE,
+// 	attributes: [
+// 		// position
+// 		{ shaderLocation: 0, offset: 0, format: "float32x3" },
+// 		// color
+// 		{
+// 			shaderLocation: 1,
+// 			offset: 3 * FLOAT_SIZE,
+// 			format: "float32x3",
+// 		},
+// 		// uv
+// 		{
+// 			shaderLocation: 2,
+// 			offset: (3 + 3) * FLOAT_SIZE,
+// 			format: "float32x2",
+// 		},
+// 	],
+// };
+function createFormatByValue() {
+	const formats: GPUVertexFormat[] = [];
 
-// export const VERTICES: Vertex[] = [
-// 	{
-// 		position: { x: 0.0, y: 0.5, z: 0.0 },
-// 		color: { x: 1.0, y: 0.0, z: 0.0 },
-// 	},
-// 	{
-// 		position: { x: -0.5, y: -0.5, z: 0.0 },
-// 		color: { x: 0.0, y: 1.0, z: 0.0 },
-// 	},
-// 	{
-// 		position: { x: 0.5, y: -0.5, z: 0.0 },
-// 		color: { x: 0.0, y: 0.0, z: 1.0 },
-// 	},
-// ];
+	// take the enum from wgpu files
+	formats[1] = "uint8x2";
+	formats[2] = "uint8x4";
+	formats[3] = "sint8x2";
+	formats[4] = "sint8x4";
+	formats[5] = "unorm8x2";
+	formats[6] = "unorm8x4";
+	formats[7] = "snorm8x2";
+	formats[8] = "snorm8x4";
+	formats[9] = "uint16x2";
+	formats[10] = "uint16x4";
+	formats[11] = "sint16x2";
+	formats[12] = "sint16x4";
+	formats[13] = "unorm16x2";
+	formats[14] = "unorm16x4";
+	formats[15] = "snorm16x2";
+	formats[16] = "snorm16x4";
+	formats[17] = "float16x2";
+	formats[18] = "float16x4";
+	formats[19] = "float32";
+	formats[20] = "float32x2";
+	formats[21] = "float32x3";
+	formats[22] = "float32x4";
+	formats[23] = "uint32";
+	formats[24] = "uint32x2";
+	formats[25] = "uint32x3";
+	formats[26] = "uint32x4";
+	formats[27] = "sint32";
+	formats[28] = "sint32x2";
+	formats[29] = "sint32x3";
+	formats[30] = "sint32x4";
+
+	return formats;
+}
+const FORMAT_BY_VALUE: GPUVertexFormat[] = createFormatByValue();
+export function bufferToGPUVertexBufferLayout(
+	buffer: Uint8Array
+): GPUVertexBufferLayout {
+	const layout: GPUVertexBufferLayout = {
+		arrayStride: buffer[0],
+		stepMode: buffer[1] == 0 ? "vertex" : "instance",
+		attributes: [],
+	};
+	const attributesCount = buffer[2];
+	const attributesStart = 3;
+	const stride = 3;
+	const attributes: GPUVertexAttribute[] = [];
+	for (let i = 0; i < attributesCount; i++) {
+		const shaderLocation = buffer[attributesStart + i * stride];
+		const offset = buffer[attributesStart + i * stride + 1];
+		const format = buffer[attributesStart + i * stride + 2];
+		attributes.push({
+			shaderLocation,
+			offset,
+			format: FORMAT_BY_VALUE[format],
+		});
+	}
+	layout.attributes = attributes;
+	return layout;
+}
 
 export interface VertexArrayToBufferResult {
 	buffer: GPUBuffer;

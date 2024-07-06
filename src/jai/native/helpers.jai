@@ -101,65 +101,65 @@ create_shader :: (device: wgpu.Device, source: string, label := "Main shader") -
 	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
 
 	return wgpu.DeviceCreateShaderModule(device, *shaderModuleDescriptor);
-} 
-
-make_vertex_layout :: ($type: Type) -> wgpu.VertexBufferLayout {
-	info := type_info(type);
-
-	vertex_buffer_layout := wgpu.VertexBufferLayout.{
-		arrayStride=size_of(type),
-		stepMode=.Vertex,
-	};
-
-	vertex_attributes := NewArray(info.members.count, wgpu.VertexAttribute);
-
-	for info.members {
-		vertex_attribute: wgpu.VertexAttribute;
-
-		if it.type.type == {
-			case .BOOL;
-				vertex_attribute.format = .Sint32;
-
-			case .INTEGER;
-				int_type_info := cast(*Type_Info_Integer) it.type;
-
-				if int_type_info.signed {
-					vertex_attribute.format = .Sint32;
-				} else {
-					vertex_attribute.format = .Uint32;
-				}
-
-			case .FLOAT;
-				assert(it.type.runtime_size <= 4, "Only float32 is supported in Vertex Attribute Data.");
-				vertex_attribute.format = .Float32;
-
-			case .STRUCT;
-				struct_type_info := cast(*Type_Info_Struct) it.type;
-
-				if struct_type_info.name == {
-					case "Vector4";
-						vertex_attribute.format = .Float32x4;
-					case "Vector3";
-						vertex_attribute.format = .Float32x3;
-					case "Vector2";
-						vertex_attribute.format = .Float32x2;
-					case;   
-						assert(false, "Unsupported struct type. Only Vector2, Vector3, Vector4 are supported");
-				}
-
-		}
-
-		vertex_attribute.offset= xx it.offset_in_bytes;
-		vertex_attribute.shaderLocation= xx it_index;
-
-		vertex_attributes[it_index] = vertex_attribute;
-	}
-
-	vertex_buffer_layout.attributeCount = xx vertex_attributes.count;
-	vertex_buffer_layout.attributes = vertex_attributes.data;
-
-	return vertex_buffer_layout;
 }
+
+// make_vertex_layout :: ($type: Type) -> wgpu.VertexBufferLayout {
+// 	info := type_info(type);
+
+// 	vertex_buffer_layout := wgpu.VertexBufferLayout.{
+// 		arrayStride=size_of(type),
+// 		stepMode=.Vertex,
+// 	};
+
+// 	vertex_attributes := NewArray(info.members.count, wgpu.VertexAttribute);
+
+// 	for info.members {
+// 		vertex_attribute: wgpu.VertexAttribute;
+
+// 		if it.type.type == {
+// 			case .BOOL;
+// 				vertex_attribute.format = .Sint32;
+
+// 			case .INTEGER;
+// 				int_type_info := cast(*Type_Info_Integer) it.type;
+
+// 				if int_type_info.signed {
+// 					vertex_attribute.format = .Sint32;
+// 				} else {
+// 					vertex_attribute.format = .Uint32;
+// 				}
+
+// 			case .FLOAT;
+// 				assert(it.type.runtime_size <= 4, "Only float32 is supported in Vertex Attribute Data.");
+// 				vertex_attribute.format = .Float32;
+
+// 			case .STRUCT;
+// 				struct_type_info := cast(*Type_Info_Struct) it.type;
+
+// 				if struct_type_info.name == {
+// 					case "Vector4";
+// 						vertex_attribute.format = .Float32x4;
+// 					case "Vector3";
+// 						vertex_attribute.format = .Float32x3;
+// 					case "Vector2";
+// 						vertex_attribute.format = .Float32x2;
+// 					case;   
+// 						assert(false, "Unsupported struct type. Only Vector2, Vector3, Vector4 are supported");
+// 				}
+
+// 		}
+
+// 		vertex_attribute.offset= xx it.offset_in_bytes;
+// 		vertex_attribute.shaderLocation= xx it_index;
+
+// 		vertex_attributes[it_index] = vertex_attribute;
+// 	}
+
+// 	vertex_buffer_layout.attributeCount = xx vertex_attributes.count;
+// 	vertex_buffer_layout.attributes = vertex_attributes.data;
+
+// 	return vertex_buffer_layout;
+// }
 
 create_pipeline :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, shader: wgpu.ShaderModule, $vertex_buffer_layout_type: Type) -> wgpu.RenderPipeline {
 	preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
@@ -175,7 +175,9 @@ create_pipeline :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.D
 	vertex_state.module = shader;
 	vertex_state.entryPoint = "vertex";
 	vertex_state.bufferCount = 1;
-	vertex_state.buffers = *make_vertex_layout(vertex_buffer_layout_type);
+	tmp_layout := wasm_make_vertex_layout(vertex_buffer_layout_type);
+	vertex_state.buffers = *Wasm_VertexBufferLayout_to_wgpu(tmp_layout);
+	// vertex_state.buffers = *make_vertex_layout(vertex_buffer_layout_type);
 
 	pipeline_descriptor.vertex = vertex_state;
 
@@ -261,4 +263,26 @@ index_array_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, indices: []Ver
 update_vertex_array_to_buffer :: (buffer:wgpu.Buffer, queue: wgpu.Queue, scene_data: *SceneData) {
 	size := cast(u64) scene_data.vertices.count * size_of(Vertex);
 	wgpu.QueueWriteBuffer(queue, buffer, 0, scene_data.vertices.data, size);
+}
+
+Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> wgpu.VertexBufferLayout {
+	vertex_buffer_layout := wgpu.VertexBufferLayout.{
+		arrayStride=xx layout.arrayStride,
+		stepMode=xx layout.stepMode,
+		attributeCount=xx layout.attributeCount,
+		// attributes=NewArray(layout.attributeCount, WGPUVertexAttribute);
+	};
+
+	attributes := NewArray(xx layout.attributeCount, wgpu.VertexAttribute);
+	for 0..(layout.attributeCount-1) {
+		src_attribute := layout.attributes[it];
+		attributes[it] = wgpu.VertexAttribute.{
+			shaderLocation=xx src_attribute.shaderLocation,
+			offset=xx src_attribute.offset,
+			format=xx src_attribute.format,
+		};
+	}
+	vertex_buffer_layout.attributes = attributes.data;
+
+	return vertex_buffer_layout;
 }
