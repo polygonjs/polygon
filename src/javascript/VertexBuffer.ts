@@ -9,6 +9,8 @@
 // 	color: Vector3;
 // }
 // const VERTEX_SIZE = VECTOR3_SIZE * 2;
+export const VERTEX_FLOATS_COUNT = 3 + 3 + 2;
+export const FLOAT_SIZE = 4;
 interface SceneData {
 	vertexBuffer: Float32Array;
 	indexBuffer: Uint32Array;
@@ -17,6 +19,27 @@ export const SCENE_DATA: SceneData = {
 	vertexBuffer: new Float32Array(0),
 	indexBuffer: new Uint32Array(0),
 };
+
+export const VERTEX_BUFFER_LAYOUT: GPUVertexBufferLayout = {
+	arrayStride: VERTEX_FLOATS_COUNT * FLOAT_SIZE,
+	attributes: [
+		// position
+		{ shaderLocation: 0, offset: 0, format: "float32x3" },
+		// color
+		{
+			shaderLocation: 1,
+			offset: 3 * FLOAT_SIZE,
+			format: "float32x3",
+		},
+		// uv
+		{
+			shaderLocation: 2,
+			offset: (3 + 3) * FLOAT_SIZE,
+			format: "float32x2",
+		},
+	],
+};
+
 // export const VERTICES: Vertex[] = [
 // 	{
 // 		position: { x: 0.0, y: 0.5, z: 0.0 },
@@ -54,7 +77,6 @@ export function vertexArrayToBuffer(
 		console.error("buffer is null");
 		return;
 	}
-
 	device.queue.writeBuffer(buffer, 0, data);
 
 	const result: VertexArrayToBufferResult = {
@@ -89,19 +111,7 @@ export function indexArrayToBuffer(
 
 export function updateVertexArrayToBuffer(
 	device: GPUDevice,
-	// vertices: Vertex[],
 	data: VertexArrayToBufferResult
 ) {
-	// for (let i = 0; i < vertices.length; i++) {
-	// 	const vertex = vertices[i];
-	// 	const offset = (i * VERTEX_SIZE) / 4;
-	// 	data.data[offset + 0] = vertex.position.x;
-	// 	data.data[offset + 1] = vertex.position.y;
-	// 	data.data[offset + 2] = vertex.position.z;
-	// 	data.data[offset + 3] = vertex.color.x;
-	// 	data.data[offset + 4] = vertex.color.y;
-	// 	data.data[offset + 5] = vertex.color.z;
-	// }
-	// console.log(data.data[0], data.data[1]);
 	device.queue.writeBuffer(data.buffer, 0, data.data);
 }

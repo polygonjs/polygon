@@ -98,7 +98,7 @@ set_webgpu_shader :: (message: string) {
 	set_webgpu_shader_js(message.count, message.data);
 }
 set_webgpu_vertex_data :: (vertices: []Vertex) {
-	set_webgpu_vertex_data_js(vertices.count*3*2, vertices.data, size_of(float32));
+	set_webgpu_vertex_data_js(vertices.count * VERTEX_FLOATS_COUNT, vertices.data, size_of(float32));
 }
 set_webgpu_index_data :: (indices: []VertexIndex) {
 	set_webgpu_index_data_js(indices.count, indices.data, size_of(VertexIndex));
