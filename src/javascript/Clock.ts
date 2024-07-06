@@ -3,7 +3,7 @@ export interface ClockData {
 	delta: number;
 	previousTime: number;
 }
-export function clockCreate(): ClockData {
+function clockCreate(): ClockData {
 	return {
 		time: 0,
 		delta: 0,
@@ -11,10 +11,12 @@ export function clockCreate(): ClockData {
 	};
 }
 
-export function clockInit(clockData: ClockData) {
+export function clockInit() {
+	const clockData = clockCreate();
 	clockData.previousTime = performance.now();
 	clockData.time = 0;
 	clockData.delta = 0;
+	return clockData;
 }
 
 export function clockTick(clockData: ClockData) {
