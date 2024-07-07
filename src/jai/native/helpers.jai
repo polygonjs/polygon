@@ -161,10 +161,10 @@ create_shader :: (device: wgpu.Device, source: string, label := "Main shader") -
 // 	return vertex_buffer_layout;
 // }
 
-create_pipeline :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, shader: wgpu.ShaderModule, $vertex_buffer_layout_type: Type) -> wgpu.RenderPipeline {
+update_pipeline_descriptor :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, shader: wgpu.ShaderModule, $vertex_buffer_layout_type: Type) {
 	preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
 
-	pipeline_descriptor: wgpu.RenderPipelineDescriptor;
+	// pipeline_descriptor: wgpu.RenderPipelineDescriptor;
 	pipeline_descriptor.label = "Render Pipeline";
 
 	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
@@ -203,11 +203,11 @@ create_pipeline :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.D
 		cullMode=.None,
 	};
 
-	pipeline_descriptor.multisample = .{
-		count = 1,
-		mask = 1,
-		alphaToCoverageEnabled = false,
-	};
+	// pipeline_descriptor.multisample = .{
+	// 	count = 1,
+	// 	mask = 1,
+	// 	alphaToCoverageEnabled = false,
+	// };
 
 	color_target_state: wgpu.ColorTargetState;
 	color_target_state.format = preferred_texture_format;
@@ -227,13 +227,11 @@ create_pipeline :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.D
 
 	pipeline_descriptor.depthStencil = null;
 
-	return wgpu.DeviceCreateRenderPipeline(device, *pipeline_descriptor);
 }
 
-create_swapchain :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, width: int, height: int) -> wgpu.SwapChain {
+create_swapchain :: (descriptor: *wgpu.SwapChainDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, width: int, height: int) -> wgpu.SwapChain {
 	preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
 
-	descriptor: wgpu.SwapChainDescriptor;
 	descriptor.label = "Default Swapchain";
 	descriptor.usage = xx wgpu.TextureUsage.RenderAttachment;
 	descriptor.format = preferred_texture_format;
@@ -241,7 +239,7 @@ create_swapchain :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.
 	descriptor.height = xx height;
 	descriptor.presentMode = .Fifo;
 
-	return wgpu.DeviceCreateSwapChain(device, surface, *descriptor);
+	return wgpu.DeviceCreateSwapChain(device, surface, descriptor);
 }
 
 vertex_array_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, vertices: []Vertex) -> wgpu.Buffer, u64 {

@@ -6,8 +6,15 @@ import {
 	updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
 } from "./VertexBuffer";
+import {
+	createMultiSampleTextureIfNeeded,
+	MultiSampleTextureContainer,
+	updatePipelineDescriptor,
+	updateRenderPassDescription,
+} from "./WebGPUMultisample";
 import { webGPUListenToResize } from "./WebGPUResize";
-// import { webGPUListenToResize } from "./WebGPUResize";
+
+const MSAA: boolean = true;
 
 export async function setupAndRenderWebGPU() {
 	const adapter = await navigator.gpu?.requestAdapter();
@@ -55,7 +62,7 @@ export async function setupAndRenderWebGPU() {
 		return;
 	}
 
-	const pipeline = device.createRenderPipeline({
+	const pipelineDescriptor: GPURenderPipelineDescriptor = {
 		label: "our hardcoded red triangle pipeline",
 		layout: "auto",
 		vertex: {
@@ -68,7 +75,9 @@ export async function setupAndRenderWebGPU() {
 			module,
 			targets: [{ format: presentationFormat }],
 		},
-	});
+	};
+	updatePipelineDescriptor(pipelineDescriptor, MSAA);
+	const pipeline = device.createRenderPipeline(pipelineDescriptor);
 
 	const colorAttachment: GPURenderPassColorAttachment = {
 		view: context.getCurrentTexture().createView(), //null as any, //<- to be filled out when we render
@@ -108,6 +117,10 @@ export async function setupAndRenderWebGPU() {
 		entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
 	});
 
+	let multisampleTextureContainer: MultiSampleTextureContainer = {
+		texture: null,
+	};
+
 	// window.offset = 0;
 	const clockData = clockInit();
 	// const getCurrentTime = () => Math.floor(performance.now());
@@ -132,10 +145,22 @@ export async function setupAndRenderWebGPU() {
 			0,
 			SCENE_DATA.objectUniformBuffer
 		);
+
+		createMultiSampleTextureIfNeeded(
+			device,
+			context,
+			multisampleTextureContainer
+		);
 		// Get the current texture from the canvas context and
 		// set it as the texture to render to.
 		// const colorAttachment:GPURenderPassColorAttachment = renderPassDescriptor.colorAttachments[0];
-		colorAttachment.view = context.getCurrentTexture().createView();
+		// colorAttachment.view = context.getCurrentTexture().createView();
+		updateRenderPassDescription(
+			colorAttachment,
+			context,
+			multisampleTextureContainer,
+			MSAA
+		);
 
 		// make a command encoder to start encoding commands
 		const encoder = device.createCommandEncoder({ label: "our encoder" });

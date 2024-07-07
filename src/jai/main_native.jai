@@ -20,9 +20,11 @@ wgpu :: #import "wgpu";
 
 #load "native/helpers.jai";
 #load "native/uniforms_helpers.jai";
+#load "native/multisample.jai";
 
 WINDOW_WIDTH  :: 1280;
 WINDOW_HEIGHT :: 720;
+MSAA :: true;
 
 wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 	print_c("[WGPU :: %]: %\n", level, to_string(msg));
@@ -71,14 +73,19 @@ main :: () {
 	shader := create_shader(device, SHADER);
 	assert(shader != null, "Shader is not created correctly");
 
-	pipeline := create_pipeline(surface, adapter, device, shader, Vertex);
+	pipeline_descriptor: wgpu.RenderPipelineDescriptor;
+	update_pipeline_descriptor(*pipeline_descriptor, surface, adapter, device, shader, Vertex);
+	update_pipeline_descriptor_multisample(*pipeline_descriptor, MSAA);
+	pipeline := wgpu.DeviceCreateRenderPipeline(device, *pipeline_descriptor);
 	assert(pipeline != null, "Pipeline is not created correctly");
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
 	index_buffer, index_buffer_size := index_array_to_buffer(device, queue, SCENE_DATA.indices);
 	uniform_buffer, uniform_buffer_size, bind_group := uniform_to_buffer(device, queue, pipeline, SCENE_DATA.object_uniforms);
 
-	swapchain := create_swapchain(surface, adapter, device, WINDOW_WIDTH, WINDOW_HEIGHT);
+	swap_chain_descriptor: wgpu.SwapChainDescriptor;
+	swapchain := create_swapchain(*swap_chain_descriptor, surface, adapter, device, WINDOW_WIDTH, WINDOW_HEIGHT);
+	multisample_texture := create_multi_sample_texture_if_needed(device, *swap_chain_descriptor);
 
 	wgpu.QueueSubmit(queue, 0, null);
 
@@ -116,6 +123,7 @@ main :: () {
 		};
 
 		colorAttachment.view = current_view;
+		update_render_pass_description(*colorAttachment,*swap_chain_descriptor, *current_view, *multisample_texture, MSAA);
 
 		render_pass_descriptor := wgpu.RenderPassDescriptor.{ label = "Main Render Pass" };
 		render_pass_descriptor.colorAttachmentCount = 1;
