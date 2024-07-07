@@ -5,7 +5,7 @@ import {
 	SHADERS,
 } from "./Common";
 import { logGreenBg } from "./Logger";
-import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./VertexBuffer";
+import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./SceneData";
 
 const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
 

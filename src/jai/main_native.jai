@@ -34,7 +34,7 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 
 
 #load "common/shaders.jai";
-#load "common/vertices.jai";
+#load "common/scene_data.jai";
 
 
 

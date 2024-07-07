@@ -1,14 +1,11 @@
 #import "Basic";
 #import "Math";
-// A basic "Hello WASM World" program
-
-// time :float= 0;
-#load "common/vertices.jai";
+#load "common/scene_data.jai";
 #load "common/wgpu_mock.jai";
 #placeholder SHADER;
 
-
-SCENE_DATA : SceneData;
+SCENE_DATA :SceneData;
+matrix_buffer :MatrixBuffer;
 
 main :: () {
 	// print("Hello Jai 24!\n");
@@ -47,8 +44,7 @@ main :: () {
 	// log("Logging to the DOM via Jai.");
 	// log_error("We can also log errors.");
 
-	SCENE_DATA.vertices, SCENE_DATA.indices = create_vertices();
-	
+	SCENE_DATA = create_scene_data();
 
 	vertex_buffer_layout := wasm_make_vertex_layout(Vertex);
 	vertex_buffer_layout_buffer := Wasm_VertexBufferLayout_to_buffer(*vertex_buffer_layout);
@@ -56,7 +52,7 @@ main :: () {
 
 	set_webgpu_vertex_data(SCENE_DATA.vertices);
 	set_webgpu_index_data(SCENE_DATA.indices);
-	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
+	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms, matrix_buffer);
 	set_webgpu_shader(SHADER);
 	// time:float=0;
 	// while (true) {
@@ -97,8 +93,27 @@ set_webgpu_index_data :: (indices: []VertexIndex) {
 set_webgpu_vertex_layout :: (buffer: []VertexLayoutBuffer) {
 	set_webgpu_vertex_layout_js(buffer.count, buffer.data, size_of(VertexLayoutBuffer));
 }
-set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
-	set_webgpu_object_uniforms_js(object_uniforms.count * size_of(ObjectUniforms), object_uniforms.data, size_of(float32));
+matrix4_to_buffer :: (matrix: *Matrix4, buffer: *MatrixBuffer) {
+	buffer.data[0] = matrix._11;
+	buffer.data[1] = matrix._12;
+	buffer.data[2] = matrix._13;
+	buffer.data[3] = matrix._14;
+	buffer.data[4] = matrix._21;
+	buffer.data[5] = matrix._22;
+	buffer.data[6] = matrix._23;
+	buffer.data[7] = matrix._24;
+	buffer.data[8] = matrix._31;
+	buffer.data[9] = matrix._32;
+	buffer.data[10] = matrix._33;
+	buffer.data[11] = matrix._34;
+	buffer.data[12] = matrix._41;
+	buffer.data[13] = matrix._42;
+	buffer.data[14] = matrix._43;
+	buffer.data[15] = matrix._44;
+}
+set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms, buffer: MatrixBuffer) {
+	matrix4_to_buffer(*(object_uniforms[0].matrix), *buffer);
+	set_webgpu_object_uniforms_js(buffer.count, buffer.data, size_of(float));
 }
 
 
@@ -109,7 +124,7 @@ set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
 set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
 set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #foreign;
 set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
-set_webgpu_object_uniforms_js :: (count: s64, data: *ObjectUniforms, element_size:u8) #foreign;
+set_webgpu_object_uniforms_js :: (count: s64, data: *float, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 
@@ -117,6 +132,8 @@ set_wasm_time :: (new_time: s64) {
 	time:float = new_time / 1000.0;
 
 	update_scene_data(*SCENE_DATA, time);
+
+	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms, matrix_buffer);
 }
 
 

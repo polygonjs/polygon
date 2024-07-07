@@ -11,7 +11,7 @@ struct VertexOutput {
 };
 
 struct ObjectUniforms {
-	translate: vec3f,
+	matrix: mat4x4f,
 };
 
 @group(0) @binding(0) var<uniform> objectUniforms: ObjectUniforms;
@@ -19,7 +19,7 @@ struct ObjectUniforms {
 @vertex
 fn vertex(model: VertexInput) -> VertexOutput {
 	var out: VertexOutput;
-	out.clip_position = vec4<f32>(model.position + objectUniforms.translate, 1.0);
+	out.clip_position = vec4<f32>(model.position, 1.0) * objectUniforms.matrix;
 	out.color = model.color;
 	out.uv = model.uv;
 	return out;

@@ -5,7 +5,7 @@ import {
 	SCENE_DATA,
 	updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
-} from "./VertexBuffer";
+} from "./SceneData";
 import {
 	createMultiSampleTextureIfNeeded,
 	MultiSampleTextureContainer,

@@ -1,7 +1,6 @@
 uniform_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, pipeline: wgpu.RenderPipeline, uniforms: [1]ObjectUniforms) -> wgpu.Buffer, u64, wgpu.BindGroup {
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
 	size := max( cast(u64)16, cast(u64) uniforms.count * size_of(ObjectUniforms));
-	print("size: %\n", size);
 
 	buffer := wgpu.DeviceCreateBuffer(device, *(wgpu.BufferDescriptor.{
 		usage = xx (wgpu.BufferUsage.Uniform | wgpu.BufferUsage.CopyDst),

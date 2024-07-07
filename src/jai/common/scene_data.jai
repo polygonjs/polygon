@@ -9,7 +9,7 @@ VertexIndex :: u32;
 VertexLayoutBuffer :: u8;
 
 ObjectUniforms :: struct {
-	translate: Vector3;
+	matrix: Matrix4;
 };
 
 SceneData :: struct {
@@ -17,6 +17,8 @@ SceneData :: struct {
 	indices: [..]VertexIndex;
 	object_uniforms: [1]ObjectUniforms;
 };
+
+MatrixBuffer :: [16]float;
 
 create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	vertices : [..]Vertex;
@@ -37,7 +39,8 @@ create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 }
 create_object_uniforms :: ()-> [1]ObjectUniforms {
 	uniforms :[1]ObjectUniforms;
-	uniforms[0] = ObjectUniforms.{translate=.{0.2, 0.0, 0.0}};
+	uniforms[0] = ObjectUniforms.{matrix=.{}};
+	identity(*uniforms[0].matrix);
 	return uniforms;
 }
 create_scene_data :: ()-> SceneData {
@@ -48,8 +51,9 @@ create_scene_data :: ()-> SceneData {
 }
 
 update_scene_data :: (scene_data: *SceneData, time:float) {
-	scene_data.vertices[0].position.y = 0.5 + 0.2*sin(time);
+	// scene_data.vertices[0].position.y = 0.5 + 0.2*sin(time);
+	// scene_data.object_uniforms[0].translate.x = sin(time);
 
-	scene_data.object_uniforms[0].translate.x = sin(time);
+	translate(*scene_data.object_uniforms[0].matrix, .{x = 0.01*sin(time), y = 0.0, z = 0.0} );
 }
 
