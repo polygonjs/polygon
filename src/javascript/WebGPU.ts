@@ -92,16 +92,24 @@ export async function setupAndRenderWebGPU() {
 	};
 
 	// TODO: why min size of 16?
-	const uniformBufferSize = Math.max(
+	const objectUniformBufferSize = Math.max(
 		16,
 		SCENE_DATA.objectUniformBuffer.length
+	);
+	const cameraUniformBufferSize = Math.max(
+		16,
+		SCENE_DATA.cameraUniformBuffer.length
 	);
 	//Math.max(SCENE_DATA.objectUniformBuffer.length, 16);
 	// 4 * 4 + // color is 4 32bit floats (4bytes each)
 	// 2 * 4 + // scale is 2 32bit floats (4bytes each)
 	// 2 * 4;  // offset is 2 32bit floats (4bytes each)
-	const uniformBuffer = device.createBuffer({
-		size: uniformBufferSize * 4,
+	const objectUniformBuffer = device.createBuffer({
+		size: objectUniformBufferSize * 4,
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+	});
+	const cameraUniformBuffer = device.createBuffer({
+		size: cameraUniformBufferSize * 4,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 	});
 
@@ -112,9 +120,13 @@ export async function setupAndRenderWebGPU() {
 
 	//   uniformValues.set([0, 1, 0, 1], kColorOffset);        // set the color
 	// uniformValues.set([0.5], offsetOffset); // set the offset
-	const bindGroup = device.createBindGroup({
+	const objectBindGroup = device.createBindGroup({
 		layout: pipeline.getBindGroupLayout(0),
-		entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
+		entries: [{ binding: 0, resource: { buffer: objectUniformBuffer } }],
+	});
+	const cameraBindGroup = device.createBindGroup({
+		layout: pipeline.getBindGroupLayout(1),
+		entries: [{ binding: 0, resource: { buffer: cameraUniformBuffer } }],
 	});
 
 	let multisampleTextureContainer: MultiSampleTextureContainer = {
@@ -141,9 +153,14 @@ export async function setupAndRenderWebGPU() {
 
 		updateVertexArrayToBuffer(device, vertexArrayBufferResult);
 		device.queue.writeBuffer(
-			uniformBuffer,
+			objectUniformBuffer,
 			0,
 			SCENE_DATA.objectUniformBuffer
+		);
+		device.queue.writeBuffer(
+			cameraUniformBuffer,
+			0,
+			SCENE_DATA.cameraUniformBuffer
 		);
 
 		createMultiSampleTextureIfNeeded(
@@ -168,7 +185,8 @@ export async function setupAndRenderWebGPU() {
 		// make a render pass encoder to encode render specific commands
 		const pass = encoder.beginRenderPass(renderPassDescriptor);
 		pass.setPipeline(pipeline);
-		pass.setBindGroup(0, bindGroup);
+		pass.setBindGroup(0, objectBindGroup);
+		pass.setBindGroup(1, cameraBindGroup);
 		pass.setVertexBuffer(0, vertexArrayBufferResult.buffer);
 		pass.setIndexBuffer(indexArrayToBufferResult.buffer, "uint32");
 		pass.drawIndexed(indexArrayToBufferResult.data.length);

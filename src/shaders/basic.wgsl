@@ -11,15 +11,32 @@ struct VertexOutput {
 };
 
 struct ObjectUniforms {
-	matrix: mat4x4f,
+	transformMatrix: mat4x4f,
+};
+struct CameraUniforms {
+	transformMatrixInverse: mat4x4f,
+	projectionMatrix: mat4x4f,
 };
 
-@group(0) @binding(0) var<uniform> objectUniforms: ObjectUniforms;
+@group(0) @binding(0) var<uniform> object: ObjectUniforms;
+@group(1) @binding(0) var<uniform> camera: CameraUniforms;
 
 @vertex
 fn vertex(model: VertexInput) -> VertexOutput {
 	var out: VertexOutput;
-	out.clip_position = vec4<f32>(model.position, 1.0) * objectUniforms.matrix;
+	var mvPosition = vec4<f32>(model.position, 1.0);
+	// out.clip_position = vec4<f32>(model.position, 1.0) * (object.transformMatrix);
+	// out.clip_position = out.clip_position * camera.transformMatrixInverse;
+	// out.clip_position = camera.projectionMatrix * out.clip_position;
+
+	// out.clip_position = out.clip_position * (camera.projectionMatrix * camera.transformMatrixInverse);
+
+	// out.clip_position = camera.projectionMatrix * ((vec4<f32>(model.position, 1.0) * (object.transformMatrix)) * cameraUniforms.transformMatrixInverse);
+
+	var modelViewMatrix = camera.transformMatrixInverse * object.transformMatrix;
+	var finalMatrix = camera.projectionMatrix * modelViewMatrix;
+	out.clip_position = finalMatrix * mvPosition;
+
 	out.color = model.color;
 	out.uv = model.uv;
 	return out;

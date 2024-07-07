@@ -21,6 +21,9 @@ wgpu :: #import "wgpu";
 #load "native/helpers.jai";
 #load "native/uniforms_helpers.jai";
 #load "native/multisample.jai";
+#load "common/math_helper.jai";
+#load "common/scene_data.jai";
+#load "native/shaders.jai";
 
 WINDOW_WIDTH  :: 1280;
 WINDOW_HEIGHT :: 720;
@@ -31,16 +34,12 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 }
 
 
-
-
-#load "common/shaders.jai";
-#load "common/scene_data.jai";
-
-
-
 main :: () {
 	SHADER :: #run create_shaders();
-	SCENE_DATA : SceneData = create_scene_data();
+	SCENE_DATA :SceneData= create_scene_data(WINDOW_WIDTH / WINDOW_HEIGHT);
+	// CAMERA_DATA :CameraData = create_camera_data(WINDOW_WIDTH / WINDOW_HEIGHT);
+
+	// viewProjectionMatrix = multiply(projection, cameraTransformInverse);
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -81,7 +80,8 @@ main :: () {
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
 	index_buffer, index_buffer_size := index_array_to_buffer(device, queue, SCENE_DATA.indices);
-	uniform_buffer, uniform_buffer_size, bind_group := uniform_to_buffer(device, queue, pipeline, SCENE_DATA.object_uniforms);
+	object_uniform_buffer, object_uniform_buffer_size, object_bind_group := object_uniform_to_buffer(device, queue, pipeline, SCENE_DATA.object_uniforms);
+	camera_uniform_buffer, camera_uniform_buffer_size, camera_bind_group := camera_uniform_to_buffer(device, queue, pipeline, SCENE_DATA.camera_uniforms);
 
 	swap_chain_descriptor: wgpu.SwapChainDescriptor;
 	swapchain := create_swapchain(*swap_chain_descriptor, surface, adapter, device, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -108,8 +108,10 @@ main :: () {
 		current_view := wgpu.SwapChainGetCurrentTextureView(swapchain);
 
 		update_scene_data(*SCENE_DATA, time);
+		update_scene_data_uniforms(*SCENE_DATA);
 		update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
-		update_object_uniforms_to_buffer(uniform_buffer, queue, *SCENE_DATA);
+		update_object_uniforms_to_buffer(object_uniform_buffer, queue, *SCENE_DATA);
+		update_camera_uniforms_to_buffer(camera_uniform_buffer, queue, *SCENE_DATA);
 
 		cmd_encoder := wgpu.DeviceCreateCommandEncoder(
 			device,
@@ -131,9 +133,15 @@ main :: () {
 
 		render_pass := wgpu.CommandEncoderBeginRenderPass(cmd_encoder, *render_pass_descriptor);
 
+		//
 		wgpu.RenderPassEncoderSetPipeline(render_pass, pipeline);
-		dynamicOffsets:[0]u32;
-		wgpu.RenderPassEncoderSetBindGroup(render_pass, 0, bind_group, 0, dynamicOffsets.data);
+		object_dynamicOffsets:[0]u32;
+		wgpu.RenderPassEncoderSetBindGroup(render_pass, 0, object_bind_group, 0, object_dynamicOffsets.data);
+		//
+		camera_dynamicOffsets:[0]u32;
+		// camera_dynamicOffsets[0] = 16*4;
+		wgpu.RenderPassEncoderSetBindGroup(render_pass, 1, camera_bind_group, 0, camera_dynamicOffsets.data);
+		//
 		wgpu.RenderPassEncoderSetVertexBuffer(render_pass, 0, vertex_buffer, 0, vertex_buffer_size);
 		wgpu.RenderPassEncoderSetIndexBuffer(render_pass, index_buffer, wgpu.IndexFormat.Uint32, 0, index_buffer_size);
 

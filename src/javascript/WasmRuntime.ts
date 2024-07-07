@@ -125,6 +125,23 @@ const exported_js_functions = {
 		}
 		SCENE_DATA.objectUniformBuffer = buffer;
 	},
+	set_webgpu_camera_uniforms_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Float32Array
+		);
+		if (!buffer) {
+			console.error("set_webgpu_object_uniforms_js: No buffer");
+			return;
+		}
+		SCENE_DATA.cameraUniformBuffer = buffer;
+	},
 	memcmp: (
 		str1Pointer: BigInt,
 		str2Pointer: BigInt,

@@ -161,30 +161,80 @@ create_shader :: (device: wgpu.Device, source: string, label := "Main shader") -
 // 	return vertex_buffer_layout;
 // }
 
+// update_pipeline_descriptor_layout :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, device: wgpu.Device) {
+// 	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
+
+// 	bind_group_layout_entries := NewArray(2, wgpu.BindGroupLayoutEntry);
+// 	bind_group_layout_entries[0] = wgpu.BindGroupLayoutEntry.{
+// 		binding = 0,
+// 		visibility = xx wgpu.ShaderStage.Vertex,
+// 		buffer = .{ type = wgpu.BufferBindingType.Uniform },
+// 	};
+// 	bind_group_layout_entries[1] = wgpu.BindGroupLayoutEntry.{
+// 		binding = 1,
+// 		visibility = xx wgpu.ShaderStage.Vertex,
+// 		buffer = .{ type = wgpu.BufferBindingType.Uniform },
+// 	};
+// 	bind_group_layouts := NewArray(1, wgpu.BindGroupLayout);
+// 	bind_group_layouts[0] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{
+// 		entryCount = xx bind_group_layout_entries.count,
+// 		entries = bind_group_layout_entries.data,
+// 	}));
+// 	pipeline_layout_descriptor.bindGroupLayoutCount = xx bind_group_layouts.count;
+// 	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
+
+// 	pipeline_descriptor.layout = wgpu.DeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
+// }
+
+update_pipeline_descriptor_layout :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, device: wgpu.Device) {
+	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
+
+	
+	bind_group_layouts := NewArray(2, wgpu.BindGroupLayout);
+
+	// group 0
+	{
+		bind_group_layout_entries := NewArray(1, wgpu.BindGroupLayoutEntry);
+		bind_group_layout_entries[0] = wgpu.BindGroupLayoutEntry.{
+			binding = 0,
+			visibility = xx wgpu.ShaderStage.Vertex,
+			buffer = .{ type = wgpu.BufferBindingType.Uniform },
+		};
+		bind_group_layouts[0] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{
+			entryCount = xx bind_group_layout_entries.count,
+			entries = bind_group_layout_entries.data,
+		}));
+	}
+	// group 1
+	{
+		bind_group_layout_entries := NewArray(1, wgpu.BindGroupLayoutEntry);
+		bind_group_layout_entries[0] = wgpu.BindGroupLayoutEntry.{
+			binding = 0,
+			visibility = xx wgpu.ShaderStage.Vertex,
+			buffer = .{ type = wgpu.BufferBindingType.Uniform },
+		};
+		bind_group_layouts[1] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{
+			entryCount = xx bind_group_layout_entries.count,
+			entries = bind_group_layout_entries.data,
+		}));
+	}
+	// 
+	pipeline_layout_descriptor.bindGroupLayoutCount = xx bind_group_layouts.count;
+	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
+
+	pipeline_descriptor.layout = wgpu.DeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
+}
+
 update_pipeline_descriptor :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, shader: wgpu.ShaderModule, $vertex_buffer_layout_type: Type) {
 	preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
 
 	// pipeline_descriptor: wgpu.RenderPipelineDescriptor;
 	pipeline_descriptor.label = "Render Pipeline";
 
-	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
+	
 
 	// uniforms
-	bind_group_layout_entries := NewArray(1, wgpu.BindGroupLayoutEntry);
-	bind_group_layout_entries[0]= wgpu.BindGroupLayoutEntry.{
-		binding = 0,
-		visibility = cast(u32) wgpu.ShaderStage.Vertex, // not sure the cast is correct
-		buffer = .{ type = wgpu.BufferBindingType.Uniform },
-	};
-	bind_group_layouts := NewArray(1, wgpu.BindGroupLayout);
-	bind_group_layouts[0] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{
-		entryCount = cast(u64)bind_group_layout_entries.count,
-		entries = bind_group_layout_entries.data,
-	}));
-	pipeline_layout_descriptor.bindGroupLayoutCount = cast(u64)bind_group_layouts.count;
-	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
-
-	pipeline_descriptor.layout = wgpu.DeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
+	update_pipeline_descriptor_layout(pipeline_descriptor, device);
 
 	// vertex
 	vertex_state: wgpu.VertexState;

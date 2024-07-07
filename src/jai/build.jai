@@ -16,7 +16,7 @@ WGSL
 
 DONE
 
-#load "common/shaders.jai";
+#load "native/shaders.jai";
 
 
 #run {

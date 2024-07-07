@@ -5,6 +5,7 @@ interface SceneData {
 	indexBuffer: Uint32Array;
 	vertexLayout: GPUVertexBufferLayout;
 	objectUniformBuffer: Float32Array;
+	cameraUniformBuffer: Float32Array;
 }
 export const SCENE_DATA: SceneData = {
 	vertexBuffer: new Float32Array(0),
@@ -14,6 +15,7 @@ export const SCENE_DATA: SceneData = {
 		attributes: [],
 	},
 	objectUniformBuffer: new Float32Array(0),
+	cameraUniformBuffer: new Float32Array(0),
 };
 
 function createFormatByValue() {
