@@ -4,6 +4,7 @@ interface SceneData {
 	vertexBuffer: Float32Array;
 	indexBuffer: Uint32Array;
 	vertexLayout: GPUVertexBufferLayout;
+	objectUniformBuffer: Float32Array;
 }
 export const SCENE_DATA: SceneData = {
 	vertexBuffer: new Float32Array(0),
@@ -12,27 +13,9 @@ export const SCENE_DATA: SceneData = {
 		arrayStride: 0,
 		attributes: [],
 	},
+	objectUniformBuffer: new Float32Array(0),
 };
 
-// export const VERTEX_BUFFER_LAYOUT: GPUVertexBufferLayout = {
-// 	arrayStride: VERTEX_FLOATS_COUNT * FLOAT_SIZE,
-// 	attributes: [
-// 		// position
-// 		{ shaderLocation: 0, offset: 0, format: "float32x3" },
-// 		// color
-// 		{
-// 			shaderLocation: 1,
-// 			offset: 3 * FLOAT_SIZE,
-// 			format: "float32x3",
-// 		},
-// 		// uv
-// 		{
-// 			shaderLocation: 2,
-// 			offset: (3 + 3) * FLOAT_SIZE,
-// 			format: "float32x2",
-// 		},
-// 	],
-// };
 function createFormatByValue() {
 	const formats: GPUVertexFormat[] = [];
 

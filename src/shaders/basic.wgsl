@@ -10,10 +10,16 @@ struct VertexOutput {
 	@location(1) uv: vec2<f32>,
 };
 
+struct ObjectUniforms {
+	translate: vec3f,
+};
+
+@group(0) @binding(0) var<uniform> objectUniforms: ObjectUniforms;
+
 @vertex
 fn vertex(model: VertexInput) -> VertexOutput {
 	var out: VertexOutput;
-	out.clip_position = vec4<f32>(model.position, 1.0);
+	out.clip_position = vec4<f32>(model.position + objectUniforms.translate, 1.0);
 	out.color = model.color;
 	out.uv = model.uv;
 	return out;

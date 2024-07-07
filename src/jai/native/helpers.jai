@@ -169,15 +169,30 @@ create_pipeline :: (surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.D
 
 	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
 
+	// uniforms
+	bind_group_layout_entries := NewArray(1, wgpu.BindGroupLayoutEntry);
+	bind_group_layout_entries[0]= wgpu.BindGroupLayoutEntry.{
+		binding = 0,
+		visibility = cast(u32) wgpu.ShaderStage.Vertex, // not sure the cast is correct
+		buffer = .{ type = wgpu.BufferBindingType.Uniform },
+	};
+	bind_group_layouts := NewArray(1, wgpu.BindGroupLayout);
+	bind_group_layouts[0] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{
+		entryCount = cast(u64)bind_group_layout_entries.count,
+		entries = bind_group_layout_entries.data,
+	}));
+	pipeline_layout_descriptor.bindGroupLayoutCount = cast(u64)bind_group_layouts.count;
+	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
+
 	pipeline_descriptor.layout = wgpu.DeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
 
+	// vertex
 	vertex_state: wgpu.VertexState;
 	vertex_state.module = shader;
 	vertex_state.entryPoint = "vertex";
 	vertex_state.bufferCount = 1;
 	tmp_layout := wasm_make_vertex_layout(vertex_buffer_layout_type);
 	vertex_state.buffers = *Wasm_VertexBufferLayout_to_wgpu(tmp_layout);
-	// vertex_state.buffers = *make_vertex_layout(vertex_buffer_layout_type);
 
 	pipeline_descriptor.vertex = vertex_state;
 

@@ -27,7 +27,9 @@ function jaiPlugin() {
 
 			server.watcher.on("change", (filePath) => {
 				if (fileIsValid(filePath)) {
-					console.log(`File changed: ${filePath}`);
+					console.log(`-----------------------------------------`);
+					console.log(`--------------- File changed: ${filePath}`);
+					console.log(`-----------------------------------------`);
 					exec("jai src/jai/build.jai", (err, stdout, stderr) => {
 						if (err) {
 							console.error(

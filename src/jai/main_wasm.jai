@@ -48,22 +48,7 @@ main :: () {
 	// log_error("We can also log errors.");
 
 	SCENE_DATA.vertices, SCENE_DATA.indices = create_vertices();
-	// SCENE_DATA.buffer  = [2*3*SCENE_DATA.vertices.count]float32;
-	// SCENE_DATA.buffer.count = 2*3*SCENE_DATA.vertices.count;
-	// vertices_to_buffer(SCENE_DATA.vertices, SCENE_DATA.buffer);
-	// print("size of %\n", size_of(float32));
-	// for vertex: VERTICES {
-	// 	offset := it_index*6;
-	// 	buffer[offset+0] = vertex.position.x;
-	// 	buffer[offset+1] = vertex.position.y;
-	// 	buffer[offset+2] = vertex.position.z;
-	// 	buffer[offset+3] = vertex.color.x;
-	// 	buffer[offset+4] = vertex.color.y;
-	// 	buffer[offset+5] = vertex.color.z;
-	// }
-	// for item: buffer {
-	// 	print("item %:%\n",it_index, item);
-	// }
+	
 
 	vertex_buffer_layout := wasm_make_vertex_layout(Vertex);
 	vertex_buffer_layout_buffer := Wasm_VertexBufferLayout_to_buffer(*vertex_buffer_layout);
@@ -71,6 +56,7 @@ main :: () {
 
 	set_webgpu_vertex_data(SCENE_DATA.vertices);
 	set_webgpu_index_data(SCENE_DATA.indices);
+	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
 	set_webgpu_shader(SHADER);
 	// time:float=0;
 	// while (true) {
@@ -111,6 +97,9 @@ set_webgpu_index_data :: (indices: []VertexIndex) {
 set_webgpu_vertex_layout :: (buffer: []VertexLayoutBuffer) {
 	set_webgpu_vertex_layout_js(buffer.count, buffer.data, size_of(VertexLayoutBuffer));
 }
+set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
+	set_webgpu_object_uniforms_js(object_uniforms.count * size_of(ObjectUniforms), object_uniforms.data, size_of(float32));
+}
 
 
 // We need to declare all the JS functions that will be passed to our WebAssembly
@@ -120,6 +109,7 @@ set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
 set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
 set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #foreign;
 set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
+set_webgpu_object_uniforms_js :: (count: s64, data: *ObjectUniforms, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 

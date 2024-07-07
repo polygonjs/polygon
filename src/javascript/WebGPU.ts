@@ -81,15 +81,19 @@ export async function setupAndRenderWebGPU() {
 		colorAttachments: [colorAttachment],
 	};
 
-	// const uniformBufferSize = 1 * 4;
+	// TODO: why min size of 16?
+	const uniformBufferSize = Math.max(
+		16,
+		SCENE_DATA.objectUniformBuffer.length
+	);
+	//Math.max(SCENE_DATA.objectUniformBuffer.length, 16);
 	// 4 * 4 + // color is 4 32bit floats (4bytes each)
 	// 2 * 4 + // scale is 2 32bit floats (4bytes each)
 	// 2 * 4;  // offset is 2 32bit floats (4bytes each)
-	// const uniformBuffer = device.createBuffer({
-	// 	size: uniformBufferSize,
-	// 	usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-	// });
-	// const uniformValues = new Float32Array(uniformBufferSize / 4);
+	const uniformBuffer = device.createBuffer({
+		size: uniformBufferSize * 4,
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+	});
 
 	//   const kColorOffset = 0;
 	//   const kScaleOffset = 4;
@@ -98,10 +102,10 @@ export async function setupAndRenderWebGPU() {
 
 	//   uniformValues.set([0, 1, 0, 1], kColorOffset);        // set the color
 	// uniformValues.set([0.5], offsetOffset); // set the offset
-	// const bindGroup = device.createBindGroup({
-	// 	layout: pipeline.getBindGroupLayout(0),
-	// 	entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
-	// });
+	const bindGroup = device.createBindGroup({
+		layout: pipeline.getBindGroupLayout(0),
+		entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
+	});
 
 	// window.offset = 0;
 	const clockData = clockInit();
@@ -122,9 +126,11 @@ export async function setupAndRenderWebGPU() {
 		window.set_wasm_time(BigInt(0), BigInt(clockData.time));
 
 		updateVertexArrayToBuffer(device, vertexArrayBufferResult);
-		// uniformValues.set([window.offset], offsetOffset); // set the scale
-		// uniformValues[offsetOffset] = window.offset;
-		// device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+		device.queue.writeBuffer(
+			uniformBuffer,
+			0,
+			SCENE_DATA.objectUniformBuffer
+		);
 		// Get the current texture from the canvas context and
 		// set it as the texture to render to.
 		// const colorAttachment:GPURenderPassColorAttachment = renderPassDescriptor.colorAttachments[0];
@@ -136,6 +142,7 @@ export async function setupAndRenderWebGPU() {
 		// make a render pass encoder to encode render specific commands
 		const pass = encoder.beginRenderPass(renderPassDescriptor);
 		pass.setPipeline(pipeline);
+		pass.setBindGroup(0, bindGroup);
 		pass.setVertexBuffer(0, vertexArrayBufferResult.buffer);
 		pass.setIndexBuffer(indexArrayToBufferResult.buffer, "uint32");
 		pass.drawIndexed(indexArrayToBufferResult.data.length);

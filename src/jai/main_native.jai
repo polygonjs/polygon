@@ -19,6 +19,7 @@
 wgpu :: #import "wgpu";
 
 #load "native/helpers.jai";
+#load "native/uniforms_helpers.jai";
 
 WINDOW_WIDTH  :: 1280;
 WINDOW_HEIGHT :: 720;
@@ -37,9 +38,7 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 
 main :: () {
 	SHADER :: #run create_shaders();
-	SCENE_DATA : SceneData;
-	SCENE_DATA.vertices, SCENE_DATA.indices = create_vertices();
-	// vertices_to_buffer(SCENE_DATA.vertices, SCENE_DATA.buffer);
+	SCENE_DATA : SceneData = create_scene_data();
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -72,12 +71,12 @@ main :: () {
 	shader := create_shader(device, SHADER);
 	assert(shader != null, "Shader is not created correctly");
 
-	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
-	index_buffer, index_buffer_size := index_array_to_buffer(device, queue, SCENE_DATA.indices);
-	// SCENE_DATA.buffer = vertex_buffer;
-
 	pipeline := create_pipeline(surface, adapter, device, shader, Vertex);
 	assert(pipeline != null, "Pipeline is not created correctly");
+
+	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
+	index_buffer, index_buffer_size := index_array_to_buffer(device, queue, SCENE_DATA.indices);
+	uniform_buffer, uniform_buffer_size, bind_group := uniform_to_buffer(device, queue, pipeline, SCENE_DATA.object_uniforms);
 
 	swapchain := create_swapchain(surface, adapter, device, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -102,9 +101,8 @@ main :: () {
 		current_view := wgpu.SwapChainGetCurrentTextureView(swapchain);
 
 		update_scene_data(*SCENE_DATA, time);
-		// VERTICES[0].position.y = sin(4*time) / 2.0;
 		update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
-		
+		update_object_uniforms_to_buffer(uniform_buffer, queue, *SCENE_DATA);
 
 		cmd_encoder := wgpu.DeviceCreateCommandEncoder(
 			device,
@@ -126,6 +124,8 @@ main :: () {
 		render_pass := wgpu.CommandEncoderBeginRenderPass(cmd_encoder, *render_pass_descriptor);
 
 		wgpu.RenderPassEncoderSetPipeline(render_pass, pipeline);
+		dynamicOffsets:[0]u32;
+		wgpu.RenderPassEncoderSetBindGroup(render_pass, 0, bind_group, 0, dynamicOffsets.data);
 		wgpu.RenderPassEncoderSetVertexBuffer(render_pass, 0, vertex_buffer, 0, vertex_buffer_size);
 		wgpu.RenderPassEncoderSetIndexBuffer(render_pass, index_buffer, wgpu.IndexFormat.Uint32, 0, index_buffer_size);
 
