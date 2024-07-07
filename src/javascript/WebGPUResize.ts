@@ -1,12 +1,16 @@
 export function webGPUListenToResize(
 	device: GPUDevice,
+	domElement: HTMLElement,
 	canvas: HTMLCanvasElement
+	// callback: () => void
 ) {
 	const observer = new ResizeObserver((entries) => {
-		for (const entry of entries) {
-			if (canvas != entry.target) continue;
-			const width = (entry.contentBoxSize[0].inlineSize / 64) | 0;
-			const height = (entry.contentBoxSize[0].blockSize / 64) | 0;
+		let entriesCount = entries.length;
+		for (let i = 0; i < entriesCount; i++) {
+			const entry = entries[i];
+			if (domElement != entry.target) continue;
+			const width = entry.contentBoxSize[0].inlineSize;
+			const height = entry.contentBoxSize[0].blockSize;
 			canvas.width = Math.max(
 				1,
 				Math.min(width, device.limits.maxTextureDimension2D)
@@ -17,5 +21,5 @@ export function webGPUListenToResize(
 			);
 		}
 	});
-	observer.observe(canvas);
+	observer.observe(domElement);
 }

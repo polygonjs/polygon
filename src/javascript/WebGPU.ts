@@ -6,6 +6,7 @@ import {
 	updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
 } from "./VertexBuffer";
+import { webGPUListenToResize } from "./WebGPUResize";
 // import { webGPUListenToResize } from "./WebGPUResize";
 
 export async function setupAndRenderWebGPU() {
@@ -156,5 +157,5 @@ export async function setupAndRenderWebGPU() {
 
 	requestAnimationFrame(render);
 
-	// webGPUListenToResize(device, canvas);
+	webGPUListenToResize(device, domElement, canvas);
 }
