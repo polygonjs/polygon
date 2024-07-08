@@ -43,18 +43,79 @@ matrix4x4_to_buffer :: (matrix: *Matrix4, buffer: *Matrix4x4Buffer) #expand {
 
 create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	vertices : [..]Vertex;
-	array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, 0.0}, color=.{1.0, 0.0, 0.0}, uv=.{0.0, 1.0}});
-	array_add(*vertices, Vertex.{ position=.{-0.5, -0.5, 0.0}, color=.{0.0, 1.0, 0.0}, uv=.{0.0, 0.0}});
-	array_add(*vertices, Vertex.{ position=.{0.5, -0.5, 0.0}, color=.{0.0, 0.0, 1.0}, uv=.{1.0, 0.0}});
-	array_add(*vertices, Vertex.{ position=.{0.5, 0.5, 0.0}, color=.{1.0, 0.0, 1.0}, uv=.{1.0, 1.0}});
+
+	// array_add(*vertices, Vertex.{ position=.{-0.5, 0.0, 0.5}, color=.{1.0, 0.0, 0.0}, uv=.{0.0, 1.0}});
+	// array_add(*vertices, Vertex.{ position=.{-0.5, 0.0, -0.5}, color=.{0.0, 1.0, 0.0}, uv=.{0.0, 0.0}});
+	// array_add(*vertices, Vertex.{ position=.{0.5, 0.0, -0.5}, color=.{0.0, 0.0, 1.0}, uv=.{1.0, 0.0}});
+	// array_add(*vertices, Vertex.{ position=.{0.5, 0.0, 0.5}, color=.{1.0, 0.0, 1.0}, uv=.{1.0, 1.0}});
+
+	// indices:[..]VertexIndex;
+	// array_add(*indices, 0);
+	// array_add(*indices, 1);
+	// array_add(*indices, 2);
+	// array_add(*indices, 0);
+	// array_add(*indices, 2);
+	// array_add(*indices, 3);
+
+	array_add(*vertices, Vertex.{ position=.{-0.5, -0.5, 0.5}, color=.{1.0, 0.0, 0.0}, uv=.{0.0, 0.0}});
+	array_add(*vertices, Vertex.{ position=.{0.5, -0.5, 0.5}, color=.{0.0, 1.0, 0.0}, uv=.{1.0, 0.0}});
+	array_add(*vertices, Vertex.{ position=.{0.5, 0.5, 0.5}, color=.{0.0, 0.0, 1.0}, uv=.{1.0, 1.0}});
+	array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, 0.5}, color=.{1.0, 1.0, 0.0}, uv=.{0.0, 1.0}});
+
+	array_add(*vertices, Vertex.{ position=.{-0.5, -0.5, -0.5}, color=.{1.0, 0.0, 1.0}, uv=.{0.0, 0.0}});
+	array_add(*vertices, Vertex.{ position=.{0.5, -0.5, -0.5}, color=.{0.0, 1.0, 1.0}, uv=.{1.0, 0.0}});
+	array_add(*vertices, Vertex.{ position=.{0.5, 0.5, -0.5}, color=.{1.0, 1.0, 1.0}, uv=.{1.0, 1.0}});
+	array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, -0.5}, color=.{0.5, 0.5, 0.5}, uv=.{0.0, 1.0}});
+
 
 	indices:[..]VertexIndex;
+	// Front face
 	array_add(*indices, 0);
 	array_add(*indices, 1);
 	array_add(*indices, 2);
-	array_add(*indices, 0);
 	array_add(*indices, 2);
 	array_add(*indices, 3);
+	array_add(*indices, 0);
+
+	// Back face
+	array_add(*indices, 5);
+	array_add(*indices, 4);
+	array_add(*indices, 7);
+	array_add(*indices, 7);
+	array_add(*indices, 6);
+	array_add(*indices, 5);
+
+	// Left face
+	array_add(*indices, 4);
+	array_add(*indices, 0);
+	array_add(*indices, 3);
+	array_add(*indices, 3);
+	array_add(*indices, 7);
+	array_add(*indices, 4);
+
+	// Right face
+	array_add(*indices, 1);
+	array_add(*indices, 5);
+	array_add(*indices, 6);
+	array_add(*indices, 6);
+	array_add(*indices, 2);
+	array_add(*indices, 1);
+
+	// // Top face
+	array_add(*indices, 3);
+	array_add(*indices, 2);
+	array_add(*indices, 6);
+	array_add(*indices, 6);
+	array_add(*indices, 7);
+	array_add(*indices, 3);
+
+	// // Bottom face
+	array_add(*indices, 4);
+	array_add(*indices, 5);
+	array_add(*indices, 1);
+	array_add(*indices, 1);
+	array_add(*indices, 0);
+	array_add(*indices, 4);
 
 	return vertices, indices;
 }
@@ -73,7 +134,7 @@ create_camera_data :: (aspect: float32)-> [1]CameraData {
 	camera_data :[1]CameraData;
 	camera_data[0].projectionMatrix = make_projection_matrix(deg_to_rad(50), aspect, 0.1, 100);
 	identity(*camera_data[0].transformMatrix);
-	translate(*camera_data[0].transformMatrix, .{x = 0.0, y = 0.0, z = 4.0});
+	translate(*camera_data[0].transformMatrix, .{x = 0.0, y = 0.0, z = 5.0});
 	return camera_data;
 }
 create_camera_uniforms :: (camera_data: *[1]CameraData)-> [1]CameraUniforms {
@@ -141,20 +202,20 @@ update_scene_data :: (scene_data: *SceneData, time:float) {
 	// identity(*transformMatrix);
 
 	// rotation
-	quaternion :Quaternion;
-	axis:=Vector3.{x=0.0, y=1.0, z=0.0};
-	set_from_axis_and_angle(*quaternion, axis, deg_to_rad(10*time));
-	rotationMatrix:Matrix4;
-	identity(*rotationMatrix);
-	rotationMatrix = rotate(rotationMatrix, *quaternion);
+	// quaternion :Quaternion;
+	// axis:=Vector3.{x=0.0, y=1.0, z=0.0};
+	// set_from_axis_and_angle(*quaternion, axis, deg_to_rad(50*time));
+	// rotationMatrix:Matrix4;
+	// identity(*rotationMatrix);
+	// rotationMatrix = rotate(rotationMatrix, *quaternion);
 	
-	// translation
-	translateMatrix :Matrix4;
-	identity(*translateMatrix);
-	translate(*translateMatrix, .{x=0.0, y=0.0, z=5.0});
+	// // translation
+	// translateMatrix :Matrix4;
+	// identity(*translateMatrix);
+	// translate(*translateMatrix, .{x=0.0, y=0.0, z=5.0});
 
-	// combine
-	transformMatrix := rotationMatrix * translateMatrix;
-	scene_data.camera_data[0].transformMatrix = transformMatrix;
+	// // combine
+	// transformMatrix := rotationMatrix * translateMatrix;
+	// scene_data.camera_data[0].transformMatrix = transformMatrix;
 }
 

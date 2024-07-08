@@ -73,10 +73,16 @@ create_surface :: (instance: wgpu.Instance, window: *SDL_Window, label := "Main 
 	return surface;
 }
 
-request_device :: (adapter: wgpu.Adapter) -> wgpu.Device {
+request_device :: (adapter: wgpu.Adapter, width:int, height:int) -> wgpu.Device {
 	device_descriptor: wgpu.DeviceDescriptor;
 	device: wgpu.Device;
 
+	// from https://eliemichel.github.io/LearnWebGPU/basic-3d-rendering/3d-meshes/depth-buffer.html
+	// device_descriptor.requiredLimits.limits.maxTextureDimension1D = xx height;
+	// device_descriptor.requiredLimits.limits.maxTextureDimension2D = xx width;
+	// device_descriptor.requiredLimits.limits.maxTextureArrayLayers = 1;
+
+	//
 	wgpu.AdapterRequestDevice(adapter, *device_descriptor, (status: wgpu.RequestDeviceStatus, device: wgpu.Device, message: *u8, user_data: *void) #c_call {
 		if status != .Success {
 			print_c("Status: %, Device: %, Message: %", status, device, to_string(message));
@@ -225,8 +231,16 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *wgpu.RenderPipelineD
 	pipeline_descriptor.layout = wgpu.DeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
 }
 
-update_pipeline_descriptor :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, shader: wgpu.ShaderModule, $vertex_buffer_layout_type: Type) {
-	preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
+update_pipeline_descriptor :: (
+	pipeline_descriptor: *wgpu.RenderPipelineDescriptor,
+	// surface: wgpu.Surface,
+	// adapter: wgpu.Adapter,
+	device: wgpu.Device,
+	shader: wgpu.ShaderModule,
+	vertex_buffer_layout: *wgpu.VertexBufferLayout,
+	fragment_state: *wgpu.FragmentState
+) {
+	// preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
 
 	// pipeline_descriptor: wgpu.RenderPipelineDescriptor;
 	pipeline_descriptor.label = "Render Pipeline";
@@ -241,17 +255,20 @@ update_pipeline_descriptor :: (pipeline_descriptor: *wgpu.RenderPipelineDescript
 	vertex_state.module = shader;
 	vertex_state.entryPoint = "vertex";
 	vertex_state.bufferCount = 1;
-	tmp_layout := wasm_make_vertex_layout(vertex_buffer_layout_type);
-	vertex_state.buffers = *Wasm_VertexBufferLayout_to_wgpu(tmp_layout);
+	// tmp_layout := wasm_make_vertex_layout(vertex_buffer_layout_type);
+	vertex_state.buffers = vertex_buffer_layout;//*Wasm_VertexBufferLayout_to_wgpu(tmp_layout);
 
 	pipeline_descriptor.vertex = vertex_state;
 
 	pipeline_descriptor.primitive = .{
 		topology=.TriangleList,
 		stripIndexFormat=.Undefined,
-		frontFace=.CCW,
+		// frontFace=.CCW,
 		cullMode=.None,
 	};
+	// primitive: {
+	// 		cullMode: "back",
+	// 	},
 
 	// pipeline_descriptor.multisample = .{
 	// 	count = 1,
@@ -259,7 +276,32 @@ update_pipeline_descriptor :: (pipeline_descriptor: *wgpu.RenderPipelineDescript
 	// 	alphaToCoverageEnabled = false,
 	// };
 
-	color_target_state: wgpu.ColorTargetState;
+	// color_target_state: wgpu.ColorTargetState;
+	// color_target_state.format = preferred_texture_format;
+	// color_target_state.blend = *(wgpu.BlendState.{ 
+	// 	color = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
+	// 	alpha = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
+	// });
+	// color_target_state.writeMask = xx wgpu.ColorWriteMask.All;
+
+	// fragment_state: wgpu.FragmentState;
+	// fragment_state.module = shader;
+	// fragment_state.entryPoint = "fragment";
+	// fragment_state.targetCount = 1;
+	// fragment_state.targets = *color_target_state;
+
+	pipeline_descriptor.fragment = fragment_state;
+
+	// pipeline_descriptor.depthStencil = null;
+
+}
+fragment_state_prepare :: (
+	fragment_state: *wgpu.FragmentState,
+	color_target_state: *wgpu.ColorTargetState,
+	shader: wgpu.ShaderModule,
+	preferred_texture_format:wgpu.TextureFormat
+){
+
 	color_target_state.format = preferred_texture_format;
 	color_target_state.blend = *(wgpu.BlendState.{ 
 		color = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
@@ -267,16 +309,37 @@ update_pipeline_descriptor :: (pipeline_descriptor: *wgpu.RenderPipelineDescript
 	});
 	color_target_state.writeMask = xx wgpu.ColorWriteMask.All;
 
-	fragment_state: wgpu.FragmentState;
 	fragment_state.module = shader;
 	fragment_state.entryPoint = "fragment";
 	fragment_state.targetCount = 1;
-	fragment_state.targets = *color_target_state;
-
-	pipeline_descriptor.fragment = *fragment_state;
-
-	pipeline_descriptor.depthStencil = null;
-
+	fragment_state.targets = color_target_state;
+}
+pipeline_descriptor_print :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor){
+	{
+		info := type_info(type_of(<<pipeline_descriptor));
+		log("pipeline contains the following members:");
+		for info.members {
+			log("%: % of type %", it_index, it.name, type_to_string(it.type));
+		}
+	}
+	// vertex
+	{
+		info := type_info(type_of((<<pipeline_descriptor).vertex));
+		log("vertex contains the following members:");
+		for info.members {
+			log("%: % of type %", it_index, it.name, type_to_string(it.type));
+		}
+	}
+	// vertex buffers
+	{
+		buffers := <<((<<pipeline_descriptor).vertex.buffers);
+		info := type_info(type_of(buffers));
+		log("vertex.buffers contains the following members:");
+		for info.members {
+			log("%: % of type %", it_index, it.name, type_to_string(it.type));
+		}
+		print("step mode: %\n", buffers.stepMode);	
+	}
 }
 
 create_swapchain :: (descriptor: *wgpu.SwapChainDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, width: int, height: int) -> wgpu.SwapChain {

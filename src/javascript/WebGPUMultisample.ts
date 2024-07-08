@@ -6,9 +6,9 @@ export interface MultiSampleTextureContainer {
 // const MULTISAMPLE_TEXTURE_CONTAINER:MultiSampleTextureContainer = {
 // 	texture:null
 // }
-const MULTISAMPLE_SAMPLES_COUNT = 4;
+export const MULTISAMPLE_SAMPLES_COUNT = 4;
 
-export function updatePipelineDescriptor(
+export function updatePipelineDescriptorMultisample(
 	pipelineDescriptor: GPURenderPipelineDescriptor,
 	multisample: boolean
 ) {
@@ -54,7 +54,7 @@ export function createMultiSampleTextureIfNeeded(
 	}
 }
 
-export function updateRenderPassDescription(
+export function updateRenderPassDescriptorMultisample(
 	colorAttachment: GPURenderPassColorAttachment,
 	context: GPUCanvasContext,
 	textureContainer: MultiSampleTextureContainer,

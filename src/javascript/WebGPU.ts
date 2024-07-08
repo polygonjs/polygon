@@ -7,10 +7,17 @@ import {
 	vertexArrayToBuffer,
 } from "./SceneData";
 import {
+	createDepthTextureIfNeeded,
+	depthInitRenderPassDescriptor,
+	DepthTextureContainer,
+	updatePipelineDescriptorDepth,
+	updateRenderPassDescriptorDepth,
+} from "./WebGPUDepth";
+import {
 	createMultiSampleTextureIfNeeded,
 	MultiSampleTextureContainer,
-	updatePipelineDescriptor,
-	updateRenderPassDescription,
+	updatePipelineDescriptorMultisample,
+	updateRenderPassDescriptorMultisample,
 } from "./WebGPUMultisample";
 import { webGPUListenToResize } from "./WebGPUResize";
 
@@ -75,8 +82,12 @@ export async function setupAndRenderWebGPU() {
 			module,
 			targets: [{ format: presentationFormat }],
 		},
+		primitive: {
+			cullMode: "back",
+		},
 	};
-	updatePipelineDescriptor(pipelineDescriptor, MSAA);
+	updatePipelineDescriptorMultisample(pipelineDescriptor, MSAA);
+	updatePipelineDescriptorDepth(pipelineDescriptor);
 	const pipeline = device.createRenderPipeline(pipelineDescriptor);
 
 	const colorAttachment: GPURenderPassColorAttachment = {
@@ -90,6 +101,7 @@ export async function setupAndRenderWebGPU() {
 		label: "our basic canvas renderPass",
 		colorAttachments: [colorAttachment],
 	};
+	depthInitRenderPassDescriptor(renderPassDescriptor);
 
 	// TODO: why min size of 16?
 	const objectUniformBufferSize = Math.max(
@@ -132,6 +144,9 @@ export async function setupAndRenderWebGPU() {
 	let multisampleTextureContainer: MultiSampleTextureContainer = {
 		texture: null,
 	};
+	let depthTextureContainer: DepthTextureContainer = {
+		texture: null,
+	};
 
 	// window.offset = 0;
 	const clockData = clockInit();
@@ -168,15 +183,25 @@ export async function setupAndRenderWebGPU() {
 			context,
 			multisampleTextureContainer
 		);
+		createDepthTextureIfNeeded(
+			device,
+			context,
+			depthTextureContainer,
+			multisampleTextureContainer
+		);
 		// Get the current texture from the canvas context and
 		// set it as the texture to render to.
 		// const colorAttachment:GPURenderPassColorAttachment = renderPassDescriptor.colorAttachments[0];
 		// colorAttachment.view = context.getCurrentTexture().createView();
-		updateRenderPassDescription(
+		updateRenderPassDescriptorMultisample(
 			colorAttachment,
 			context,
 			multisampleTextureContainer,
 			MSAA
+		);
+		updateRenderPassDescriptorDepth(
+			renderPassDescriptor,
+			depthTextureContainer
 		);
 
 		// make a command encoder to start encoding commands

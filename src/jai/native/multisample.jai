@@ -16,38 +16,45 @@ update_pipeline_descriptor_multisample :: (pipeline_descriptor: *wgpu.RenderPipe
 	}
 }
 
-create_multi_sample_texture_if_needed :: (device: wgpu.Device, swap_chain_descriptor: *wgpu.SwapChainDescriptor ) -> wgpu.Texture {
+create_multi_sample_texture_if_needed :: (
+	device: wgpu.Device,
+	swap_chain_descriptor: *wgpu.SwapChainDescriptor,
+	texture_descriptor: *wgpu.TextureDescriptor,
+	multisample: bool
+) -> wgpu.Texture {
 
-	texture_descriptor := wgpu.TextureDescriptor.{
-		size = .{
-			width = swap_chain_descriptor.width,
-			height = swap_chain_descriptor.height,
-			depthOrArrayLayers = 1
-		},
-		sampleCount = MULTISAMPLE_SAMPLES_COUNT,
-		format = swap_chain_descriptor.format,
-		usage = xx wgpu.TextureUsage.RenderAttachment,
-		dimension = wgpu.TextureDimension._2D,
-		mipLevelCount = 1
+	texture_descriptor.size = .{
+		width = swap_chain_descriptor.width,
+		height = swap_chain_descriptor.height,
+		depthOrArrayLayers = 1
 	};
-	texture := wgpu.DeviceCreateTexture(device, *texture_descriptor);
+	texture_descriptor.sampleCount = MULTISAMPLE_SAMPLES_COUNT;
+	texture_descriptor.format = swap_chain_descriptor.format;
+	texture_descriptor.usage = xx wgpu.TextureUsage.RenderAttachment;
+	texture_descriptor.dimension = wgpu.TextureDimension._2D;
+	texture_descriptor.mipLevelCount = 1;
+	texture := wgpu.DeviceCreateTexture(device, texture_descriptor);
 
 	return texture;
 }
 
-multisample_texture_view_descriptor := wgpu.TextureViewDescriptor.{
-	mipLevelCount = 1,
-	arrayLayerCount = 1,
-};
 
-update_render_pass_description :: (
+update_render_pass_descriptor_multisample :: (
 	colorAttachment: *wgpu.RenderPassColorAttachment,
 	swap_chain_descriptor: *wgpu.SwapChainDescriptor,
 	current_view: *wgpu.TextureView,
 	texture: *wgpu.Texture,
 	multisample: bool
-){
+) #expand {
 	if( multisample == true){
+		// if(colorAttachment.view){
+		// 	wgpu.TextureViewRelease((<<colorAttachment).view);
+		// }
+		multisample_texture_view_descriptor := wgpu.TextureViewDescriptor.{
+			mipLevelCount = 1,
+			arrayLayerCount = 1,
+		};
+		
 		multisample_texture_view_descriptor.format = swap_chain_descriptor.format;
 		texture_view := wgpu.TextureCreateView(<<texture, *multisample_texture_view_descriptor);
 		colorAttachment.view = texture_view;
