@@ -8,8 +8,9 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
+		"optimize_wasm": "wasm-opt -Oz --dce --strip-debug public/polygon-next.wasm -o public/polygon-next.wasm",
 		"jai_dev": "jai src/jai/build.jai",
-		"jai_release": "jai src/jai/build.jai -release"
+		"jai_release": "jai src/jai/build.jai -release && yarn optimize_wasm"
 	},
 	"devDependencies": {
 		"@types/node": "^20.14.9",
