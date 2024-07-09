@@ -340,6 +340,16 @@ pipeline_descriptor_print :: (pipeline_descriptor: *wgpu.RenderPipelineDescripto
 		}
 		print("step mode: %\n", buffers.stepMode);	
 	}
+	// multisample
+	{
+		multisample := ((<<pipeline_descriptor).multisample);
+		info := type_info(type_of(multisample));
+		log("multisample contains the following members:");
+		for info.members {
+			log("%: % of type %", it_index, it.name, type_to_string(it.type));
+		}
+		print("multisample.count: %\n", multisample.count);	
+	}
 }
 
 create_swapchain :: (descriptor: *wgpu.SwapChainDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, width: int, height: int) -> wgpu.SwapChain {

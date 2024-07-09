@@ -38,27 +38,26 @@ create_multi_sample_texture_if_needed :: (
 	return texture;
 }
 
-
+multisample_texture_view_descriptor := wgpu.TextureViewDescriptor.{
+	mipLevelCount = 1,
+	arrayLayerCount = 1,
+};
 update_render_pass_descriptor_multisample :: (
 	colorAttachment: *wgpu.RenderPassColorAttachment,
 	swap_chain_descriptor: *wgpu.SwapChainDescriptor,
 	current_view: *wgpu.TextureView,
-	texture: *wgpu.Texture,
+	multisample_texture: *wgpu.Texture,
 	multisample: bool
-) #expand {
+) -> wgpu.TextureView #expand {
 	if( multisample == true){
 		// if(colorAttachment.view){
 		// 	wgpu.TextureViewRelease((<<colorAttachment).view);
 		// }
-		multisample_texture_view_descriptor := wgpu.TextureViewDescriptor.{
-			mipLevelCount = 1,
-			arrayLayerCount = 1,
-		};
-		
 		multisample_texture_view_descriptor.format = swap_chain_descriptor.format;
-		texture_view := wgpu.TextureCreateView(<<texture, *multisample_texture_view_descriptor);
+		texture_view := wgpu.TextureCreateView(<<multisample_texture, *multisample_texture_view_descriptor);
 		colorAttachment.view = texture_view;
 		colorAttachment.resolveTarget = <<current_view;
+		return texture_view;
 	} else {
 		colorAttachment.view = <<current_view;
 	}

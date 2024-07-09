@@ -92,7 +92,7 @@ export async function setupAndRenderWebGPU() {
 
 	const colorAttachment: GPURenderPassColorAttachment = {
 		view: context.getCurrentTexture().createView(), //null as any, //<- to be filled out when we render
-		clearValue: [0.3, 0.3, 0.3, 1],
+		clearValue: [0.0, 0.0, 0.0, 1],
 		loadOp: "clear",
 		storeOp: "store",
 	};

@@ -80,22 +80,12 @@ main :: () {
 	vertex_buffer_layout := Wasm_VertexBufferLayout_to_wgpu(wasm_vertex_layout_layout);
 	preferred_texture_format :wgpu.TextureFormat= wgpu.SurfaceGetPreferredFormat(surface, adapter);
 	fragment_state_prepare(*fragment_state, *color_target_state, shader, preferred_texture_format);
-	update_pipeline_descriptor(
-		*pipeline_descriptor,
-		// surface,
-		// adapter,
-		device,
-		shader,
-		*vertex_buffer_layout,
-		*fragment_state
-	);
+	update_pipeline_descriptor( *pipeline_descriptor, device, shader, *vertex_buffer_layout, *fragment_state );
 	update_pipeline_descriptor_multisample(*pipeline_descriptor, MSAA);
 	depth_stencil_state: wgpu.DepthStencilState;
 	update_pipeline_descriptor_depth(*pipeline_descriptor, *depth_stencil_state, DEPTH);
-	pipeline_descriptor_print(*pipeline_descriptor);
-	print("creating pipeline...\n");
+	// pipeline_descriptor_print(*pipeline_descriptor);
 	pipeline := wgpu.DeviceCreateRenderPipeline(device, *pipeline_descriptor);
-	print("pipeline created\n");
 	assert(pipeline != null, "Pipeline is not created correctly");
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(device, queue, SCENE_DATA.vertices);
@@ -158,18 +148,18 @@ main :: () {
 		);
 
 		colorAttachment := wgpu.RenderPassColorAttachment.{
-			loadOp = wgpu.LoadOp.Clear,
+			loadOp = wgpu.LoadOp.Load,
 			storeOp = wgpu.StoreOp.Store,
 			clearValue = wgpu.Color.{0.0, 0.0, 0.0, 1.0},
 		};
 
-		colorAttachment.view = current_view;
-		update_render_pass_descriptor_multisample(*colorAttachment,*swap_chain_descriptor, *current_view, *multisample_texture, MSAA);
+		//colorAttachment.view = current_view;
+		texture_view_multisample := update_render_pass_descriptor_multisample(*colorAttachment, *swap_chain_descriptor, *current_view, *multisample_texture, MSAA);
 
 		render_pass_descriptor := wgpu.RenderPassDescriptor.{ label = "Main Render Pass" };
 		render_pass_descriptor.colorAttachmentCount = 1;
 		render_pass_descriptor.colorAttachments = *colorAttachment;
-		update_render_pass_descriptor_depth(*render_pass_descriptor, *depth_texture, DEPTH);
+		depth_texture_view := update_render_pass_descriptor_depth(*render_pass_descriptor, *depth_texture, DEPTH);
 		render_pass := wgpu.CommandEncoderBeginRenderPass(cmd_encoder, *render_pass_descriptor);
 
 		//
@@ -184,9 +174,11 @@ main :: () {
 		wgpu.RenderPassEncoderSetVertexBuffer(render_pass, 0, vertex_buffer, 0, vertex_buffer_size);
 		wgpu.RenderPassEncoderSetIndexBuffer(render_pass, index_buffer, wgpu.IndexFormat.Uint32, 0, index_buffer_size);
 
-		wgpu.RenderPassEncoderDrawIndexed(render_pass, cast(u32) SCENE_DATA.indices.count, 1, 0, 0, 0);
+		wgpu.RenderPassEncoderDrawIndexed(render_pass, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
 		wgpu.RenderPassEncoderEnd(render_pass);
 		wgpu.TextureViewRelease(current_view);
+		if( texture_view_multisample ) wgpu.TextureViewRelease(texture_view_multisample);
+		if( depth_texture_view ) wgpu.TextureViewRelease(depth_texture_view);
 
 		cmd_buffer := wgpu.CommandEncoderFinish(cmd_encoder, *(wgpu.CommandBufferDescriptor.{label = "Main Command Buffer"}));
 

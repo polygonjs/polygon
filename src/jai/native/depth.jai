@@ -55,7 +55,6 @@ create_depth_texture_if_needed :: (
 ) -> wgpu.Texture {
 
 	sampleCount :u32= xx (ifx multisample then MULTISAMPLE_SAMPLES_COUNT else 1);
-	print("sampleCount:%\n", sampleCount);
 	texture_descriptor := wgpu.TextureDescriptor.{
 		size = .{
 			width = swap_chain_descriptor.width,
@@ -86,7 +85,7 @@ update_render_pass_descriptor_depth :: (
 	depth:bool
 	// we need #expand here, to ensure that the pointer to depth_texture_stencil_attachment
 	// remains in the caller stack
-) #expand {
+) -> wgpu.TextureView #expand {
 	// if(render_pass_descriptor.depthStencilAttachment.view){
 	// 	wgpu.TextureViewRelease(render_pass_descriptor.depthStencilAttachment.view);
 	// }
@@ -94,7 +93,6 @@ update_render_pass_descriptor_depth :: (
 	if(depth){
 		
 		texture_view := wgpu.TextureCreateView(<<texture, *depth_texture_view_descriptor);
-		print("A\n");
 		depth_texture_stencil_attachment := wgpu.RenderPassDepthStencilAttachment.{
 			view = texture_view,
 			depthClearValue = 1.0,
@@ -106,9 +104,8 @@ update_render_pass_descriptor_depth :: (
 			stencilStoreOp = wgpu.StoreOp.Store,
 			stencilReadOnly = true,
 		};
-		print("B\n");
 		render_pass_descriptor.depthStencilAttachment = *depth_texture_stencil_attachment;
-		print("C\n");
+		return texture_view;
 	} else {
 		render_pass_descriptor.depthStencilAttachment = null;
 	}
