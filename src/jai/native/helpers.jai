@@ -216,7 +216,7 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *wgpu.RenderPipelineD
 		bind_group_layout_entries := NewArray(1, wgpu.BindGroupLayoutEntry);
 		bind_group_layout_entries[0] = wgpu.BindGroupLayoutEntry.{
 			binding = 0,
-			visibility = xx wgpu.ShaderStage.Vertex,
+			visibility = xx wgpu.ShaderStage.Vertex|wgpu.ShaderStage.Fragment,
 			buffer = .{ type = wgpu.BufferBindingType.Uniform },
 		};
 		bind_group_layouts[1] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{

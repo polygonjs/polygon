@@ -6,14 +6,16 @@ struct VertexInput {
 
 struct VertexOutput {
 	@builtin(position) clip_position: vec4<f32>,
-	@location(0) color: vec3<f32>,
-	@location(1) uv: vec2<f32>,
+	@location(0) worldPos: vec3<f32>,
+	@location(1) color: vec3<f32>,
+	@location(2) uv: vec2<f32>,
 };
 
 struct ObjectUniforms {
 	transformMatrix: mat4x4f,
 };
 struct CameraUniforms {
+	worldPos: vec4<f32>,
 	transformMatrixInverse: mat4x4f,
 	projectionMatrix: mat4x4f,
 };
@@ -37,6 +39,7 @@ fn vertex(model: VertexInput) -> VertexOutput {
 	var finalMatrix = camera.projectionMatrix * modelViewMatrix;
 	out.clip_position = finalMatrix * mvPosition;
 
+	out.worldPos = (object.transformMatrix * mvPosition).xyz;
 	out.color = model.color;
 	out.uv = model.uv;
 	return out;
@@ -44,6 +47,7 @@ fn vertex(model: VertexInput) -> VertexOutput {
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-	return vec4<f32>(in.uv.x, in.uv.y, 0.0, 1.0);
+	// return vec4<f32>(in.uv.x, in.uv.y, 0.0, 1.0);
 	// return vec4<f32>(in.color, 1.0);
+	return vec4<f32>(abs(in.worldPos - camera.worldPos.xyz), 1.0);
 }

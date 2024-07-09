@@ -99,10 +99,10 @@ set_webgpu_vertex_layout :: (buffer: []VertexLayoutBuffer) {
 }
 
 set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
-	set_webgpu_object_uniforms_js(16, object_uniforms.data, size_of(float));
+	set_webgpu_object_uniforms_js(size_of(ObjectUniforms)/size_of(float), object_uniforms.data, size_of(float));
 }
 set_webgpu_camera_uniforms_data :: (camera_uniforms: [1]CameraUniforms) {
-	set_webgpu_camera_uniforms_js(16*2, camera_uniforms.data, size_of(float));
+	set_webgpu_camera_uniforms_js(size_of(CameraUniforms)/size_of(float), camera_uniforms.data, size_of(float));
 }
 set_webgpu_orbit_controls_data :: (orbitControls: *OrbitControls) {
 	set_webgpu_orbit_controls_js(size_of(OrbitControls), orbitControls, size_of(float));

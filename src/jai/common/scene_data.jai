@@ -5,6 +5,7 @@ Vertex :: struct {
 	uv: Vector2;
 }
 VERTEX_FLOATS_COUNT :: 3 + 3 + 2;
+Time :: float32;
 VertexIndex :: u32;
 VertexLayoutBuffer :: u8;
 Matrix4x4Buffer :: [16]float;
@@ -21,11 +22,14 @@ CameraData :: struct {
 	projectionMatrix: Matrix4;
 };
 CameraUniforms :: struct {
+	time:Vector4;
+	worldPos: Vector4; // if I give a Vector3, there seems some padding or alignment issue, as this crashes
 	transformMatrixInverse: Matrix4x4Buffer;
 	projectionMatrix: Matrix4x4Buffer;
 };
 
 SceneData :: struct {
+	time: Time;
 	// object
 	vertices: [..]Vertex;
 	indices: [..]VertexIndex;
@@ -150,7 +154,7 @@ create_camera_uniforms :: (camera_data: *[1]CameraData)-> [1]CameraUniforms {
 	camera_uniforms : [1]CameraUniforms;
 	// matrix4x4_to_buffer(*transformMatrixInverse, *uniforms[0].transformMatrixInverse);
 	// matrix4x4_to_buffer(*transposedMatrix, *uniforms[0].projectionMatrix);
-	update_camera_uniforms(camera_data, *camera_uniforms);
+	update_camera_uniforms(camera_data, *camera_uniforms, 0.);
 
 	return camera_uniforms;
 }
@@ -165,13 +169,18 @@ create_scene_data :: (aspect:float32)-> SceneData {
 }
 update_scene_data_uniforms :: (scene_data: *SceneData) {
 	update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
-	update_camera_uniforms(*scene_data.camera_data, *scene_data.camera_uniforms);
+	update_camera_uniforms(*scene_data.camera_data, *scene_data.camera_uniforms, scene_data.time);
 }
 update_object_uniforms :: (object_data: *[1]ObjectData, object_uniforms: *[1]ObjectUniforms) {
 	transposedMatrix := transpose((<<object_data)[0].transformMatrix);
 	matrix4x4_to_buffer(*transposedMatrix, *((<<object_uniforms)[0].transformMatrix));
 }
-update_camera_uniforms :: (camera_data: *[1]CameraData, camera_uniforms: *[1]CameraUniforms) {
+update_camera_uniforms :: (camera_data: *[1]CameraData, camera_uniforms: *[1]CameraUniforms, time: Time) {
+	(<<camera_uniforms)[0].time.x = time;
+	(<<camera_uniforms)[0].worldPos.x = (<<camera_data)[0].transformMatrix._14;
+	(<<camera_uniforms)[0].worldPos.y = (<<camera_data)[0].transformMatrix._24;
+	(<<camera_uniforms)[0].worldPos.z = (<<camera_data)[0].transformMatrix._34;
+
 	transformMatrixInverse := inverse(transpose((<<camera_data)[0].transformMatrix));
 	projectionMatrix := transpose((<<camera_data)[0].projectionMatrix);
 	matrix4x4_to_buffer(*transformMatrixInverse, *((<<camera_uniforms)[0].transformMatrixInverse));
@@ -190,7 +199,8 @@ update_camera_uniforms :: (camera_data: *[1]CameraData, camera_uniforms: *[1]Cam
 // 	return camera_data;
 // }
 
-update_scene_data :: (scene_data: *SceneData, time:float) {
+update_scene_data :: (scene_data: *SceneData, time:Time) {
+	scene_data.time = time;
 	// scene_data.vertices[0].position.y = 0.5 + 0.2*sin(time);
 	// scene_data.object_uniforms[0].translate.x = sin(time);
 

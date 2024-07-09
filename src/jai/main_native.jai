@@ -32,6 +32,7 @@ WINDOW_WIDTH  :: 720;
 WINDOW_HEIGHT :: 720;
 MSAA :: true;
 DEPTH :: true;
+BACKGROUND_COLOR :: wgpu.Color.{0.0, 0.0, 0.2, 1.0};
 
 wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 	print_c("[WGPU :: %]: %\n", level, to_string(msg));
@@ -151,7 +152,7 @@ main :: () {
 		colorAttachment := wgpu.RenderPassColorAttachment.{
 			loadOp = wgpu.LoadOp.Clear,
 			storeOp = wgpu.StoreOp.Store,
-			clearValue = wgpu.Color.{0.0, 0.0, 0.0, 1.0},
+			clearValue = BACKGROUND_COLOR,
 		};
 
 		//colorAttachment.view = current_view;
