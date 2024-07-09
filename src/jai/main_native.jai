@@ -148,7 +148,7 @@ main :: () {
 		);
 
 		colorAttachment := wgpu.RenderPassColorAttachment.{
-			loadOp = wgpu.LoadOp.Load,
+			loadOp = wgpu.LoadOp.Clear,
 			storeOp = wgpu.StoreOp.Store,
 			clearValue = wgpu.Color.{0.0, 0.0, 0.0, 1.0},
 		};
