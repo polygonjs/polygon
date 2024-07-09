@@ -48,18 +48,7 @@ matrix4x4_to_buffer :: (matrix: *Matrix4, buffer: *Matrix4x4Buffer) #expand {
 create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	vertices : [..]Vertex;
 
-	// array_add(*vertices, Vertex.{ position=.{-0.5, 0.0, 0.5}, color=.{1.0, 0.0, 0.0}, uv=.{0.0, 1.0}});
-	// array_add(*vertices, Vertex.{ position=.{-0.5, 0.0, -0.5}, color=.{0.0, 1.0, 0.0}, uv=.{0.0, 0.0}});
-	// array_add(*vertices, Vertex.{ position=.{0.5, 0.0, -0.5}, color=.{0.0, 0.0, 1.0}, uv=.{1.0, 0.0}});
-	// array_add(*vertices, Vertex.{ position=.{0.5, 0.0, 0.5}, color=.{1.0, 0.0, 1.0}, uv=.{1.0, 1.0}});
-
-	// indices:[..]VertexIndex;
-	// array_add(*indices, 0);
-	// array_add(*indices, 1);
-	// array_add(*indices, 2);
-	// array_add(*indices, 0);
-	// array_add(*indices, 2);
-	// array_add(*indices, 3);
+	size :Vector3= .{3,1,3};
 
 	array_add(*vertices, Vertex.{ position=.{-0.5, -0.5, 0.5}, color=.{1.0, 0.0, 0.0}, uv=.{0.0, 0.0}});
 	array_add(*vertices, Vertex.{ position=.{0.5, -0.5, 0.5}, color=.{0.0, 1.0, 0.0}, uv=.{1.0, 0.0}});
@@ -70,6 +59,10 @@ create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	array_add(*vertices, Vertex.{ position=.{0.5, -0.5, -0.5}, color=.{0.0, 1.0, 1.0}, uv=.{1.0, 0.0}});
 	array_add(*vertices, Vertex.{ position=.{0.5, 0.5, -0.5}, color=.{1.0, 1.0, 1.0}, uv=.{1.0, 1.0}});
 	array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, -0.5}, color=.{0.5, 0.5, 0.5}, uv=.{0.0, 1.0}});
+
+	for vertex: vertices {
+		vertices[it_index].position *= size;
+	}
 
 
 	indices:[..]VertexIndex;
