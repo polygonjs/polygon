@@ -42,7 +42,7 @@ main :: () {
 	// }
 
 	// Lets try something fancier
-	context.logger = dom_logger;
+	// context.logger = dom_logger;
 	// log("Logging to the DOM via Jai.");
 	// log_error("We can also log errors.");
 
@@ -81,10 +81,10 @@ main :: () {
 // 	}
 // }
 
-dom_logger :: (message: string, data: *void, info: Log_Info) {
-	is_error := (info.common_flags & .ERROR) != 0;
-	wasm_log_dom(message.count, message.data, is_error);
-}
+// dom_logger :: (message: string, data: *void, info: Log_Info) {
+// 	is_error := (info.common_flags & .ERROR) != 0;
+// 	wasm_log_dom(message.count, message.data, is_error);
+// }
 set_webgpu_shader :: (message: string) {
 	set_webgpu_shader_js(message.count, message.data);
 }

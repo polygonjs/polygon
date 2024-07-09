@@ -39,6 +39,7 @@ DONE
 		options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
 		options.llvm_options.enable_split_modules   = false;
 		options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
+		options.dead_code_elimination				= .MODULES_ONLY;
 
 		import_paths: [..]string;
 		// Add our own modules folder first so that we can override modules with our own version, if necessary.

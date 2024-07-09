@@ -8,7 +8,8 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
-		"jai_dev": "jai src/jai/build.jai"
+		"jai_dev": "jai src/jai/build.jai",
+		"jai_release": "jai src/jai/build.jai -release"
 	},
 	"devDependencies": {
 		"@types/node": "^20.14.9",

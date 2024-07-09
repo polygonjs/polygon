@@ -75,7 +75,7 @@ export function orbitControlsAddEvents(
 		orbitControlsToBuffer(sceneData);
 	}
 	function onMousewheel(event: WheelEvent) {
-		orbitControls.radius -= event.deltaY * 0.1;
+		orbitControls.radius += event.deltaY * 0.01;
 		if (orbitControls.radius < 1.0) orbitControls.radius = 1.0;
 		orbitControlsToBuffer(sceneData);
 	}
