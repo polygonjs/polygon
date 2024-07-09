@@ -18,12 +18,13 @@
 #load "common/wgpu_mock.jai";
 wgpu :: #import "wgpu";
 
+#load "common/math_helper.jai";
+#load "common/orbit_controls.jai";
+#load "common/scene_data.jai";
 #load "native/helpers.jai";
 #load "native/uniforms_helpers.jai";
 #load "native/depth.jai";
 #load "native/multisample.jai";
-#load "common/math_helper.jai";
-#load "common/scene_data.jai";
 #load "native/shaders.jai";
 #load "native/orbit_controls.jai";
 

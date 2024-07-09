@@ -1,11 +1,13 @@
 #import "Basic";
 #import "Math";
 #load "common/math_helper.jai";
-#load "common/wgpu_mock.jai";
+#load "common/orbit_controls.jai";
 #load "common/scene_data.jai";
+#load "common/wgpu_mock.jai";
 #placeholder SHADER;
 
 SCENE_DATA :SceneData;
+orbit_controls :OrbitControls;
 
 main :: () {
 	// print("Hello Jai 24!\n");
@@ -55,6 +57,7 @@ main :: () {
 	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
 	set_webgpu_camera_uniforms_data(SCENE_DATA.camera_uniforms);
 	set_webgpu_shader(SHADER);
+	set_webgpu_orbit_controls_data(*orbit_controls);
 	// time:float=0;
 	// while (true) {
     //     time += 0.00001;
@@ -101,6 +104,9 @@ set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
 set_webgpu_camera_uniforms_data :: (camera_uniforms: [1]CameraUniforms) {
 	set_webgpu_camera_uniforms_js(16*2, camera_uniforms.data, size_of(float));
 }
+set_webgpu_orbit_controls_data :: (orbitControls: *OrbitControls) {
+	set_webgpu_orbit_controls_js(size_of(OrbitControls), orbitControls, size_of(float));
+}
 
 
 // We need to declare all the JS functions that will be passed to our WebAssembly
@@ -112,6 +118,7 @@ set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #f
 set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
 set_webgpu_object_uniforms_js :: (count: s64, data: *ObjectUniforms, element_size:u8) #foreign;
 set_webgpu_camera_uniforms_js :: (count: s64, data: *CameraUniforms, element_size:u8) #foreign;
+set_webgpu_orbit_controls_js :: (count: s64, data: *OrbitControls, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 
@@ -119,6 +126,7 @@ set_wasm_time :: (new_time: s64) {
 	time:float = new_time / 1000.0;
 
 	update_scene_data(*SCENE_DATA, time);
+	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 
 	update_scene_data_uniforms(*SCENE_DATA);
 	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);

@@ -1,4 +1,13 @@
 export type SetTimeFunction = (uselessArg: BigInt, time: BigInt) => void;
+export interface Vector2 {
+	x: number;
+	y: number;
+}
+export interface Vector3 {
+	x: number;
+	y: number;
+	z: number;
+}
 
 declare global {
 	interface Window {

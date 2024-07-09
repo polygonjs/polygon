@@ -1,5 +1,6 @@
 import { clockInit, clockTick } from "./Clock";
 import { SHADERS } from "./Common";
+import { orbitControlsAddEvents } from "./OrbitControls";
 import {
 	indexArrayToBuffer,
 	SCENE_DATA,
@@ -23,19 +24,24 @@ import { webGPUListenToResize } from "./WebGPUResize";
 
 const MSAA: boolean = true;
 
-export async function setupAndRenderWebGPU() {
+export async function requestWebGPU() {
 	const adapter = await navigator.gpu?.requestAdapter();
 	const device = await adapter?.requestDevice();
 	if (!device) {
 		alert("need a browser that supports WebGPU");
 		return;
 	}
+	return device;
+}
 
+export async function setupAndRenderWebGPU(device: GPUDevice) {
 	const domElement = document.getElementById("app") as HTMLElement;
 	if (!domElement) {
 		alert("no dom element found with id app");
 		return;
 	}
+
+	orbitControlsAddEvents(domElement, SCENE_DATA);
 	const canvas = document.createElement("canvas");
 	const rect = domElement.getBoundingClientRect();
 	canvas.width = rect.width;

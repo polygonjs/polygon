@@ -1,11 +1,17 @@
+import { OrbitControls, orbitControlsCreate } from "./OrbitControls";
+
 export const VERTEX_FLOATS_COUNT = 3 + 3 + 2;
 export const FLOAT_SIZE = 4;
-interface SceneData {
+export interface SceneData {
 	vertexBuffer: Float32Array;
 	indexBuffer: Uint32Array;
 	vertexLayout: GPUVertexBufferLayout;
 	objectUniformBuffer: Float32Array;
+	//
 	cameraUniformBuffer: Float32Array;
+	//
+	orbitControlsBuffer: Float32Array;
+	orbitControls: OrbitControls;
 }
 export const SCENE_DATA: SceneData = {
 	vertexBuffer: new Float32Array(0),
@@ -15,7 +21,11 @@ export const SCENE_DATA: SceneData = {
 		attributes: [],
 	},
 	objectUniformBuffer: new Float32Array(0),
+	//
 	cameraUniformBuffer: new Float32Array(0),
+	//
+	orbitControlsBuffer: new Float32Array(0),
+	orbitControls: orbitControlsCreate(),
 };
 
 function createFormatByValue() {

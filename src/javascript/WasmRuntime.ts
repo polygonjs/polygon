@@ -5,6 +5,7 @@ import {
 	SHADERS,
 } from "./Common";
 import { logGreenBg } from "./Logger";
+import { orbitControlsFromBuffer } from "./OrbitControls";
 import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./SceneData";
 
 const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
@@ -141,6 +142,24 @@ const exported_js_functions = {
 			return;
 		}
 		SCENE_DATA.cameraUniformBuffer = buffer;
+	},
+	set_webgpu_orbit_controls_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Float32Array
+		);
+		if (!buffer) {
+			console.error("set_webgpu_object_uniforms_js: No buffer");
+			return;
+		}
+		SCENE_DATA.orbitControlsBuffer = buffer;
+		orbitControlsFromBuffer(SCENE_DATA);
 	},
 	memcmp: (
 		str1Pointer: BigInt,

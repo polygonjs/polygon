@@ -1,11 +1,17 @@
 import "../css/style.css";
 import { loadWasm } from "./WasmRuntime";
-import { setupAndRenderWebGPU } from "./WebGPU";
+import { requestWebGPU, setupAndRenderWebGPU } from "./WebGPU";
 // @ts-ignore
 // import { debugMain } from "./debug";
 
 document.addEventListener("DOMContentLoaded", async () => {
-	await loadWasm();
-	setupAndRenderWebGPU();
+	const wasmPromise = loadWasm();
+	const webGPUPromise = requestWebGPU();
+	const results = await Promise.all([wasmPromise, webGPUPromise]);
+	const device = results[1];
+	if (!device) {
+		return;
+	}
+	setupAndRenderWebGPU(device);
 	// debugMain();
 });
