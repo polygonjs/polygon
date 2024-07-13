@@ -1,3 +1,24 @@
+WGPUContext :: struct {
+	instance: wgpu.Instance;
+	surface: wgpu.Surface;
+	adapter:wgpu.Adapter;
+	device: wgpu.Device ;
+	config: wgpu.SurfaceConfiguration;
+	surface_texture :wgpu.SurfaceTexture;
+	preferred_texture_format :wgpu.TextureFormat;
+	//
+	use_msaa: bool=true;
+	use_depth_buffer: bool=true;
+	bg_color :wgpu.Color =.{0.0, 0.0, 0.0, 1.0};
+	//
+	multisample_texture_descriptor : wgpu.TextureDescriptor;
+	multisample_texture: wgpu.Texture;
+	multisample_texture_view: *wgpu.TextureView;
+	//
+	depth_texture: wgpu.Texture;
+	depth_texture_view: *wgpu.TextureView;
+};
+
 print_c :: (format: string, args: ..Any, to_standard_error := false) #expand {
 	new_context: Context;
 	push_context new_context {
@@ -95,6 +116,65 @@ request_device :: (adapter: wgpu.Adapter, width:int, height:int) -> wgpu.Device 
 
 	return device;
 }
+webgpu_handle_resize :: (wgpu_context: *WGPUContext, width: u32, height: u32){
+	surface_configure(wgpu_context, width, height);
+}
+
+wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUContext {
+	wgpu_context:WGPUContext;
+
+	instance_desc: wgpu.InstanceDescriptor;
+	wgpu_context.instance = wgpu.CreateInstance(*instance_desc);
+	assert(wgpu_context.instance != null, "Instance is not created correctly");
+
+	wgpu_context.surface = create_surface(wgpu_context.instance, window);
+	assert(wgpu_context.surface != null, "Surface is not created correctly");
+
+	wgpu_context.adapter = request_adapter(wgpu_context.instance, wgpu_context.surface, powerPreference = .HighPerformance);
+	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
+
+	wgpu_context.device = request_device(wgpu_context.adapter, WINDOW_WIDTH, WINDOW_HEIGHT);
+	assert(wgpu_context.device != null, "Device is not created correctly");
+
+	// surface_configure(*wgpu_context, width, height);
+	surface_capabilities :wgpu.SurfaceCapabilities;
+	wgpu.SurfaceGetCapabilities(wgpu_context.surface, wgpu_context.adapter, *surface_capabilities);
+	print("init: %x%\n", width, height);
+	wgpu_context.config = wgpu.SurfaceConfiguration.{
+		device = wgpu_context.device,
+		usage = xx wgpu.TextureUsage.RenderAttachment,
+		format = surface_capabilities.formats[0],
+		presentMode = wgpu.PresentMode.Fifo,
+		alphaMode = surface_capabilities.alphaModes[0],
+		width = width,
+		height = height,
+	};
+	wgpu.SurfaceConfigure(wgpu_context.surface, *wgpu_context.config);
+
+	wgpu.DeviceSetUncapturedErrorCallback(wgpu_context.device, (type: wgpu.ErrorType, msg: *u8, user_data: *void) #c_call {
+		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
+	}, null);
+
+	return wgpu_context;
+}
+surface_configure :: (wgpu_context: *WGPUContext, width: u32, height: u32){
+	(<<wgpu_context).config.width = width;
+	(<<wgpu_context).config.height = height;
+	wgpu.SurfaceConfigure((<<wgpu_context).surface, *((<<wgpu_context).config));
+}
+surface_create_current_view :: (wgpu_context: *WGPUContext) -> wgpu.TextureView {
+	wgpu.SurfaceGetCurrentTexture((<<wgpu_context).surface, *((<<wgpu_context).surface_texture));
+		current_view_descriptor := wgpu.TextureViewDescriptor.{
+			format = (<<wgpu_context).preferred_texture_format,
+			dimension = wgpu.TextureViewDimension._2D,
+			aspect = wgpu.TextureAspect.All,
+			baseMipLevel = 0,
+			mipLevelCount = 1,
+			baseArrayLayer = 0,
+			arrayLayerCount = 1,
+		};
+	return wgpu.TextureCreateView((<<wgpu_context).surface_texture.texture, *current_view_descriptor);
+}
 
 create_shader :: (device: wgpu.Device, source: string, label := "Main shader") -> wgpu.ShaderModule {
 	wgslDescriptor: wgpu.ShaderModuleWGSLDescriptor;
@@ -108,89 +188,6 @@ create_shader :: (device: wgpu.Device, source: string, label := "Main shader") -
 
 	return wgpu.DeviceCreateShaderModule(device, *shaderModuleDescriptor);
 }
-
-// make_vertex_layout :: ($type: Type) -> wgpu.VertexBufferLayout {
-// 	info := type_info(type);
-
-// 	vertex_buffer_layout := wgpu.VertexBufferLayout.{
-// 		arrayStride=size_of(type),
-// 		stepMode=.Vertex,
-// 	};
-
-// 	vertex_attributes := NewArray(info.members.count, wgpu.VertexAttribute);
-
-// 	for info.members {
-// 		vertex_attribute: wgpu.VertexAttribute;
-
-// 		if it.type.type == {
-// 			case .BOOL;
-// 				vertex_attribute.format = .Sint32;
-
-// 			case .INTEGER;
-// 				int_type_info := cast(*Type_Info_Integer) it.type;
-
-// 				if int_type_info.signed {
-// 					vertex_attribute.format = .Sint32;
-// 				} else {
-// 					vertex_attribute.format = .Uint32;
-// 				}
-
-// 			case .FLOAT;
-// 				assert(it.type.runtime_size <= 4, "Only float32 is supported in Vertex Attribute Data.");
-// 				vertex_attribute.format = .Float32;
-
-// 			case .STRUCT;
-// 				struct_type_info := cast(*Type_Info_Struct) it.type;
-
-// 				if struct_type_info.name == {
-// 					case "Vector4";
-// 						vertex_attribute.format = .Float32x4;
-// 					case "Vector3";
-// 						vertex_attribute.format = .Float32x3;
-// 					case "Vector2";
-// 						vertex_attribute.format = .Float32x2;
-// 					case;   
-// 						assert(false, "Unsupported struct type. Only Vector2, Vector3, Vector4 are supported");
-// 				}
-
-// 		}
-
-// 		vertex_attribute.offset= xx it.offset_in_bytes;
-// 		vertex_attribute.shaderLocation= xx it_index;
-
-// 		vertex_attributes[it_index] = vertex_attribute;
-// 	}
-
-// 	vertex_buffer_layout.attributeCount = xx vertex_attributes.count;
-// 	vertex_buffer_layout.attributes = vertex_attributes.data;
-
-// 	return vertex_buffer_layout;
-// }
-
-// update_pipeline_descriptor_layout :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, device: wgpu.Device) {
-// 	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
-
-// 	bind_group_layout_entries := NewArray(2, wgpu.BindGroupLayoutEntry);
-// 	bind_group_layout_entries[0] = wgpu.BindGroupLayoutEntry.{
-// 		binding = 0,
-// 		visibility = xx wgpu.ShaderStage.Vertex,
-// 		buffer = .{ type = wgpu.BufferBindingType.Uniform },
-// 	};
-// 	bind_group_layout_entries[1] = wgpu.BindGroupLayoutEntry.{
-// 		binding = 1,
-// 		visibility = xx wgpu.ShaderStage.Vertex,
-// 		buffer = .{ type = wgpu.BufferBindingType.Uniform },
-// 	};
-// 	bind_group_layouts := NewArray(1, wgpu.BindGroupLayout);
-// 	bind_group_layouts[0] = wgpu.DeviceCreateBindGroupLayout(device, *(wgpu.BindGroupLayoutDescriptor.{
-// 		entryCount = xx bind_group_layout_entries.count,
-// 		entries = bind_group_layout_entries.data,
-// 	}));
-// 	pipeline_layout_descriptor.bindGroupLayoutCount = xx bind_group_layouts.count;
-// 	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
-
-// 	pipeline_descriptor.layout = wgpu.DeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
-// }
 
 update_pipeline_descriptor_layout :: (pipeline_descriptor: *wgpu.RenderPipelineDescriptor, device: wgpu.Device) {
 	pipeline_layout_descriptor: wgpu.PipelineLayoutDescriptor;
