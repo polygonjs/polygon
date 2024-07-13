@@ -11,7 +11,7 @@ request_adapter :: (instance: wgpu.Instance, surface: wgpu.Surface, powerPrefere
 	request_adapter_options := wgpu.RequestAdapterOptions.{
 		compatibleSurface = surface,
 		powerPreference = powerPreference,
-		forceFallbackAdapter = forceFallbackAdapter,
+		forceFallbackAdapter = xx forceFallbackAdapter,
 	};
 
 	wgpu.InstanceRequestAdapter(instance, *request_adapter_options, (status: wgpu.RequestAdapterStatus, adapter: wgpu.Adapter, message: *u8, user_data: *void) #c_call {
@@ -36,7 +36,7 @@ create_surface :: (instance: wgpu.Instance, window: *SDL_Window, label := "Main 
 
 		surface_desc_from_windows_hwnd: wgpu.SurfaceDescriptorFromWindowsHWND;
 		surface_desc_from_windows_hwnd.chain.sType = .SurfaceDescriptorFromWindowsHWND;
-		surface_desc_from_windows_hwnd.hwnd = sdl_info.info.win.window; 
+		surface_desc_from_windows_hwnd.hwnd = sdl_info.info.win.window;
 
 		surface_desc.nextInChain = xx *surface_desc_from_windows_hwnd;
 	}
@@ -352,18 +352,6 @@ pipeline_descriptor_print :: (pipeline_descriptor: *wgpu.RenderPipelineDescripto
 	}
 }
 
-create_swapchain :: (descriptor: *wgpu.SwapChainDescriptor, surface: wgpu.Surface, adapter: wgpu.Adapter, device: wgpu.Device, width: int, height: int) -> wgpu.SwapChain {
-	preferred_texture_format := wgpu.SurfaceGetPreferredFormat(surface, adapter);
-
-	descriptor.label = "Default Swapchain";
-	descriptor.usage = xx wgpu.TextureUsage.RenderAttachment;
-	descriptor.format = preferred_texture_format;
-	descriptor.width = xx width;
-	descriptor.height = xx height;
-	descriptor.presentMode = .Fifo;
-
-	return wgpu.DeviceCreateSwapChain(device, surface, descriptor);
-}
 
 vertex_array_to_buffer :: (device: wgpu.Device, queue: wgpu.Queue, vertices: []Vertex) -> wgpu.Buffer, u64 {
 	size := cast(u64) vertices.count * size_of(Vertex);

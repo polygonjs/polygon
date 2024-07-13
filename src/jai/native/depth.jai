@@ -16,7 +16,7 @@ stencil_face_state_set_default :: (stencil_face_state: *wgpu.StencilFaceState) {
 
 depth_stencil_state_set_default :: (depth_stencil_state: *wgpu.DepthStencilState) {
 	depth_stencil_state.format = wgpu.TextureFormat.Undefined;
-	depth_stencil_state.depthWriteEnabled = false;
+	depth_stencil_state.depthWriteEnabled = xx false;
 	depth_stencil_state.depthCompare = wgpu.CompareFunction.Always;
 	depth_stencil_state.stencilReadMask = 0xFFFFFFFF;
 	depth_stencil_state.stencilWriteMask = 0xFFFFFFFF;
@@ -30,7 +30,7 @@ depth_stencil_state_set_default :: (depth_stencil_state: *wgpu.DepthStencilState
 depth_stencil_state_prepare :: (depth_stencil_state: *wgpu.DepthStencilState) {
 	depth_stencil_state_set_default(depth_stencil_state);
 	depth_stencil_state.depthCompare = wgpu.CompareFunction.Less;
-	depth_stencil_state.depthWriteEnabled = true;
+	depth_stencil_state.depthWriteEnabled = xx true;
 	depth_stencil_state.format = DEPTH_TEXTURE_FORMAT;
 	depth_stencil_state.stencilReadMask = 0;
 	depth_stencil_state.stencilWriteMask = 0;
@@ -48,17 +48,19 @@ update_pipeline_descriptor_depth :: (pipeline_descriptor: *wgpu.RenderPipelineDe
 
 create_depth_texture_if_needed :: (
 	device: wgpu.Device,
-	swap_chain_descriptor: *wgpu.SwapChainDescriptor,
+	surface_texture: *wgpu.SurfaceTexture,
 	viewFormats:*wgpu.TextureFormat,
 	depth: bool,
 	multisample: bool
 ) -> wgpu.Texture {
 
+	width := wgpu.TextureGetWidth(surface_texture.texture);
+	height := wgpu.TextureGetHeight(surface_texture.texture);
 	sampleCount :u32= xx (ifx multisample then MULTISAMPLE_SAMPLES_COUNT else 1);
 	texture_descriptor := wgpu.TextureDescriptor.{
 		size = .{
-			width = swap_chain_descriptor.width,
-			height = swap_chain_descriptor.height,
+			width =width,
+			height = height,
 			depthOrArrayLayers = 1
 		},
 		sampleCount = sampleCount,
@@ -98,11 +100,11 @@ update_render_pass_descriptor_depth :: (
 			depthClearValue = 1.0,
 			depthLoadOp = wgpu.LoadOp.Clear, //"clear",
 			depthStoreOp = wgpu.StoreOp.Store, //"store",
-			depthReadOnly = false,
+			depthReadOnly = xx false,
 			stencilClearValue = 0,
 			stencilLoadOp = wgpu.LoadOp.Clear,
 			stencilStoreOp = wgpu.StoreOp.Store,
-			stencilReadOnly = true,
+			stencilReadOnly = xx true,
 		};
 		render_pass_descriptor.depthStencilAttachment = *depth_texture_stencil_attachment;
 		return texture_view;

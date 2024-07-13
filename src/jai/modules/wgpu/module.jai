@@ -1,5 +1,12 @@
-#load "native.jai";
-#load "helpers.jai";
+#if OS == .WINDOWS {
+	#load "windows.jai";
+} else #if OS == .LINUX {
+	#load "linux.jai";
+} else #if OS == .MACOS {
+	#load "mac.jai";
+} else {
+	assert(false);
+}
 
 #scope_module
 

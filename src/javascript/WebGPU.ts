@@ -27,10 +27,19 @@ const MSAA: boolean = true;
 export async function requestWebGPU() {
 	const adapter = await navigator.gpu?.requestAdapter();
 	const device = await adapter?.requestDevice();
-	if (!device) {
+	if (!(device && adapter)) {
 		alert("need a browser that supports WebGPU");
 		return;
 	}
+	// console.log("features", adapter.features.size);
+	// adapter.features.forEach((value, key) => {
+	// 	console.log(key, value);
+	// });
+	// const keys = Object.keys(device.limits);
+	// console.log("limits", device.limits, device.limits.__brand, keys);
+	// keys.forEach((key) => {
+	// 	console.log(key, (device.limits as any)[key]);
+	// });
 	return device;
 }
 
