@@ -31,7 +31,7 @@ wgpu :: #import "wgpu";
 
 WINDOW_WIDTH  :u32: 1280;
 WINDOW_HEIGHT :u32: 720;
-RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
+INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
 
 
 
@@ -42,7 +42,7 @@ wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
 
 main :: () {
 	SHADER :: #run create_shaders();
-	SCENE_DATA :SceneData= create_scene_data(RATIO);
+	SCENE_DATA :SceneData= create_scene_data(INIT_RATIO);
 	orbit_controls :OrbitControls;
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -104,6 +104,8 @@ main :: () {
 						new_height := event.window.data2;
 						if(new_width > 0 && new_height > 0){
 							webgpu_handle_resize(*wgpu_context, xx event.window.data1, xx event.window.data2);
+							SCENE_DATA.camera_aspect = (cast(float32) event.window.data1) / (cast(float32) event.window.data2);
+							update_camera_data_projection(*SCENE_DATA);
 						}
 					}
 				}

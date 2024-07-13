@@ -36,6 +36,10 @@ SceneData :: struct {
 	object_data: [1]ObjectData;
 	object_uniforms: [1]ObjectUniforms;
 	// camera
+	camera_aspect: float32;
+	camera_fov_in_degrees: float32 = 50.0;
+	camera_near: float32 = 0.1;
+	camera_far: float32 = 100.0;
 	camera_data: [1]CameraData;
 	camera_uniforms: [1]CameraUniforms;
 };
@@ -127,12 +131,24 @@ create_object_uniforms :: (object_data: *[1]ObjectData)-> [1]ObjectUniforms {
 	update_object_uniforms(object_data, *object_uniforms);
 	return object_uniforms;
 }
-create_camera_data :: (aspect: float32)-> [1]CameraData {
-	camera_data :[1]CameraData;
-	camera_data[0].projectionMatrix = make_projection_matrix(deg_to_rad(50), aspect, 0.1, 100);
+create_camera_data :: (scene_data:*SceneData)-> [1]CameraData {
+	camera_data: [1]CameraData;
+	// camera_data[0].projectionMatrix = make_projection_matrix(deg_to_rad(fov), aspect, 0.1, 100);
+	update_camera_data_projection(*(camera_data[0]), scene_data);
 	identity(*camera_data[0].transformMatrix);
 	translate(*camera_data[0].transformMatrix, .{x = 0.0, y = 0.0, z = 5.0});
 	return camera_data;
+}
+update_camera_data_projection :: (camera_data: *CameraData, scene_data: *SceneData) {
+	camera_data[0].projectionMatrix = make_projection_matrix(
+		deg_to_rad(scene_data.camera_fov_in_degrees),
+		scene_data.camera_aspect,
+		scene_data.camera_near,
+		scene_data.camera_far
+	);
+}
+update_camera_data_projection :: (scene_data: *SceneData){
+	update_camera_data_projection(*(scene_data.camera_data[0]), scene_data);
 }
 create_camera_uniforms :: (camera_data: *[1]CameraData)-> [1]CameraUniforms {
 	// uniforms[0].projection = make_frustum_matrix(-1,1,aspect,-aspect,1,100);
@@ -156,10 +172,13 @@ create_scene_data :: (aspect:float32)-> SceneData {
 	scene_data.vertices, scene_data.indices = create_vertices();
 	scene_data.object_data = create_object_data();
 	scene_data.object_uniforms = create_object_uniforms(*scene_data.object_data);
-	scene_data.camera_data = create_camera_data(aspect);
+	scene_data.camera_aspect = aspect;
+	// scene_data.camera_fov_in_degrees = fov_in_degrees;
+	scene_data.camera_data = create_camera_data(*scene_data);
 	scene_data.camera_uniforms = create_camera_uniforms(*scene_data.camera_data);
 	return scene_data;
 }
+
 update_scene_data_uniforms :: (scene_data: *SceneData) {
 	update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
 	update_camera_uniforms(*scene_data.camera_data, *scene_data.camera_uniforms, scene_data.time);

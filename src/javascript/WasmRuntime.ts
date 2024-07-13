@@ -1,7 +1,7 @@
 import {
 	AllocatedMemory,
 	AllocatedMemoryContainer,
-	SetTimeFunction,
+	UpdateWasmFunction,
 	SHADERS,
 } from "./Common";
 import { logGreenBg } from "./Logger";
@@ -221,19 +221,19 @@ export function loadWasm(): Promise<void> {
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
 			mainFunc(0, BigInt(0));
 
-			const getSetTimeFunction = () => {
+			const getUpdateWasmFunction = () => {
 				const methodNames = Object.keys(obj.instance.exports);
 				for (const methodName of methodNames) {
-					if (methodName.startsWith("set_wasm_time")) {
+					if (methodName.startsWith("update_wasm")) {
 						return obj.instance.exports[
 							methodName
-						] as SetTimeFunction;
+						] as UpdateWasmFunction;
 					}
 				}
 			};
-			const setTimeFunc = getSetTimeFunction();
-			if (setTimeFunc) {
-				window.set_wasm_time = setTimeFunc;
+			const updateWasmFunc = getUpdateWasmFunction();
+			if (updateWasmFunc) {
+				window.update_wasm = updateWasmFunc;
 			}
 			resolve();
 		});

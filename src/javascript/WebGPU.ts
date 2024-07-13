@@ -179,7 +179,12 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 			return;
 		}
 		clockTick(clockData);
-		window.set_wasm_time(BigInt(0), BigInt(clockData.time));
+		const aspect = canvas.width / canvas.height;
+		window.update_wasm(
+			BigInt(0),
+			BigInt(clockData.time),
+			BigInt(Math.round(aspect * 1000))
+		);
 
 		updateVertexArrayToBuffer(device, vertexArrayBufferResult);
 		device.queue.writeBuffer(

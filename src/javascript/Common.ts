@@ -1,4 +1,8 @@
-export type SetTimeFunction = (uselessArg: BigInt, time: BigInt) => void;
+export type UpdateWasmFunction = (
+	uselessArg: BigInt,
+	time: BigInt,
+	aspect: BigInt
+) => void;
 export interface Vector2 {
 	x: number;
 	y: number;
@@ -11,12 +15,12 @@ export interface Vector3 {
 
 declare global {
 	interface Window {
-		set_wasm_time: SetTimeFunction;
+		update_wasm: UpdateWasmFunction;
 		// offset: number;
 	}
 }
 
-window.set_wasm_time = (time) => console.log(`default set_time:${time}`);
+window.update_wasm = (time) => console.log(`default update_wasm:${time}`);
 
 export interface AllocatedMemory {
 	buffer: Iterable<number>;

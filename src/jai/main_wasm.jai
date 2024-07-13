@@ -122,8 +122,14 @@ set_webgpu_orbit_controls_js :: (count: s64, data: *OrbitControls, element_size:
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
 
-set_wasm_time :: (new_time: s64) {
+update_wasm :: (new_time: s64, _new_aspect: s64) {
 	time:float = new_time / 1000.0;
+	new_aspect:float = ( cast(float32) _new_aspect) / 1000.0;
+
+	if(new_aspect != SCENE_DATA.camera_aspect){
+		SCENE_DATA.camera_aspect = new_aspect;
+		update_camera_data_projection(*SCENE_DATA);
+	}
 
 	update_scene_data(*SCENE_DATA, time);
 	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
