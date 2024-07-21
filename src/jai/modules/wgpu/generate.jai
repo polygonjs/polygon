@@ -1,4 +1,4 @@
-
+// based on v0.19.4.1 from https://github.com/gfx-rs/wgpu-native/
 
 #run build();
 
@@ -36,9 +36,11 @@ generate_bindings :: () -> bool {
 		array_add(*libnames,      "libwgpu_native");
 		array_add(*source_files,  "linux/webgpu.h");
 		array_add(*source_files,  "linux/wgpu.h");
-		array_add(*strip_prefixes, "wgpu");
-		array_add(*strip_prefixes, "WGPU");
+		// array_add(*strip_prefixes, "wgpu");
+		// array_add(*strip_prefixes, "WGPU");
 		array_add(*extra_clang_arguments, "-x", "c++", "-DWIN32_LEAN_AND_MEAN");
+
+		
 
 	}
 

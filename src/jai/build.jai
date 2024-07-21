@@ -18,11 +18,13 @@ DONE
 
 #load "native/shaders.jai";
 
+BUILD_WASM :: false;
+BUILD_NATIVE :: true;
 
 #run {
 	set_build_options_dc(.{do_output = false});
 
-	{
+	if ( BUILD_WASM ) {
 		w := compiler_create_workspace("Wasm");
 
 		options := get_build_options(w);
@@ -92,7 +94,7 @@ DONE
 
 		compiler_end_intercept(w);
 	}
-	{
+	if ( BUILD_NATIVE ) {
 		w := compiler_create_workspace("Native");
 		options := get_build_options(w);
 		options.output_path = "../../bin/";

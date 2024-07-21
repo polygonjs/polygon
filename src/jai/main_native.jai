@@ -10,24 +10,36 @@
 	// m  :: #library,system,link_always "libm";
 	// dl :: #library,system,link_always "libdl";
 	// pt :: #library,system,link_always "libpthread";
+
+	// for imgui_impl_wgpu lib (until we convert it to jai)
+	//
+	// sudo ln -s /lib/x86_64-linux-gnu/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so
+	// and now we can import with "gcc_s"
+	// libstd :: #library,system,link_always "stdc++";
 }
 
 #import "Basic";
-#import "SDL";
 #import "Math";
+#import "wgpu";
+#import "SDL";
+#import "imgui"; // not "ImGui"
+// #import "imgui_impl_wgpu";
 #load "common/wgpu_mock.jai";
-wgpu :: #import "wgpu";
 
 #load "common/math_helper.jai";
 #load "common/orbit_controls.jai";
 #load "common/scene_data.jai";
+#load "native/helpers_imgui.jai";
 #load "native/helpers_sdl.jai";
 #load "native/helpers_webgpu.jai";
+#load "native/imgui_impl_wgpu/index.jai";
+#load "native/helpers_ui.jai";
+#load "native/print_utils.jai";
 #load "native/uniforms_helpers.jai";
-#load "native/depth.jai";
-#load "native/multisample.jai";
 #load "native/shaders.jai";
 #load "native/orbit_controls.jai";
+#load "native/wgpu_depth.jai";
+#load "native/wgpu_multisample.jai";
 
 WINDOW_WIDTH  :u32: 1280;
 WINDOW_HEIGHT :u32: 720;
@@ -35,8 +47,17 @@ INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
 
 
 
-wgpu_log_callback :: (level: wgpu.LogLevel, msg: *u8, userdata: *void) #c_call {
+wgpu_log_callback :: (level: WGPULogLevel, msg: *u8, userdata: *void) #c_call {
+	new_context: Context;
+	push_context new_context {
+		print("\n");
+		print_red("ERROR WGPU START\n");
+	}
 	print_c("[WGPU :: %]: %\n", level, to_string(msg));
+	push_context new_context {
+		print_red("ERROR WGPU END\n");
+		print("\n");
+	}
 }
 
 
@@ -56,31 +77,52 @@ main :: () {
 	);
 	assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
 
-	wgpu.SetLogCallback(wgpu_log_callback, null);
-	wgpu.SetLogLevel(.Error);
+	imgui_context := ImGui.CreateContext();
+	sdl_init_success := ImGui_ImplSdl_Init(window);
+	assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
+	ImGui.StyleColorsDark();
+	// io := ImGui.GetIO();
+	// imgui_context, io := gui_init(window);
+	// imgui_context := ImGui.CreateContext();
+	// // Setup ImGui binding
+	ImGui_ImplSdl_Init(window);
+	// // Setup style
+	// // ImGuiStyleColorsClassic();
+	// ImGui.StyleColorsDark();
+	// //ImGui.StyleColorsLight();
+	// io := ImGui.GetIO();
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+	ui_data :UiData= .{};
+	// show_demo_window := true;
+	// show_another_window := true;
+
+
+	wgpuSetLogCallback(wgpu_log_callback, null);
+	wgpuSetLogLevel(.Error); //(.Warn);
 
 	wgpu_context: WGPUContext = wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
 	
 
-	queue := wgpu.DeviceGetQueue(wgpu_context.device);
+	queue := wgpuDeviceGetQueue(wgpu_context.device);
 	assert(queue != null, "Queue is not created correctly");
 
 	shader := create_shader(wgpu_context.device, SHADER);
 	assert(shader != null, "Shader is not created correctly");
 
-	pipeline_descriptor: wgpu.RenderPipelineDescriptor;
-	fragment_state: wgpu.FragmentState;
-	color_target_state: wgpu.ColorTargetState;
+	pipeline_descriptor: WGPURenderPipelineDescriptor;
+	fragment_state: WGPUFragmentState;
+	color_target_state: WGPUColorTargetState;
 	wasm_vertex_layout_layout := wasm_make_vertex_layout(Vertex);
 	vertex_buffer_layout := Wasm_VertexBufferLayout_to_wgpu(wasm_vertex_layout_layout);
-	wgpu_context.preferred_texture_format = wgpu.SurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
 	fragment_state_prepare(*fragment_state, *color_target_state, shader, wgpu_context.preferred_texture_format);
 	update_pipeline_descriptor( *pipeline_descriptor, wgpu_context.device, shader, *vertex_buffer_layout, *fragment_state );
 	update_pipeline_descriptor_multisample(*wgpu_context, *pipeline_descriptor);
-	depth_stencil_state: wgpu.DepthStencilState;
+	depth_stencil_state: WGPUDepthStencilState;
 	update_pipeline_descriptor_depth(*wgpu_context, *pipeline_descriptor, *depth_stencil_state);
 	// pipeline_descriptor_print(*pipeline_descriptor);
-	pipeline := wgpu.DeviceCreateRenderPipeline(wgpu_context.device, *pipeline_descriptor);
+	pipeline := wgpuDeviceCreateRenderPipeline(wgpu_context.device, *pipeline_descriptor);
 	assert(pipeline != null, "Pipeline is not created correctly");
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
@@ -88,10 +130,20 @@ main :: () {
 	object_uniform_buffer, object_uniform_buffer_size, object_bind_group := object_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.object_uniforms);
 	camera_uniform_buffer, camera_uniform_buffer_size, camera_bind_group := camera_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.camera_uniforms);
 
-
-	wgpu.QueueSubmit(queue, 0, null);
+	sdl_init_info := ImGui_ImplWGPU_InitInfo.{
+		Device = wgpu_context.device,
+		NumFramesInFlight = 3,
+		RenderTargetFormat = wgpu_context.preferred_texture_format,
+		DepthStencilFormat = WGPUTextureFormat.Undefined,//DEPTH_TEXTURE_FORMAT
+	};
+	// sdl_init := ImGui_ImplWGPU_InitInfo_init(*sdl_init_info);
+	bd:ImGui_ImplWGPU_Data = .{};
+	imgui_wgpu_common:ImGui_WGPU_Common = .{};
+	ImGui_ImplWGPU_Init(*bd, sdl_init_info);
+	// wgpuQueueSubmit(queue, 0, null);
 
 	do_exit := false;
+	frames_count :u64= 0;
 	while !do_exit {
 		event: SDL_Event;
 		while SDL_PollEvent(*event) {
@@ -106,6 +158,8 @@ main :: () {
 							webgpu_handle_resize(*wgpu_context, xx event.window.data1, xx event.window.data2);
 							SCENE_DATA.camera_aspect = (cast(float32) event.window.data1) / (cast(float32) event.window.data2);
 							update_camera_data_projection(*SCENE_DATA);
+
+							
 						}
 					}
 				}
@@ -119,6 +173,7 @@ main :: () {
 		}
 		time := SDL_GetTicks() / 1000.0;
 		frame := surface_create_current_view( *wgpu_context );
+		defer wgpuTextureViewRelease(frame);
 		create_multi_sample_texture_if_needed( *wgpu_context );
 		create_depth_texture_if_needed( *wgpu_context );
 		//
@@ -129,70 +184,121 @@ main :: () {
 		update_object_uniforms_to_buffer(object_uniform_buffer, queue, *SCENE_DATA);
 		update_camera_uniforms_to_buffer(camera_uniform_buffer, queue, *SCENE_DATA);
 
-		cmd_encoder := wgpu.DeviceCreateCommandEncoder(
-			wgpu_context.device,
-			*(wgpu.CommandEncoderDescriptor.{label = "Main Command Encoder"}),
-		);
 
-		colorAttachment := wgpu.RenderPassColorAttachment.{
-			loadOp = wgpu.LoadOp.Clear,
-			storeOp = wgpu.StoreOp.Store,
+		//
+		
+
+		colorAttachment := WGPURenderPassColorAttachment.{
+			loadOp = WGPULoadOp.Clear,
+			storeOp = WGPUStoreOp.Store,
 			clearValue = wgpu_context.bg_color,
 		};
 
 		update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
 
-		render_pass_descriptor := wgpu.RenderPassDescriptor.{ label = "Main Render Pass" };
-		render_pass_descriptor.colorAttachmentCount = 1;
-		render_pass_descriptor.colorAttachments = *colorAttachment;
-		update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
-		render_pass_encoder := wgpu.CommandEncoderBeginRenderPass(cmd_encoder, *render_pass_descriptor);
+		{
+			render_pass_encoder1: WGPURenderPassEncoder;
+			cmd_buffer1: WGPUCommandBuffer;
+			cmd_encoder1 := wgpuDeviceCreateCommandEncoder(
+				wgpu_context.device,
+				*(WGPUCommandEncoderDescriptor.{label = "Command Encoder 3D"}),
+			);
+			defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
+			defer wgpuCommandBufferRelease(cmd_buffer1);
+			defer wgpuCommandEncoderRelease(cmd_encoder1);
+			{	
+				render_pass_descriptor := WGPURenderPassDescriptor.{
+					label = "Render Pass 3D",
+					colorAttachmentCount = 1,
+					colorAttachments = *colorAttachment,
+					// depthStencilAttachment = null,
+				};
+				update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
+				render_pass_encoder1 = wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
 
-		//
-		wgpu.RenderPassEncoderSetPipeline(render_pass_encoder, pipeline);
-		object_dynamicOffsets:[0]u32;
-		wgpu.RenderPassEncoderSetBindGroup(render_pass_encoder, 0, object_bind_group, 0, object_dynamicOffsets.data);
-		//
-		camera_dynamicOffsets:[0]u32;
-		// camera_dynamicOffsets[0] = 16*4;
-		wgpu.RenderPassEncoderSetBindGroup(render_pass_encoder, 1, camera_bind_group, 0, camera_dynamicOffsets.data);
-		//
-		wgpu.RenderPassEncoderSetVertexBuffer(render_pass_encoder, 0, vertex_buffer, 0, vertex_buffer_size);
-		wgpu.RenderPassEncoderSetIndexBuffer(render_pass_encoder, index_buffer, wgpu.IndexFormat.Uint32, 0, index_buffer_size);
+				//
+				wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, pipeline);
+				object_dynamicOffsets:[0]u32;
+				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 0, object_bind_group, 0, object_dynamicOffsets.data);
+				//
+				camera_dynamicOffsets:[0]u32;
+				// camera_dynamicOffsets[0] = 16*4;
+				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 1, camera_bind_group, 0, camera_dynamicOffsets.data);
+				//
+				wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, vertex_buffer, 0, vertex_buffer_size);
+				wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, index_buffer, WGPUIndexFormat.Uint32, 0, index_buffer_size);
 
-		wgpu.RenderPassEncoderDrawIndexed(render_pass_encoder, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-		wgpu.RenderPassEncoderEnd(render_pass_encoder);
+				wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
+				gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *imgui_wgpu_common, *ui_data);
+				wgpuRenderPassEncoderEnd(render_pass_encoder1);
+				
 
-		cmd_buffer := wgpu.CommandEncoderFinish(cmd_encoder, *(wgpu.CommandBufferDescriptor.{label = "Main Command Buffer"}));
+				cmd_buffer1 = wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer 3D"}));
 
-		wgpu.QueueSubmit(queue, 1, *cmd_buffer);
+				wgpuQueueSubmit(queue, 1, *cmd_buffer1);
+			}
+		}
 
-		wgpu.SurfacePresent(wgpu_context.surface);
-		
-		wgpu.CommandBufferRelease(cmd_buffer);
-		wgpu.RenderPassEncoderRelease(render_pass_encoder);
-		wgpu.CommandEncoderRelease(cmd_encoder);
-		wgpu.TextureViewRelease(frame);
-		wgpu.TextureRelease(wgpu_context.surface_texture.texture);
+
+
+		// {
+		// 	render_pass_encoder2: WGPURenderPassEncoder;
+		// 	cmd_buffer2: WGPUCommandBuffer;
+		// 	cmd_encoder2 := wgpuDeviceCreateCommandEncoder(
+		// 		wgpu_context.device,
+		// 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder UI"}),
+		// 	);
+		// 	defer wgpuRenderPassEncoderRelease(render_pass_encoder2);
+		// 	defer wgpuCommandBufferRelease(cmd_buffer2);
+		// 	defer wgpuCommandEncoderRelease(cmd_encoder2);
+		// 	{
+		// 		render_pass_descriptor := WGPURenderPassDescriptor.{
+		// 			label = "Render Pass UI",
+		// 			colorAttachmentCount = 1,
+		// 			colorAttachments = *colorAttachment,
+		// 			depthStencilAttachment = null,
+		// 		};
+		// 		update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
+		// 		render_pass_encoder2 = wgpuCommandEncoderBeginRenderPass(cmd_encoder2, *render_pass_descriptor);
+
+		// 		gui_update(window, *wgpu_context, render_pass_encoder2, *bd, *imgui_wgpu_common, *ui_data);
+		// 		wgpuRenderPassEncoderEnd(render_pass_encoder2);
+		// 		cmd_buffer2 = wgpuCommandEncoderFinish(cmd_encoder2, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer UI"}));
+
+		// 		wgpuQueueSubmit(queue, 1, *cmd_buffer2);
+		// 	}
+		// }
+
+
+
+		wgpuSurfacePresent(wgpu_context.surface);
+		wgpuTextureRelease(wgpu_context.surface_texture.texture);
 		multisample_release(*wgpu_context);
 		depth_release(*wgpu_context);
 		
+		// if frames_count>20 { do_exit = true; }
+		// print_green(tprint("frames_count:%\n", frames_count));
+		frames_count += 1;
 	}
 
 	// Close and destroy the window
 	// see https://github.com/gfx-rs/wgpu-native/blob/trunk/examples/triangle/main.c
-	wgpu.RenderPipelineRelease(pipeline);
-	// wgpu.PipelineLayoutRelease(pipeline_layout);
-	// wgpu.ShaderModuleRelease(shader_module);
-	// wgpu.SurfaceCapabilitiesFreeMembers(surface_capabilities);
-	// wgpu.QueueRelease(queue);
-	wgpu.DeviceRelease(wgpu_context.device);
-	wgpu.AdapterRelease(wgpu_context.adapter);
-	wgpu.SurfaceRelease(wgpu_context.surface);
+	wgpuRenderPipelineRelease(pipeline);
+	// wgpuPipelineLayoutRelease(pipeline_layout);
+	// wgpuShaderModuleRelease(shader_module);
+	// wgpuSurfaceCapabilitiesFreeMembers(surface_capabilities);
+	// wgpuQueueRelease(queue);
+	wgpuDeviceRelease(wgpu_context.device);
+	wgpuAdapterRelease(wgpu_context.adapter);
+	wgpuSurfaceRelease(wgpu_context.surface);
+	ImGui_ImplWGPU_Shutdown();
+	ImGui_ImplSdl_Shutdown();
+	ImGui.DestroyContext();
 	SDL_DestroyWindow(window);
-	wgpu.InstanceRelease(wgpu_context.instance);
+	wgpuInstanceRelease(wgpu_context.instance);
 
 	// Clean up
 	SDL_Quit();
+	print_green(tprint("polygon closed gracefully at frame: %.\n", frames_count));
 }
 
