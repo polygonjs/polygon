@@ -29,7 +29,7 @@
 #load "common/math_helper.jai";
 #load "common/orbit_controls.jai";
 #load "common/scene_data.jai";
-#load "native/helpers_imgui.jai";
+#load "native/helpers_imgui_impl_sdl.jai";
 #load "native/helpers_sdl.jai";
 #load "native/helpers_webgpu.jai";
 #load "native/imgui_impl_wgpu/index.jai";
@@ -147,7 +147,9 @@ main :: () {
 	while !do_exit {
 		event: SDL_Event;
 		while SDL_PollEvent(*event) {
-			// print("Event: %\n", event.type);
+			ImGui_ImplSdl_ProcessEvent(*event);
+			io := ImGui.GetIO();
+
 			if event.type == {
 				case SDL_QUIT; {do_exit = true;}
 				case SDL_WINDOWEVENT; {
@@ -159,17 +161,22 @@ main :: () {
 							SCENE_DATA.camera_aspect = (cast(float32) event.window.data1) / (cast(float32) event.window.data2);
 							update_camera_data_projection(*SCENE_DATA);
 
-							
 						}
 					}
 				}
 				case SDL_KEYDOWN; {
-					if event.key.keysym.sym == SDLK_ESCAPE {
-						do_exit = true;
+					if(io.WantCaptureKeyboard==false){
+						if event.key.keysym.sym == SDLK_ESCAPE {
+							do_exit = true;
+						}
 					}
 				}
 			}
-			orbit_controls_process_event(*orbit_controls, *event);
+
+			if(io.WantCaptureMouse==false){
+				orbit_controls_process_event(*orbit_controls, *event);
+			}
+
 		}
 		time := SDL_GetTicks() / 1000.0;
 		frame := surface_create_current_view( *wgpu_context );

@@ -1,3 +1,6 @@
+g_MousePressed := bool.[false, false, false];
+g_MouseWheel: float = 0.0;
+
 cursor_arrow: *SDL_Cursor;
 cursor_text_input: *SDL_Cursor;
 cursor_move: *SDL_Cursor;
@@ -14,12 +17,47 @@ ImGui_ImplSdl_SetClipboardText :: (data: *void, text: *u8) #c_call {
 	SDL_SetClipboardText(text);
 }
 
+// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+ImGui_ImplSdl_ProcessEvent :: (event: *SDL_Event) -> bool {
+	io := ImGui.GetIO();
+	if event.type == {
+		case SDL_MOUSEWHEEL;
+			if event.wheel.y > 0 g_MouseWheel = 1;
+			if event.wheel.y < 0 g_MouseWheel = -1;
+			return true;
+		case SDL_MOUSEBUTTONDOWN;
+			if event.button.button == SDL_BUTTON_LEFT   g_MousePressed[0] = true;
+			if event.button.button == SDL_BUTTON_RIGHT  g_MousePressed[1] = true;
+			if event.button.button == SDL_BUTTON_MIDDLE g_MousePressed[2] = true;
+			return true;
+		case SDL_TEXTINPUT;
+			io.AddInputCharactersUTF8(io, xx event.text.text.data);
+			return true;
+		case SDL_KEYDOWN; #through;
+		case SDL_KEYUP;
+			//@@key := event.key.keysym.sym & ~SDLK_SCANCODE_MASK;
+			key := event.key.keysym.sym & (xx ~(1<<30));
+			io.KeysDown[key] = (event.type == SDL_KEYDOWN);
+			kmod := SDL_GetModState();
+			io.KeyShift = ((kmod & KMOD_SHIFT) != 0);
+			io.KeyCtrl = ((kmod & KMOD_CTRL) != 0);
+			io.KeyAlt = ((kmod & KMOD_ALT) != 0);
+			io.KeySuper = ((kmod & KMOD_GUI) != 0);
+			return true;
+	}
+	return false;
+}
+
+
 ImGui_ImplSdl_InvalidateDeviceObjects :: () {
-    // if g_FontTexture {
-    //     glDeleteTextures(1, *g_FontTexture);
-    //     ImGui.GetIO().Fonts.TexID = null;
-    //     g_FontTexture = 0;
-    // }
+	// if g_FontTexture {
+	//     glDeleteTextures(1, *g_FontTexture);
+	//     ImGui.GetIO().Fonts.TexID = null;
+	//     g_FontTexture = 0;
+	// }
 }
 
 ImGui_ImplSdl_Init :: (window: *SDL_Window) -> bool {
@@ -67,7 +105,7 @@ ImGui_ImplSdl_Init :: (window: *SDL_Window) -> bool {
 }
 
 ImGui_ImplSdl_Shutdown :: () {
-    ImGui_ImplSdl_InvalidateDeviceObjects();
+	ImGui_ImplSdl_InvalidateDeviceObjects();
 }
 
 ImGui_ImplSdl_NewFrame :: (window: *SDL_Window) {
@@ -106,13 +144,13 @@ ImGui_ImplSdl_NewFrame :: (window: *SDL_Window) {
 		io.MousePos = .{-FLOAT32_MAX,-FLOAT32_MAX};
 	}
 
-	// io.MouseDown[0] = (g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0);      // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-	// io.MouseDown[1] = (g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0);
-	// io.MouseDown[2] = (g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
-	// g_MousePressed[0], g_MousePressed[1], g_MousePressed[2] = false, false, false;
+	io.MouseDown[0] = (g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0);      // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+	io.MouseDown[1] = (g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0);
+	io.MouseDown[2] = (g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
+	g_MousePressed[0], g_MousePressed[1], g_MousePressed[2] = false, false, false;
 
-	// io.MouseWheel = g_MouseWheel;
-	// g_MouseWheel = 0.0;
+	io.MouseWheel = g_MouseWheel;
+	g_MouseWheel = 0.0;
 
 	// Hide OS mouse cursor if ImGui is drawing it
 	SDL_ShowCursor(xx (io.MouseDrawCursor == false));
