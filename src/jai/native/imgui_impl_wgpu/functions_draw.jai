@@ -24,34 +24,34 @@ ImGui_ImplWGPU_SetupRenderState:: ( draw_data: *ImDrawData, ctx: WGPURenderPassE
 			*mvp.coef,
 			size_of(type_of(ImGui_WGPU_Uniforms.MVP))
 		);
-		gamma:float;
-		if bd.renderTargetFormat == {
-		case WGPUTextureFormat.ASTC10x10UnormSrgb;
-		case WGPUTextureFormat.ASTC10x5UnormSrgb;
-		case WGPUTextureFormat.ASTC10x6UnormSrgb;
-		case WGPUTextureFormat.ASTC10x8UnormSrgb;
-		case WGPUTextureFormat.ASTC12x10UnormSrgb;
-		case WGPUTextureFormat.ASTC12x12UnormSrgb;
-		case WGPUTextureFormat.ASTC4x4UnormSrgb;
-		case WGPUTextureFormat.ASTC5x5UnormSrgb;
-		case WGPUTextureFormat.ASTC6x5UnormSrgb;
-		case WGPUTextureFormat.ASTC6x6UnormSrgb;
-		case WGPUTextureFormat.ASTC8x5UnormSrgb;
-		case WGPUTextureFormat.ASTC8x6UnormSrgb;
-		case WGPUTextureFormat.ASTC8x8UnormSrgb;
-		case WGPUTextureFormat.BC1RGBAUnormSrgb;
-		case WGPUTextureFormat.BC2RGBAUnormSrgb;
-		case WGPUTextureFormat.BC3RGBAUnormSrgb;
-		case WGPUTextureFormat.BC7RGBAUnormSrgb;
-		case WGPUTextureFormat.BGRA8UnormSrgb;
-		case WGPUTextureFormat.ETC2RGB8A1UnormSrgb;
-		case WGPUTextureFormat.ETC2RGB8UnormSrgb;
-		case WGPUTextureFormat.ETC2RGBA8UnormSrgb;
-		case WGPUTextureFormat.RGBA8UnormSrgb;
-			gamma = 2.2;
-		case;
-			gamma = 1.0;
-		}
+		// gamma:float;
+		// if bd.renderTargetFormat == {
+		// case WGPUTextureFormat.ASTC10x10UnormSrgb;
+		// case WGPUTextureFormat.ASTC10x5UnormSrgb;
+		// case WGPUTextureFormat.ASTC10x6UnormSrgb;
+		// case WGPUTextureFormat.ASTC10x8UnormSrgb;
+		// case WGPUTextureFormat.ASTC12x10UnormSrgb;
+		// case WGPUTextureFormat.ASTC12x12UnormSrgb;
+		// case WGPUTextureFormat.ASTC4x4UnormSrgb;
+		// case WGPUTextureFormat.ASTC5x5UnormSrgb;
+		// case WGPUTextureFormat.ASTC6x5UnormSrgb;
+		// case WGPUTextureFormat.ASTC6x6UnormSrgb;
+		// case WGPUTextureFormat.ASTC8x5UnormSrgb;
+		// case WGPUTextureFormat.ASTC8x6UnormSrgb;
+		// case WGPUTextureFormat.ASTC8x8UnormSrgb;
+		// case WGPUTextureFormat.BC1RGBAUnormSrgb;
+		// case WGPUTextureFormat.BC2RGBAUnormSrgb;
+		// case WGPUTextureFormat.BC3RGBAUnormSrgb;
+		// case WGPUTextureFormat.BC7RGBAUnormSrgb;
+		// case WGPUTextureFormat.BGRA8UnormSrgb;
+		// case WGPUTextureFormat.ETC2RGB8A1UnormSrgb;
+		// case WGPUTextureFormat.ETC2RGB8UnormSrgb;
+		// case WGPUTextureFormat.ETC2RGBA8UnormSrgb;
+		// case WGPUTextureFormat.RGBA8UnormSrgb;
+		// 	gamma = 2.2;
+		// case;
+		// 	gamma = 1.0;
+		// }
 		// wgpuQueueWriteBuffer(
 		// 	bd.defaultQueue,
 		// 	bd.renderResources.Uniforms,

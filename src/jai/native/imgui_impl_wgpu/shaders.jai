@@ -48,7 +48,7 @@ struct Uniforms {
 @fragment
 fn main(in: VertexOutput) -> @location(0) vec4<f32> {
 	let color = in.color * textureSample(t, s, in.uv);
-	let corrected_color = pow(color.rgb, vec3<f32>(2.2));
+	let corrected_color = pow(color.rgb, vec3<f32>(2.2)); // currently hard coded uniforms.gamma as 2.2, as writing the uniforms to the webgpu buffer was error prone
 	return vec4<f32>(corrected_color, color.a);
 }
 WGSL
