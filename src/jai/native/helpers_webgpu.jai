@@ -121,7 +121,7 @@ webgpu_handle_resize :: (wgpu_context: *WGPUContext, width: u32, height: u32){
 	surface_configure(wgpu_context, width, height);
 }
 
-wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUContext {
+wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUContext, WGPUSurfaceCapabilities {
 	wgpu_context:WGPUContext;
 
 	instance_desc: WGPUInstanceDescriptor;
@@ -156,7 +156,7 @@ wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUConte
 		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
 	}, null);
 
-	return wgpu_context;
+	return wgpu_context, surface_capabilities;
 }
 surface_configure :: (wgpu_context: *WGPUContext, width: u32, height: u32){
 	(<<wgpu_context).config.width = width;

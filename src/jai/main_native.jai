@@ -73,7 +73,7 @@ main :: () {
 
 	SDL_Init(SDL_INIT_VIDEO);
 
-	window := SDL_CreateWindow("Polygon 2",
+	window := SDL_CreateWindow("Polygon Compute",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		xx WINDOW_WIDTH,
@@ -106,15 +106,15 @@ main :: () {
 	wgpuSetLogCallback(wgpu_log_callback, null);
 	wgpuSetLogLevel(.Error); //(.Warn);
 
-	wgpu_context: WGPUContext = wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+	wgpu_context, surface_capabilities := wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	queue := wgpuDeviceGetQueue(wgpu_context.device);
 	assert(queue != null, "Queue is not created correctly");
 
 	compute_test(*wgpu_context, queue, SHADERS.compute);
 
-	shader := create_shader(wgpu_context.device, SHADERS.render);
-	assert(shader != null, "Shader is not created correctly");
+	shader_module := create_shader(wgpu_context.device, SHADERS.render);
+	assert(shader_module != null, "shader_module is not created correctly");
 
 	pipeline_descriptor: WGPURenderPipelineDescriptor;
 	fragment_state: WGPUFragmentState;
@@ -124,8 +124,8 @@ main :: () {
 	#if FREE_MEMORY defer array_reset(*vertex_attributes);
 	#if FREE_MEMORY defer array_reset(*attributes);
 	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
-	fragment_state_prepare(*fragment_state, *color_target_state, shader, wgpu_context.preferred_texture_format);
-	update_pipeline_descriptor( *pipeline_descriptor, wgpu_context.device, shader, *vertex_buffer_layout, *fragment_state );
+	fragment_state_prepare(*fragment_state, *color_target_state, shader_module, wgpu_context.preferred_texture_format);
+	update_pipeline_descriptor( *pipeline_descriptor, wgpu_context.device, shader_module, *vertex_buffer_layout, *fragment_state );
 	update_pipeline_descriptor_multisample(*wgpu_context, *pipeline_descriptor);
 	depth_stencil_state: WGPUDepthStencilState;
 	update_pipeline_descriptor_depth(*wgpu_context, *pipeline_descriptor, *depth_stencil_state);
@@ -302,7 +302,7 @@ main :: () {
 		depth_release(*wgpu_context);
 		#if USE_IMGUI gui_free(*iwc);
 		
-		if frames_count>1 { do_exit = true; }
+		// if frames_count>1 { do_exit = true; }
 		// print_green(tprint("frames_count:%\n", frames_count));
 		frames_count += 1;
 	}
@@ -310,10 +310,10 @@ main :: () {
 	// Close and destroy the window
 	// see https://github.com/gfx-rs/wgpu-native/blob/trunk/examples/triangle/main.c
 	wgpuRenderPipelineRelease(pipeline);
-	// wgpuPipelineLayoutRelease(pipeline_layout);
-	// wgpuShaderModuleRelease(shader_module);
-	// wgpuSurfaceCapabilitiesFreeMembers(surface_capabilities);
-	// wgpuQueueRelease(queue);
+	wgpuPipelineLayoutRelease(pipeline_descriptor.layout);
+	wgpuShaderModuleRelease(shader_module);
+	wgpuSurfaceCapabilitiesFreeMembers(surface_capabilities);
+	wgpuQueueRelease(queue);
 	wgpuDeviceRelease(wgpu_context.device);
 	wgpuAdapterRelease(wgpu_context.adapter);
 	wgpuSurfaceRelease(wgpu_context.surface);

@@ -74,7 +74,7 @@ create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	array_add(*vertices, Vertex.{ position=.{0.5, 0.5, -0.5}, color=.{1.0, 1.0, 1.0}, uv=.{1.0, 1.0}});
 	array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, -0.5}, color=.{0.5, 0.5, 0.5}, uv=.{0.0, 1.0}});
 
-	for vertex: vertices {
+	for vertices {
 		vertices[it_index].position *= size;
 	}
 
