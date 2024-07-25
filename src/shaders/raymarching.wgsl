@@ -23,6 +23,9 @@ struct CameraUniforms {
 struct SDFUniforms {
 	offset: vec4<f32>,
 };
+@group(0) @binding(0) var<uniform> object: ObjectUniforms;
+@group(1) @binding(0) var<uniform> camera: CameraUniforms;
+@group(2) @binding(0) var<uniform> sdf: SDFUniforms;
 
 struct SDFContext {
 	d: f32,
@@ -187,9 +190,7 @@ fn applyShading( rayOrigin:vec3<f32>, rayDir:vec3<f32>,   sdfContext:SDFContext)
 }
 
 
-@group(0) @binding(0) var<uniform> object: ObjectUniforms;
-@group(1) @binding(0) var<uniform> camera: CameraUniforms;
-@group(2) @binding(0) var<uniform> sdf: SDFUniforms;
+
 
 
 

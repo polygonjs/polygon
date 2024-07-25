@@ -1,3 +1,10 @@
+FREE_MEMORY :: true;
+DEBUG_MEMORY_LEAKS :: false;
+WINDOW_WIDTH  :u32: 1280;
+WINDOW_HEIGHT :u32: 720;
+INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
+USE_IMGUI :: true;
+
 #if OS == .LINUX  {
 	// in order to import gcc_s, I initially tried:
 	// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
@@ -41,10 +48,6 @@
 #load "native/wgpu_depth.jai";
 #load "native/wgpu_multisample.jai";
 
-FREE_MEMORY :: true;
-WINDOW_WIDTH  :u32: 1280;
-WINDOW_HEIGHT :u32: 720;
-INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
 
 
 
@@ -141,21 +144,13 @@ main :: () {
 		Device = wgpu_context.device,
 		NumFramesInFlight = 3,
 		RenderTargetFormat = wgpu_context.preferred_texture_format,
-		DepthStencilFormat = WGPUTextureFormat.Undefined,//DEPTH_TEXTURE_FORMAT
+		DepthStencilFormat = ifx wgpu_context.use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
 	};
 	// sdl_init := ImGui_ImplWGPU_InitInfo_init(*sdl_init_info);
 	bd:ImGui_ImplWGPU_Data = .{};
 	iwc:ImGui_WGPU_Common = .{};
 	ImGui_ImplWGPU_Init(*bd, sdl_init_info);
 	// wgpuQueueSubmit(queue, 0, null);
-
-	//  array_reset(*vertex_attributes);
-	//  array_reset(*attributes);
-	//   array_reset(*object_uniform_entries);
-	//   array_reset(*camera_uniform_entries);
-	// report_memory_leaks();
-	// if(1+1)return;
-	
 
 	do_exit := false;
 	frames_count :u64= 0;
@@ -257,7 +252,7 @@ main :: () {
 				wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, index_buffer, WGPUIndexFormat.Uint32, 0, index_buffer_size);
 
 				wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-				gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA);
+				#if USE_IMGUI gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA);
 				wgpuRenderPassEncoderEnd(render_pass_encoder1);
 
 
@@ -303,7 +298,7 @@ main :: () {
 		wgpuTextureRelease(wgpu_context.surface_texture.texture);
 		multisample_release(*wgpu_context);
 		depth_release(*wgpu_context);
-		gui_free(*iwc);
+		#if USE_IMGUI gui_free(*iwc);
 		
 		// if frames_count>10 { do_exit = true; }
 		// print_green(tprint("frames_count:%\n", frames_count));
@@ -326,7 +321,7 @@ main :: () {
 	SDL_DestroyWindow(window);
 	wgpuInstanceRelease(wgpu_context.instance);
 
-	defer report_memory_leaks();
+	#if DEBUG_MEMORY_LEAKS defer report_memory_leaks();
 
 	// Clean up
 	SDL_Quit();

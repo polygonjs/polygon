@@ -4,13 +4,13 @@ update_pipeline_descriptor_multisample :: (wgpu_config: *WGPUContext, pipeline_d
 	if( (<<wgpu_config).use_msaa ){
 		pipeline_descriptor.multisample = .{
 			count = MULTISAMPLE_SAMPLES_COUNT,
-			mask = 0xFFFFFFFF,
+			mask = U32_MAX,
 			alphaToCoverageEnabled = xx true,
 		};
 	} else {
 		pipeline_descriptor.multisample = .{
 			count = 1,
-			mask = 0xFFFFFFFF,
+			mask = U32_MAX,
 			alphaToCoverageEnabled = xx false,
 		};
 	}

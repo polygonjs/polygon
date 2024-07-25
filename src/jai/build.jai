@@ -19,9 +19,10 @@ DONE
 #load "native/shaders.jai";
 
 BUILD_WASM :: true;
-BUILD_NATIVE :: false;
+BUILD_NATIVE :: true;
 
 #run {
+	print("Building WASM: %, Native: %\n", BUILD_WASM, BUILD_NATIVE);
 	set_build_options_dc(.{do_output = false});
 
 	if ( BUILD_WASM ) {

@@ -7,8 +7,8 @@ WGPUContext :: struct {
 	surface_texture :WGPUSurfaceTexture;
 	preferred_texture_format :WGPUTextureFormat;
 	//
-	use_msaa: bool=false;
-	use_depth_buffer: bool=false;
+	use_msaa: bool=true;
+	use_depth_buffer: bool=true;
 	bg_color :WGPUColor =.{0.0, 0.0, 0.0, 1.0};
 	//
 	multisample_texture_descriptor : WGPUTextureDescriptor;
@@ -140,7 +140,7 @@ wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUConte
 	// surface_configure(*wgpu_context, width, height);
 	surface_capabilities :WGPUSurfaceCapabilities;
 	wgpuSurfaceGetCapabilities(wgpu_context.surface, wgpu_context.adapter, *surface_capabilities);
-	print("init: %x%\n", width, height);
+
 	wgpu_context.config = WGPUSurfaceConfiguration.{
 		device = wgpu_context.device,
 		usage = xx WGPUTextureUsage.RenderAttachment,

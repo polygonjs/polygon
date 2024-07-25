@@ -78,8 +78,8 @@ ImGui_WGPU_Common :: struct {
 	graphics_pipeline_desc : WGPURenderPipelineDescriptor;
 	common_bg_layout_entries: [2]WGPUBindGroupLayoutEntry;
 	image_bg_layout_entries:[1]WGPUBindGroupLayoutEntry;
-	common_bg_layout_desc:WGPUBindGroupLayoutDescriptor;
-	image_bg_layout_desc:WGPUBindGroupLayoutDescriptor;
+	common_bg_layout_desc:WGPUBindGroupLayoutDescriptor=.{label="common_bg_layout_desc"};
+	image_bg_layout_desc:WGPUBindGroupLayoutDescriptor=.{label="image_bg_layout_desc"};
 	bg_layouts:[2]WGPUBindGroupLayout;
 	layout_desc:WGPUPipelineLayoutDescriptor;
 	vert : ImGui_WGPU_Common_ShaderModule;
@@ -93,7 +93,7 @@ ImGui_WGPU_Common :: struct {
 	fragment_state:WGPUFragmentState;
 	depth_stencil_state:WGPUDepthStencilState;
 	common_bg_entries:[2]WGPUBindGroupEntry;
-	common_bg_descriptor:WGPUBindGroupDescriptor;
+	common_bg_descriptor:WGPUBindGroupDescriptor=.{label="common_bg_descriptor"};
 	image_bind_group:WGPUBindGroup;
 	font_texture: ImGui_WGPU_Common_FontTexture;
 	uniforms: ImGui_WGPU_Common_Uniforms;

@@ -13,7 +13,10 @@ ImGui_ImplWGPU_GetBackendData :: ()-> *ImGui_ImplWGPU_Data {
 }
 
 // device: WGPUDevice, num_frames_in_flight:u64, rt_format:WGPUTextureFormat, depth_format: WGPUTextureFormat
-ImGui_ImplWGPU_Init :: (bd:*ImGui_ImplWGPU_Data,info: ImGui_ImplWGPU_InitInfo) -> bool {
+ImGui_ImplWGPU_Init :: (
+	bd:*ImGui_ImplWGPU_Data,
+	info: ImGui_ImplWGPU_InitInfo
+) -> bool {
 	io := ImGui.GetIO();
 	//IM_ASSERT(io.BackendRendererUserData == nullptr && "Already initialized a renderer backend!");
 	assert(io.BackendRendererUserData == null, "Already initialized a renderer backend!");

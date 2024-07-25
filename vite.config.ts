@@ -6,7 +6,7 @@ import { exec, ExecException } from "child_process";
 // import * as path from "path";
 
 const BUILD_ON_FILE_CHANGE: boolean = true;
-const RUN_NATIVE_ON_FILE_CHANGE: boolean = false;
+const RUN_NATIVE_ON_FILE_CHANGE: boolean = true;
 
 function fileIsNotInDotBuildFolder(filePath: string): boolean {
 	return filePath.includes("/.build/") == false;
@@ -74,11 +74,13 @@ function jaiPlugin() {
 		server.watcher.add("src/**/*.wgsl");
 
 		server.watcher.on("change", (filePath) => {
-			if (fileIsValid(filePath) && BUILD_ON_FILE_CHANGE) {
-				// console.log(
-				// 	"config is not set to recompile for now, compile manually"
-				// );
-				// return;
+			if (fileIsValid(filePath)) {
+				if (!BUILD_ON_FILE_CHANGE) {
+					console.warn(
+						"config is not set to recompile for now, compile manually"
+					);
+					return;
+				}
 				console.log(`-----------------------------------------`);
 				console.log(`--------------- File changed: ${filePath}`);
 				console.log(`-----------------------------------------`);

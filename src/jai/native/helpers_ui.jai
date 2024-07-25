@@ -37,7 +37,7 @@ gui_update :: (
 	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipelineState==null) {
 		print_yellow("invalidate and create START");
 		ImGui_ImplWGPU_InvalidateDeviceObjects();
-		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc);
+		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, wgpu_context);
 		print_yellow("invalidate and create DONE");
 		bd.resolution.width = width;
 		bd.resolution.height = height;
