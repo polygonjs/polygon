@@ -108,7 +108,7 @@ sdf_uniform_to_buffer :: (
 
 	wgpuQueueWriteBuffer(queue, buffer, 0, uniforms.data, size);
 
-	entries := NewArray(1, WGPUBindGroupEntry); // TODO: free this
+	entries := NewArray(1, WGPUBindGroupEntry);
 	entries[0] = WGPUBindGroupEntry.{
 		binding=0,
 		size=size,
