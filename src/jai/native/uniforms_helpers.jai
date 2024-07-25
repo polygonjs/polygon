@@ -1,4 +1,9 @@
-object_uniform_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, pipeline: WGPURenderPipeline, uniforms: [1]ObjectUniforms) -> WGPUBuffer, u64, WGPUBindGroup {
+object_uniform_to_buffer :: (
+	device: WGPUDevice,
+	queue: WGPUQueue,
+	pipeline: WGPURenderPipeline,
+	uniforms: [1]ObjectUniforms
+) -> WGPUBuffer, u64, WGPUBindGroup, []WGPUBindGroupEntry {
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
 	size := max( cast(u64)16, cast(u64) uniforms.count * size_of(ObjectUniforms));
 
@@ -24,7 +29,7 @@ object_uniform_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, pipeline: WGP
 	};
 	bind_group := wgpuDeviceCreateBindGroup(device, *bind_group_descriptor);
 
-	return buffer, size, bind_group;
+	return buffer, size, bind_group, entries;
 }
 
 update_object_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
@@ -34,7 +39,12 @@ update_object_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_
 	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.object_uniforms.data, size);
 }
 
-camera_uniform_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, pipeline: WGPURenderPipeline, uniforms: [1]CameraUniforms) -> WGPUBuffer, u64, WGPUBindGroup {
+camera_uniform_to_buffer :: (
+	device: WGPUDevice,
+	queue: WGPUQueue,
+	pipeline: WGPURenderPipeline,
+	uniforms: [1]CameraUniforms
+) -> WGPUBuffer, u64, WGPUBindGroup, []WGPUBindGroupEntry {
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
 	size := max( cast(u64)16, cast(u64) uniforms.count * size_of(CameraUniforms));
 
@@ -66,7 +76,7 @@ camera_uniform_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, pipeline: WGP
 	};
 	bind_group := wgpuDeviceCreateBindGroup(device, *bind_group_descriptor);
 
-	return buffer, size, bind_group;
+	return buffer, size, bind_group, entries;
 }
 
 update_camera_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {

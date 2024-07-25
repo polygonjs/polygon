@@ -50,6 +50,7 @@ request_adapter :: (instance: WGPUInstance, surface: WGPUSurface, powerPreferenc
 create_surface :: (instance: WGPUInstance, window: *SDL_Window, label := "Main Surface") -> WGPUSurface {
 	surface_desc: WGPUSurfaceDescriptor;
 	surface_desc.label = to_c_string(label);
+	#if FREE_MEMORY defer free(surface_desc.label);
 
 	#if OS == .WINDOWS {
 		sdl_info: SDL_SysWMinfo;
@@ -180,13 +181,17 @@ create_shader :: (device: WGPUDevice, source: string, label := "Main shader") ->
 	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
 	wgslDescriptor.chain.next = null;
 	wgslDescriptor.chain.sType=.ShaderModuleWGSLDescriptor;
-	wgslDescriptor.code = to_c_string(source); 
+	wgslDescriptor.code = to_c_string(source);
+	#if FREE_MEMORY defer free(wgslDescriptor.code);
 
 	shaderModuleDescriptor: WGPUShaderModuleDescriptor;
 	shaderModuleDescriptor.label = to_c_string(label);
+	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
 	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
+	shader_module := wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
 
-	return wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
+
+	return shader_module;
 }
 
 update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDescriptor, device: WGPUDevice) {
@@ -194,10 +199,12 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDe
 
 	
 	bind_group_layouts := NewArray(2, WGPUBindGroupLayout);
+	#if FREE_MEMORY defer array_reset(*bind_group_layouts);
 
 	// group 0
 	{
 		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
+		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
 		bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
 			binding = 0,
 			visibility = xx WGPUShaderStage.Vertex,
@@ -211,6 +218,7 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDe
 	// group 1
 	{
 		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
+		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
 		bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
 			binding = 0,
 			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
@@ -221,7 +229,7 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDe
 			entries = bind_group_layout_entries.data,
 		}));
 	}
-	// 
+	//
 	pipeline_layout_descriptor.bindGroupLayoutCount = xx bind_group_layouts.count;
 	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
 
@@ -384,7 +392,7 @@ update_vertex_array_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_dat
 	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.vertices.data, size);
 }
 
-Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> WGPUVertexBufferLayout {
+Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> WGPUVertexBufferLayout, []WGPUVertexAttribute {
 	vertex_buffer_layout := WGPUVertexBufferLayout.{
 		arrayStride=xx layout.arrayStride,
 		stepMode=xx layout.stepMode,
@@ -403,5 +411,5 @@ Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> WGPUVerte
 	}
 	vertex_buffer_layout.attributes = attributes.data;
 
-	return vertex_buffer_layout;
+	return vertex_buffer_layout, attributes;
 }

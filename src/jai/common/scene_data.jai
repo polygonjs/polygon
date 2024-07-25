@@ -51,6 +51,7 @@ matrix4x4_to_buffer :: (matrix: *Matrix4, buffer: *Matrix4x4Buffer) #expand {
 
 create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	vertices : [..]Vertex;
+	indices:[..]VertexIndex;
 
 	size :Vector3= .{3,1,3};
 
@@ -69,7 +70,6 @@ create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	}
 
 
-	indices:[..]VertexIndex;
 	// Front face
 	array_add(*indices, 0);
 	array_add(*indices, 1);
@@ -117,6 +117,9 @@ create_vertices :: ()-> [..]Vertex, [..]VertexIndex {
 	array_add(*indices, 1);
 	array_add(*indices, 0);
 	array_add(*indices, 4);
+
+	this_allocation_is_not_a_leak(indices.data);
+	this_allocation_is_not_a_leak(vertices.data);
 
 	return vertices, indices;
 }

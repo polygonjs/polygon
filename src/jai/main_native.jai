@@ -18,7 +18,7 @@
 	// libstd :: #library,system,link_always "stdc++";
 }
 
-#import "Basic";
+#import "Basic"()(MEMORY_DEBUGGER=true);
 #import "Math";
 #import "wgpu";
 #import "SDL";
@@ -41,6 +41,7 @@
 #load "native/wgpu_depth.jai";
 #load "native/wgpu_multisample.jai";
 
+FREE_MEMORY :: true;
 WINDOW_WIDTH  :u32: 1280;
 WINDOW_HEIGHT :u32: 720;
 INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
@@ -113,8 +114,10 @@ main :: () {
 	pipeline_descriptor: WGPURenderPipelineDescriptor;
 	fragment_state: WGPUFragmentState;
 	color_target_state: WGPUColorTargetState;
-	wasm_vertex_layout_layout := wasm_make_vertex_layout(Vertex);
-	vertex_buffer_layout := Wasm_VertexBufferLayout_to_wgpu(wasm_vertex_layout_layout);
+	wasm_vertex_layout_layout, vertex_attributes := wasm_make_vertex_layout(Vertex);
+	vertex_buffer_layout, attributes := Wasm_VertexBufferLayout_to_wgpu(wasm_vertex_layout_layout);
+	#if FREE_MEMORY defer array_reset(*vertex_attributes);
+	#if FREE_MEMORY defer array_reset(*attributes);
 	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
 	fragment_state_prepare(*fragment_state, *color_target_state, shader, wgpu_context.preferred_texture_format);
 	update_pipeline_descriptor( *pipeline_descriptor, wgpu_context.device, shader, *vertex_buffer_layout, *fragment_state );
@@ -127,8 +130,10 @@ main :: () {
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
 	index_buffer, index_buffer_size := index_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.indices);
-	object_uniform_buffer, object_uniform_buffer_size, object_bind_group := object_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.object_uniforms);
-	camera_uniform_buffer, camera_uniform_buffer_size, camera_bind_group := camera_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.camera_uniforms);
+	object_uniform_buffer, object_uniform_buffer_size, object_bind_group, object_uniform_entries := object_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.object_uniforms);
+	camera_uniform_buffer, camera_uniform_buffer_size, camera_bind_group, camera_uniform_entries := camera_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.camera_uniforms);
+	#if FREE_MEMORY defer array_reset(*object_uniform_entries);
+	#if FREE_MEMORY defer array_reset(*camera_uniform_entries);
 
 	sdl_init_info := ImGui_ImplWGPU_InitInfo.{
 		Device = wgpu_context.device,
@@ -138,9 +143,17 @@ main :: () {
 	};
 	// sdl_init := ImGui_ImplWGPU_InitInfo_init(*sdl_init_info);
 	bd:ImGui_ImplWGPU_Data = .{};
-	imgui_wgpu_common:ImGui_WGPU_Common = .{};
+	iwc:ImGui_WGPU_Common = .{};
 	ImGui_ImplWGPU_Init(*bd, sdl_init_info);
 	// wgpuQueueSubmit(queue, 0, null);
+
+	//  array_reset(*vertex_attributes);
+	//  array_reset(*attributes);
+	//   array_reset(*object_uniform_entries);
+	//   array_reset(*camera_uniform_entries);
+	// report_memory_leaks();
+	// if(1+1)return;
+	
 
 	do_exit := false;
 	frames_count :u64= 0;
@@ -236,7 +249,7 @@ main :: () {
 				wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, index_buffer, WGPUIndexFormat.Uint32, 0, index_buffer_size);
 
 				wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-				gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *imgui_wgpu_common, *ui_data);
+				gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data);
 				wgpuRenderPassEncoderEnd(render_pass_encoder1);
 				
 
@@ -282,8 +295,9 @@ main :: () {
 		wgpuTextureRelease(wgpu_context.surface_texture.texture);
 		multisample_release(*wgpu_context);
 		depth_release(*wgpu_context);
+		gui_free(*iwc);
 		
-		// if frames_count>20 { do_exit = true; }
+		// if frames_count>10 { do_exit = true; }
 		// print_green(tprint("frames_count:%\n", frames_count));
 		frames_count += 1;
 	}
@@ -303,6 +317,8 @@ main :: () {
 	ImGui.DestroyContext();
 	SDL_DestroyWindow(window);
 	wgpuInstanceRelease(wgpu_context.instance);
+
+	defer report_memory_leaks();
 
 	// Clean up
 	SDL_Quit();

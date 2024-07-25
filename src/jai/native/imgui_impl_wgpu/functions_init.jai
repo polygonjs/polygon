@@ -54,6 +54,7 @@ ImGui_ImplWGPU_Init :: (bd:*ImGui_ImplWGPU_Data,info: ImGui_ImplWGPU_InitInfo) -
 			VertexBufferSize = 5000,
 		});
 	}
+	this_allocation_is_not_a_leak(bd.pFrameResources.data);
 	// bd2 := ImGui_ImplWGPU_GetBackendData();
 	return true;
 }

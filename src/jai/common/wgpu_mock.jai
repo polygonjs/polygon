@@ -95,7 +95,7 @@ Wasm_VertexBufferLayout :: struct {
 	attributes:     *Wasm_VertexAttribute;
 }
 
-wasm_make_vertex_layout :: ($type: Type) -> Wasm_VertexBufferLayout {
+wasm_make_vertex_layout :: ($type: Type) -> Wasm_VertexBufferLayout, []Wasm_VertexAttribute {
 	info := type_info(type);
 
 	vertex_buffer_layout := Wasm_VertexBufferLayout.{
@@ -104,6 +104,7 @@ wasm_make_vertex_layout :: ($type: Type) -> Wasm_VertexBufferLayout {
 	};
 
 	vertex_attributes := NewArray(info.members.count, Wasm_VertexAttribute);
+	// defer array_reset(*vertex_attributes);
 
 	for info.members {
 		vertex_attribute: Wasm_VertexAttribute;
@@ -150,7 +151,7 @@ wasm_make_vertex_layout :: ($type: Type) -> Wasm_VertexBufferLayout {
 	vertex_buffer_layout.attributeCount = xx vertex_attributes.count;
 	vertex_buffer_layout.attributes = vertex_attributes.data;
 
-	return vertex_buffer_layout;
+	return vertex_buffer_layout, vertex_attributes;
 }
 
 

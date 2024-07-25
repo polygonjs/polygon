@@ -23,7 +23,7 @@ ImGui_ImplWGPU_Shutdown :: () {
 	ImGui_ImplWGPU_InvalidateDeviceObjects();
 	// delete[] bd->pFrameResources;
 	// free(bd.pFrameResources);
-	for *bd.pFrameResources free(it);
+	// for *bd.pFrameResources free(it);
 	array_reset(*bd.pFrameResources);
 
 	// bd.pFrameResources = null;

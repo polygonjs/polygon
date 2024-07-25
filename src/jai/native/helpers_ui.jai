@@ -77,3 +77,10 @@ gui_update :: (
 	draw_data := ImGui.GetDrawData();
 	ImGui_ImplWGPU_RenderDrawData(*iwc.draw, draw_data, render_pass);
 }
+
+gui_free :: (iwc: *ImGui_WGPU_Common){
+	#if FREE_MEMORY {
+		array_reset(*iwc.draw.im_draw_verts);
+		array_reset(*iwc.draw.im_draw_idxs);
+	}
+}
