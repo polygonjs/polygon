@@ -20,14 +20,18 @@ struct CameraUniforms {
 	transformMatrixInverse: mat4x4f,
 	projectionMatrix: mat4x4f,
 };
+struct SDFUniforms {
+	offset: vec4<f32>,
+};
 
 @group(0) @binding(0) var<uniform> object: ObjectUniforms;
 @group(1) @binding(0) var<uniform> camera: CameraUniforms;
+@group(2) @binding(0) var<uniform> sdf: SDFUniforms;
 
 @vertex
 fn vertex(model: VertexInput) -> VertexOutput {
 	var out: VertexOutput;
-	var mvPosition = vec4<f32>(model.position, 1.0);
+	var mvPosition = vec4<f32>(model.position+sdf.offset.xyz, 1.0);
 	// out.clip_position = vec4<f32>(model.position, 1.0) * (object.transformMatrix);
 	// out.clip_position = out.clip_position * camera.transformMatrixInverse;
 	// out.clip_position = camera.projectionMatrix * out.clip_position;
