@@ -10,8 +10,12 @@
 
 WASM_INSERTION_STRING :: #string DONE
 
-SHADER :: #string WGSL
+SHADER_RENDER :: #string WGSL
 %1;
+WGSL
+
+SHADER_COMPUTE :: #string WGSL
+%2;
 WGSL
 
 DONE
@@ -82,7 +86,7 @@ BUILD_NATIVE :: true;
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
 							SHADER :: #run create_shaders();
-							build_string := sprint(WASM_INSERTION_STRING, SHADER);
+							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute);
 							add_build_string(build_string, w);
 							generated_code = true;
 						}

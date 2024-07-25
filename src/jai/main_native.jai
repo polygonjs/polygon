@@ -45,6 +45,7 @@ USE_IMGUI :: true;
 #load "native/uniforms_helpers.jai";
 #load "native/shaders.jai";
 #load "native/orbit_controls.jai";
+#load "native/wgpu_compute.jai";
 #load "native/wgpu_depth.jai";
 #load "native/wgpu_multisample.jai";
 
@@ -66,7 +67,7 @@ wgpu_log_callback :: (level: WGPULogLevel, msg: *u8, userdata: *void) #c_call {
 
 
 main :: () {
-	SHADER :: #run create_shaders();
+	SHADERS :: #run create_shaders();
 	SCENE_DATA :SceneData= create_scene_data(INIT_RATIO);
 	orbit_controls :OrbitControls;
 
@@ -106,12 +107,13 @@ main :: () {
 	wgpuSetLogLevel(.Error); //(.Warn);
 
 	wgpu_context: WGPUContext = wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
-	
 
 	queue := wgpuDeviceGetQueue(wgpu_context.device);
 	assert(queue != null, "Queue is not created correctly");
 
-	shader := create_shader(wgpu_context.device, SHADER);
+	compute_test(*wgpu_context, queue, SHADERS.compute);
+
+	shader := create_shader(wgpu_context.device, SHADERS.render);
 	assert(shader != null, "Shader is not created correctly");
 
 	pipeline_descriptor: WGPURenderPipelineDescriptor;
@@ -219,7 +221,7 @@ main :: () {
 			cmd_buffer1: WGPUCommandBuffer;
 			cmd_encoder1 := wgpuDeviceCreateCommandEncoder(
 				wgpu_context.device,
-				*(WGPUCommandEncoderDescriptor.{label = "Command Encoder 3D"}),
+				*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Render"}),
 			);
 			defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
 			defer wgpuCommandBufferRelease(cmd_buffer1);
@@ -300,7 +302,7 @@ main :: () {
 		depth_release(*wgpu_context);
 		#if USE_IMGUI gui_free(*iwc);
 		
-		// if frames_count>10 { do_exit = true; }
+		if frames_count>1 { do_exit = true; }
 		// print_green(tprint("frames_count:%\n", frames_count));
 		frames_count += 1;
 	}

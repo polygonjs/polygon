@@ -1,4 +1,5 @@
 import "../css/style.css";
+import { computeTest } from "./ComputeTest";
 import { loadWasm } from "./WasmRuntime";
 import { requestWebGPU, setupAndRenderWebGPU } from "./WebGPU";
 // @ts-ignore
@@ -13,5 +14,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return;
 	}
 	setupAndRenderWebGPU(device);
-	// debugMain();
+	computeTest({ device });
 });

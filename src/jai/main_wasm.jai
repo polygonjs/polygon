@@ -4,7 +4,8 @@
 #load "common/orbit_controls.jai";
 #load "common/scene_data.jai";
 #load "common/wgpu_mock.jai";
-#placeholder SHADER;
+#placeholder SHADER_RENDER;
+#placeholder SHADER_COMPUTE;
 
 SCENE_DATA :SceneData;
 orbit_controls :OrbitControls;
@@ -58,7 +59,7 @@ main :: () {
 	set_webgpu_camera_uniforms_data(SCENE_DATA.camera_uniforms);
 	set_webgpu_sdf_data_data(SCENE_DATA.sdf_data);
 	set_webgpu_sdf_uniforms_data(SCENE_DATA.sdf_uniforms);
-	set_webgpu_shader(SHADER);
+	set_webgpu_shader(SHADER_RENDER);
 	set_webgpu_orbit_controls_data(*orbit_controls);
 	// time:float=0;
 	// while (true) {
