@@ -27,6 +27,12 @@ CameraUniforms :: struct {
 	transformMatrixInverse: Matrix4x4Buffer;
 	projectionMatrix: Matrix4x4Buffer;
 };
+SDFData :: struct {
+	offset:Vector4;
+};
+SDFUniforms :: struct {
+	offset:Vector4;
+};
 
 SceneData :: struct {
 	time: Time;
@@ -42,6 +48,9 @@ SceneData :: struct {
 	camera_far: float32 = 100.0;
 	camera_data: [1]CameraData;
 	camera_uniforms: [1]CameraUniforms;
+	// sdf
+	sdf_data: [1]SDFData;
+	sdf_uniforms: [1]SDFUniforms;
 };
 
 matrix4x4_to_buffer :: (matrix: *Matrix4, buffer: *Matrix4x4Buffer) #expand {
@@ -185,6 +194,7 @@ create_scene_data :: (aspect:float32)-> SceneData {
 update_scene_data_uniforms :: (scene_data: *SceneData) {
 	update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
 	update_camera_uniforms(*scene_data.camera_data, *scene_data.camera_uniforms, scene_data.time);
+	update_sdf_uniforms(*scene_data.sdf_data, *scene_data.sdf_uniforms, scene_data.time);
 }
 update_object_uniforms :: (object_data: *[1]ObjectData, object_uniforms: *[1]ObjectUniforms) {
 	transposedMatrix := transpose((<<object_data)[0].transformMatrix);
@@ -200,6 +210,9 @@ update_camera_uniforms :: (camera_data: *[1]CameraData, camera_uniforms: *[1]Cam
 	projectionMatrix := transpose((<<camera_data)[0].projectionMatrix);
 	matrix4x4_to_buffer(*transformMatrixInverse, *((<<camera_uniforms)[0].transformMatrixInverse));
 	matrix4x4_to_buffer(*projectionMatrix, *((<<camera_uniforms)[0].projectionMatrix));
+}
+update_sdf_uniforms :: (sdf_data: *[1]SDFData, sdf_uniforms: *[1]SDFUniforms, time: Time) {
+	(<<sdf_uniforms)[0].offset = (<<sdf_data)[0].offset;
 }
 // create_camera_data :: (aspect: float32)-> CameraData {
 // 	camera_data : CameraData;

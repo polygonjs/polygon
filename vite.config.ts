@@ -5,6 +5,9 @@ import { exec, ExecException } from "child_process";
 // import * as fs from "fs";
 // import * as path from "path";
 
+const BUILD_ON_FILE_CHANGE: boolean = true;
+const RUN_NATIVE_ON_FILE_CHANGE: boolean = false;
+
 function fileIsNotInDotBuildFolder(filePath: string): boolean {
 	return filePath.includes("/.build/") == false;
 }
@@ -34,13 +37,17 @@ const onBuild = (
 		});
 		// exec(`xmessage -center '${stderr}' -timeout 4`);
 	} else {
-		console.log(`Compiled .jai files: ${stdout}`);
-		console.log(`-----------------------------------------`);
-		console.log(`--------------- Running app`);
-		console.log(`-----------------------------------------`);
-		exec(`bin/polygon-next-native`, (err, stdout, stderr) =>
-			onRun(server, err, stdout, stderr)
-		);
+		if (RUN_NATIVE_ON_FILE_CHANGE) {
+			console.log(`Compiled .jai files: ${stdout}`);
+			console.log(`-----------------------------------------`);
+			console.log(`--------------- Running app`);
+			console.log(`-----------------------------------------`);
+			exec(`bin/polygon-next-native`, (err, stdout, stderr) =>
+				onRun(server, err, stdout, stderr)
+			);
+		} else {
+			console.warn(`not running native app`);
+		}
 
 		server.ws.send({
 			type: "custom",
@@ -67,7 +74,7 @@ function jaiPlugin() {
 		server.watcher.add("src/**/*.wgsl");
 
 		server.watcher.on("change", (filePath) => {
-			if (fileIsValid(filePath)) {
+			if (fileIsValid(filePath) && BUILD_ON_FILE_CHANGE) {
 				// console.log(
 				// 	"config is not set to recompile for now, compile manually"
 				// );

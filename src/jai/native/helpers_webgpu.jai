@@ -198,10 +198,10 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDe
 	pipeline_layout_descriptor: WGPUPipelineLayoutDescriptor;
 
 	
-	bind_group_layouts := NewArray(2, WGPUBindGroupLayout);
+	bind_group_layouts := NewArray(3, WGPUBindGroupLayout);
 	#if FREE_MEMORY defer array_reset(*bind_group_layouts);
 
-	// group 0
+	// group 0 (object uniforms)
 	{
 		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
 		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
@@ -215,7 +215,7 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDe
 			entries = bind_group_layout_entries.data,
 		}));
 	}
-	// group 1
+	// group 1 (camera uniforms)
 	{
 		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
 		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
@@ -225,6 +225,20 @@ update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDe
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
 		bind_group_layouts[1] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
+			entryCount = xx bind_group_layout_entries.count,
+			entries = bind_group_layout_entries.data,
+		}));
+	}
+	// group 2 (SDF uniforms)
+	{
+		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
+		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
+		bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
+			binding = 0,
+			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
+			buffer = .{ type = WGPUBufferBindingType.Uniform },
+		};
+		bind_group_layouts[2] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
 			entryCount = xx bind_group_layout_entries.count,
 			entries = bind_group_layout_entries.data,
 		}));

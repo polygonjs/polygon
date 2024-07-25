@@ -130,10 +130,12 @@ main :: () {
 
 	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
 	index_buffer, index_buffer_size := index_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.indices);
-	object_uniform_buffer, object_uniform_buffer_size, object_bind_group, object_uniform_entries := object_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.object_uniforms);
-	camera_uniform_buffer, camera_uniform_buffer_size, camera_bind_group, camera_uniform_entries := camera_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.camera_uniforms);
+	object_uniform_buffer, object_bind_group, object_uniform_entries := object_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.object_uniforms);
+	camera_uniform_buffer, camera_bind_group, camera_uniform_entries := camera_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.camera_uniforms);
+	sdf_uniform_buffer, sdf_bind_group, sdf_uniform_entries := sdf_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.sdf_uniforms);
 	#if FREE_MEMORY defer array_reset(*object_uniform_entries);
 	#if FREE_MEMORY defer array_reset(*camera_uniform_entries);
+	#if FREE_MEMORY defer array_reset(*sdf_uniform_entries);
 
 	sdl_init_info := ImGui_ImplWGPU_InitInfo.{
 		Device = wgpu_context.device,
@@ -203,6 +205,7 @@ main :: () {
 		update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
 		update_object_uniforms_to_buffer(object_uniform_buffer, queue, *SCENE_DATA);
 		update_camera_uniforms_to_buffer(camera_uniform_buffer, queue, *SCENE_DATA);
+		update_sdf_uniforms_to_buffer(sdf_uniform_buffer, queue, *SCENE_DATA);
 
 
 		//
@@ -238,6 +241,7 @@ main :: () {
 
 				//
 				wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, pipeline);
+				//
 				object_dynamicOffsets:[0]u32;
 				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 0, object_bind_group, 0, object_dynamicOffsets.data);
 				//
@@ -245,13 +249,17 @@ main :: () {
 				// camera_dynamicOffsets[0] = 16*4;
 				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 1, camera_bind_group, 0, camera_dynamicOffsets.data);
 				//
+				sdf_dynamicOffsets:[0]u32;
+				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 2, sdf_bind_group, 0, sdf_dynamicOffsets.data);
+				//
+				//
 				wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, vertex_buffer, 0, vertex_buffer_size);
 				wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, index_buffer, WGPUIndexFormat.Uint32, 0, index_buffer_size);
 
 				wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-				gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data);
+				gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA);
 				wgpuRenderPassEncoderEnd(render_pass_encoder1);
-				
+
 
 				cmd_buffer1 = wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer 3D"}));
 

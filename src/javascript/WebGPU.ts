@@ -127,6 +127,10 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 		16,
 		SCENE_DATA.cameraUniformBuffer.length
 	);
+	const SDFUniformBufferSize = Math.max(
+		16,
+		SCENE_DATA.SDFUniformBuffer.length
+	);
 	//Math.max(SCENE_DATA.objectUniformBuffer.length, 16);
 	// 4 * 4 + // color is 4 32bit floats (4bytes each)
 	// 2 * 4 + // scale is 2 32bit floats (4bytes each)
@@ -137,6 +141,10 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 	});
 	const cameraUniformBuffer = device.createBuffer({
 		size: cameraUniformBufferSize * 4,
+		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+	});
+	const SDFUniformBuffer = device.createBuffer({
+		size: SDFUniformBufferSize * 4,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 	});
 
@@ -154,6 +162,10 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 	const cameraBindGroup = device.createBindGroup({
 		layout: pipeline.getBindGroupLayout(1),
 		entries: [{ binding: 0, resource: { buffer: cameraUniformBuffer } }],
+	});
+	const SDFBindGroup = device.createBindGroup({
+		layout: pipeline.getBindGroupLayout(2),
+		entries: [{ binding: 0, resource: { buffer: SDFUniformBuffer } }],
 	});
 
 	let multisampleTextureContainer: MultiSampleTextureContainer = {
@@ -197,6 +209,11 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 			0,
 			SCENE_DATA.cameraUniformBuffer
 		);
+		device.queue.writeBuffer(
+			SDFUniformBuffer,
+			0,
+			SCENE_DATA.SDFUniformBuffer
+		);
 
 		createMultiSampleTextureIfNeeded(
 			device,
@@ -232,6 +249,7 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 		pass.setPipeline(pipeline);
 		pass.setBindGroup(0, objectBindGroup);
 		pass.setBindGroup(1, cameraBindGroup);
+		pass.setBindGroup(2, SDFBindGroup);
 		pass.setVertexBuffer(0, vertexArrayBufferResult.buffer);
 		pass.setIndexBuffer(indexArrayToBufferResult.buffer, "uint32");
 		pass.drawIndexed(indexArrayToBufferResult.data.length);
@@ -243,7 +261,7 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 		requestAnimationFrame(render);
 	}
 
-	requestAnimationFrame(render);
+	render();
 
 	webGPUListenToResize(device, domElement, canvas);
 }

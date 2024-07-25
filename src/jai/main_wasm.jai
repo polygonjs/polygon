@@ -56,6 +56,8 @@ main :: () {
 	set_webgpu_index_data(SCENE_DATA.indices);
 	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
 	set_webgpu_camera_uniforms_data(SCENE_DATA.camera_uniforms);
+	set_webgpu_sdf_data_data(SCENE_DATA.sdf_data);
+	set_webgpu_sdf_uniforms_data(SCENE_DATA.sdf_uniforms);
 	set_webgpu_shader(SHADER);
 	set_webgpu_orbit_controls_data(*orbit_controls);
 	// time:float=0;
@@ -81,10 +83,10 @@ main :: () {
 // 	}
 // }
 
-// dom_logger :: (message: string, data: *void, info: Log_Info) {
-// 	is_error := (info.common_flags & .ERROR) != 0;
-// 	wasm_log_dom(message.count, message.data, is_error);
-// }
+dom_logger :: (message: string, data: *void, info: Log_Info) {
+	is_error := (info.common_flags & .ERROR) != 0;
+	wasm_log_dom(message.count, message.data, is_error);
+}
 set_webgpu_shader :: (message: string) {
 	set_webgpu_shader_js(message.count, message.data);
 }
@@ -104,6 +106,12 @@ set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
 set_webgpu_camera_uniforms_data :: (camera_uniforms: [1]CameraUniforms) {
 	set_webgpu_camera_uniforms_js(size_of(CameraUniforms)/size_of(float), camera_uniforms.data, size_of(float));
 }
+set_webgpu_sdf_data_data :: (sdf_data: [1]SDFData) {
+	set_webgpu_sdf_data_js(size_of(SDFData)/size_of(float), sdf_data.data, size_of(float));
+}
+set_webgpu_sdf_uniforms_data :: (sdf_uniforms: [1]SDFUniforms) {
+	set_webgpu_sdf_uniforms_js(size_of(SDFUniforms)/size_of(float), sdf_uniforms.data, size_of(float));
+}
 set_webgpu_orbit_controls_data :: (orbitControls: *OrbitControls) {
 	set_webgpu_orbit_controls_js(size_of(OrbitControls), orbitControls, size_of(float));
 }
@@ -118,6 +126,8 @@ set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #f
 set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
 set_webgpu_object_uniforms_js :: (count: s64, data: *ObjectUniforms, element_size:u8) #foreign;
 set_webgpu_camera_uniforms_js :: (count: s64, data: *CameraUniforms, element_size:u8) #foreign;
+set_webgpu_sdf_data_js :: (count: s64, data: *SDFData, element_size:u8) #foreign;
+set_webgpu_sdf_uniforms_js :: (count: s64, data: *SDFUniforms, element_size:u8) #foreign;
 set_webgpu_orbit_controls_js :: (count: s64, data: *OrbitControls, element_size:u8) #foreign;
 // set_webgpu_data :: (value: float) #foreign;
 // main_call_completed :: () #foreign;
@@ -135,8 +145,6 @@ update_wasm :: (new_time: s64, _new_aspect: s64) {
 	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 
 	update_scene_data_uniforms(*SCENE_DATA);
-	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
-	set_webgpu_camera_uniforms_data(SCENE_DATA.camera_uniforms);
 }
 
 

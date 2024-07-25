@@ -28,7 +28,8 @@ gui_update :: (
 	render_pass: WGPURenderPassEncoder,
 	bd: *ImGui_ImplWGPU_Data,
 	iwc: *ImGui_WGPU_Common,
-	ui_data: *UiData
+	ui_data: *UiData,
+	scene_data: *SceneData
 ){
 
 	width := wgpuTextureGetWidth(wgpu_context.surface_texture.texture);
@@ -47,14 +48,18 @@ gui_update :: (
 	ImGui.NewFrame();
 	{
 
-		ImGui.Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+		ImGui.Begin("SDF Controls");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui.Text("This is some useful text.");               // Display some text (you can use a format string too)
 		// ImGui.Checkbox("Demo Window", *show_demo_window);      // Edit bools storing our window open/close state
 		ImGui.Checkbox("Another Window", *ui_data.show_another_window);
 
-		ImGui.SliderFloat("float", *ui_data.f, 0.0, 1.0);            // Edit 1 float using a slider from 0.0f to 1.0f
-		// // ImGui.ColorEdit3("clear color", clear_color); // Edit 3 floats representing a color
+		v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
+		ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
+		scene_data.sdf_data[0].offset.x = v3_array[0];
+		scene_data.sdf_data[0].offset.y = v3_array[1];
+		scene_data.sdf_data[0].offset.z = v3_array[2];
+		// ImGui.ColorEdit3("clear color", clear_color); // Edit 3 floats representing a color
 
 		// if (ImGui.Button("Button")==true){
 		// 		ui_data.counter+=1;

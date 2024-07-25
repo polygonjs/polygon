@@ -30,25 +30,27 @@ const exported_js_functions = {
 		// debugger;
 	},
 	wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
-		const log = document.getElementById("log");
-		if (!log) {
-			console.error("No log element found");
-			return;
-		}
 		const string = js_string_from_jai_string(s_data, s_count);
 		if (!string) {
+			console.warn("No string");
 			return;
 		}
-		const lines = string.split("\n");
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			if (!line && i == lines.length - 1) continue; // Don’t create an extra empty line after the last newline
+		console.log(string);
+		// const log = document.getElementById("log");
+		// if (!log) {
+		// 	console.error("No log element found");
+		// 	return;
+		// }
+		// const lines = string.split("\n");
+		// for (let i = 0; i < lines.length; i++) {
+		// 	const line = lines[i];
+		// 	if (!line && i == lines.length - 1) continue; // Don’t create an extra empty line after the last newline
 
-			const element = document.createElement("div");
-			if (is_error) element.style.color = "#d33";
-			element.innerText = line;
-			log.appendChild(element);
-		}
+		// 	const element = document.createElement("div");
+		// 	if (is_error) element.style.color = "#d33";
+		// 	element.innerText = line;
+		// 	log.appendChild(element);
+		// }
 	},
 	set_webgpu_shader_js: (s_count: number, s_data: BigInt) => {
 		const shader = js_string_from_jai_string(s_data, s_count);
@@ -142,6 +144,57 @@ const exported_js_functions = {
 			return;
 		}
 		SCENE_DATA.cameraUniformBuffer = buffer;
+	},
+	set_webgpu_sdf_data_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Float32Array
+		);
+		if (!buffer) {
+			console.error("set_webgpu_object_uniforms_js: No buffer");
+			return;
+		}
+		SCENE_DATA.SDFData = buffer;
+		if ((window as any).input == null) {
+			const input = document.createElement("input");
+			(window as any).input = input;
+			input.style.position = "fixed";
+			input.style.top = "0";
+			input.style.left = "0";
+			document.body.appendChild(input);
+			input.setAttribute("type", "range");
+			input.setAttribute("min", "-1");
+			input.setAttribute("max", "1");
+			input.setAttribute("step", "0.01");
+			input.addEventListener("input", () => {
+				SCENE_DATA.SDFData[0] = parseFloat(input.value);
+			});
+		} else {
+			console.error("this should only be run once");
+		}
+	},
+	set_webgpu_sdf_uniforms_js: (
+		s_count: number,
+		s_data: BigInt,
+		elementSize: number
+	) => {
+		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+			s_data,
+			s_count,
+			elementSize,
+			Float32Array
+		);
+		if (!buffer) {
+			console.error("set_webgpu_sdf_uniforms_js: No buffer");
+			return;
+		}
+		SCENE_DATA.SDFUniformBuffer = buffer;
 	},
 	set_webgpu_orbit_controls_js: (
 		s_count: number,

@@ -10,6 +10,9 @@ export interface SceneData {
 	//
 	cameraUniformBuffer: Float32Array;
 	//
+	SDFData: Float32Array;
+	SDFUniformBuffer: Float32Array;
+	//
 	orbitControlsBuffer: Float32Array;
 	orbitControls: OrbitControls;
 }
@@ -23,6 +26,9 @@ export const SCENE_DATA: SceneData = {
 	objectUniformBuffer: new Float32Array(0),
 	//
 	cameraUniformBuffer: new Float32Array(0),
+	//
+	SDFData: new Float32Array(0),
+	SDFUniformBuffer: new Float32Array(0),
 	//
 	orbitControlsBuffer: new Float32Array(0),
 	orbitControls: orbitControlsCreate(),

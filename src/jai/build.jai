@@ -18,8 +18,8 @@ DONE
 
 #load "native/shaders.jai";
 
-BUILD_WASM :: false;
-BUILD_NATIVE :: true;
+BUILD_WASM :: true;
+BUILD_NATIVE :: false;
 
 #run {
 	set_build_options_dc(.{do_output = false});

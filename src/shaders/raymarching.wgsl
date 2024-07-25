@@ -20,6 +20,9 @@ struct CameraUniforms {
 	transformMatrixInverse: mat4x4f,
 	projectionMatrix: mat4x4f,
 };
+struct SDFUniforms {
+	offset: vec4<f32>,
+};
 
 struct SDFContext {
 	d: f32,
@@ -70,7 +73,7 @@ fn GetDist(p:vec3<f32>) -> SDFContext {
 
 
 	// /geo1/MAT/rayMarchingBuilder1/SDFSphere3
-	var sphere1 = sdSphere(p - vec3(-0.25, 0.0, 0.0), 0.2);
+	var sphere1 = sdSphere(p - (vec3(-0.25, 0.0, 0.0)+sdf.offset.xyz), 0.2);
 	var sphere2 = sdSphere(p - vec3( 0.25, 0.2*sin(camera.time.x), 0.0), 0.2);
 	var plane1 = sdPlane(p-vec3(0.0, -0.2, 0.0), vec3(0.0, 1.0, 0.0), 0.0);
 	
@@ -186,6 +189,7 @@ fn applyShading( rayOrigin:vec3<f32>, rayDir:vec3<f32>,   sdfContext:SDFContext)
 
 @group(0) @binding(0) var<uniform> object: ObjectUniforms;
 @group(1) @binding(0) var<uniform> camera: CameraUniforms;
+@group(2) @binding(0) var<uniform> sdf: SDFUniforms;
 
 
 
