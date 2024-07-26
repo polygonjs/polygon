@@ -8,7 +8,7 @@ Shaders :: struct {
 create_shaders :: ()-> Shaders {
 	shaders :Shaders= .{};
 	filepath_render :: #run tprint("%../../shaders/basic.wgsl", #filepath);
-	filepath_compute :: #run tprint("%../../shaders/compute.wgsl", #filepath);
+	filepath_compute :: #run tprint("%../../shaders/compute3.wgsl", #filepath);
 	// filepath_render :: #run tprint("%../../shaders/raymarching.wgsl", #filepath);
 	shader_render, success_render :: #run read_entire_file(filepath_render);
 	if !success_render {

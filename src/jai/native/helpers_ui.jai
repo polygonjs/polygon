@@ -48,25 +48,33 @@ gui_update :: (
 	ImGui.NewFrame();
 	{
 
-		ImGui.SetNextWindowSize(.{300, 400}, ImGuiCond.FirstUseEver);
+		ImGui.SetNextWindowSize(.{300, 600}, ImGuiCond.FirstUseEver);
 		ImGui.Begin("SDF Controls");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui.Text("This is some useful text.");               // Display some text (you can use a format string too)
 		// ImGui.Checkbox("Demo Window", *show_demo_window);      // Edit bools storing our window open/close state
 		ImGui.Checkbox("Another Window", *ui_data.show_another_window);
 
-		v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
-		ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
+		// v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
+		// ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
+		ImGui.Text("Box Size");
+		ImGui.SliderFloat("sx", *scene_data.box_size.x, 0.1, 5.0);
+		ImGui.SliderFloat("sy", *scene_data.box_size.y, 0.1, 5.0);
+		ImGui.SliderFloat("sz", *scene_data.box_size.z, 0.1, 5.0);
 
-		ImGui.SliderFloat("x", *v3_array[0], -1.0, 1.0);
-		ImGui.SliderFloat("y", *v3_array[1], -1.0, 1.0);
-		ImGui.SliderFloat("z", *v3_array[2], -1.0, 1.0);
+		ImGui.Text("Position");
+		ImGui.SliderFloat("x", *scene_data.sdf_data[0].offset.x, -1.0, 1.0);
+		ImGui.SliderFloat("y", *scene_data.sdf_data[0].offset.y, -1.0, 1.0);
+		ImGui.SliderFloat("z", *scene_data.sdf_data[0].offset.z, -1.0, 1.0);
 
-		scene_data.sdf_data[0].offset.x = v3_array[0];
-		scene_data.sdf_data[0].offset.y = v3_array[1];
-		scene_data.sdf_data[0].offset.z = v3_array[2];
+		// scene_data.sdf_data[0].offset.x = v3_array[0];
+		// scene_data.sdf_data[0].offset.y = v3_array[1];
+		// scene_data.sdf_data[0].offset.z = v3_array[2];
 
 		if (ImGui.Button("Reset")) {
+			scene_data.box_size.x = 1;
+			scene_data.box_size.y = 1;
+			scene_data.box_size.z = 1;
 			scene_data.sdf_data[0].offset.x = 0;
 			scene_data.sdf_data[0].offset.y = 0;
 			scene_data.sdf_data[0].offset.z = 0;

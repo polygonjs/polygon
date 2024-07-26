@@ -13,6 +13,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 	if (!device) {
 		return;
 	}
-	setupAndRenderWebGPU(device);
-	computeTest({ device });
+	const computeResult = await computeTest({ device });
+	if (!computeResult) {
+		console.error("computeResult is null");
+		return;
+	}
+	setupAndRenderWebGPU(
+		device,
+		computeResult.verticesBufferRead,
+		computeResult.verticesBufferResult
+	);
 });

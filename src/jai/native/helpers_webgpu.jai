@@ -373,6 +373,9 @@ pipeline_descriptor_print :: (pipeline_descriptor: *WGPURenderPipelineDescriptor
 vertex_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, vertices: []Vertex) -> WGPUBuffer, u64 {
 	size := cast(u64) vertices.count * size_of(Vertex);
 
+	print("vertices:%\n",vertices);
+	print("vertices:%\n",cast([64]float) vertices.data);
+
 	buffer := wgpuDeviceCreateBuffer(device, *(WGPUBufferDescriptor.{
 		usage = xx (WGPUBufferUsage.Vertex | WGPUBufferUsage.CopyDst),
 		size=size

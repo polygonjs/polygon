@@ -37,6 +37,7 @@ SDFUniforms :: struct {
 SceneData :: struct {
 	time: Time;
 	// object
+	box_size: Vector3=.{3.0, 1.0, 1.0};
 	vertices: [..]Vertex;
 	indices: [..]VertexIndex;
 	object_data: [1]ObjectData;

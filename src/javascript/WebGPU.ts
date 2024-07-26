@@ -6,6 +6,7 @@ import {
 	SCENE_DATA,
 	updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
+	VertexArrayToBufferResult,
 } from "./SceneData";
 import {
 	createDepthTextureIfNeeded,
@@ -43,7 +44,11 @@ export async function requestWebGPU() {
 	return device;
 }
 
-export async function setupAndRenderWebGPU(device: GPUDevice) {
+export async function setupAndRenderWebGPU(
+	device: GPUDevice,
+	vertexBufferRead: Float32Array,
+	verticesBufferResult: VertexArrayToBufferResult
+) {
 	const domElement = document.getElementById("app") as HTMLElement;
 	if (!domElement) {
 		alert("no dom element found with id app");
@@ -71,10 +76,12 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 	const module = device.createShaderModule({
 		code: SHADERS.basic,
 	});
-	const vertexArrayBufferResult = vertexArrayToBuffer(
-		device,
-		SCENE_DATA.vertexBuffer
-	);
+	// console.log("Compare:", vertexBufferRead, SCENE_DATA.vertexBuffer);
+	// const vertexArrayBufferResult = vertexArrayToBuffer(
+	// 	device,
+	// 	[vertexBufferRead, SCENE_DATA.vertexBuffer][0]
+	// );
+	const vertexArrayBufferResult = verticesBufferResult;
 	const indexArrayToBufferResult = indexArrayToBuffer(
 		device,
 		SCENE_DATA.indexBuffer
@@ -198,7 +205,7 @@ export async function setupAndRenderWebGPU(device: GPUDevice) {
 			BigInt(Math.round(aspect * 1000))
 		);
 
-		updateVertexArrayToBuffer(device, vertexArrayBufferResult);
+		// updateVertexArrayToBuffer(device, vertexArrayBufferResult);
 		device.queue.writeBuffer(
 			objectUniformBuffer,
 			0,

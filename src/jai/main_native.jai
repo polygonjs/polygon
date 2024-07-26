@@ -4,6 +4,7 @@ WINDOW_WIDTH  :u32: 1280;
 WINDOW_HEIGHT :u32: 720;
 INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
 USE_IMGUI :: true;
+USE_COMPUTE_SHADER :: true;
 
 #if OS == .LINUX  {
 	// in order to import gcc_s, I initially tried:
@@ -27,6 +28,7 @@ USE_IMGUI :: true;
 
 #import "Basic"()(MEMORY_DEBUGGER=true);
 #import "Math";
+#import "String";
 #import "wgpu";
 #import "SDL";
 #import "imgui"; // not "ImGui"
@@ -111,7 +113,6 @@ main :: () {
 	queue := wgpuDeviceGetQueue(wgpu_context.device);
 	assert(queue != null, "Queue is not created correctly");
 
-	compute_test(*wgpu_context, queue, SHADERS.compute);
 
 	shader_module := create_shader(wgpu_context.device, SHADERS.render);
 	assert(shader_module != null, "shader_module is not created correctly");
@@ -133,7 +134,11 @@ main :: () {
 	pipeline := wgpuDeviceCreateRenderPipeline(wgpu_context.device, *pipeline_descriptor);
 	assert(pipeline != null, "Pipeline is not created correctly");
 
-	vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
+	#if USE_COMPUTE_SHADER {
+		compute_shader_controller := compute_shader_controller_create(*wgpu_context, queue, SHADERS.compute);
+	} else {
+		vertex_buffer, vertex_buffer_size := vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
+	}
 	index_buffer, index_buffer_size := index_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.indices);
 	object_uniform_buffer, object_bind_group, object_uniform_entries := object_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.object_uniforms);
 	camera_uniform_buffer, camera_bind_group, camera_uniform_entries := camera_uniform_to_buffer(wgpu_context.device, queue, pipeline, SCENE_DATA.camera_uniforms);
@@ -199,13 +204,15 @@ main :: () {
 		orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 		update_scene_data(*SCENE_DATA, time);
 		update_scene_data_uniforms(*SCENE_DATA);
-		update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
+		// update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
 		update_object_uniforms_to_buffer(object_uniform_buffer, queue, *SCENE_DATA);
 		update_camera_uniforms_to_buffer(camera_uniform_buffer, queue, *SCENE_DATA);
 		update_sdf_uniforms_to_buffer(sdf_uniform_buffer, queue, *SCENE_DATA);
 
-
-		//
+		#if USE_COMPUTE_SHADER {
+			compute_shader_controller.update_box_size(compute_shader_controller, SCENE_DATA.box_size);
+			compute_shader_controller.compute(compute_shader_controller);
+		}
 		
 
 		colorAttachment := WGPURenderPassColorAttachment.{
@@ -231,7 +238,6 @@ main :: () {
 					label = "Render Pass 3D",
 					colorAttachmentCount = 1,
 					colorAttachments = *colorAttachment,
-					// depthStencilAttachment = null,
 				};
 				update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
 				render_pass_encoder1 = wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
@@ -239,18 +245,15 @@ main :: () {
 				//
 				wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, pipeline);
 				//
-				object_dynamicOffsets:[0]u32;
-				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 0, object_bind_group, 0, object_dynamicOffsets.data);
+				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 0, object_bind_group, 0, null);
+				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 1, camera_bind_group, 0, null);
+				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 2, sdf_bind_group, 0, null);
 				//
-				camera_dynamicOffsets:[0]u32;
-				// camera_dynamicOffsets[0] = 16*4;
-				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 1, camera_bind_group, 0, camera_dynamicOffsets.data);
-				//
-				sdf_dynamicOffsets:[0]u32;
-				wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 2, sdf_bind_group, 0, sdf_dynamicOffsets.data);
-				//
-				//
-				wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, vertex_buffer, 0, vertex_buffer_size);
+				#if USE_COMPUTE_SHADER {
+					wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, compute_shader_controller.vertex_buffer, 0, compute_shader_controller.vertex_buffer_size);
+				} else {
+					wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, vertex_buffer, 0, vertex_buffer_size);
+				}
 				wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, index_buffer, WGPUIndexFormat.Uint32, 0, index_buffer_size);
 
 				wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
