@@ -10,9 +10,9 @@ export async function computeTest(options: ComputeTestOptions) {
 	const inputSize = new Float32Array([1, 1, 1]);
 	const verticesSize = new Float32Array(64).byteLength;
 	const indicesSize = new Float32Array(64).byteLength;
-	const workGroupsCountX = 2;
-	const workGroupsCountY = 2;
-	const workGroupsCountZ = 2;
+	const workGroupsCountX = 1;
+	const workGroupsCountY = 1;
+	const workGroupsCountZ = 1;
 	const workGroupsCount =
 		workGroupsCountX * workGroupsCountY * workGroupsCountZ;
 	console.log(workGroupsCount ** 2);
@@ -161,11 +161,11 @@ export async function computeTest(options: ComputeTestOptions) {
 	device.queue.writeBuffer(inputSizeBuffer, 0, inputSize);
 
 	// create a buffer on the GPU to get a copy of the results
-	const verticesBufferMap = device.createBuffer({
-		label: "verticesBufferMap1",
-		size: verticesSize,
-		usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-	});
+	// const verticesBufferMap = device.createBuffer({
+	// 	label: "verticesBufferMap",
+	// 	size: verticesSize,
+	// 	usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
+	// });
 	const verticesBuffer = device.createBuffer({
 		label: "verticesBuffer",
 		size: verticesSize,
@@ -174,13 +174,13 @@ export async function computeTest(options: ComputeTestOptions) {
 			GPUBufferUsage.COPY_SRC |
 			GPUBufferUsage.VERTEX,
 	});
-	const indicesBufferMap = device.createBuffer({
-		label: "indicesBufferMap",
-		size: indicesSize,
-		usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-	});
+	// const indicesBufferMap = device.createBuffer({
+	// 	label: "indicesBufferMap",
+	// 	size: indicesSize,
+	// 	usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
+	// });
 	const indicesBuffer = device.createBuffer({
-		label: "indicesBuffer2",
+		label: "indicesBuffer",
 		size: indicesSize,
 		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
 	});
@@ -217,6 +217,7 @@ export async function computeTest(options: ComputeTestOptions) {
 			},
 		],
 	});
+	console.log("a");
 
 	// Encode commands to do the computation
 	const encoder = device.createCommandEncoder({
@@ -229,6 +230,7 @@ export async function computeTest(options: ComputeTestOptions) {
 	pass.setBindGroup(0, bindGroupInputSize);
 	pass.setBindGroup(1, bindGroupVertices);
 	pass.setBindGroup(2, bindGroupIndices);
+	console.log("b");
 	pass.dispatchWorkgroups(
 		workGroupsCountX,
 		workGroupsCountY,
@@ -237,52 +239,53 @@ export async function computeTest(options: ComputeTestOptions) {
 	pass.end();
 
 	// Encode a command to copy the results to a mappable buffer.
-	encoder.copyBufferToBuffer(
-		verticesBuffer,
-		0,
-		verticesBufferMap,
-		0,
-		verticesBufferMap.size
-	);
-	encoder.copyBufferToBuffer(
-		indicesBuffer,
-		0,
-		indicesBufferMap,
-		0,
-		indicesBufferMap.size
-	);
+	// encoder.copyBufferToBuffer(
+	// 	verticesBuffer,
+	// 	0,
+	// 	verticesBufferMap,
+	// 	0,
+	// 	verticesBufferMap.size
+	// );
+	// encoder.copyBufferToBuffer(
+	// 	indicesBuffer,
+	// 	0,
+	// 	indicesBufferMap,
+	// 	0,
+	// 	indicesBufferMap.size
+	// );
 
 	// Finish encoding and submit the commands
 	const commandBuffer = encoder.finish();
 	device.queue.submit([commandBuffer]);
+	console.log("c");
 
 	// Read the results
 	// console.log("input", inputSize);
 	// {
-	await verticesBufferMap.mapAsync(GPUMapMode.READ);
-	const verticesBufferRead = new Float32Array(
-		verticesBufferMap.getMappedRange()
-	);
+	// await verticesBufferMap.mapAsync(GPUMapMode.READ);
+	// const verticesBufferRead = new Float32Array(
+	// 	verticesBufferMap.getMappedRange()
+	// );
 
-	console.log("verticesBufferRead", verticesBufferRead);
+	// console.log("verticesBufferRead", verticesBufferRead);
 
 	// resultBufferMap1.unmap();
 	// }
 	// {
-	await indicesBufferMap.mapAsync(GPUMapMode.READ);
-	const indicesBufferRead = new Float32Array(
-		indicesBufferMap.getMappedRange()
-	);
+	// await indicesBufferMap.mapAsync(GPUMapMode.READ);
+	// const indicesBufferRead = new Float32Array(
+	// 	indicesBufferMap.getMappedRange()
+	// );
 
-	// console.log("indicesBufferRead", indicesBufferRead);
+	// // console.log("indicesBufferRead", indicesBufferRead);
 
-	indicesBufferMap.unmap();
+	// indicesBufferMap.unmap();
 	// }
 	const verticesBufferResult: VertexArrayToBufferResult = {
 		buffer: verticesBuffer,
 		size: verticesSize,
-		data: verticesBufferRead,
+		data: new Float32Array([]), //verticesBufferRead,
 	};
 
-	return { verticesBufferResult, verticesBufferRead };
+	return { verticesBufferResult };
 }

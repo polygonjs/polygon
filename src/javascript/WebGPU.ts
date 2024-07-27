@@ -45,9 +45,9 @@ export async function requestWebGPU() {
 }
 
 export async function setupAndRenderWebGPU(
-	device: GPUDevice,
-	vertexBufferRead: Float32Array,
-	verticesBufferResult: VertexArrayToBufferResult
+	device: GPUDevice
+	// vertexBufferRead: Float32Array,
+	// verticesBufferResult: VertexArrayToBufferResult
 ) {
 	const domElement = document.getElementById("app") as HTMLElement;
 	if (!domElement) {
@@ -77,11 +77,11 @@ export async function setupAndRenderWebGPU(
 		code: SHADERS.basic,
 	});
 	// console.log("Compare:", vertexBufferRead, SCENE_DATA.vertexBuffer);
-	// const vertexArrayBufferResult = vertexArrayToBuffer(
-	// 	device,
-	// 	[vertexBufferRead, SCENE_DATA.vertexBuffer][0]
-	// );
-	const vertexArrayBufferResult = verticesBufferResult;
+	const vertexArrayBufferResult = vertexArrayToBuffer(
+		device,
+		SCENE_DATA.vertexBuffer //[vertexBufferRead, SCENE_DATA.vertexBuffer][0]
+	);
+	// const vertexArrayBufferResult = verticesBufferResult;
 	const indexArrayToBufferResult = indexArrayToBuffer(
 		device,
 		SCENE_DATA.indexBuffer

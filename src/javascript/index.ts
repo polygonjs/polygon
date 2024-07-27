@@ -1,6 +1,6 @@
 import "../css/style.css";
-import { computeTest } from "./ComputeTest";
-import { loadWasm } from "./WasmRuntime";
+// import { computeTest } from "./ComputeTest";
+import { loadWasm } from "./WasmRuntimeDebug";
 import { requestWebGPU, setupAndRenderWebGPU } from "./WebGPU";
 // @ts-ignore
 // import { debugMain } from "./debug";
@@ -13,14 +13,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 	if (!device) {
 		return;
 	}
-	const computeResult = await computeTest({ device });
-	if (!computeResult) {
-		console.error("computeResult is null");
-		return;
-	}
-	setupAndRenderWebGPU(
-		device,
-		computeResult.verticesBufferRead,
-		computeResult.verticesBufferResult
-	);
+	// const computeResult = await computeTest({ device });
+	// if (!computeResult) {
+	// 	console.error("computeResult is null");
+	// 	return;
+	// }
+	// setupAndRenderWebGPU(
+	// 	device
+	// 	// computeResult.verticesBufferRead,
+	// 	// computeResult.verticesBufferResult
+	// );
 });

@@ -11,7 +11,7 @@ SCENE_DATA :SceneData;
 orbit_controls :OrbitControls;
 
 main :: () {
-	// print("Hello Jai 24!\n");
+	print("Hello Jai 25!\n");
 	// write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
 	// log("Hello logger");
 
@@ -61,13 +61,7 @@ main :: () {
 	set_webgpu_sdf_uniforms_data(SCENE_DATA.sdf_uniforms);
 	set_webgpu_shader(SHADER_RENDER);
 	set_webgpu_orbit_controls_data(*orbit_controls);
-	// time:float=0;
-	// while (true) {
-    //     time += 0.00001;
-	// 	offset := sin(time);
-	// 	set_webgpu_data(offset);
-	// }
-
+	
 	// main_call_completed();
 }
 

@@ -7,6 +7,7 @@ import {
 import { logGreenBg } from "./Logger";
 import { orbitControlsFromBuffer } from "./OrbitControls";
 import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./SceneData";
+import { jsStringFromJaiString, writeToConsoleLog } from "./WasmRuntimeUtils";
 
 const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
 
@@ -19,18 +20,26 @@ const exported_js_functions = {
 		s_data: BigInt,
 		to_standard_error: boolean
 	) => {
-		const string = js_string_from_jai_string(s_data, s_count);
+		const string = jsStringFromJaiString(
+			s_data,
+			s_count,
+			allocatedMemoryContainer.allocatedMemory!
+		);
 		if (!string) {
 			return;
 		}
-		write_to_console_log(string, to_standard_error);
+		writeToConsoleLog(string, to_standard_error);
 	},
 
 	wasm_debug_break: () => {
 		// debugger;
 	},
 	wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
-		const string = js_string_from_jai_string(s_data, s_count);
+		const string = jsStringFromJaiString(
+			s_data,
+			s_count,
+			allocatedMemoryContainer.allocatedMemory!
+		);
 		if (!string) {
 			console.warn("No string");
 			return;
@@ -53,7 +62,11 @@ const exported_js_functions = {
 		// }
 	},
 	set_webgpu_shader_js: (s_count: number, s_data: BigInt) => {
-		const shader = js_string_from_jai_string(s_data, s_count);
+		const shader = jsStringFromJaiString(
+			s_data,
+			s_count,
+			allocatedMemoryContainer.allocatedMemory!
+		);
 		if (!shader) {
 			return;
 		}
@@ -222,8 +235,16 @@ const exported_js_functions = {
 		// https://discord.com/channels/661732390355337246/1172463903943446548/1256763226847187127
 		// https://www.tutorialspoint.com/c_standard_library/c_function_memcmp.htm
 		const size = Number(sizeBig);
-		const str1 = js_string_from_jai_string(str1Pointer, size);
-		const str2 = js_string_from_jai_string(str2Pointer, size);
+		const str1 = jsStringFromJaiString(
+			str1Pointer,
+			size,
+			allocatedMemoryContainer.allocatedMemory!
+		);
+		const str2 = jsStringFromJaiString(
+			str2Pointer,
+			size,
+			allocatedMemoryContainer.allocatedMemory!
+		);
 		if (str1 == str2) {
 			return 0;
 		}
@@ -300,6 +321,12 @@ if (import.meta.hot) {
 		logGreenBg(
 			`------------ WASM HOT RELOAD ------------ ${wamsRebuildCount++}`
 		);
+		if ((window as any).input) {
+			(window as any).input.parentElement?.removeChild(
+				(window as any).input
+			);
+		}
+		(window as any).input = null;
 		// logGreenBg("-----------------------------------------");
 		// logGreenBg("-----------------------------------------");
 		loadWasm();
@@ -310,26 +337,6 @@ if (import.meta.hot) {
 	});
 }
 
-const text_decoder = new TextDecoder();
-function js_string_from_jai_string(pointer: BigInt, length: number) {
-	// console.log({ pointer });
-	// if(!allocated){
-	// 	console.error("Memory not allocated")
-	// 	return
-	// }
-	const u8 = new Uint8Array(allocatedMemoryContainer.allocatedMemory!.buffer);
-	if (Number(pointer) > u8.length) {
-		console.error("Pointer out of bounds", Number(pointer), u8.length);
-		return;
-	}
-	// console.log({ buffer: allocated!.buffer, u8, allocated });
-	const bytes = u8.subarray(
-		Number(pointer),
-		Number(pointer) + Number(length)
-	);
-	// console.log("length", Number(pointer), Number(length), bytes);
-	return text_decoder.decode(bytes);
-}
 // function float32_from_jai_buffer(
 // 	pointer: BigInt,
 // 	length: number,
@@ -430,49 +437,4 @@ function typedArrayFromJaiBuffer<T extends TypeArrayType>(
 	}
 	const slice = fullBuffer.subarray(start, start + Number(length));
 	return slice as TypeArrayByType[T];
-}
-
-// console.log and console.error always add newlines so we need to buffer the output from write_string
-// to simulate a more basic I/O behavior. We’ll flush it after a certain time so that you still
-// see the last line if you forget to terminate it with a newline for some reason.
-let console_buffer = "";
-let console_buffer_is_standard_error: boolean = false;
-let console_timeout: number = -1;
-const FLUSH_CONSOLE_AFTER_MS = 3;
-
-function write_to_console_log(str: string, to_standard_error: boolean) {
-	if (
-		console_buffer &&
-		console_buffer_is_standard_error != to_standard_error
-	) {
-		flush_buffer();
-	}
-
-	console_buffer_is_standard_error = to_standard_error;
-	const lines = str.split("\n");
-	for (let i = 0; i < lines.length - 1; i++) {
-		console_buffer += lines[i];
-		flush_buffer();
-	}
-
-	console_buffer += lines[lines.length - 1];
-
-	clearTimeout(console_timeout);
-	if (console_buffer) {
-		console_timeout = setTimeout(() => {
-			flush_buffer();
-		}, FLUSH_CONSOLE_AFTER_MS);
-	}
-
-	function flush_buffer() {
-		if (!console_buffer) return;
-
-		if (console_buffer_is_standard_error) {
-			console.error(console_buffer);
-		} else {
-			console.log(console_buffer);
-		}
-
-		console_buffer = "";
-	}
 }
