@@ -1,7 +1,10 @@
 WGPUContext :: struct {
-	device: WGPUDevice ;
+	device: WGPUDevice;
 	surface: WGPUSurface; // this is the canvas heapIndex in wasm
 	preferred_texture_format :WGPUTextureFormat;
+	#if WASM==true {
+		queue:WGPUQueue;
+	}
 	#if WASM==false {
 		instance: WGPUInstance;
 		adapter: WGPUAdapter; // only useful to keep around when releasing it

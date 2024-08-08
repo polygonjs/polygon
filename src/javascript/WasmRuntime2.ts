@@ -1,4 +1,8 @@
-import { AllocatedMemory, OnWebGPUReadyFunction } from "./Common";
+import {
+	AllocatedMemory,
+	OnRequestAnimationFrameFunction,
+	OnWebGPUReadyFunction,
+} from "./Common";
 import { jsStringFromJaiString } from "./wasm/StringUtils";
 import { memcmp } from "./wasm/WasmUtils";
 // import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
@@ -182,26 +186,30 @@ export function loadWasm(): Promise<void> {
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
 			mainFunc(0, BigInt(0));
 
-			const getOnWebGPUReadyFunction = () => {
+			const linkWasmFunctions = () => {
 				const methodNames = Object.keys(obj.instance.exports);
 				// console.log("methodNames:", methodNames.sort());
 				for (const methodName of methodNames) {
+					const method = obj.instance.exports[methodName];
 					if (methodName.startsWith("on_wgpu_device_ready")) {
-						return obj.instance.exports[
-							methodName
-						] as OnWebGPUReadyFunction;
+						window.onWebGPUReady = method as OnWebGPUReadyFunction;
+					}
+					if (methodName.startsWith("on_request_animation_frame")) {
+						window.onRequestAnimationFrame =
+							method as OnRequestAnimationFrameFunction;
 					}
 				}
 			};
-			const onWebGPUReady = getOnWebGPUReadyFunction();
-			if (onWebGPUReady) {
-				window.onWebGPUReady = onWebGPUReady;
-				// console.log("onWebGPUReady calling...");
-				// onWebGPUReady(BigInt(0), BigInt(0));
-				// console.log("onWebGPUReady called");
-			} else {
-				console.warn("onWebGPUReady is null");
+			linkWasmFunctions();
+			if (
+				window.onWebGPUReady == null ||
+				window.onRequestAnimationFrame == null
+			) {
+				console.error("functions not assigned");
 			}
+			// console.log("onWebGPUReady calling...");
+			// onWebGPUReady(BigInt(0), BigInt(0));
+			// console.log("onWebGPUReady called");
 			resolve();
 		});
 	});

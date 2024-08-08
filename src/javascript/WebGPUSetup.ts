@@ -1,3 +1,4 @@
+import { USELESS_ARG0 } from "./Common";
 import { heapAdd } from "./WasmHeap";
 import { WGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { textureFormatIndex } from "./WebGPU/utils/WebGPUMap";
@@ -49,11 +50,22 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	// });
 	// console.log(window.onWebGPUReady);
 	window.onWebGPUReady(
-		BigInt(10),
+		USELESS_ARG0,
 		canvasIndex,
 		deviceHeapIndex,
 		queueHeapIndex,
 		formatNative
 	);
 	console.log("webgpuSetup done");
+
+	function render() {
+		window.onRequestAnimationFrame(
+			USELESS_ARG0,
+			BigInt(0),
+			BigInt(canvas.width),
+			BigInt(canvas.height)
+		);
+		// requestAnimationFrame(render);
+	}
+	render();
 }

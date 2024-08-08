@@ -22,11 +22,11 @@ USE_COMPUTE_SHADER :: false;
 // PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
 
 FREE_MEMORY :: false; // beware wasm memory corruption when in use
-call_from_wasm_context :Context;
+#if WASM==true call_from_wasm_context :Context;
 
 
 main :: () {
-	call_from_wasm_context = context;
+	#if WASM==true call_from_wasm_context = context;
 	// a := 1+2;
 	// set_print_string_buffer(PRINT_STRING_BUFFER);
 	// js_print("main called\n");
@@ -53,16 +53,35 @@ wasm_write_string :: (count: s64, data: *u8, is_error: bool)  #foreign;
 // js_set_print_string_buffer :: (count: s64, data: *u8, element_size:u8) #foreign;
 // js_read_print_buffer :: (count: s64) #foreign;
 
+wgpu_context:WGPUContext;
+
 on_wgpu_device_ready :: (
 	canvas: WGPUSurface,
 	device: WGPUDevice,
 	queue: WGPUQueue,
 	preferred_texture_format: WGPUTextureFormat
 ) {
-	context = call_from_wasm_context;
+	#if WASM==true context = call_from_wasm_context;
 	print("on_wgpu_device_ready START\n");
 	defer print("on_wgpu_device_ready DONE\n");
 
+	#if WASM==true
+		wgpu_context.device = device;
+		wgpu_context.queue = queue;
+		wgpu_context.surface = canvas;
+		wgpu_context.preferred_texture_format = preferred_texture_format;
+	#if WASM==false
+		wgpu_context, surface_capabilities := wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	// on_request_animation_frame(0, 500, 500);
+}
+
+on_request_animation_frame :: (
+	new_time: u64,
+	width: u64,
+	height: u64
+) {
+	#if WASM==true context = call_from_wasm_context;
 	SCENE_DATA :SceneData= create_scene_data(1.);
 	// a := 1+20;
 	// js_print("on_wgpu_device_ready START\n");
@@ -84,14 +103,9 @@ on_wgpu_device_ready :: (
 	// print_type_info(WGPUBlendOperation); // enum/u32
 	// print_type_info(WGPUBlendFactor); // enum/u32
 
-	#if WASM==true
-		wgpu_context:WGPUContext = .{
-			surface = canvas,
-			device = device,
-			preferred_texture_format = preferred_texture_format
-		};
-	#if WASM==false
-		wgpu_context, surface_capabilities := wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+	device := wgpu_context.device;
+	queue := wgpu_context.queue;
+
 
 	shader_module := wgpu_create_shader_module(device, SHADER_RENDER, "render");
 	vertex_buffer_layout, vertex_attributes := wgpu_make_vertex_layout(Vertex);
@@ -102,7 +116,7 @@ on_wgpu_device_ready :: (
 	pipeline_descriptor: WGPURenderPipelineDescriptor = .{label = "Render Pipeline"};
 	fragment_state: WGPUFragmentState;
 	color_target_state: WGPUColorTargetState;
-	wgpu_fragment_state_prepare(*fragment_state, *color_target_state, shader_module, preferred_texture_format);
+	wgpu_fragment_state_prepare(*fragment_state, *color_target_state, shader_module, wgpu_context.preferred_texture_format);
 	wgpu_update_pipeline_descriptor( *pipeline_descriptor, device, shader_module, *vertex_buffer_layout, *fragment_state );
 	wgpu_update_pipeline_descriptor_multisample(*wgpu_context, *pipeline_descriptor);
 	depth_stencil_state: WGPUDepthStencilState;

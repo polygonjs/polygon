@@ -1,4 +1,5 @@
 export type MainFunction = (uselessArg0: number, uselessArg1: BigInt) => void;
+export const USELESS_ARG0 = BigInt(10);
 export type UpdateWasmFunction = (
 	uselessArg0: bigint,
 	time: bigint,
@@ -11,6 +12,13 @@ export type OnWebGPUReadyFunction = (
 	queueHeapIndex: bigint,
 	preferredFormat: number
 ) => void;
+export type OnRequestAnimationFrameFunction = (
+	uselessArg0: bigint,
+	time: bigint,
+	width: bigint,
+	height: bigint
+) => void;
+
 export interface Vector2 {
 	x: number;
 	y: number;
@@ -25,6 +33,7 @@ declare global {
 	interface Window {
 		update_wasm: UpdateWasmFunction;
 		onWebGPUReady: OnWebGPUReadyFunction;
+		onRequestAnimationFrame: OnRequestAnimationFrameFunction;
 		ALLOCATED_MEMORY_CONTAINER: AllocatedMemoryContainer;
 		webGPUContext: GPUCanvasContext;
 		// offset: number;
