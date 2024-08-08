@@ -153,7 +153,7 @@ create_camera_data :: (scene_data:*SceneData)-> [1]CameraData {
 	return camera_data;
 }
 update_camera_data_projection :: (camera_data: *CameraData, scene_data: *SceneData) {
-	// print("scene_data.camera_aspect:%\n", scene_data.camera_aspect);
+	// print("scene_data.camera_aspect:%, %\n", scene_data.camera_aspect, camera_data[0].projectionMatrix);
 	camera_data[0].projectionMatrix = make_projection_matrix(
 		deg_to_rad(scene_data.camera_fov_in_degrees),
 		scene_data.camera_aspect,

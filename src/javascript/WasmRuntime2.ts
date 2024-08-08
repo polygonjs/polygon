@@ -1,7 +1,7 @@
 import { AllocatedMemory, OnWebGPUReadyFunction } from "./Common";
 import { jsStringFromJaiString } from "./wasm/StringUtils";
 import { memcmp } from "./wasm/WasmUtils";
-import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
+// import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
 import { writeToConsoleLog } from "./wasm/PrintUtils";
 import {
 	js_wgpu_create_shader_module,
@@ -32,7 +32,7 @@ import { wgpuCommandEncoderFinish } from "./WebGPU/FromJs/wgpuCommandEncoderFini
 import { wgpuQueueSubmit } from "./WebGPU/FromJs/wgpuQueueSubmit";
 
 // A global reference of the WASM’s memory area so that we can look up pointers
-let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
+// let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
 
 const exported_js_functions = {
 	// wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
@@ -76,35 +76,35 @@ const exported_js_functions = {
 		writeToConsoleLog(string, to_standard_error);
 		// console.log("-- end --");
 	},
-	js_set_print_string_buffer: (
-		s_count: number,
-		s_data: bigint,
-		elementSize: number
-	) => {
-		const buffer = typedArrayFromBuffer<TypeArrayType.Uint8Array>(
-			s_data,
-			s_count,
-			elementSize,
-			Uint8Array
-		);
-		// console.log("js_set_print_string_buffer", buffer);
-		if (buffer) {
-			PRINT_STRING_BUFFER = buffer;
-		} else {
-			console.error("js_set_print_string_buffer failed");
-		}
-	},
-	js_read_print_buffer: (s_count: BigInt) => {
-		const count = Number(s_count);
-		// console.log({
-		// 	detached: (PRINT_STRING_BUFFER.buffer as any).detached,
-		// 	PRINT_STRING_BUFFER,
-		// });
-		const buffer = PRINT_STRING_BUFFER.slice(0, count);
-		const textDecoder = new TextDecoder();
-		const string = textDecoder.decode(buffer);
-		console.log(string);
-	},
+	// js_set_print_string_buffer: (
+	// 	s_count: number,
+	// 	s_data: bigint,
+	// 	elementSize: number
+	// ) => {
+	// 	const buffer = typedArrayFromBuffer<TypeArrayType.Uint8Array>(
+	// 		s_data,
+	// 		s_count,
+	// 		elementSize,
+	// 		Uint8Array
+	// 	);
+	// 	// console.log("js_set_print_string_buffer", buffer);
+	// 	if (buffer) {
+	// 		PRINT_STRING_BUFFER = buffer;
+	// 	} else {
+	// 		console.error("js_set_print_string_buffer failed");
+	// 	}
+	// },
+	// js_read_print_buffer: (s_count: BigInt) => {
+	// 	const count = Number(s_count);
+	// 	// console.log({
+	// 	// 	detached: (PRINT_STRING_BUFFER.buffer as any).detached,
+	// 	// 	PRINT_STRING_BUFFER,
+	// 	// });
+	// 	const buffer = PRINT_STRING_BUFFER.slice(0, count);
+	// 	const textDecoder = new TextDecoder();
+	// 	const string = textDecoder.decode(buffer);
+	// 	console.log(string);
+	// },
 	wasm_debug_break: () => {
 		console.warn("NOT IMPLEMENTED wasm_debug_break");
 	},

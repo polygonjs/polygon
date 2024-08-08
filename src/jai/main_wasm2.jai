@@ -18,8 +18,8 @@ USE_COMPUTE_SHADER :: false;
 #placeholder SHADER_RENDER;
 #placeholder SHADER_COMPUTE;
 
-MAX_PRINT_SIZE :: 2048;
-PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
+// MAX_PRINT_SIZE :: 2048;
+// PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
 
 FREE_MEMORY :: false; // beware wasm memory corruption when in use
 call_from_wasm_context :Context;
@@ -27,8 +27,8 @@ call_from_wasm_context :Context;
 
 main :: () {
 	call_from_wasm_context = context;
-	a := 1+2;
-	set_print_string_buffer(PRINT_STRING_BUFFER);
+	// a := 1+2;
+	// set_print_string_buffer(PRINT_STRING_BUFFER);
 	// js_print("main called\n");
 	// js_print(tprint("a:%\n",a));
 	// js_print("after tprint\n");
@@ -38,20 +38,20 @@ main :: () {
 	// log("Logging to the DOM via Jai.");
 }
 
-set_print_string_buffer :: (string_buffer:string) {
-	js_set_print_string_buffer(string_buffer.count, string_buffer.data, size_of(u8));
-}
-js_print :: (message:string) {
-	memcpy(PRINT_STRING_BUFFER.data, message.data, min(message.count, MAX_PRINT_SIZE) * size_of(u8));
-	// print("copied:%,%,%\n", message.count * size_of(u8),PRINT_STRING_BUFFER.count, cast(u8) PRINT_STRING_BUFFER.data[0]);
-	js_read_print_buffer(message.count);
-}
+// set_print_string_buffer :: (string_buffer:string) {
+// 	js_set_print_string_buffer(string_buffer.count, string_buffer.data, size_of(u8));
+// }
+// js_print :: (message:string) {
+// 	memcpy(PRINT_STRING_BUFFER.data, message.data, min(message.count, MAX_PRINT_SIZE) * size_of(u8));
+// 	// print("copied:%,%,%\n", message.count * size_of(u8),PRINT_STRING_BUFFER.count, cast(u8) PRINT_STRING_BUFFER.data[0]);
+// 	js_read_print_buffer(message.count);
+// }
 
 
 wasm_debug_break :: ()  #foreign;
 wasm_write_string :: (count: s64, data: *u8, is_error: bool)  #foreign;
-js_set_print_string_buffer :: (count: s64, data: *u8, element_size:u8) #foreign;
-js_read_print_buffer :: (count: s64) #foreign;
+// js_set_print_string_buffer :: (count: s64, data: *u8, element_size:u8) #foreign;
+// js_read_print_buffer :: (count: s64) #foreign;
 
 on_wgpu_device_ready :: (
 	canvas: WGPUSurface,
