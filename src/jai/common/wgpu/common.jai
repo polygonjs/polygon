@@ -244,7 +244,6 @@ wgpu_vertex_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, vertices: 
 	buffer := wgpuDeviceCreateBuffer(device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	print("wgpu_vertex_array_to_buffer\n");
 	wgpuQueueWriteBuffer(queue, buffer, 0, vertices.data, size);
 
 	return buffer, size;
@@ -260,7 +259,6 @@ wgpu_index_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, indices: []
 	buffer := wgpuDeviceCreateBuffer(device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	print("wgpu_index_array_to_buffer\n");
 	wgpuQueueWriteBuffer(queue, buffer, 0, indices.data, size);
 
 	return buffer, size;

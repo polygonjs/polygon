@@ -1,3 +1,4 @@
+import { clockInit, clockTick } from "./Clock";
 import { USELESS_ARG0 } from "./Common";
 import { heapAdd } from "./WasmHeap";
 import { WGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
@@ -34,13 +35,22 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		format: wgpuRequestResponse.presentationFormat,
 	});
 
+	const resizeObserver = new ResizeObserver((entries) => {
+		const firstEntry = entries[0];
+		if (firstEntry == null) return;
+		canvas.width = firstEntry.contentRect.width;
+		canvas.height = firstEntry.contentRect.height;
+		render();
+	});
+	resizeObserver.observe(domElement);
+
 	// console.log("webgpuSetup", wgpuRequestResponse, formatNative);
 	// wgpuRequestResponse.presentationFormat == "bgra8unorm" ? textureFormatIndex()/*23*/ : null;
-	if (formatNative == null) {
-		console.error(
-			'formatNative is null, make sure to convert the enum start with "WGPUTextureFormat :: enum u32 {" so that it can be converted from typescript'
-		);
-	}
+	// if (formatNative == null) {
+	// 	console.error(
+	// 		'formatNative is null, make sure to convert the enum start with "WGPUTextureFormat :: enum u32 {" so that it can be converted from typescript'
+	// 	);
+	// }
 	// console.log({
 	// 	canvasIndex,
 	// 	// contextIndex,
@@ -56,16 +66,21 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		queueHeapIndex,
 		formatNative
 	);
-	console.log("webgpuSetup done");
+	window.initDrawData(USELESS_ARG0);
 
+	const clockData = clockInit();
 	function render() {
 		window.onRequestAnimationFrame(
 			USELESS_ARG0,
-			BigInt(0),
+			BigInt(clockData.time),
 			BigInt(canvas.width),
 			BigInt(canvas.height)
 		);
-		// requestAnimationFrame(render);
 	}
-	render();
+	function animate() {
+		clockTick(clockData);
+		render();
+		requestAnimationFrame(animate);
+	}
+	animate();
 }

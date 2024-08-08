@@ -60,7 +60,6 @@ export function js_wgpu_create_shader_module(
 		console.error("js_wgpu_create_shader_module: No code or label");
 		throw new Error("js_wgpu_create_shader_module: No code or label");
 	}
-	console.log("js_wgpu_create_shader_module", { code, label });
 	const shaderModule = device.createShaderModule({
 		label,
 		code,

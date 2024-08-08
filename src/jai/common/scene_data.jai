@@ -181,16 +181,14 @@ create_camera_uniforms :: (camera_data: *[1]CameraData)-> [1]CameraUniforms {
 
 	return camera_uniforms;
 }
-create_scene_data :: (aspect:float32)-> SceneData {
-	scene_data : SceneData;
+init_scene_data :: (scene_data: *SceneData, aspect:float32)-> SceneData {
 	scene_data.vertices, scene_data.indices = create_vertices();
 	scene_data.object_data = create_object_data();
 	scene_data.object_uniforms = create_object_uniforms(*scene_data.object_data);
 	scene_data.camera_aspect = aspect;
 	// scene_data.camera_fov_in_degrees = fov_in_degrees;
-	scene_data.camera_data = create_camera_data(*scene_data);
+	scene_data.camera_data = create_camera_data(scene_data);
 	scene_data.camera_uniforms = create_camera_uniforms(*scene_data.camera_data);
-	return scene_data;
 }
 
 update_scene_data_uniforms :: (scene_data: *SceneData) {

@@ -9,6 +9,5 @@ export function wgpuDeviceCreateBuffer(
 	const descriptor = WGPUBufferDescriptorFromBuffer(descriptorPointer);
 	const buffer = device.createBuffer(descriptor);
 	const bufferHeapIndex = heapAdd(buffer);
-	console.log("createBuffer", bufferHeapIndex, descriptor);
 	return bufferHeapIndex;
 }

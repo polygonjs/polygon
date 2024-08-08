@@ -34,7 +34,6 @@ export async function requestWebGPU(): Promise<
 		alert("need a browser that supports WebGPU");
 		return;
 	}
-	console.log("presentationFormat", presentationFormat);
 	// console.log("features", adapter.features.size);
 	// adapter.features.forEach((value, key) => {
 	// 	console.log(key, value);

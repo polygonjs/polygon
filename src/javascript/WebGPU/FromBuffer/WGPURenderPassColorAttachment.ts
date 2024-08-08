@@ -30,7 +30,7 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 		Number(f64[2]),
 		Number(f64[3]),
 	];
-	console.log("clearValue:", clearValue);
+	// console.log("clearValue:", clearValue);
 	//
 	const loadOpOffset = offset.loadOp;
 	const loadOpSize = WGPU_SIZE.u32;

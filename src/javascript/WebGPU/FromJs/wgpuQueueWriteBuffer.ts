@@ -26,19 +26,19 @@ export function wgpuQueueWriteBuffer(
 	const f32 = new Float32Array(buffer).subarray(start, start + elementsCount);
 	// const data = u64.slice(Number(dataPointer), Number(dataPointer) + size);
 	// console.log("queue:", gpuBuffer, bufferOffset, f32, 0, sizeN);
-	console.log(
-		"writeBuffer",
-		gpuBuffer,
-		Number(bufferOffset),
-		f32,
-		0,
-		elementsCount
-	);
-	for (let i = 0; i < elementsCount; i++) {
-		if (isNaN(f32[i])) {
-			console.error("writeBuffer: isNaN", i, f32[i]);
-		}
-	}
+	// console.log(
+	// 	"writeBuffer",
+	// 	gpuBuffer,
+	// 	Number(bufferOffset),
+	// 	f32,
+	// 	0,
+	// 	elementsCount
+	// );
+	// for (let i = 0; i < elementsCount; i++) {
+	// 	if (isNaN(f32[i])) {
+	// 		console.error("writeBuffer: isNaN", i, f32[i]);
+	// 	}
+	// }
 	return queue.writeBuffer(
 		gpuBuffer,
 		Number(bufferOffset),

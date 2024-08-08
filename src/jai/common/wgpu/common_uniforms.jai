@@ -14,7 +14,6 @@ wgpu_object_uniform_to_buffer :: (
 	buffer := wgpuDeviceCreateBuffer(device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	print("wgpu_object_uniform_to_buffer\n");
 	wgpuQueueWriteBuffer(queue, buffer, 0, uniforms.data, size);
 
 	entries := NewArray(1, WGPUBindGroupEntry);
@@ -49,8 +48,6 @@ wgpu_camera_uniform_to_buffer :: (
 	}));
 	assert(buffer != null, "Buffer is not created correctly");
 
-	print("wgpu_camera_uniform_to_buffer\n");
-	print("uniforms:%\n",uniforms);
 	wgpuQueueWriteBuffer(queue, buffer, 0, uniforms.data, size);
 
 	entries := NewArray(1, WGPUBindGroupEntry); // TODO: free this
@@ -98,7 +95,6 @@ wgpu_sdf_uniform_to_buffer :: (
 	buffer := wgpuDeviceCreateBuffer(device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	print("wgpu_sdf_uniform_to_buffer\n");
 	wgpuQueueWriteBuffer(queue, buffer, 0, uniforms.data, size);
 
 	entries := NewArray(1, WGPUBindGroupEntry);
@@ -122,4 +118,27 @@ wgpu_sdf_uniform_to_buffer :: (
 	bind_group := wgpuDeviceCreateBindGroup(device, *bind_group_descriptor);
 
 	return buffer, bind_group, entries;
+}
+
+update_object_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
+	// TODO: This is a hack to make sure the buffer is at least 16 bytes
+	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
+	size := max( cast(u64)16, cast(u64) /*uniforms.count **/ size_of(ObjectUniforms));
+	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.object_uniforms.data, size);
+}
+
+
+update_camera_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
+	// TODO: This is a hack to make sure the buffer is at least 16 bytes
+	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
+	size := max( cast(u64)16, cast(u64) size_of(CameraUniforms));
+	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.camera_uniforms.data, size);
+}
+
+
+update_sdf_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
+	// TODO: This is a hack to make sure the buffer is at least 16 bytes
+	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
+	size := max( cast(u64)16, cast(u64) size_of(SDFUniforms));
+	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.sdf_uniforms.data, size);
 }

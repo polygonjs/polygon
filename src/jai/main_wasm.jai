@@ -47,7 +47,8 @@ main :: () {
 	// log("Logging to the DOM via Jai.");
 	// log_error("We can also log errors.");
 
-	SCENE_DATA = create_scene_data(1);
+	SCENE_DATA:SceneData;
+	init_scene_data(*SCENE_DATA, 1);
 
 	vertex_buffer_layout := wasm_make_vertex_layout(Vertex);
 	vertex_buffer_layout_buffer := Wasm_VertexBufferLayout_to_buffer(*vertex_buffer_layout);

@@ -1,5 +1,6 @@
 import {
 	AllocatedMemory,
+	InitDrawDataFunction,
 	OnRequestAnimationFrameFunction,
 	OnWebGPUReadyFunction,
 } from "./Common";
@@ -193,6 +194,9 @@ export function loadWasm(): Promise<void> {
 					const method = obj.instance.exports[methodName];
 					if (methodName.startsWith("on_wgpu_device_ready")) {
 						window.onWebGPUReady = method as OnWebGPUReadyFunction;
+					}
+					if (methodName.startsWith("init_draw_data")) {
+						window.initDrawData = method as InitDrawDataFunction;
 					}
 					if (methodName.startsWith("on_request_animation_frame")) {
 						window.onRequestAnimationFrame =

@@ -72,7 +72,8 @@ wgpu_log_callback :: (level: WGPULogLevel, msg: *u8, userdata: *void) #c_call {
 
 main :: () {
 	SHADERS :: #run create_shaders();
-	SCENE_DATA :SceneData= create_scene_data(INIT_RATIO);
+	SCENE_DATA :SceneData;
+	init_scene_data(*SCENE_DATA, INIT_RATIO);
 	orbit_controls :OrbitControls;
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -207,9 +208,7 @@ main :: () {
 		update_scene_data(*SCENE_DATA, time);
 		update_scene_data_uniforms(*SCENE_DATA);
 		// update_vertex_array_to_buffer(vertex_buffer, queue, *SCENE_DATA);
-		update_object_uniforms_to_buffer(object_uniform_buffer, queue, *SCENE_DATA);
-		update_camera_uniforms_to_buffer(camera_uniform_buffer, queue, *SCENE_DATA);
-		update_sdf_uniforms_to_buffer(sdf_uniform_buffer, queue, *SCENE_DATA);
+		
 
 		#if USE_COMPUTE_SHADER {
 			compute_shader_controller.update_box_size(compute_shader_controller, SCENE_DATA.box_size);

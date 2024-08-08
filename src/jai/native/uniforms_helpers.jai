@@ -32,25 +32,3 @@
 // 	return buffer, bind_group, entries;
 // }
 
-update_object_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
-	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
-	size := max( cast(u64)16, cast(u64) /*uniforms.count **/ size_of(ObjectUniforms));
-	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.object_uniforms.data, size);
-}
-
-
-update_camera_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
-	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
-	size := max( cast(u64)16, cast(u64) size_of(CameraUniforms));
-	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.camera_uniforms.data, size);
-}
-
-
-update_sdf_uniforms_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
-	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
-	size := max( cast(u64)16, cast(u64) size_of(SDFUniforms));
-	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.sdf_uniforms.data, size);
-}

@@ -12,6 +12,7 @@ export type OnWebGPUReadyFunction = (
 	queueHeapIndex: bigint,
 	preferredFormat: number
 ) => void;
+export type InitDrawDataFunction = (uselessArg0: bigint) => void;
 export type OnRequestAnimationFrameFunction = (
 	uselessArg0: bigint,
 	time: bigint,
@@ -33,6 +34,7 @@ declare global {
 	interface Window {
 		update_wasm: UpdateWasmFunction;
 		onWebGPUReady: OnWebGPUReadyFunction;
+		initDrawData: InitDrawDataFunction;
 		onRequestAnimationFrame: OnRequestAnimationFrameFunction;
 		ALLOCATED_MEMORY_CONTAINER: AllocatedMemoryContainer;
 		webGPUContext: GPUCanvasContext;
