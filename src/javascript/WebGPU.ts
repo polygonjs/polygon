@@ -4,10 +4,9 @@ import { orbitControlsAddEvents } from "./OrbitControls";
 import {
 	indexArrayToBuffer,
 	SCENE_DATA,
-	updateVertexArrayToBuffer,
 	vertexArrayToBuffer,
-	VertexArrayToBufferResult,
 } from "./SceneData";
+import { WGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import {
 	createDepthTextureIfNeeded,
 	depthInitRenderPassDescriptor,
@@ -25,13 +24,17 @@ import { webGPUListenToResize } from "./WebGPUResize";
 
 const MSAA: boolean = true;
 
-export async function requestWebGPU() {
+export async function requestWebGPU(): Promise<
+	WGPURequestResponse | undefined
+> {
 	const adapter = await navigator.gpu?.requestAdapter();
 	const device = await adapter?.requestDevice();
+	const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 	if (!(device && adapter)) {
 		alert("need a browser that supports WebGPU");
 		return;
 	}
+	console.log("presentationFormat", presentationFormat);
 	// console.log("features", adapter.features.size);
 	// adapter.features.forEach((value, key) => {
 	// 	console.log(key, value);
@@ -41,14 +44,15 @@ export async function requestWebGPU() {
 	// keys.forEach((key) => {
 	// 	console.log(key, (device.limits as any)[key]);
 	// });
-	return device;
+	return { device, presentationFormat };
 }
 
-export async function setupAndRenderWebGPU(
-	device: GPUDevice
+export async function WebGPUSetupOld(
+	options: WGPURequestResponse
 	// vertexBufferRead: Float32Array,
 	// verticesBufferResult: VertexArrayToBufferResult
 ) {
+	const { device, presentationFormat } = options;
 	const domElement = document.getElementById("app") as HTMLElement;
 	if (!domElement) {
 		alert("no dom element found with id app");
@@ -66,7 +70,6 @@ export async function setupAndRenderWebGPU(
 		alert("failed to create a context");
 		return;
 	}
-	const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
 	context.configure({
 		device,
@@ -95,12 +98,12 @@ export async function setupAndRenderWebGPU(
 		label: "our hardcoded red triangle pipeline",
 		layout: "auto",
 		vertex: {
-			//   entryPoint: 'vs',
+			entryPoint: "vertex",
 			module,
 			buffers: [SCENE_DATA.vertexLayout],
 		},
 		fragment: {
-			//   entryPoint: 'fs',
+			entryPoint: "fragment",
 			module,
 			targets: [{ format: presentationFormat }],
 		},
@@ -110,7 +113,9 @@ export async function setupAndRenderWebGPU(
 	};
 	updatePipelineDescriptorMultisample(pipelineDescriptor, MSAA);
 	updatePipelineDescriptorDepth(pipelineDescriptor);
+	console.log(pipelineDescriptor);
 	const pipeline = device.createRenderPipeline(pipelineDescriptor);
+	if (1 + 1) return;
 
 	const colorAttachment: GPURenderPassColorAttachment = {
 		view: context.getCurrentTexture().createView(), //null as any, //<- to be filled out when we render
@@ -198,12 +203,12 @@ export async function setupAndRenderWebGPU(
 			return;
 		}
 		clockTick(clockData);
-		const aspect = canvas.width / canvas.height;
-		window.update_wasm(
-			BigInt(0),
-			BigInt(clockData.time),
-			BigInt(Math.round(aspect * 1000))
-		);
+		// const aspect = canvas.width / canvas.height;
+		// window.update_wasm(
+		// 	BigInt(0),
+		// 	BigInt(clockData.time),
+		// 	BigInt(Math.round(aspect * 1000))
+		// );
 
 		// updateVertexArrayToBuffer(device, vertexArrayBufferResult);
 		device.queue.writeBuffer(
@@ -265,7 +270,7 @@ export async function setupAndRenderWebGPU(
 		const commandBuffer = encoder.finish();
 		device.queue.submit([commandBuffer]);
 
-		requestAnimationFrame(render);
+		// requestAnimationFrame(render);
 	}
 
 	render();

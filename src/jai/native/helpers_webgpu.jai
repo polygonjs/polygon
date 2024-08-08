@@ -1,23 +1,23 @@
-WGPUContext :: struct {
-	instance: WGPUInstance;
-	surface: WGPUSurface;
-	adapter:WGPUAdapter;
-	device: WGPUDevice ;
-	config: WGPUSurfaceConfiguration;
-	surface_texture :WGPUSurfaceTexture;
-	preferred_texture_format :WGPUTextureFormat;
-	//
-	use_msaa: bool=true;
-	use_depth_buffer: bool=true;
-	bg_color :WGPUColor =.{0.0, 0.0, 0.0, 1.0};
-	//
-	multisample_texture_descriptor : WGPUTextureDescriptor;
-	multisample_texture: WGPUTexture;
-	multisample_texture_view: *WGPUTextureView;
-	//
-	depth_texture: WGPUTexture;
-	depth_texture_view: *WGPUTextureView;
-};
+// WGPUContext :: struct {
+// 	instance: WGPUInstance;
+// 	surface: WGPUSurface;
+// 	adapter: WGPUAdapter; // only useful to keep around when releasing it
+// 	device: WGPUDevice ;
+// 	config: WGPUSurfaceConfiguration;
+// 	surface_texture :WGPUSurfaceTexture;
+// 	preferred_texture_format :WGPUTextureFormat;
+// 	//
+// 	use_msaa: bool=true;
+// 	use_depth_buffer: bool=true;
+// 	bg_color :WGPUColor =.{0.0, 0.0, 0.0, 1.0};
+// 	//
+// 	multisample_texture_descriptor : WGPUTextureDescriptor;
+// 	multisample_texture: WGPUTexture;
+// 	multisample_texture_view: *WGPUTextureView;
+// 	//
+// 	depth_texture: WGPUTexture;
+// 	depth_texture_view: *WGPUTextureView;
+// };
 
 print_c :: (format: string, args: ..Any, to_standard_error := false) #expand {
 	new_context: Context;
@@ -134,6 +134,8 @@ wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUConte
 	wgpu_context.adapter = request_adapter(wgpu_context.instance, wgpu_context.surface, powerPreference = .HighPerformance);
 	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
 
+	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+
 	wgpu_context.device = request_device(wgpu_context.adapter, WINDOW_WIDTH, WINDOW_HEIGHT);
 	assert(wgpu_context.device != null, "Device is not created correctly");
 
@@ -177,160 +179,10 @@ surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureView {
 	return wgpuTextureCreateView((<<wgpu_context).surface_texture.texture, *current_view_descriptor);
 }
 
-create_shader :: (device: WGPUDevice, source: string, label := "Main shader") -> WGPUShaderModule {
-	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
-	wgslDescriptor.chain.next = null;
-	wgslDescriptor.chain.sType=.ShaderModuleWGSLDescriptor;
-	wgslDescriptor.code = to_c_string(source);
-	#if FREE_MEMORY defer free(wgslDescriptor.code);
-
-	shaderModuleDescriptor: WGPUShaderModuleDescriptor;
-	shaderModuleDescriptor.label = to_c_string(label);
-	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
-	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
-	shader_module := wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
 
 
-	return shader_module;
-}
 
-update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipelineDescriptor, device: WGPUDevice) {
-	pipeline_layout_descriptor: WGPUPipelineLayoutDescriptor;
 
-	
-	bind_group_layouts := NewArray(3, WGPUBindGroupLayout);
-	#if FREE_MEMORY defer array_reset(*bind_group_layouts);
-
-	// group 0 (object uniforms)
-	{
-		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
-		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
-		bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
-			binding = 0,
-			visibility = xx WGPUShaderStage.Vertex,
-			buffer = .{ type = WGPUBufferBindingType.Uniform },
-		};
-		bind_group_layouts[0] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-			entryCount = xx bind_group_layout_entries.count,
-			entries = bind_group_layout_entries.data,
-		}));
-	}
-	// group 1 (camera uniforms)
-	{
-		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
-		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
-		bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
-			binding = 0,
-			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
-			buffer = .{ type = WGPUBufferBindingType.Uniform },
-		};
-		bind_group_layouts[1] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-			entryCount = xx bind_group_layout_entries.count,
-			entries = bind_group_layout_entries.data,
-		}));
-	}
-	// group 2 (SDF uniforms)
-	{
-		bind_group_layout_entries := NewArray(1, WGPUBindGroupLayoutEntry);
-		#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
-		bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
-			binding = 0,
-			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
-			buffer = .{ type = WGPUBufferBindingType.Uniform },
-		};
-		bind_group_layouts[2] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-			entryCount = xx bind_group_layout_entries.count,
-			entries = bind_group_layout_entries.data,
-		}));
-	}
-	//
-	pipeline_layout_descriptor.bindGroupLayoutCount = xx bind_group_layouts.count;
-	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
-
-	pipeline_descriptor.layout = wgpuDeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
-}
-
-update_pipeline_descriptor :: (
-	pipeline_descriptor: *WGPURenderPipelineDescriptor,
-	// surface: WGPUSurface,
-	// adapter: WGPUAdapter,
-	device: WGPUDevice,
-	shader: WGPUShaderModule,
-	vertex_buffer_layout: *WGPUVertexBufferLayout,
-	fragment_state: *WGPUFragmentState
-) {
-	// preferred_texture_format := WGPUSurfaceGetPreferredFormat(surface, adapter);
-
-	// pipeline_descriptor: WGPURenderPipelineDescriptor;
-	pipeline_descriptor.label = "Render Pipeline";
-
-	// uniforms
-	update_pipeline_descriptor_layout(pipeline_descriptor, device);
-
-	// vertex
-	vertex_state: WGPUVertexState;
-	vertex_state.module = shader;
-	vertex_state.entryPoint = "vertex";
-	vertex_state.bufferCount = 1;
-	// tmp_layout := wasm_make_vertex_layout(vertex_buffer_layout_type);
-	vertex_state.buffers = vertex_buffer_layout;//*Wasm_VertexBufferLayout_to_wgpu(tmp_layout);
-
-	pipeline_descriptor.vertex = vertex_state;
-
-	pipeline_descriptor.primitive = .{
-		topology=.TriangleList,
-		stripIndexFormat=.Undefined,
-		// frontFace=.CCW,
-		cullMode=.None,
-	};
-	// primitive: {
-	// 		cullMode: "back",
-	// 	},
-
-	// pipeline_descriptor.multisample = .{
-	// 	count = 1,
-	// 	mask = 1,
-	// 	alphaToCoverageEnabled = false,
-	// };
-
-	// color_target_state: WGPUColorTargetState;
-	// color_target_state.format = preferred_texture_format;
-	// color_target_state.blend = *(WGPUBlendState.{
-	// 	color = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
-	// 	alpha = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
-	// });
-	// color_target_state.writeMask = xx WGPUColorWriteMask.All;
-
-	// fragment_state: WGPUFragmentState;
-	// fragment_state.module = shader;
-	// fragment_state.entryPoint = "fragment";
-	// fragment_state.targetCount = 1;
-	// fragment_state.targets = *color_target_state;
-
-	pipeline_descriptor.fragment = fragment_state;
-
-	// pipeline_descriptor.depthStencil = null;
-
-}
-fragment_state_prepare :: (
-	fragment_state: *WGPUFragmentState,
-	color_target_state: *WGPUColorTargetState,
-	shader: WGPUShaderModule,
-	preferred_texture_format:WGPUTextureFormat
-){
-
-	color_target_state.format = preferred_texture_format;
-	color_target_state.blend = *(WGPUBlendState.{ 
-		color = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
-		alpha = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
-	});
-	color_target_state.writeMask = xx WGPUColorWriteMask.All;
-
-	fragment_state.module = shader;
-	fragment_state.entryPoint = "fragment";
-	fragment_state.targetCount = 1;
-	fragment_state.targets = color_target_state;
-}
 pipeline_descriptor_print :: (pipeline_descriptor: *WGPURenderPipelineDescriptor){
 	{
 		info := type_info(type_of(<<pipeline_descriptor));
@@ -370,35 +222,8 @@ pipeline_descriptor_print :: (pipeline_descriptor: *WGPURenderPipelineDescriptor
 }
 
 
-vertex_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, vertices: []Vertex) -> WGPUBuffer, u64 {
-	size := cast(u64) vertices.count * size_of(Vertex);
 
-	print("vertices:%\n",vertices);
-	print("vertices:%\n",cast([64]float) vertices.data);
 
-	buffer := wgpuDeviceCreateBuffer(device, *(WGPUBufferDescriptor.{
-		usage = xx (WGPUBufferUsage.Vertex | WGPUBufferUsage.CopyDst),
-		size=size
-	}));
-	assert(buffer != null, "Buffer is not created correctly");
-
-	wgpuQueueWriteBuffer(queue, buffer, 0, vertices.data, size);
-
-	return buffer, size;
-}
-index_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, indices: []VertexIndex) -> WGPUBuffer, u64 {
-	size := cast(u64) indices.count * size_of(VertexIndex);
-
-	buffer := wgpuDeviceCreateBuffer(device, *(WGPUBufferDescriptor.{
-		usage = xx (WGPUBufferUsage.Index | WGPUBufferUsage.CopyDst),
-		size=size
-	}));
-	assert(buffer != null, "Buffer is not created correctly");
-
-	wgpuQueueWriteBuffer(queue, buffer, 0, indices.data, size);
-
-	return buffer, size;
-}
 
 // update_vertex_array_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, vertices: []Vertex) {
 // 	size := cast(u64) vertices.count * size_of(Vertex);

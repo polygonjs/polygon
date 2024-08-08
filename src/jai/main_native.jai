@@ -34,6 +34,7 @@ USE_COMPUTE_SHADER :: true;
 #import "imgui"; // not "ImGui"
 // #import "imgui_impl_wgpu";
 #load "common/wgpu_mock.jai";
+#load "common/wgpu/native.jai";
 
 #load "common/math_helper.jai";
 #load "common/orbit_controls.jai";
@@ -49,7 +50,8 @@ USE_COMPUTE_SHADER :: true;
 #load "native/orbit_controls.jai";
 #load "native/wgpu_compute.jai";
 #load "native/wgpu_depth.jai";
-#load "native/wgpu_multisample.jai";
+// #load "native/wgpu_multisample.jai";
+#load "common/wgpu/common_multisample.jai";
 
 
 
@@ -114,8 +116,9 @@ main :: () {
 	assert(queue != null, "Queue is not created correctly");
 
 
-	shader_module := create_shader(wgpu_context.device, SHADERS.render);
+	shader_module := wgpu_create_shader_module(wgpu_context.device, SHADERS.render, "Main Shader");
 	assert(shader_module != null, "shader_module is not created correctly");
+	print("shader_module:%\n", shader_module);
 
 	pipeline_descriptor: WGPURenderPipelineDescriptor;
 	fragment_state: WGPUFragmentState;
@@ -124,10 +127,9 @@ main :: () {
 	vertex_buffer_layout, attributes := Wasm_VertexBufferLayout_to_wgpu(wasm_vertex_layout_layout);
 	#if FREE_MEMORY defer array_reset(*vertex_attributes);
 	#if FREE_MEMORY defer array_reset(*attributes);
-	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
 	fragment_state_prepare(*fragment_state, *color_target_state, shader_module, wgpu_context.preferred_texture_format);
 	update_pipeline_descriptor( *pipeline_descriptor, wgpu_context.device, shader_module, *vertex_buffer_layout, *fragment_state );
-	update_pipeline_descriptor_multisample(*wgpu_context, *pipeline_descriptor);
+	wgpu_update_pipeline_descriptor_multisample(*wgpu_context, *pipeline_descriptor);
 	depth_stencil_state: WGPUDepthStencilState;
 	update_pipeline_descriptor_depth(*wgpu_context, *pipeline_descriptor, *depth_stencil_state);
 	// pipeline_descriptor_print(*pipeline_descriptor);
@@ -147,7 +149,7 @@ main :: () {
 	#if FREE_MEMORY defer array_reset(*camera_uniform_entries);
 	#if FREE_MEMORY defer array_reset(*sdf_uniform_entries);
 
-	sdl_init_info := ImGui_ImplWGPU_InitInfo.{
+	imgui_init_info := ImGui_ImplWGPU_InitInfo.{
 		Device = wgpu_context.device,
 		NumFramesInFlight = 3,
 		RenderTargetFormat = wgpu_context.preferred_texture_format,
@@ -156,7 +158,7 @@ main :: () {
 	// sdl_init := ImGui_ImplWGPU_InitInfo_init(*sdl_init_info);
 	bd:ImGui_ImplWGPU_Data = .{};
 	iwc:ImGui_WGPU_Common = .{};
-	ImGui_ImplWGPU_Init(*bd, sdl_init_info);
+	ImGui_ImplWGPU_Init(*bd, imgui_init_info);
 	// wgpuQueueSubmit(queue, 0, null);
 
 	do_exit := false;

@@ -4,12 +4,14 @@ import {
 	UpdateWasmFunction,
 	SHADERS,
 } from "./Common";
-import { logGreenBg } from "./Logger";
 import { orbitControlsFromBuffer } from "./OrbitControls";
 import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./SceneData";
-import { jsStringFromJaiString, writeToConsoleLog } from "./WasmRuntimeUtils";
+import { jsStringFromJaiString } from "./wasm/StringUtils";
+import { memcmp } from "./wasm/WasmUtils";
+import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
+import { writeToConsoleLog } from "./wasm/PrintUtils";
 
-const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
+const ALLOCATED_MEMORY_CONTAINER: AllocatedMemoryContainer = {}; // A global reference of the WASM’s memory area so that we can look up pointers
 
 // These are all the functions that we declared as "#foreign" in our Jai code.
 // They let you interact with the JS and DOM world from within Jai.
@@ -17,14 +19,10 @@ const allocatedMemoryContainer: AllocatedMemoryContainer = {}; // A global refer
 const exported_js_functions = {
 	wasm_write_string: (
 		s_count: number,
-		s_data: BigInt,
+		s_data: bigint,
 		to_standard_error: boolean
 	) => {
-		const string = jsStringFromJaiString(
-			s_data,
-			s_count,
-			allocatedMemoryContainer.allocatedMemory!
-		);
+		const string = jsStringFromJaiString(s_data, s_count);
 		if (!string) {
 			return;
 		}
@@ -34,12 +32,8 @@ const exported_js_functions = {
 	wasm_debug_break: () => {
 		// debugger;
 	},
-	wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
-		const string = jsStringFromJaiString(
-			s_data,
-			s_count,
-			allocatedMemoryContainer.allocatedMemory!
-		);
+	wasm_log_dom: (s_count: number, s_data: bigint, _is_error: boolean) => {
+		const string = jsStringFromJaiString(s_data, s_count);
 		if (!string) {
 			console.warn("No string");
 			return;
@@ -61,12 +55,8 @@ const exported_js_functions = {
 		// 	log.appendChild(element);
 		// }
 	},
-	set_webgpu_shader_js: (s_count: number, s_data: BigInt) => {
-		const shader = jsStringFromJaiString(
-			s_data,
-			s_count,
-			allocatedMemoryContainer.allocatedMemory!
-		);
+	set_webgpu_shader_js: (s_count: number, s_data: bigint) => {
+		const shader = jsStringFromJaiString(s_data, s_count);
 		if (!shader) {
 			return;
 		}
@@ -78,7 +68,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Float32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -94,7 +84,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Uint32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Uint32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -111,7 +101,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Uint8Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Uint8Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -129,7 +119,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Float32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -146,7 +136,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Float32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -163,7 +153,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Float32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -197,7 +187,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Float32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -214,7 +204,7 @@ const exported_js_functions = {
 		s_data: BigInt,
 		elementSize: number
 	) => {
-		const buffer = typedArrayFromJaiBuffer<TypeArrayType.Float32Array>(
+		const buffer = typedArrayFromBuffer<TypeArrayType.Float32Array>(
 			s_data,
 			s_count,
 			elementSize,
@@ -227,38 +217,7 @@ const exported_js_functions = {
 		SCENE_DATA.orbitControlsBuffer = buffer;
 		orbitControlsFromBuffer(SCENE_DATA);
 	},
-	memcmp: (
-		str1Pointer: BigInt,
-		str2Pointer: BigInt,
-		sizeBig: BigInt
-	): number => {
-		// https://discord.com/channels/661732390355337246/1172463903943446548/1256763226847187127
-		// https://www.tutorialspoint.com/c_standard_library/c_function_memcmp.htm
-		const size = Number(sizeBig);
-		const str1 = jsStringFromJaiString(
-			str1Pointer,
-			size,
-			allocatedMemoryContainer.allocatedMemory!
-		);
-		const str2 = jsStringFromJaiString(
-			str2Pointer,
-			size,
-			allocatedMemoryContainer.allocatedMemory!
-		);
-		if (str1 == str2) {
-			return 0;
-		}
-		if (!(str1 && str2)) {
-			return -1;
-		}
-		if (str1 < str2) {
-			return -1;
-		}
-		if (str1 > str2) {
-			return 1;
-		}
-		return -1;
-	},
+	memcmp,
 };
 
 // Create the environment for the WASM file,
@@ -286,7 +245,7 @@ export function loadWasm(): Promise<void> {
 			imports
 		).then((obj) => {
 			const memory = obj.instance.exports["memory"];
-			allocatedMemoryContainer.allocatedMemory =
+			ALLOCATED_MEMORY_CONTAINER.allocatedMemory =
 				memory as any as AllocatedMemory;
 			// console.log(
 			// 	"WASM loaded",
@@ -313,29 +272,29 @@ export function loadWasm(): Promise<void> {
 		});
 	});
 }
-if (import.meta.hot) {
-	let wamsRebuildCount = 0;
-	import.meta.hot.on("jai-wasm-update", () => {
-		// logGreenBg("-----------------------------------------");
-		// logGreenBg("-----------------------------------------");
-		logGreenBg(
-			`------------ WASM HOT RELOAD ------------ ${wamsRebuildCount++}`
-		);
-		if ((window as any).input) {
-			(window as any).input.parentElement?.removeChild(
-				(window as any).input
-			);
-		}
-		(window as any).input = null;
-		// logGreenBg("-----------------------------------------");
-		// logGreenBg("-----------------------------------------");
-		loadWasm();
-	});
-	import.meta.hot.on("jai-wasm-error", (d) => {
-		console.error("Jai WASM error", d);
-		console.log(d["message"]);
-	});
-}
+// if (import.meta.hot) {
+// 	let wamsRebuildCount = 0;
+// 	import.meta.hot.on("jai-wasm-update", () => {
+// 		// logGreenBg("-----------------------------------------");
+// 		// logGreenBg("-----------------------------------------");
+// 		logGreenBg(
+// 			`------------ WASM HOT RELOAD ------------ ${wamsRebuildCount++}`
+// 		);
+// 		if ((window as any).input) {
+// 			(window as any).input.parentElement?.removeChild(
+// 				(window as any).input
+// 			);
+// 		}
+// 		(window as any).input = null;
+// 		// logGreenBg("-----------------------------------------");
+// 		// logGreenBg("-----------------------------------------");
+// 		loadWasm();
+// 	});
+// 	import.meta.hot.on("jai-wasm-error", (d) => {
+// 		console.error("Jai WASM error", d);
+// 		console.log(d["message"]);
+// 	});
+// }
 
 // function float32_from_jai_buffer(
 // 	pointer: BigInt,
@@ -369,72 +328,3 @@ if (import.meta.hot) {
 // 	// const bytes = u32.subarray(start, start + Number(length));
 // 	// return bytes;
 // }
-export enum TypeArrayType {
-	Uint8Array = "Uint8Array",
-	Int16Array = "Int16Array",
-	Uint16Array = "Uint16Array",
-	Int32Array = "Int32Array",
-	Uint32Array = "Uint32Array",
-	Float32Array = "Float32Array",
-	Float64Array = "Float64Array",
-}
-type TypedArray =
-	| Uint8Array
-	| Int16Array
-	| Uint16Array
-	| Int32Array
-	| Uint32Array
-	| Float32Array
-	| Float64Array;
-type TypedArrayClass =
-	| typeof Uint8Array
-	| typeof Int16Array
-	| typeof Uint16Array
-	| typeof Int32Array
-	| typeof Uint32Array
-	| typeof Float32Array
-	| typeof Float64Array;
-type TypeArrayByTypedArrayGeneric = { [key in TypeArrayType]: TypedArray };
-type TypeArrayClassByTypedArrayGeneric = {
-	[key in TypeArrayType]: TypedArrayClass;
-};
-interface TypeArrayByType extends TypeArrayByTypedArrayGeneric {
-	Uint8Array: Uint8Array;
-	Int16Array: Int16Array;
-	Uint16Array: Uint16Array;
-	Int32Array: Int32Array;
-	Uint32Array: Uint32Array;
-	Float32Array: Float32Array;
-	Float64Array: Float64Array;
-}
-interface TypeArrayClassByType extends TypeArrayClassByTypedArrayGeneric {
-	Uint8Array: typeof Uint8Array;
-	Int16Array: typeof Int16Array;
-	Uint16Array: typeof Uint16Array;
-	Int32Array: typeof Int32Array;
-	Uint32Array: typeof Uint32Array;
-	Float32Array: typeof Float32Array;
-	Float64Array: typeof Float64Array;
-}
-
-function typedArrayFromJaiBuffer<T extends TypeArrayType>(
-	pointer: BigInt,
-	length: number,
-	elementSize: number,
-	arrayClass: TypeArrayClassByType[T]
-): TypeArrayByType[T] | undefined {
-	const fullBuffer = new arrayClass(
-		allocatedMemoryContainer.allocatedMemory!.buffer
-	);
-	const start = Number(pointer) / elementSize;
-	if (start > fullBuffer.length) {
-		console.error(
-			"Pointer out of bounds",
-			Number(pointer),
-			fullBuffer.length
-		);
-		return;
-	}
-	const slice = fullBuffer.subarray(start, start + Number(length));
-	return slice as TypeArrayByType[T];
-}

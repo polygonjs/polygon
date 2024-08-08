@@ -1,12 +1,12 @@
 import { defineConfig, PluginOption, Plugin, ViteDevServer } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
-
+import checker from "vite-plugin-checker";
 import { exec, ExecException } from "child_process";
 // import * as fs from "fs";
 // import * as path from "path";
 
 const BUILD_ON_FILE_CHANGE: boolean = true;
-const RUN_NATIVE_ON_FILE_CHANGE: boolean = true;
+const RUN_NATIVE_ON_FILE_CHANGE: boolean = false;
 
 function fileIsNotInDotBuildFolder(filePath: string): boolean {
 	return filePath.includes("/.build/") == false;
@@ -101,6 +101,11 @@ function jaiPlugin() {
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
+		checker({
+			// https://vite-plugin-checker.netlify.app/checkers/vue-tsc.html
+			// vueTsc: true,
+			typescript: true,
+		}),
 		visualizer({
 			template: "treemap", // or sunburst
 			open: false,

@@ -1,30 +1,3 @@
-import { AllocatedMemory } from "./Common";
-
-const text_decoder = new TextDecoder();
-export function jsStringFromJaiString(
-	pointer: BigInt,
-	length: number,
-	allocatedMemory: AllocatedMemory
-) {
-	// console.log({ pointer });
-	// if(!allocated){
-	// 	console.error("Memory not allocated")
-	// 	return
-	// }
-	const u8 = new Uint8Array(allocatedMemory.buffer);
-	if (Number(pointer) > u8.length) {
-		console.error("Pointer out of bounds", Number(pointer), u8.length);
-		return;
-	}
-	// console.log({ buffer: allocated!.buffer, u8, allocated });
-	const bytes = u8.subarray(
-		Number(pointer),
-		Number(pointer) + Number(length)
-	);
-	// console.log("length", Number(pointer), Number(length), bytes);
-	return text_decoder.decode(bytes);
-}
-
 // console.log and console.error always add newlines so we need to buffer the output from write_string
 // to simulate a more basic I/O behavior. We’ll flush it after a certain time so that you still
 // see the last line if you forget to terminate it with a newline for some reason.

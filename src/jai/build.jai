@@ -22,18 +22,18 @@ DONE
 
 #load "native/shaders.jai";
 
-BUILD_WASM :: true;
-BUILD_NATIVE :: false;
 BUILD_COMMON :: true;
 BUILD_NON_COMMON :: false;
+BUILD_WASM :: true;
+BUILD_NATIVE :: false;
 
 #run {
 	print("Building WASM: %, Native: %\n", BUILD_WASM, BUILD_NATIVE);
 	set_build_options_dc(.{do_output = false});
 
 	if ( BUILD_COMMON ) {
-		{
-			w := compiler_create_workspace("Wasm");
+		if ( BUILD_WASM ) {
+			w := compiler_create_workspace("Wasm Common");
 
 			options := get_build_options(w);
 			copy_commonly_propagated_fields(get_build_options(), *options);
@@ -62,7 +62,7 @@ BUILD_NON_COMMON :: false;
 			//  -rluba, 2023-11-15
 			walloc_object_file_path := "modules/walloc/walloc.o";
 
-			STACK_SIZE :: 64 * 1024;
+			STACK_SIZE :: 1024 * 1024;
 			options.additional_linker_arguments = .["--stack-first", "-z", tprint("stack-size=%", STACK_SIZE), walloc_object_file_path];
 
 			set_build_options(options, w);
@@ -72,7 +72,7 @@ BUILD_NON_COMMON :: false;
 
 			compiler_begin_intercept(w);
 
-			add_build_file("main_common.jai", w);
+			add_build_file("main_wasm2.jai", w);
 
 			generated_code := false;
 			while true {
@@ -101,10 +101,9 @@ BUILD_NON_COMMON :: false;
 			}
 
 			compiler_end_intercept(w);
-			print(">> built common WASM\n");
 		}
-		{
-			w := compiler_create_workspace("Native");
+		if ( BUILD_NATIVE ) {
+			w := compiler_create_workspace("Native Common");
 			options := get_build_options(w);
 			options.output_path = "../../bin/";
 			make_directory_if_it_does_not_exist(options.output_path);
@@ -114,7 +113,7 @@ BUILD_NON_COMMON :: false;
 			print(">> built common native\n");
 		}
 	}
-
+	
 	if ( BUILD_WASM && BUILD_NON_COMMON ) {
 		w := compiler_create_workspace("Wasm");
 
