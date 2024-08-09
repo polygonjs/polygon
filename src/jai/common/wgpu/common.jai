@@ -1,10 +1,8 @@
 WGPUContext :: struct {
 	device: WGPUDevice;
-	surface: WGPUSurface; // this is the canvas heapIndex in wasm
+	queue:WGPUQueue;
 	preferred_texture_format :WGPUTextureFormat;
-	#if WASM==true {
-		queue:WGPUQueue;
-	}
+	surface: WGPUSurface; // this is the canvas heapIndex in wasm
 	#if WASM==false {
 		instance: WGPUInstance;
 		adapter: WGPUAdapter; // only useful to keep around when releasing it
@@ -23,6 +21,11 @@ WGPUContext :: struct {
 	depth_texture: WGPUTexture;
 	depth_texture_view: *WGPUTextureView;
 };
+
+ShadersContainer :: struct {
+	render: string;
+	compute: string;
+}
 
 wgpu_make_vertex_layout :: ($type: Type) -> WGPUVertexBufferLayout, []WGPUVertexAttribute {
 	info := type_info(type);
@@ -271,3 +274,4 @@ wgpu_create_bind_group_layout :: (device: WGPUDevice, entryCount: s64, data: *WG
 	}));
 	return bind_group_layout;
 }
+

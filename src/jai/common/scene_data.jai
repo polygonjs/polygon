@@ -181,7 +181,7 @@ create_camera_uniforms :: (camera_data: *[1]CameraData)-> [1]CameraUniforms {
 
 	return camera_uniforms;
 }
-init_scene_data :: (scene_data: *SceneData, aspect:float32)-> SceneData {
+init_scene_data :: (scene_data: *SceneData, aspect:float32) {
 	scene_data.vertices, scene_data.indices = create_vertices();
 	scene_data.object_data = create_object_data();
 	scene_data.object_uniforms = create_object_uniforms(*scene_data.object_data);

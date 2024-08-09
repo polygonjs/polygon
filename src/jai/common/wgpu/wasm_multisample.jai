@@ -1,0 +1,1 @@
+update_render_pass_descriptor_multisample :: ( use_msaa:bool, colorAttachment: *WGPURenderPassColorAttachment )->void #foreign;

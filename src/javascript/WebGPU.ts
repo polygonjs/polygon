@@ -274,5 +274,5 @@ export async function WebGPUSetupOld(
 
 	render();
 
-	webGPUListenToResize(device, domElement, canvas);
+	webGPUListenToResize(device, domElement, canvas, render);
 }

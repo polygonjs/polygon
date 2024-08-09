@@ -121,8 +121,7 @@ webgpu_handle_resize :: (wgpu_context: *WGPUContext, width: u32, height: u32){
 	surface_configure(wgpu_context, width, height);
 }
 
-wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUContext, WGPUSurfaceCapabilities {
-	wgpu_context:WGPUContext;
+wgpu_context_init :: (window: *SDL_Window, wgpu_context:*WGPUContext,width: u32, height: u32)-> WGPUSurfaceCapabilities {
 
 	instance_desc: WGPUInstanceDescriptor;
 	wgpu_context.instance = wgpuCreateInstance(*instance_desc);
@@ -138,6 +137,9 @@ wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUConte
 
 	wgpu_context.device = request_device(wgpu_context.adapter, WINDOW_WIDTH, WINDOW_HEIGHT);
 	assert(wgpu_context.device != null, "Device is not created correctly");
+
+	wgpu_context.queue = wgpuDeviceGetQueue(wgpu_context.device);
+	assert(wgpu_context.queue != null, "Queue is not created correctly");
 
 	// surface_configure(*wgpu_context, width, height);
 	surface_capabilities :WGPUSurfaceCapabilities;
@@ -158,25 +160,12 @@ wgpu_context_create :: (window: *SDL_Window, width: u32, height: u32)->WGPUConte
 		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
 	}, null);
 
-	return wgpu_context, surface_capabilities;
+	return surface_capabilities;
 }
 surface_configure :: (wgpu_context: *WGPUContext, width: u32, height: u32){
 	(<<wgpu_context).config.width = width;
 	(<<wgpu_context).config.height = height;
 	wgpuSurfaceConfigure((<<wgpu_context).surface, *((<<wgpu_context).config));
-}
-surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureView {
-	wgpuSurfaceGetCurrentTexture((<<wgpu_context).surface, *((<<wgpu_context).surface_texture));
-		current_view_descriptor := WGPUTextureViewDescriptor.{
-			format = (<<wgpu_context).preferred_texture_format,
-			dimension = WGPUTextureViewDimension._2D,
-			aspect = WGPUTextureAspect.All,
-			baseMipLevel = 0,
-			mipLevelCount = 1,
-			baseArrayLayer = 0,
-			arrayLayerCount = 1,
-		};
-	return wgpuTextureCreateView((<<wgpu_context).surface_texture.texture, *current_view_descriptor);
 }
 
 
@@ -234,24 +223,24 @@ update_vertex_array_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_dat
 	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.vertices.data, size);
 }
 
-Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> WGPUVertexBufferLayout, []WGPUVertexAttribute {
-	vertex_buffer_layout := WGPUVertexBufferLayout.{
-		arrayStride=xx layout.arrayStride,
-		stepMode=xx layout.stepMode,
-		attributeCount=xx layout.attributeCount,
-		// attributes=NewArray(layout.attributeCount, WGPUVertexAttribute);
-	};
+// Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> WGPUVertexBufferLayout, []WGPUVertexAttribute {
+// 	vertex_buffer_layout := WGPUVertexBufferLayout.{
+// 		arrayStride=xx layout.arrayStride,
+// 		stepMode=xx layout.stepMode,
+// 		attributeCount=xx layout.attributeCount,
+// 		// attributes=NewArray(layout.attributeCount, WGPUVertexAttribute);
+// 	};
 
-	attributes := NewArray(xx layout.attributeCount, WGPUVertexAttribute);
-	for 0..(layout.attributeCount-1) {
-		src_attribute := layout.attributes[it];
-		attributes[it] = WGPUVertexAttribute.{
-			format=xx src_attribute.format,
-			offset=xx src_attribute.offset,
-			shaderLocation=xx src_attribute.shaderLocation,
-		};
-	}
-	vertex_buffer_layout.attributes = attributes.data;
+// 	attributes := NewArray(xx layout.attributeCount, WGPUVertexAttribute);
+// 	for 0..(layout.attributeCount-1) {
+// 		src_attribute := layout.attributes[it];
+// 		attributes[it] = WGPUVertexAttribute.{
+// 			format=xx src_attribute.format,
+// 			offset=xx src_attribute.offset,
+// 			shaderLocation=xx src_attribute.shaderLocation,
+// 		};
+// 	}
+// 	vertex_buffer_layout.attributes = attributes.data;
 
-	return vertex_buffer_layout, attributes;
-}
+// 	return vertex_buffer_layout, attributes;
+// }

@@ -1,4 +1,4 @@
-WASM :: true;
+#placeholder WASM;
 USE_COMPUTE_SHADER :: false;
 #import "Basic";
 #import "Math";
@@ -14,16 +14,75 @@ USE_COMPUTE_SHADER :: false;
 #load "common/wgpu/common.jai";
 #load "common/wgpu/common_depth.jai";
 #load "common/wgpu/common_multisample.jai";
+#if WASM == true #load "common/wgpu/wasm_multisample.jai";
+#if WASM == false #load "common/wgpu/native_multisample.jai";
 #load "common/wgpu/common_uniforms.jai";
+#load "common/orbit_controls.jai";
+#if WASM==false {
+	#if OS == .LINUX  {
+		// in order to import gcc_s, I initially tried:
+		// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
+		// as the symlink from libgcc_s.so did not exist. This worked fine,
+		// but to be cleaner, I created it with:
+		// sudo ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so
+		// and now we can import with "gcc_s"
+		gcc_s  :: #library,system,link_always "gcc_s";
+		// c  :: #library,system,link_always "libc";
+		// m  :: #library,system,link_always "libm";
+		// dl :: #library,system,link_always "libdl";
+		// pt :: #library,system,link_always "libpthread";
+
+		// for imgui_impl_wgpu lib (until we convert it to jai)
+		//
+		// sudo ln -s /lib/x86_64-linux-gnu/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so
+		// and now we can import with "gcc_s"
+		// libstd :: #library,system,link_always "stdc++";
+	}
+	#import "wgpu";
+	#import "SDL";
+	#load "native/helpers_webgpu.jai";
+	#load "native/print_utils.jai";
+	#load "native/orbit_controls.jai";
+	// shared with wasm?
+	#import "imgui";
+	#load "native/helpers_imgui_impl_sdl.jai";
+}
 
 #placeholder SHADER_RENDER;
 #placeholder SHADER_COMPUTE;
+
+#if WASM==false {
+	WINDOW_WIDTH  :u32: 1280;
+	WINDOW_HEIGHT :u32: 720;
+	INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
+}
+
+wgpu_context:WGPUContext;
+SCENE_DATA:SceneData;
+DRAW_DATA:DrawData;
+orbit_controls :OrbitControls;
 
 // MAX_PRINT_SIZE :: 2048;
 // PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
 
 FREE_MEMORY :: false; // beware wasm memory corruption when in use
+FRAMES_COUNT:u64 = 0;
 #if WASM==true call_from_wasm_context :Context;
+
+#if WASM==false {
+	wgpu_log_callback :: (level: WGPULogLevel, msg: *u8, userdata: *void) #c_call {
+		new_context: Context;
+		push_context new_context {
+			print("\n");
+			print_red("ERROR WGPU START\n");
+		}
+		print_c("[WGPU :: %]: %\n", level, to_string(msg));
+		push_context new_context {
+			print_red("ERROR WGPU END\n");
+			print("\n");
+		}
+	}
+}
 
 
 main :: () {
@@ -37,6 +96,77 @@ main :: () {
 
 	// context.logger = dom_logger;
 	// log("Logging to the DOM via Jai.");
+
+
+	#if WASM==false {
+		SDL_Init(SDL_INIT_VIDEO);
+
+		window := SDL_CreateWindow("Polygon Compute",
+			SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED,
+			xx WINDOW_WIDTH,
+			xx WINDOW_HEIGHT,
+			SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE
+		);
+		assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
+
+		imgui_context := ImGui.CreateContext();
+		sdl_init_success := ImGui_ImplSdl_Init(window);
+		assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
+		ImGui.StyleColorsDark();
+		ImGui_ImplSdl_Init(window);
+
+		wgpuSetLogCallback(wgpu_log_callback, null);
+		wgpuSetLogLevel(.Error); //(.Warn);
+		surface_capabilities := wgpu_context_init(window, *wgpu_context, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+		on_wgpu_device_ready(wgpu_context.surface, wgpu_context.device, wgpu_context.queue, wgpu_context.preferred_texture_format);
+		init_draw_data();
+
+		do_exit := false;
+		frames_count :u64= 0;
+		while !do_exit {
+			event: SDL_Event;
+			while SDL_PollEvent(*event) {
+				ImGui_ImplSdl_ProcessEvent(*event);
+				io := ImGui.GetIO();
+
+				if event.type == {
+					case SDL_QUIT; {do_exit = true;}
+					case SDL_WINDOWEVENT; {
+						if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+							new_width := event.window.data1;
+							new_height := event.window.data2;
+							if(new_width > 0 && new_height > 0){
+								webgpu_handle_resize(*wgpu_context, xx event.window.data1, xx event.window.data2);
+								SCENE_DATA.camera_aspect = (cast(float32) event.window.data1) / (cast(float32) event.window.data2);
+								update_camera_data_projection(*SCENE_DATA);
+
+							}
+						}
+					}
+					case SDL_KEYDOWN; {
+						if(io.WantCaptureKeyboard==false){
+							if event.key.keysym.sym == SDLK_ESCAPE {
+								do_exit = true;
+							}
+						}
+					}
+				}
+
+				if(io.WantCaptureMouse==false){
+					orbit_controls_process_event(*orbit_controls, *event);
+				}
+
+			}
+			time := SDL_GetTicks();// / 1000.0;
+
+			on_request_animation_frame(time, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+		}
+		SDL_Quit();
+	}
+
 }
 
 // set_print_string_buffer :: (string_buffer:string) {
@@ -54,9 +184,6 @@ wasm_write_string :: (count: s64, data: *u8, is_error: bool)  #foreign;
 // js_set_print_string_buffer :: (count: s64, data: *u8, element_size:u8) #foreign;
 // js_read_print_buffer :: (count: s64) #foreign;
 
-wgpu_context:WGPUContext;
-SCENE_DATA:SceneData;
-DRAW_DATA:DrawData;
 
 on_wgpu_device_ready :: (
 	canvas: WGPUSurface,
@@ -64,25 +191,32 @@ on_wgpu_device_ready :: (
 	queue: WGPUQueue,
 	preferred_texture_format: WGPUTextureFormat
 ) {
-	#if WASM==true context = call_from_wasm_context;
 	// print("on_wgpu_device_ready START\n");
 	// defer print("on_wgpu_device_ready DONE\n");
 
-	#if WASM==true
+	#if WASM==true {
+		context = call_from_wasm_context;
 		wgpu_context.device = device;
 		wgpu_context.queue = queue;
 		wgpu_context.surface = canvas;
 		wgpu_context.preferred_texture_format = preferred_texture_format;
-	#if WASM==false
-		wgpu_context, surface_capabilities := wgpu_context_create(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+	}
+	// print_type_info(WGPUTextureViewDescriptor);
 
 	init_scene_data(*SCENE_DATA, 1.);
 	// on_request_animation_frame(0, 500, 500);
 }
 
 init_draw_data :: (){
+	#if WASM==true context = call_from_wasm_context;
 	device := wgpu_context.device;
-	queue := wgpu_context.queue;
+	#if WASM==true {
+		queue := wgpu_context.queue;
+	}
+	#if WASM==false {
+		queue := wgpuDeviceGetQueue(wgpu_context.device);
+		assert(queue != null, "Queue is not created correctly");
+	}
 	DRAW_DATA.shader_module = wgpu_create_shader_module(device, SHADER_RENDER, "render");
 	DRAW_DATA.vertex_buffer_layout, DRAW_DATA.vertex_attributes = wgpu_make_vertex_layout(Vertex);
 
@@ -115,14 +249,20 @@ init_draw_data :: (){
 	DRAW_DATA.uniforms.sdf.bind_group_entries = wgpu_sdf_uniform_to_buffer(wgpu_context.device, queue, DRAW_DATA.pipeline, SCENE_DATA.sdf_uniforms);
 }
 
+
 on_request_animation_frame :: (
 	new_time: u64,
 	width: u64,
 	height: u64
 ) {
-	#if WASM==true context = call_from_wasm_context;
+	#if WASM {
+		context = call_from_wasm_context;
+		queue := wgpu_context.queue;
+	} else {
+		queue := wgpuDeviceGetQueue(wgpu_context.device);
+		assert(queue != null, "Queue is not created correctly");
+	}
 	device := wgpu_context.device;
-	queue := wgpu_context.queue;
 
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
@@ -138,47 +278,32 @@ on_request_animation_frame :: (
 	update_camera_uniforms_to_buffer(DRAW_DATA.uniforms.camera.buffer, queue, *SCENE_DATA);
 	update_sdf_uniforms_to_buffer(DRAW_DATA.uniforms.sdf.buffer, queue, *SCENE_DATA);
 
-	// a := 1+20;
-	// js_print("on_wgpu_device_ready START\n");
-	// js_print(tprint("result:%\n", a));
-	// js_print(tprint("result:%\n", a+1));
-	// js_print(tprint("result:%\n", a+2));
-	// js_print("on_wgpu_device_ready 2\n");
-
-	// builder: String_Builder;
-    // print_to_builder(*builder, "a:%\n", a);
-    // result := builder_to_string(*builder);
-	// print(result);
-
-	// print_type_info(WGPUCommandBuffer);
-	// print_type_info(WGPURenderPassColorAttachment);
-	// print_type_info(WGPUColorTargetState);
-	// print_type_info(WGPUBlendState);
-	// print_type_info(WGPUBlendComponent);
-	// print_type_info(WGPUBlendOperation); // enum/u32
-	// print_type_info(WGPUBlendFactor); // enum/u32
-
-
-
-
-	// DRAW_DATA.shader_module = wgpu_create_shader_module(device, SHADER_RENDER, "render");
-	// print(">>> B: %, % <<< \n", vertex_buffer_layout.attributes[0].format, vertex_buffer_layout.attributes[1].format);
-	// #if FREE_MEMORY defer array_reset(*vertex_attributes);
-
-	
-
-
+	#if WASM==false {
+		frame := wgpu_surface_create_current_view( *wgpu_context );
+		defer wgpuTextureViewRelease(frame);
+	}
+	create_multi_sample_texture_if_needed( *wgpu_context );
+	create_depth_texture_if_needed( *wgpu_context );
 	colorAttachment := WGPURenderPassColorAttachment.{
 		loadOp = WGPULoadOp.Clear,
 		storeOp = WGPUStoreOp.Store,
 		clearValue = wgpu_context.bg_color,
 	};
+	#if WASM==true {
+		update_render_pass_descriptor_multisample(wgpu_context.use_msaa, *colorAttachment);
+	} else {
+		update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
+	}
+
 	render_pass_encoder1: WGPURenderPassEncoder;
 	cmd_buffer1: WGPUCommandBuffer;
 	cmd_encoder1 := wgpuDeviceCreateCommandEncoder(
 		wgpu_context.device,
 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Render"}),
 	);
+	defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
+	defer wgpuCommandBufferRelease(cmd_buffer1);
+	defer wgpuCommandEncoderRelease(cmd_encoder1);
 
 	{
 		render_pass_descriptor := WGPURenderPassDescriptor.{
@@ -186,7 +311,7 @@ on_request_animation_frame :: (
 			colorAttachmentCount = 1,
 			colorAttachments = *colorAttachment,
 		};
-		// update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
+		update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
 		render_pass_encoder1 = wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
 
 		wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, DRAW_DATA.pipeline);
@@ -211,5 +336,12 @@ on_request_animation_frame :: (
 		wgpuQueueSubmit(queue, 1, *cmd_buffer1);
 	}
 
-	#if WASM == false wgpuSurfacePresent(wgpu_context.surface);
+	#if WASM == false {
+		wgpuSurfacePresent(wgpu_context.surface);
+		wgpuTextureRelease(wgpu_context.surface_texture.texture);
+	}
+	multisample_release(*wgpu_context);
+	depth_release(*wgpu_context);
+
+	FRAMES_COUNT += 1;
 }

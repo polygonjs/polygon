@@ -344,6 +344,29 @@ WGPUBindGroupLayoutDescriptor (with size=32) contains the following members:
 		nextInChain: BigInt(0),
 		label: BigInt(8),
 	},
+	/*
+WGPUTextureViewDescriptor (with size=48) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: label of type *u8 with offset 8
+- 2: format of type WGPUTextureFormat with offset 16
+- 3: dimension of type WGPUTextureViewDimension with offset 20
+- 4: baseMipLevel of type u32 with offset 24
+- 5: mipLevelCount of type u32 with offset 28
+- 6: baseArrayLayer of type u32 with offset 32
+- 7: arrayLayerCount of type u32 with offset 36
+- 8: aspect of type WGPUTextureAspect with offset 40
+	*/
+	WGPUTextureViewDescriptor: {
+		nextInChain: BigInt(0),
+		label: BigInt(8),
+		format: BigInt(16),
+		dimension: BigInt(20),
+		baseMipLevel: BigInt(24),
+		mipLevelCount: BigInt(28),
+		baseArrayLayer: BigInt(32),
+		arrayLayerCount: BigInt(36),
+		aspect: BigInt(40),
+	},
 };
 export const WGPU_SIZE = {
 	u8: BigInt(1),

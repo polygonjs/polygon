@@ -35,6 +35,12 @@ import { wgpuRenderPassEncoderDrawIndexed } from "./WebGPU/FromJs/wgpuRenderPass
 import { wgpuRenderPassEncoderEnd } from "./WebGPU/FromJs/wgpuRenderPassEncoderEnd";
 import { wgpuCommandEncoderFinish } from "./WebGPU/FromJs/wgpuCommandEncoderFinish";
 import { wgpuQueueSubmit } from "./WebGPU/FromJs/wgpuQueueSubmit";
+import { wgpuCommandBufferRelease } from "./WebGPU/FromJs/wgpuCommandBufferRelease";
+import { wgpuCommandEncoderRelease } from "./WebGPU/FromJs/wgpuCommandEncoderRelease";
+import { wgpuRenderPassEncoderRelease } from "./WebGPU/FromJs/wgpuRenderPassEncoderRelease";
+// import { wgpuSurfaceGetCurrentTexture } from "./WebGPU/FromJs/wgpuSurfaceGetCurrentTexture";
+import { wgpuTextureCreateView } from "./WebGPU/FromJs/wgpuTextureCreateView";
+import { update_render_pass_descriptor_multisample } from "./WebGPU/utils/WebGPUMultisample";
 
 // A global reference of the WASM’s memory area so that we can look up pointers
 // let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
@@ -139,6 +145,12 @@ const exported_js_functions = {
 	wgpuRenderPassEncoderEnd,
 	wgpuCommandEncoderFinish,
 	wgpuQueueSubmit,
+	wgpuCommandBufferRelease,
+	wgpuCommandEncoderRelease,
+	wgpuRenderPassEncoderRelease,
+	// wgpuSurfaceGetCurrentTexture,
+	wgpuTextureCreateView,
+	update_render_pass_descriptor_multisample,
 };
 
 // Create the environment for the WASM file,

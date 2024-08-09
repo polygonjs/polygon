@@ -257,3 +257,28 @@ export const GPU_STORE_OPS: GPUStoreOp[] = ["store", "discard"];
 export function storeOpIntToGPUStoreOp(i: number): GPUStoreOp {
 	return GPU_STORE_OPS[i - 1]; // in linux.jai, we have the undefined entry at index 0
 }
+
+export const GPU_TEXTURE_VIEW_DIMENSIONS: GPUTextureViewDimension[] = [
+	"1d",
+	"2d",
+	"2d-array",
+	"cube",
+	"cube-array",
+	"3d",
+];
+export function textureViewDimentionIntToGPUTextureViewDimension(
+	i: number
+): GPUTextureViewDimension {
+	return GPU_TEXTURE_VIEW_DIMENSIONS[i - 1]; // in linux.jai, we have the undefined entry at index 0
+}
+
+export const GPU_TEXTURE_ASPECTS: GPUTextureAspect[] = [
+	"all",
+	"stencil-only",
+	"depth-only",
+];
+export function textureAspectIntToGPUTextureAspect(
+	i: number
+): GPUTextureAspect {
+	return GPU_TEXTURE_ASPECTS[i];
+}

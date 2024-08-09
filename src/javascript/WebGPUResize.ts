@@ -1,8 +1,8 @@
 export function webGPUListenToResize(
 	device: GPUDevice,
 	domElement: HTMLElement,
-	canvas: HTMLCanvasElement
-	// callback: () => void
+	canvas: HTMLCanvasElement,
+	callback: () => void
 ) {
 	const observer = new ResizeObserver((entries) => {
 		let entriesCount = entries.length;
@@ -20,6 +20,7 @@ export function webGPUListenToResize(
 				Math.min(height, device.limits.maxTextureDimension2D)
 			);
 		}
+		callback();
 	});
 	observer.observe(domElement);
 }

@@ -20,12 +20,12 @@ WGSL
 
 DONE
 
-#load "native/shaders.jai";
+#load "common/wgpu/shaders/shaders.jai";
 
 BUILD_COMMON :: true;
 BUILD_NON_COMMON :: false;
 BUILD_WASM :: true;
-BUILD_NATIVE :: false;
+BUILD_NATIVE :: true;
 
 #run {
 	print("Building WASM: %, Native: %\n", BUILD_WASM, BUILD_NATIVE);
@@ -91,6 +91,7 @@ BUILD_NATIVE :: false;
 								SHADER :: #run create_shaders();
 								build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute);
 								add_build_string(build_string, w);
+								add_build_string("WASM :: true;", w);
 								generated_code = true;
 							}
 						}
@@ -109,7 +110,34 @@ BUILD_NATIVE :: false;
 			make_directory_if_it_does_not_exist(options.output_path);
 			options.output_executable_name = "polygon-next-native";
 			set_build_options(options, w);
-			add_build_file("main_common.jai", w);
+
+			compiler_begin_intercept(w);
+
+			add_build_file("main_wasm2.jai", w);
+
+			generated_code := false;
+			while true {
+				message := compiler_wait_for_message();
+				if message.kind == {
+					case .PHASE;
+						phase := cast(*Message_Phase) message;
+						if phase.phase == .TYPECHECKED_ALL_WE_CAN {
+							if !generated_code {
+								SHADER :: #run create_shaders();
+								build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute);
+								add_build_string(build_string, w);
+								add_build_string("WASM :: false;", w);
+								generated_code = true;
+							}
+						}
+
+					case .COMPLETE;
+						break;
+				}
+			}
+
+			compiler_end_intercept(w);
+
 			print(">> built common native\n");
 		}
 	}
