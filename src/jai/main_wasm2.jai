@@ -1,5 +1,9 @@
+USE_IMGUI :: true;
+USE_IMGUI_DEBUG :: false;
 #placeholder WASM;
 USE_COMPUTE_SHADER :: false;
+FREE_MEMORY :: false; // beware wasm memory corruption when in use
+
 #import "Basic";
 #import "Math";
 #if WASM == true #import "wgpu_wasm";
@@ -18,34 +22,55 @@ USE_COMPUTE_SHADER :: false;
 #if WASM == false #load "common/wgpu/native_multisample.jai";
 #load "common/wgpu/common_uniforms.jai";
 #load "common/orbit_controls.jai";
-#if WASM==false {
-	#if OS == .LINUX  {
-		// in order to import gcc_s, I initially tried:
-		// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
-		// as the symlink from libgcc_s.so did not exist. This worked fine,
-		// but to be cleaner, I created it with:
-		// sudo ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so
-		// and now we can import with "gcc_s"
-		gcc_s  :: #library,system,link_always "gcc_s";
-		// c  :: #library,system,link_always "libc";
-		// m  :: #library,system,link_always "libm";
-		// dl :: #library,system,link_always "libdl";
-		// pt :: #library,system,link_always "libpthread";
+#load "native/print_utils.jai";
 
-		// for imgui_impl_wgpu lib (until we convert it to jai)
-		//
-		// sudo ln -s /lib/x86_64-linux-gnu/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so
-		// and now we can import with "gcc_s"
-		// libstd :: #library,system,link_always "stdc++";
-	}
+#if OS == .LINUX {
+	// in order to import gcc_s, I initially tried:
+	// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
+	// as the symlink from libgcc_s.so did not exist. This worked fine,
+	// but to be cleaner, I created it with:
+	// sudo ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so
+	// and now we can import with "gcc_s"
+	gcc_s  :: #library,system,link_always "gcc_s";
+	// c  :: #library,system,link_always "libc";
+	// m  :: #library,system,link_always "libm";
+	// dl :: #library,system,link_always "libdl";
+	// pt :: #library,system,link_always "libpthread";
+
+	// for imgui_impl_wgpu lib (until we convert it to jai)
+	//
+	// sudo ln -s /lib/x86_64-linux-gnu/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so
+	// and now we can import with "gcc_s"
+	// libstd :: #library,system,link_always "stdc++";
+}
+#if (USE_IMGUI) && OS == .WASM {
+	// to be used with build option
+	// -L$EMSDK/upstream/emscripten/system/lib/libc
+	// or
+	// -L$EMSDK/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten
+	// #system_library,system,link_always "emscripten_libc_stubs"
+	// #system_library,system,link_always "libc++";
+	// #system_library,system,link_always "libc-debug";
+	// #system_library,system,link_always "libc++abi-debug-noexcept";
+	// #system_library,system,link_always "libstubs-debug";
+}
+
+#if WASM==false {
 	#import "wgpu";
 	#import "SDL";
 	#load "native/helpers_webgpu.jai";
-	#load "native/print_utils.jai";
 	#load "native/orbit_controls.jai";
-	// shared with wasm?
+}
+#if USE_IMGUI {
+	#load "common/imgui/common.jai";
+	#load "native/imgui_impl_wgpu/index.jai";
 	#import "imgui";
-	#load "native/helpers_imgui_impl_sdl.jai";
+	#load "native/helpers_ui.jai";
+	#if WASM {
+		#load "common/imgui/wasm.jai";
+	} else {
+		#load "common/imgui/native.jai";
+	}
 }
 
 #placeholder SHADER_RENDER;
@@ -55,17 +80,24 @@ USE_COMPUTE_SHADER :: false;
 	WINDOW_WIDTH  :u32: 1280;
 	WINDOW_HEIGHT :u32: 720;
 	INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
+	window:*SDL_Window;
 }
 
 wgpu_context:WGPUContext;
+window_context:WindowContext;
 SCENE_DATA:SceneData;
 DRAW_DATA:DrawData;
 orbit_controls :OrbitControls;
+#if USE_IMGUI {
+	ui_data :UiData= .{};
+	bd:ImGui_ImplWGPU_Data = .{};
+	iwc:ImGui_WGPU_Common = .{};
+}
 
 // MAX_PRINT_SIZE :: 2048;
 // PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
 
-FREE_MEMORY :: false; // beware wasm memory corruption when in use
+
 FRAMES_COUNT:u64 = 0;
 #if WASM==true call_from_wasm_context :Context;
 
@@ -87,6 +119,13 @@ FRAMES_COUNT:u64 = 0;
 
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
+
+	// if USE_IMGUI_DEBUG {
+	// 	imgui_context := ImGui.CreateContext(null);
+	// 	print("imgui_context: %\n", <<imgui_context);
+	// 	io := ImGui.GetIO();
+	// 	return;
+	// }
 	// a := 1+2;
 	// set_print_string_buffer(PRINT_STRING_BUFFER);
 	// js_print("main called\n");
@@ -96,12 +135,13 @@ main :: () {
 
 	// context.logger = dom_logger;
 	// log("Logging to the DOM via Jai.");
+	// print_type_info(WGPUBufferBindingLayout);
 
 
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO);
 
-		window := SDL_CreateWindow("Polygon Compute",
+		window = SDL_CreateWindow("Polygon Compute",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			xx WINDOW_WIDTH,
@@ -109,8 +149,10 @@ main :: () {
 			SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE
 		);
 		assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
+		window_context.window = window;
 
 		imgui_context := ImGui.CreateContext();
+		print("imgui_context: %\n", imgui_context);
 		sdl_init_success := ImGui_ImplSdl_Init(window);
 		assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
 		ImGui.StyleColorsDark();
@@ -191,6 +233,7 @@ on_wgpu_device_ready :: (
 	queue: WGPUQueue,
 	preferred_texture_format: WGPUTextureFormat
 ) {
+	if USE_IMGUI_DEBUG return;
 	// print("on_wgpu_device_ready START\n");
 	// defer print("on_wgpu_device_ready DONE\n");
 
@@ -200,8 +243,8 @@ on_wgpu_device_ready :: (
 		wgpu_context.queue = queue;
 		wgpu_context.surface = canvas;
 		wgpu_context.preferred_texture_format = preferred_texture_format;
+		
 	}
-	// print_type_info(WGPUTextureViewDescriptor);
 
 	init_scene_data(*SCENE_DATA, 1.);
 	// on_request_animation_frame(0, 500, 500);
@@ -247,6 +290,25 @@ init_draw_data :: (){
 	DRAW_DATA.uniforms.sdf.buffer,
 	DRAW_DATA.uniforms.sdf.bind_group,
 	DRAW_DATA.uniforms.sdf.bind_group_entries = wgpu_sdf_uniform_to_buffer(wgpu_context.device, queue, DRAW_DATA.pipeline, SCENE_DATA.sdf_uniforms);
+
+	#if USE_IMGUI {
+		ImGui.CreateContext(null);
+
+		#if WASM {
+			io := ImGui.GetIO();
+			io.IniFilename = null;
+		}
+
+		bd.wgpuDevice = wgpu_context.device;
+		imgui_init_info := ImGui_ImplWGPU_InitInfo.{
+			// Device = wgpu_context.device,
+			NumFramesInFlight = 3,
+			RenderTargetFormat = wgpu_context.preferred_texture_format,
+			DepthStencilFormat = ifx wgpu_context.use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
+		};
+		
+		ImGui_ImplWGPU_Init(*bd, imgui_init_info);
+	}
 }
 
 
@@ -255,6 +317,7 @@ on_request_animation_frame :: (
 	width: u64,
 	height: u64
 ) {
+	if USE_IMGUI_DEBUG return;
 	#if WASM {
 		context = call_from_wasm_context;
 		queue := wgpu_context.queue;
@@ -327,7 +390,7 @@ on_request_animation_frame :: (
 		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, DRAW_DATA.index.buffer, WGPUIndexFormat.Uint32, 0, DRAW_DATA.index.buffer_size);
 
 		wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-		// #if USE_IMGUI gui_update(window, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA);
+		#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA);
 		wgpuRenderPassEncoderEnd(render_pass_encoder1);
 
 

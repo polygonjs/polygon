@@ -1,5 +1,5 @@
-import { jsStringFromJaiString } from "../../wasm/StringUtils";
-import { heapAdd, heapGet } from "../../WasmHeap";
+// import { jsStringFromJaiString } from "../../wasm/StringUtils";
+import { heapGet } from "../../WasmHeap";
 
 // import { WGPUBindGroupDescriptorFromBuffer } from "./WebGPU/FromBuffer/WGPUBindGroupDescriptor";
 // import { WGPUBindGroupEntryFromBuffer } from "./WGPUBindGroupEntry";
@@ -46,26 +46,27 @@ export interface WGPURequestResponse {
 // 	// });
 // 	return module;
 // }
-export function js_wgpu_create_shader_module(
-	deviceHeapIndex: bigint,
-	code_s_count: number,
-	code_s_data: bigint,
-	label_s_count: number,
-	label_s_data: bigint
-) {
-	const device = heapGet<GPUDevice>(deviceHeapIndex)!;
-	const code = jsStringFromJaiString(code_s_data, code_s_count);
-	const label = jsStringFromJaiString(label_s_data, label_s_count);
-	if (code == null || label == null) {
-		console.error("js_wgpu_create_shader_module: No code or label");
-		throw new Error("js_wgpu_create_shader_module: No code or label");
-	}
-	const shaderModule = device.createShaderModule({
-		label,
-		code,
-	});
-	return heapAdd(shaderModule);
-}
+// export function js_wgpu_create_shader_module(
+// 	deviceHeapIndex: bigint,
+// 	code_s_count: number,
+// 	code_s_data: bigint,
+// 	label_s_count: number,
+// 	label_s_data: bigint
+// ) {
+// 	const device = heapGet<GPUDevice>(deviceHeapIndex)!;
+// 	const code = jsStringFromJaiString(code_s_data, code_s_count);
+// 	const label = jsStringFromJaiString(label_s_data, label_s_count);
+// 	if (code == null || label == null) {
+// 		console.error("js_wgpu_create_shader_module: No code or label");
+// 		throw new Error("js_wgpu_create_shader_module: No code or label");
+// 	}
+// 	console.log({ device, label, code });
+// 	const shaderModule = device.createShaderModule({
+// 		label,
+// 		code,
+// 	});
+// 	return heapAdd(shaderModule);
+// }
 
 // export function js_wgpu_create_pipeline_layout(
 // 	deviceHeapIndex: bigint,

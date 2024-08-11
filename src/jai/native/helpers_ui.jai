@@ -1,29 +1,6 @@
-// UiInit :: struct {
-// 	imgui_context : ImGuiContext;
-// 	io :ImGuiIO;
-// }
-UiData :: struct {
-	f:float = 0.0;
-	counter:u32 = 0;
-	show_another_window:bool = true;
-}
-
-// gui_init :: (window:*SDL_Window)->*ImGuiContext,*ImGuiIO{
-// 	imgui_context := ImGui.CreateContext();
-//     // Setup ImGui binding
-//     ImGui_ImplSdl_Init(window);
-//     // Setup style
-//     // ImGuiStyleColorsClassic();
-//     ImGui.StyleColorsDark();
-//     //ImGui.StyleColorsLight();
-//     io := ImGui.GetIO();
-
-// 	return imgui_context, io;
-// }
-
 
 gui_update :: (
-	window:*SDL_Window,
+	window_context: *WindowContext,
 	wgpu_context: *WGPUContext,
 	render_pass: WGPURenderPassEncoder,
 	bd: *ImGui_ImplWGPU_Data,
@@ -32,9 +9,9 @@ gui_update :: (
 	scene_data: *SceneData
 ){
 
-	width := wgpuTextureGetWidth(wgpu_context.surface_texture.texture);
-	height := wgpuTextureGetHeight(wgpu_context.surface_texture.texture);
-	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipelineState==null) {
+	width := wgpu_texture_get_width_surface(wgpu_context);
+	height := wgpu_texture_get_height_surface(wgpu_context);
+	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipeline==null) {
 		print_yellow("invalidate and create START");
 		ImGui_ImplWGPU_InvalidateDeviceObjects();
 		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, wgpu_context);
@@ -44,7 +21,11 @@ gui_update :: (
 	}
 
 	// ImGui_ImplWGPU_NewFrame();
-	ImGui_ImplSdl_NewFrame(window);
+	#if WASM {
+		ImGui_ImplWasm_NewFrame();
+	} else {
+		ImGui_ImplSdl_NewFrame(window_context.window);
+	}
 	ImGui.NewFrame();
 	{
 
@@ -101,6 +82,7 @@ gui_update :: (
 	ImGui.Render();
 	draw_data := ImGui.GetDrawData();
 	ImGui_ImplWGPU_RenderDrawData(*iwc.draw, draw_data, render_pass);
+
 }
 
 gui_free :: (iwc: *ImGui_WGPU_Common){

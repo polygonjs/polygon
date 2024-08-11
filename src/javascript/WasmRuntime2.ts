@@ -4,12 +4,12 @@ import {
 	OnRequestAnimationFrameFunction,
 	OnWebGPUReadyFunction,
 } from "./Common";
-import { jsStringFromJaiString } from "./wasm/StringUtils";
-import { memcmp } from "./wasm/WasmUtils";
+import { jsStringFromJaiString, strlen } from "./wasm/WasmString";
+import { atof, memcmp, memcpy, memmove, memset } from "./wasm/WasmUtils";
 // import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
 import { writeToConsoleLog } from "./wasm/PrintUtils";
 import {
-	js_wgpu_create_shader_module,
+	// js_wgpu_create_shader_module,
 	js_wgpu_texture_get_height_surface,
 	js_wgpu_texture_get_width_surface,
 } from "./WebGPU/utils/WebGPUCommon";
@@ -41,11 +41,32 @@ import { wgpuRenderPassEncoderRelease } from "./WebGPU/FromJs/wgpuRenderPassEnco
 // import { wgpuSurfaceGetCurrentTexture } from "./WebGPU/FromJs/wgpuSurfaceGetCurrentTexture";
 import { wgpuTextureCreateView } from "./WebGPU/FromJs/wgpuTextureCreateView";
 import { update_render_pass_descriptor_multisample } from "./WebGPU/utils/WebGPUMultisample";
+import { NOT_IMPLEMENTED } from "./wasm/WasmNotImplemented";
+import { wgpuBindGroupLayoutRelease } from "./WebGPU/FromJs/wgpuBindGroupLayoutRelease";
+import { wgpuBindGroupRelease } from "./WebGPU/FromJs/wgpuBindGroupRelease";
+import { wgpuBufferDestroy } from "./WebGPU/FromJs/wgpuBufferDestroy";
+import { wgpuBufferRelease } from "./WebGPU/FromJs/wgpuBufferRelease";
+import { wgpuDeviceCreateSampler } from "./WebGPU/FromJs/wgpuDeviceCreateSampler";
+import { wgpuDeviceCreateShaderModule } from "./WebGPU/FromJs/wgpuDeviceCreateShaderModule";
+import { wgpuDeviceGetQueue } from "./WebGPU/FromJs/wgpuDeviceGetQueue";
+import { wgpuQueueRelease } from "./WebGPU/FromJs/wgpuQueueRelease";
+import { wgpuQueueWriteTexture } from "./WebGPU/FromJs/wgpuQueueWriteTexture";
+import { wgpuRenderPassEncoderSetBlendConstant } from "./WebGPU/FromJs/wgpuRenderPassEncoderSetBlendConstant";
+import { wgpuRenderPassEncoderSetScissorRect } from "./WebGPU/FromJs/wgpuRenderPassEncoderSetScissorRect";
+import { wgpuRenderPassEncoderSetViewport } from "./WebGPU/FromJs/wgpuRenderPassEncoderSetViewport";
+import { wgpuRenderPipelineRelease } from "./WebGPU/FromJs/wgpuRenderPipelineRelease";
+import { wgpuSamplerRelease } from "./WebGPU/FromJs/wgpuSamplerRelease";
+import { wgpuShaderModuleRelease } from "./WebGPU/FromJs/wgpuShaderModuleRelease";
+import { WASM_MATH } from "./wasm/WasmMath";
+import { __assert_fail } from "./wasm/WasmImgui";
+import { vsnprintf } from "./wasm/WasmVsnPrintf";
+import { mapFunctionName } from "./wasm/WasmFunctionMapper";
+import { qsort } from "./wasm/WasmQSort";
 
 // A global reference of the WASM’s memory area so that we can look up pointers
 // let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
 
-const exported_js_functions = {
+const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 	// wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
 	// 	const string = jsStringFromJaiString(
 	// 		s_data,
@@ -120,6 +141,16 @@ const exported_js_functions = {
 		console.warn("NOT IMPLEMENTED wasm_debug_break");
 	},
 	memcmp,
+	memset,
+	memcpy,
+	memmove,
+	strlen,
+	atof,
+	vsnprintf,
+	qsort,
+	__assert_fail,
+	...WASM_MATH,
+	...NOT_IMPLEMENTED,
 	wgpuCommandEncoderBeginRenderPass,
 	wgpuDeviceCreateCommandEncoder,
 	wgpuDeviceCreatePipelineLayout,
@@ -130,7 +161,7 @@ const exported_js_functions = {
 	wgpuTextureViewRelease,
 	wgpuQueueWriteBuffer,
 	wgpuDeviceCreateBindGroupLayout,
-	js_wgpu_create_shader_module,
+	// js_wgpu_create_shader_module,
 	js_wgpu_texture_get_width_surface,
 	js_wgpu_texture_get_height_surface,
 	wgpuDeviceCreateRenderPipeline,
@@ -151,13 +182,28 @@ const exported_js_functions = {
 	// wgpuSurfaceGetCurrentTexture,
 	wgpuTextureCreateView,
 	update_render_pass_descriptor_multisample,
+	wgpuBindGroupLayoutRelease,
+	wgpuBindGroupRelease,
+	wgpuBufferDestroy,
+	wgpuBufferRelease,
+	wgpuDeviceCreateSampler,
+	wgpuDeviceCreateShaderModule,
+	wgpuDeviceGetQueue,
+	wgpuQueueRelease,
+	wgpuQueueWriteTexture,
+	wgpuRenderPassEncoderSetBlendConstant,
+	wgpuRenderPassEncoderSetScissorRect,
+	wgpuRenderPassEncoderSetViewport,
+	wgpuRenderPipelineRelease,
+	wgpuSamplerRelease,
+	wgpuShaderModuleRelease,
 };
 
 // Create the environment for the WASM file,
 // which includes the exported JS functions for the WASM:
 const unassignedFunctionNames: string[] = [];
 const imports = {
-	env: new Proxy(exported_js_functions, {
+	env: new Proxy(EXPORTED_JS_FUNCTIONS, {
 		get(target, prop) {
 			if (target.hasOwnProperty(prop)) {
 				return (target as any)[prop];
@@ -199,20 +245,49 @@ export function loadWasm(): Promise<void> {
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
 			mainFunc(0, BigInt(0));
 
+			function mapFunction(
+				functionName: string,
+				prefix: string,
+				targetName: string,
+				method: Function
+			) {
+				mapFunctionName(
+					functionName,
+					prefix,
+					targetName,
+					method,
+					EXPORTED_JS_FUNCTIONS
+				);
+			}
+
 			const linkWasmFunctions = () => {
 				const methodNames = Object.keys(obj.instance.exports);
-				// console.log("methodNames:", methodNames.sort());
 				for (const methodName of methodNames) {
 					const method = obj.instance.exports[methodName];
-					if (methodName.startsWith("on_wgpu_device_ready")) {
-						window.onWebGPUReady = method as OnWebGPUReadyFunction;
-					}
-					if (methodName.startsWith("init_draw_data")) {
-						window.initDrawData = method as InitDrawDataFunction;
-					}
-					if (methodName.startsWith("on_request_animation_frame")) {
-						window.onRequestAnimationFrame =
-							method as OnRequestAnimationFrameFunction;
+					if (typeof method == "function") {
+						function mapFunc(prefix: string, targetName: string) {
+							mapFunction(
+								methodName,
+								prefix,
+								targetName,
+								method as Function
+							);
+						}
+						mapFunc("c_style_strlen", "strlen");
+						if (methodName.startsWith("on_wgpu_device_ready")) {
+							window.onWebGPUReady =
+								method as OnWebGPUReadyFunction;
+						}
+						if (methodName.startsWith("init_draw_data")) {
+							window.initDrawData =
+								method as InitDrawDataFunction;
+						}
+						if (
+							methodName.startsWith("on_request_animation_frame")
+						) {
+							window.onRequestAnimationFrame =
+								method as OnRequestAnimationFrameFunction;
+						}
 					}
 				}
 			};

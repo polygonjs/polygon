@@ -1,4 +1,4 @@
-ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_ShaderModule, wgsl_source: *string) -> WGPUProgrammableStageDescriptor {
+ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_ShaderModule, wgsl_source: *string, label:string) -> WGPUProgrammableStageDescriptor {
 	bd := ImGui_ImplWGPU_GetBackendData();
 
 	iwc_shader_module.wgsl_desc = .{};
@@ -6,6 +6,7 @@ ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_Shad
 	iwc_shader_module.wgsl_desc.code = wgsl_source.data;
 
 	iwc_shader_module.desc = .{
+		label = to_c_string(label),
 		nextInChain = xx (*(iwc_shader_module.wgsl_desc)),//cast(*WGPUChainedStruct) wgsl_desc;
 	};
 
@@ -21,7 +22,7 @@ ImGui_ImplWGPU_CreateImageBindGroup::(layout: WGPUBindGroupLayout, texture_view:
 	image_bg_entries: [1]WGPUBindGroupEntry;
 	image_bg_entries[0] = .{ textureView = texture_view };
 
-	image_bg_descriptor:WGPUBindGroupDescriptor = .{};
+	image_bg_descriptor:WGPUBindGroupDescriptor = .{label = "imgui_image_bind_group"};
 	image_bg_descriptor.layout = layout;
 	image_bg_descriptor.entryCount = 1;//size_of(image_bg_entries) / size_of(WGPUBindGroupEntry);
 	image_bg_descriptor.entries = image_bg_entries.data;
@@ -74,11 +75,13 @@ ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTextu
 		iwc_font_tex.layout.rowsPerImage = xx height;
 		iwc_font_tex.size = .{ width = xx width, height = xx height, depthOrArrayLayers = 1 };
 		wgpuQueueWriteTexture(bd.defaultQueue, *iwc_font_tex.dst_view, pixels, xx (width * size_pp * height), *iwc_font_tex.layout, *iwc_font_tex.size);
+
 	}
 
 	// Create the associated sampler
 	// (Bilinear sampling is required by default. Set 'io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = false' to allow point/nearest sampling)
-	{
+	{	
+		// iwc_font_tex.sampler_desc.label = "this is just a test";
 		iwc_font_tex.sampler_desc.minFilter = WGPUFilterMode.Linear;
 		iwc_font_tex.sampler_desc.magFilter = WGPUFilterMode.Linear;
 		iwc_font_tex.sampler_desc.mipmapFilter = WGPUMipmapFilterMode.Linear;
@@ -124,18 +127,18 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 		print("ImGui_ImplWGPU_CreateDeviceObjects:bd.wgpuDevice is null, return false\n");
 		return false;
 	}
-	if (bd.pipelineState != null) {
+	if (bd.pipeline != null) {
 		print_red("invalidate here?!\n");
 		ImGui_ImplWGPU_InvalidateDeviceObjects();
 	}
 
 	// Create render pipeline
-	iwc.graphics_pipeline_desc = .{};
+	iwc.graphics_pipeline_desc = .{label = "Dear ImGui Render Pipeline"};
 	iwc.graphics_pipeline_desc.primitive.topology = WGPUPrimitiveTopology.TriangleList;
 	iwc.graphics_pipeline_desc.primitive.stripIndexFormat = WGPUIndexFormat.Undefined;
 	iwc.graphics_pipeline_desc.primitive.frontFace = WGPUFrontFace.CW;
 	iwc.graphics_pipeline_desc.primitive.cullMode = WGPUCullMode.None;
-	update_pipeline_descriptor_multisample(wgpu_context,*iwc.graphics_pipeline_desc);
+	wgpu_update_pipeline_descriptor_multisample(wgpu_context,*iwc.graphics_pipeline_desc);
 	// we don't rely entirely on update_pipeline_descriptor_multisample(),
 	// as the imgui widgets seem to look better with alphaToCoverageEnabled = false here
 	iwc.graphics_pipeline_desc.multisample.alphaToCoverageEnabled = xx false;
@@ -163,13 +166,13 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.bg_layouts[0] = wgpuDeviceCreateBindGroupLayout(bd.wgpuDevice, *iwc.common_bg_layout_desc);
 	iwc.bg_layouts[1] = wgpuDeviceCreateBindGroupLayout(bd.wgpuDevice, *iwc.image_bg_layout_desc);
 
-	
+	iwc.layout_desc.label = "imgui_layout_desc";
 	iwc.layout_desc.bindGroupLayoutCount = 2;
 	iwc.layout_desc.bindGroupLayouts = iwc.bg_layouts.data;
 	iwc.graphics_pipeline_desc.layout = wgpuDeviceCreatePipelineLayout(bd.wgpuDevice, *iwc.layout_desc);
 
 	// Create the vertex shader
-	iwc.vertex_shader_desc = ImGui_ImplWGPU_CreateShaderModule(*iwc.vert, *__shader_vert_wgsl);
+	iwc.vertex_shader_desc = ImGui_ImplWGPU_CreateShaderModule(*iwc.vert, *__shader_vert_wgsl, "imgui_vertex");
 	iwc.graphics_pipeline_desc.vertex.module = iwc.vertex_shader_desc.module;
 	iwc.graphics_pipeline_desc.vertex.entryPoint = iwc.vertex_shader_desc.entryPoint;
 
@@ -184,7 +187,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.graphics_pipeline_desc.vertex.buffers = iwc.buffer_layouts.data;
 
 	// Create the pixel shader
-	iwc.pixel_shader_desc = ImGui_ImplWGPU_CreateShaderModule(*iwc.frag, *__shader_frag_wgsl);
+	iwc.pixel_shader_desc = ImGui_ImplWGPU_CreateShaderModule(*iwc.frag, *__shader_frag_wgsl, "imgui_fragment");
 
 	// Create the blending setup
 	iwc.blend_state.alpha.operation = WGPUBlendOperation.Add;
@@ -216,7 +219,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	// Configure disabled depth-stencil state
 	iwc.graphics_pipeline_desc.depthStencil = ifx (bd.depthStencilFormat == WGPUTextureFormat.Undefined) then null else *iwc.depth_stencil_state;
 
-	bd.pipelineState = wgpuDeviceCreateRenderPipeline(bd.wgpuDevice, *iwc.graphics_pipeline_desc);
+	bd.pipeline = wgpuDeviceCreateRenderPipeline(bd.wgpuDevice, *iwc.graphics_pipeline_desc);
 
 	ImGui_ImplWGPU_CreateFontsTexture(*iwc.font_texture);
 	ImGui_ImplWGPU_CreateUniformBuffer(*iwc.uniforms);
@@ -237,7 +240,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.image_bind_group = ImGui_ImplWGPU_CreateImageBindGroup(iwc.bg_layouts[1], bd.renderResources.FontTextureView);
 	bd.renderResources.ImageBindGroup = iwc.image_bind_group;
 	bd.renderResources.ImageBindGroupLayout = iwc.bg_layouts[1];
-	text_id_hash := ImHashData(bd.renderResources.FontTextureView, size_of(ImTextureID), 0);
+	text_id_hash := ImHashData(bd.renderResources.FontTextureView, xx size_of(ImTextureID), 0);
 	bd.renderResources.ImageBindGroups.SetVoidPtr( *bd.renderResources.ImageBindGroups, text_id_hash, iwc.image_bind_group );
 
 	SafeReleaseWGPUShaderModule(*iwc.vertex_shader_desc.module);

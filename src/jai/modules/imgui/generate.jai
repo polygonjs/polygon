@@ -2,10 +2,20 @@ AT_COMPILE_TIME :: true;
 
 // We don’t ship the Dear ImGui source with the compiler. Download a Dear ImGui release and update this path if you want to re-generate the bindings.
 // cd /home/gui/work/web/github/imgui && git checkout v1.90.9
-// jai generate.jai - -compile -wgpu
+//
+// jai generate.jai - -compile -native -debug
+// jai generate.jai - -native -debug
+//
+// or
+//
+// jai generate.jai - -wasm -debug
+// jai generate.jai - -compile -wasm -no_generate -debug
+//
 // test with: nm -g linux/ImGui.a | grep Impl
 IMGUI_PATH :: "/home/gui/work/web/github/imgui";
 MODULES_PATH :: "/home/gui/work/web/games/polygon-next/src/jai/modules";
+EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
+
 
 DECLARATIONS_TO_OMIT :: string.[
 	// We have custom declarations for these in module.jai:
@@ -19,9 +29,9 @@ DECLARATIONS_TO_OMIT :: string.[
 	"ImGuiTextBuffer",
 
 	"ImDrawCallback_ResetRenderState", // casting an integer to a function pointer is not supported in Jai.
-
-	"NavFlattened", // doesn't seem to remove the NavFlattened var, which currently needs to be adjusted manually
 ];
+
+#import "String";
 
 #if AT_COMPILE_TIME {
 	#import "Process";
@@ -48,84 +58,108 @@ DECLARATIONS_TO_OMIT :: string.[
 
 generate_bindings :: (args: [] string) -> bool {
 	compile        := array_find(args, "-compile");
+	native         := array_find(args, "-native");
+	wasm           := array_find(args, "-wasm");
 	compile_debug  := array_find(args, "-debug");
-	wgpu           := array_find(args, "-wgpu");
+	no_generate    := array_find(args, "-no_generate");
+
+	imgui_src_files: [..] string;
+	array_add(*imgui_src_files, tprint("%/imgui.cpp", IMGUI_PATH));
+	array_add(*imgui_src_files, tprint("%/imgui_widgets.cpp", IMGUI_PATH));
+	array_add(*imgui_src_files, tprint("%/imgui_draw.cpp", IMGUI_PATH));
+	array_add(*imgui_src_files, tprint("%/imgui_tables.cpp", IMGUI_PATH));
+	// @ToDo: Maybe add an option to exclude imgui_demo?
+	// array_add(*imgui_src_files, tprint("%/imgui_demo.cpp", IMGUI_PATH));
+
+	IMGUI_MODULE_PATH := tprint("%/imgui", MODULES_PATH);
+	IMGUI_WASM_MODULE_PATH := tprint("%/wasm", IMGUI_MODULE_PATH);
 
 	if compile {
-		imgui_src_files: [..] string;
-		extras: [..] string;
-		library_files: [..] string;
-		array_add(*imgui_src_files, tprint("%/imgui.cpp", IMGUI_PATH));
-		array_add(*imgui_src_files, tprint("%/imgui_widgets.cpp", IMGUI_PATH));
-		array_add(*imgui_src_files, tprint("%/imgui_draw.cpp", IMGUI_PATH));
-		array_add(*imgui_src_files, tprint("%/imgui_tables.cpp", IMGUI_PATH));
-		// @ToDo: Maybe add an option to exclude imgui_demo?
-		// array_add(*imgui_src_files, tprint("%/imgui_demo.cpp", IMGUI_PATH));
-		if wgpu {
-			array_add(*imgui_src_files, "backends/imgui_impl_wgpu.cpp");
-			// array_add(*extras, "-shared");
-			// array_add(*extras, "-fpic");
-			array_add(*extras, tprint("-I%", IMGUI_PATH));
-			array_add(*extras, tprint("-I%/wgpu/linux", MODULES_PATH));
-			// array_add(*extras, tprint("-L%/wgpu/linux", MODULES_PATH));
-			// array_add(*extras, "-lwgpu_native");
-		}
-		// array_add(*extras, "-DIMGUI_DISABLE_OBSOLETE_FUNCTIONS"); // failed attempt to remove NavFlattened from generated file
 
 		success := true;
-		print("compiling...\n");
-		#if OS == .WINDOWS {
-			make_directory_if_it_does_not_exist("windows");
-			array_add(*extras, "/DIMGUI_API=__declspec(dllexport)");
-			success &&= build_cpp_dynamic_lib("windows/ImGui", ..imgui_src_files, extra = extras, debug=compile_debug);
-			// We set IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS. Otherwise all users of the ImGui module have to link against "imm32".
-			array_add(*extras, "/DIMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS");
-			success &&= build_cpp_static_lib("windows/ImGui", ..imgui_src_files, extra = extras, debug=compile_debug);
-		} else #if OS == .LINUX {
-			make_directory_if_it_does_not_exist("linux");
-			print("creating .so file - START\n");
-			success &&= build_cpp_dynamic_lib("linux/ImGui", ..imgui_src_files, extra = extras, debug=compile_debug); // creates the .so
-			print("creating .so file - DONE\n");
-			// @Hack: Is -fno-threadsafe-statics really the way to go? Without it, we get linker errors when using the static library
-			// due to "__cxa_guard_acquire" et al not being defined. The library users probably need to link agains libc++ or something. But do we really want to enforce that?
-			array_add(*extras, .. .["-fpic","-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics"]);
-			print("creating .o files and .a file - START\n");
-			success &&= build_cpp_static_lib("linux/ImGui", ..imgui_src_files, extra = extras, debug=compile_debug); // creates the .a
-			print("creating .o files and .a file - DONE\n");
-			print("custom START\n");
-			cmd1 := "clang++ -O3 -shared -fpic -I/home/gui/work/web/github/imgui -o linux/ImGui.so imgui.o imgui_widgets.o imgui_draw.o imgui_tables.o imgui_impl_wgpu.o -L../wgpu/linux -lwgpu_native -Wl,-rpath=/home/gui/work/web/games/polygon-next/src/jai/modules/wgpu/linux -lstdc++";
-			print("%\n", cmd1);
-			run_command(cmd1, working_directory=IMGUI_PATH);
-			cmd2 := "ar -rc linux/ImGui.a imgui.o imgui_widgets.o imgui_draw.o imgui_tables.o imgui_impl_wgpu.o ../wgpu/linux/libwgpu_native.a";
-			print("%\n", cmd2);
-			run_command(cmd2, working_directory=IMGUI_PATH);
-			print("custom DONE\n");
+		if native {
+			#if OS == .WINDOWS {
+				make_directory_if_it_does_not_exist("windows");
+				success &&= build_cpp_dynamic_lib("windows/ImGui", ..imgui_src_files, extra = .["/DIMGUI_API=__declspec(dllexport)"], debug=compile_debug);
+				// We set IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS. Otherwise all users of the ImGui module have to link against "imm32".
+				success &&= build_cpp_static_lib("windows/ImGui", ..imgui_src_files, extra = .["/DIMGUI_API=__declspec(dllexport)", "/DIMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS"], debug=compile_debug);
+			} else #if OS == .LINUX {
+				make_directory_if_it_does_not_exist("linux");
+				success &&= build_cpp_dynamic_lib("linux/ImGui", ..imgui_src_files, debug=compile_debug);
+				// @Hack: Is -fno-threadsafe-statics really the way to go? Without it, we get linker errors when using the static library
+				// due to "__cxa_guard_acquire" et al not being defined. The library users probably need to link agains libc++ or something. But do we really want to enforce that?
+				success &&= build_cpp_static_lib("linux/ImGui", ..imgui_src_files, extra = .["-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics"], debug=compile_debug);
 
-		} else #if OS == .MACOS {
-			#import "Process";
-			make_directory_if_it_does_not_exist("macos");
-			macos_x64_version_arg   := "-mmacos-version-min=10.13"; // Our current x64 min version
-			macos_arm64_version_arg := "-mmacos-version-min=11.0";  // Earliest version that supports arm64
-			// x64 variant
-			success &&= build_cpp_dynamic_lib("macos/ImGui_x64",   ..imgui_src_files, extra = .["-arch", "x86_64", "-std=c++20", macos_x64_version_arg], debug=compile_debug);
-			// @Hack: Is -fno-threadsafe-statics really the way to go? Without it, we get linker errors when using the static library
-			// due to "__cxa_guard_acquire" et al not being defined. The library users probably need to link agains libc++ or something. But do we really want to enforce that?
-			success &&= build_cpp_static_lib( "macos/ImGui_x64",   ..imgui_src_files, extra = .["-arch", "x86_64", "-std=c++20", "-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics", macos_x64_version_arg], debug=compile_debug);
-			// arm64 variant
-			success &&= build_cpp_dynamic_lib("macos/ImGui_arm64", ..imgui_src_files, extra = .["-arch", "arm64",  "-std=c++20", macos_arm64_version_arg], debug=compile_debug);
-			success &&= build_cpp_static_lib( "macos/ImGui_arm64", ..imgui_src_files, extra = .["-arch", "arm64",  "-std=c++20", "-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics", macos_arm64_version_arg], debug=compile_debug);
-			// create universal binaries
-			run_result := run_command("lipo", "-create", "macos/ImGui_x64.dylib", "macos/ImGui_arm64.dylib", "-output", "macos/ImGui.dylib");
-			success &&= (run_result.exit_code == 0);
-			run_result =  run_command("lipo", "-create", "macos/ImGui_x64.a", "macos/ImGui_arm64.a", "-output", "macos/ImGui.a");
-			success &&= (run_result.exit_code == 0);
-		} else {
-			assert(false);
+				// generate the .so and .a in the wasm folder with those commands:
+				// em++ --target=wasm64-unknown-emscripten -g -O2 -c -fpic -o imgui.o /home/gui/work/web/github/imgui/imgui.cpp
+				// em++ --target=wasm64-unknown-emscripten -g -O2 -c -fpic -o imgui_widgets.o /home/gui/work/web/github/imgui/imgui_widgets.cpp
+				// em++ --target=wasm64-unknown-emscripten -g -O2 -c -fpic -o imgui_draw.o /home/gui/work/web/github/imgui/imgui_draw.cpp
+				// em++ --target=wasm64-unknown-emscripten -g -O2 -c -fpic -o imgui_tables.o /home/gui/work/web/github/imgui/imgui_tables.cpp
+				// em++ --target=wasm64-unknown-emscripten -g -O2 -c -fpic -o imgui_demo.o /home/gui/work/web/github/imgui/imgui_demo.cpp
+				// emar rcs ImGui.a imgui.o imgui_widgets.o imgui_draw.o imgui_tables.o imgui_demo.o
+				// em++ -v --target=wasm64-unknown-emscripten -g -O2 -s SIDE_MODULE=1 -o ImGui.so imgui.o imgui_widgets.o imgui_draw.o imgui_tables.o imgui_demo.o
+			} else #if OS == .MACOS {
+				#import "Process";
+				make_directory_if_it_does_not_exist("macos");
+				macos_x64_version_arg   := "-mmacos-version-min=10.13"; // Our current x64 min version
+				macos_arm64_version_arg := "-mmacos-version-min=11.0";  // Earliest version that supports arm64
+				// x64 variant
+				success &&= build_cpp_dynamic_lib("macos/ImGui_x64",   ..imgui_src_files, extra = .["-arch", "x86_64", "-std=c++20", macos_x64_version_arg], debug=compile_debug);
+				// @Hack: Is -fno-threadsafe-statics really the way to go? Without it, we get linker errors when using the static library
+				// due to "__cxa_guard_acquire" et al not being defined. The library users probably need to link agains libc++ or something. But do we really want to enforce that?
+				success &&= build_cpp_static_lib( "macos/ImGui_x64",   ..imgui_src_files, extra = .["-arch", "x86_64", "-std=c++20", "-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics", macos_x64_version_arg], debug=compile_debug);
+				// arm64 variant
+				success &&= build_cpp_dynamic_lib("macos/ImGui_arm64", ..imgui_src_files, extra = .["-arch", "arm64",  "-std=c++20", macos_arm64_version_arg], debug=compile_debug);
+				success &&= build_cpp_static_lib( "macos/ImGui_arm64", ..imgui_src_files, extra = .["-arch", "arm64",  "-std=c++20", "-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics", macos_arm64_version_arg], debug=compile_debug);
+				// create universal binaries
+				run_result := run_command("lipo", "-create", "macos/ImGui_x64.dylib", "macos/ImGui_arm64.dylib", "-output", "macos/ImGui.dylib");
+				success &&= (run_result.exit_code == 0);
+				run_result =  run_command("lipo", "-create", "macos/ImGui_x64.a", "macos/ImGui_arm64.a", "-output", "macos/ImGui.a");
+				success &&= (run_result.exit_code == 0);
+			} else {
+				assert(false);
+			}
 		}
-		print("compiling result:%\n",success);
 
 		if !success     return false;
+
+		if wasm {
+			success := true;
+			o_files:[..]string;
+			run_result := run_command("pwd");
+			for imgui_src_files {
+				o_file := replace(it, ".cpp", ".o");
+				o_file = replace(o_file, tprint("%/", IMGUI_PATH), "");
+				array_add(*o_files, o_file);
+				// cmd_o_file := tprint("em++ --target=wasm64-unknown-emscripten -g -O2 -c -fpic -pthread -o % % ", o_file, it);
+				cmd_o_file := tprint("clang++ -Oz --target=wasm64 --sysroot=%/upstream/emscripten/cache/sysroot -D_LIBCPP_HAS_NO_THREADS -c -o % %", EMSDK_PATH, o_file, it);
+
+				print("%\n", cmd_o_file);
+				run_result := run_command(..split(cmd_o_file, " "), working_directory=IMGUI_WASM_MODULE_PATH);
+				success &&= (run_result.exit_code == 0);
+			}
+
+			cmd_emar := tprint("emar rcs ImGui.a imgui.o %", join(..o_files, " "));
+			print("%\n", cmd_emar);
+			run_result = run_command(..split(cmd_emar, " "), working_directory=IMGUI_WASM_MODULE_PATH);
+			success &&= (run_result.exit_code == 0);
+			if !success     return false;
+
+			cmd_empp := tprint("em++ -v --target=wasm64-unknown-emscripten -g -O2 -o ImGui.so %", join(..o_files, " "));
+			print("%\n", cmd_empp);
+			run_result = run_command(..split(cmd_empp, " "), working_directory=IMGUI_WASM_MODULE_PATH);
+			success &&= (run_result.exit_code == 0);
+			if !success     return false;
+
+			cmd_clean := tprint("rm % ImGui.wasm", join(..o_files, " "));
+			print("%\n", cmd_clean);
+			run_result = run_command(..split(cmd_clean, " "), working_directory=IMGUI_WASM_MODULE_PATH);
+			success &&= (run_result.exit_code == 0);
+
+			if !success     return false;
+		}
 	}
+	if(no_generate) return true;
 
 	defer array_reset(*begin_end_string_args);
 
@@ -138,33 +172,26 @@ generate_bindings :: (args: [] string) -> bool {
 			array_add(*libpaths, "windows");
 			output_filename = "windows.jai";
 		} else {
-			#if OS == .LINUX {
-				array_add(*libpaths, "linux");
-			} else #if OS == .MACOS {
-				array_add(*libpaths, "macos");
+			if wasm {
+				array_add(*libpaths, "wasm");
+				footer = FOOTER_WASM;
 			} else {
-				assert(false);
+				#if OS == .LINUX {
+					array_add(*libpaths, "linux");
+				} else #if OS == .MACOS {
+					array_add(*libpaths, "macos");
+				} else {
+					assert(false);
+				}
+				footer = FOOTER_UNIX;
 			}
-			output_filename = "unix.jai";
+			output_filename = ifx wasm then "wasm.jai"  else "unix.jai";
 			generate_library_declarations = false;
-			footer = FOOTER_UNIX;
 		}
 
 		array_add(*libnames,      "ImGui");
 		array_add(*include_paths, IMGUI_PATH);
-		// array_add(*include_paths, tprint("%/backends", IMGUI_PATH));
-		array_add(*include_paths, tprint("%/imgui/backends", MODULES_PATH));
 		array_add(*source_files,  tprint("%/imgui.h", IMGUI_PATH));
-		print("wgpu:%\n", wgpu);
-		if wgpu {
-			array_add(*libnames,      "libwgpu_native");
-			array_add(*libpaths, tprint("%/wgpu/linux", MODULES_PATH));
-			array_add(*include_paths, tprint("%/wgpu/linux", MODULES_PATH));
-			print("%\n", tprint("%/wgpu/linux", MODULES_PATH));
-			array_add(*source_files,  tprint("%/imgui/backends/imgui_impl_wgpu.h", MODULES_PATH));
-			array_add(*source_files,  tprint("%/wgpu/linux/webgpu.h", MODULES_PATH));
-			array_add(*source_files,  tprint("%/wgpu/linux/wgpu.h", MODULES_PATH));
-		}
 		array_add(*extra_clang_arguments, "-x", "c++", "-DWIN32_LEAN_AND_MEAN");
 		// array_add(*flatten_namespaces, "ImGui");
 		// array_add(*strip_prefixes, "ImGui");
@@ -176,7 +203,7 @@ generate_bindings :: (args: [] string) -> bool {
 		visitor   = imgui_visitor;
 		get_func_args_for_printing = imgui_get_function_arg_for_printing;
 	}
-	// print("%, %\n", output_filename, opts);
+
 	return generate_bindings(opts, output_filename);
 }
 
@@ -205,6 +232,7 @@ imgui_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declaration_
 			decl.output_name = decl.name; // Don’t shorten ImGuiContext to Context as this would conflict
 		}
 
+		
 		if decl.kind == .TYPEDEF {
 			old_name := decl.name;
 			if old_name {
@@ -260,6 +288,13 @@ imgui_visitor :: (decl: *Declaration, parent_decl: *Declaration) -> Declaration_
 	if decl.kind == .FUNCTION {
 		func := cast(*Function)decl;
 		type := func.type.type_of_function;
+		// if(ends_with(decl.name, "GetIO")) {
+			// print("%: %\n", decl.name, parent_decl.kind);
+			// if (parent_decl && parent_decl.kind == .NAMESPACE) {
+			// 	// print("%: %\n", decl.name, parent_decl.kind);
+			// 	func.output_name = tprint("ImGui_JAI_%", decl.name);
+			// }
+		// }
 		// ImGui also has functions with pairs of arguments like "text_begin" and "text_end"
 		// for the pointers to the beginning and end of a string. We'll generate wrappers for
 		// those function which take a jai string.
@@ -350,5 +385,11 @@ FOOTER_UNIX :: #string END
 
 #if OS == .MACOS    imgui :: #library "macos/ImGui";
 #if OS == .LINUX    imgui :: #library "linux/ImGui";
+
+END
+
+FOOTER_WASM :: #string END
+
+imgui :: #library "wasm/ImGui";
 
 END

@@ -69,6 +69,5 @@ export function WGPUTextureViewDescriptorFromBuffer(
 		arrayLayerCount,
 		aspect,
 	};
-	console.log({ desc });
 	return desc;
 }

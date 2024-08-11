@@ -15,27 +15,27 @@ export function WGPUPrimitiveStateFromBuffer(
 	//
 	const topologyOffset = offset.topology;
 	const topologySize = WGPU_SIZE.u32;
-	const topologyState = (pointer + topologyOffset) / topologySize;
-	const topologyb = u32[Number(topologyState)];
+	const topologyStart = (pointer + topologyOffset) / topologySize;
+	const topologyb = u32[Number(topologyStart)];
 	const topology = topologyIntToGPUPrimitiveTopology(topologyb);
 	//
 	const stripIndexFormatOffset = offset.stripIndexFormat;
 	const stripIndexFormatSize = WGPU_SIZE.u32;
-	const stripIndexFormatState =
+	const stripIndexFormatStart =
 		(pointer + stripIndexFormatOffset) / stripIndexFormatSize;
-	const stripIndexFormatb = u32[Number(stripIndexFormatState)];
+	const stripIndexFormatb = u32[Number(stripIndexFormatStart)];
 	const stripIndexFormat = indexFormatIntToGPUIndexFormat(stripIndexFormatb);
 	//
 	const frontFaceOffset = offset.frontFace;
 	const frontFaceSize = WGPU_SIZE.u32;
-	const frontFaceState = (pointer + frontFaceOffset) / frontFaceSize;
-	const frontFaceb = u32[Number(frontFaceState)];
+	const frontFaceStart = (pointer + frontFaceOffset) / frontFaceSize;
+	const frontFaceb = u32[Number(frontFaceStart)];
 	const frontFace = frontFaceIntToGPUFrontFace(frontFaceb);
 	//
 	const cullModeOffset = offset.cullMode;
 	const cullModeSize = WGPU_SIZE.u32;
-	const cullModeState = (pointer + cullModeOffset) / cullModeSize;
-	const cullModeb = u32[Number(cullModeState)];
+	const cullModeStart = (pointer + cullModeOffset) / cullModeSize;
+	const cullModeb = u32[Number(cullModeStart)];
 	const cullMode = cullModeIntToGPUCullMode(cullModeb);
 
 	//

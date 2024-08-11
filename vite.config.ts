@@ -46,7 +46,9 @@ const onBuild = (
 				onRun(server, err, stdout, stderr)
 			);
 		} else {
-			console.warn(`not running native app`);
+			console.warn(
+				`native app compilation succesful, but vite config is set to not run it`
+			);
 		}
 
 		server.ws.send({

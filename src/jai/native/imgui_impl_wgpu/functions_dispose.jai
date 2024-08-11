@@ -3,7 +3,7 @@ ImGui_ImplWGPU_InvalidateDeviceObjects::() {
 	if (bd.wgpuDevice==null){
 		return;
 	}
-	SafeReleasePipelineState(*bd.pipelineState);
+	SafeReleasePipelineState(*bd.pipeline);
 	SafeReleaseRenderResources(*bd.renderResources);
 
 	io := ImGui.GetIO();

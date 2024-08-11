@@ -6,7 +6,7 @@ import {
 } from "./Common";
 import { orbitControlsFromBuffer } from "./OrbitControls";
 import { bufferToGPUVertexBufferLayout, SCENE_DATA } from "./SceneData";
-import { jsStringFromJaiString } from "./wasm/StringUtils";
+import { jsStringFromJaiString } from "./wasm/WasmString";
 import { memcmp } from "./wasm/WasmUtils";
 import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
 import { writeToConsoleLog } from "./wasm/PrintUtils";

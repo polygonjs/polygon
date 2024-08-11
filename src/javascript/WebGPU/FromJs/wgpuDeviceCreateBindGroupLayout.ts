@@ -8,5 +8,12 @@ export function wgpuDeviceCreateBindGroupLayout(
 	const device = heapGet<GPUDevice>(deviceHeapIndex)!;
 	const desc = WGPUBindGroupLayoutDescriptorFromBuffer(descriptorPointer);
 	const bindGroupLayout = device.createBindGroupLayout(desc);
-	return heapAdd(bindGroupLayout);
+	const index = heapAdd(bindGroupLayout);
+	// console.log(
+	// 	"wgpuDeviceCreateBindGroupLayout",
+	// 	desc,
+	// 	bindGroupLayout,
+	// 	index
+	// );
+	return index;
 }

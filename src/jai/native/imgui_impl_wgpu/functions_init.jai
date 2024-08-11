@@ -28,7 +28,7 @@ ImGui_ImplWGPU_Init :: (
 	io.BackendRendererName = "imgui_impl_webgpu";
 	io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;  // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
 
-	bd.wgpuDevice = info.Device;
+	// bd.wgpuDevice = info.Device;
 	bd.defaultQueue = wgpuDeviceGetQueue(bd.wgpuDevice);
 	bd.renderTargetFormat = info.RenderTargetFormat;
 	bd.depthStencilFormat = info.DepthStencilFormat;

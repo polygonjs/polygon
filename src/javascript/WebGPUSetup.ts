@@ -12,6 +12,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		return;
 	}
 
+	const clockData = clockInit();
 	const canvas = document.createElement("canvas");
 	const rect = domElement.getBoundingClientRect();
 	canvas.width = rect.width;
@@ -39,6 +40,8 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	const formatNative = textureFormatIndex(
 		wgpuRequestResponse.presentationFormat
 	);
+	let _onRequestAnimationFrameInProgress: boolean = false;
+	let framesCount = 0;
 
 	// const resizeObserver = new ResizeObserver((entries) => {
 	// 	const firstEntry = entries[0];
@@ -79,19 +82,28 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	);
 	window.initDrawData(USELESS_ARG0);
 
-	const clockData = clockInit();
 	function render() {
+		if (_onRequestAnimationFrameInProgress) {
+			return;
+		}
+		_onRequestAnimationFrameInProgress = true;
 		window.onRequestAnimationFrame(
 			USELESS_ARG0,
 			BigInt(clockData.time),
 			BigInt(canvas.width),
 			BigInt(canvas.height)
 		);
+		framesCount++;
+		_onRequestAnimationFrameInProgress = false;
 	}
 	function animate() {
 		clockTick(clockData);
 		render();
+		// if (framesCount < 3) {
 		requestAnimationFrame(animate);
+		// } else {
+		// logGreenBg("3 frames rendered, stopping for now");
+		// }
 	}
 	animate();
 }

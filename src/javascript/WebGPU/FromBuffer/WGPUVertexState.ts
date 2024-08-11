@@ -1,4 +1,4 @@
-import { jsStringFromJaiStringWithoutLength } from "../../wasm/StringUtils";
+import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
 import {

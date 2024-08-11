@@ -1,6 +1,5 @@
-import { heapGet } from "../../WasmHeap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import { labelFromBuffer } from "../utils/WebGPUUtils";
+import { heapGetItemFromOffset, labelFromBuffer } from "../utils/WebGPUUtils";
 import { WGPUDepthStencilStateFromBuffer } from "./WGPUDepthStencilState";
 import { WGPUFragmentStateFromBuffer } from "./WGPUFragmentState";
 import { WGPUMultisampleStateFromBuffer } from "./WGPUMultisampleState";
@@ -19,9 +18,19 @@ export function WGPURenderPipelineDescriptorFromBuffer(
 	//
 	const label = labelFromBuffer(pointer, offset, u64);
 	//
-	const layoutPointer = (pointer + offset.layout) / WGPU_SIZE.u64;
-	const layoutHeapIndex = u64[Number(layoutPointer)];
-	const layout = heapGet<GPUPipelineLayout>(layoutHeapIndex);
+	// const layoutPointer = (pointer + offset.layout) / WGPU_SIZE.u64;
+	// const layoutHeapIndex = u64[Number(layoutPointer)];
+	const layout = heapGetItemFromOffset<GPUPipelineLayout>(
+		u64,
+		pointer,
+		offset.layout
+	); //heapGet<GPUPipelineLayout>(layoutHeapIndex);
+	// console.log(
+	// 	"WGPURenderPipelineDescriptorFromBuffer: layout",
+	// 	layout,
+	// 	pointer,
+	// 	offset.layout
+	// );
 	if (!layout) {
 		throw new Error("layout is null");
 	}

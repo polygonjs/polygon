@@ -11,8 +11,8 @@ ShadersContainer :: struct {
 
 create_shaders :: ()-> ShadersContainer {
 	shaders :ShadersContainer= .{};
-	// filepath_render :: #run tprint("%../../shaders/basic.wgsl", #filepath);
-	filepath_render :: #run tprint("%../../../../shaders/raymarching.wgsl", #filepath);
+	filepath_render :: #run tprint("%../../../../shaders/basic.wgsl", #filepath);
+	// filepath_render :: #run tprint("%../../../../shaders/raymarching.wgsl", #filepath);
 	filepath_compute :: #run tprint("%../../../../shaders/compute3.wgsl", #filepath);
 	shader_render, success_render :: #run read_entire_file(filepath_render);
 	if !success_render {

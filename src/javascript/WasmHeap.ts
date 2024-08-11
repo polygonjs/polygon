@@ -12,6 +12,12 @@ const HEAP: Heap = {
 };
 
 export function heapAdd(item: HeapObject): bigint {
+	const currentIndex = HEAP.indexByItem.get(item);
+	if (currentIndex != null) {
+		console.log("item already in heap", item);
+		return currentIndex;
+	}
+
 	// const slot = HEAP.availableSlots.values().next().value;
 	const index = HEAP.nextValue;
 	HEAP.itemByIndex.set(index, item);

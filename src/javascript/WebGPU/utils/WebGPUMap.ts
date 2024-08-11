@@ -282,3 +282,70 @@ export function textureAspectIntToGPUTextureAspect(
 ): GPUTextureAspect {
 	return GPU_TEXTURE_ASPECTS[i];
 }
+
+export const GPU_TEXTURE_DIMENSIONS: GPUTextureDimension[] = ["1d", "2d", "3d"];
+export function textureDimensionIntToGPUTextureDimension(
+	i: number
+): GPUTextureDimension {
+	return GPU_TEXTURE_DIMENSIONS[i];
+}
+
+export const GPU_ADDRESS_MODES: GPUAddressMode[] = [
+	// note that the order here is different than the one in typescript
+	"repeat",
+	"mirror-repeat",
+	"clamp-to-edge",
+];
+export function addressModeIntToGPUAddressMode(i: number): GPUAddressMode {
+	return GPU_ADDRESS_MODES[i];
+}
+
+export const GPU_FILTER_MODES: GPUFilterMode[] = ["nearest", "linear"];
+export function filterModeIntToGPUFilterMode(i: number): GPUFilterMode {
+	return GPU_FILTER_MODES[i];
+}
+
+export const GPU_MIPMAP_FILTER_MODES: GPUMipmapFilterMode[] = [
+	"nearest",
+	"linear",
+];
+export function mipmapFilterModeIntToGPUMipmapFilterMode(
+	i: number
+): GPUMipmapFilterMode {
+	return GPU_MIPMAP_FILTER_MODES[i];
+}
+
+export const GPU_SAMPLER_BINDING_TYPES: GPUSamplerBindingType[] = [
+	"filtering",
+	"non-filtering",
+	"comparison",
+];
+export function samplerBindingTypeIntToGPUSamplerBindingType(
+	i: number
+): GPUSamplerBindingType {
+	return GPU_SAMPLER_BINDING_TYPES[i - 1]; // in linux.jai, we have the undefined entry at index 0
+}
+
+export const GPU_TEXTURE_SAMPLE_TYPES: GPUTextureSampleType[] = [
+	"float",
+	"unfilterable-float",
+	"depth",
+	"sint",
+	"uint",
+];
+export function textureSampleTypeIntToGPUTextureSampleType(
+	i: number
+): GPUTextureSampleType {
+	return GPU_TEXTURE_SAMPLE_TYPES[i - 1]; // in linux.jai, we have the undefined entry at index 0
+}
+
+export const GPU_STORAGE_TEXTURE_ACCESS: GPUStorageTextureAccess[] = [
+	"write-only",
+	"read-only",
+	"read-write",
+];
+export function storageTextureAccessIntToGPUStorageTextureAccess(
+	i: number
+): GPUStorageTextureAccess {
+	return GPU_STORAGE_TEXTURE_ACCESS[i - 1]; // in linux.jai, we have the undefined entry at index 0
+}

@@ -1,4 +1,5 @@
-import { jsStringFromJaiStringWithoutLength } from "../../wasm/StringUtils";
+import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
+import { heapGet } from "../../WasmHeap";
 import { WGPU_SIZE } from "./WebGPUOffset";
 
 interface LabelOffsetContainer {
@@ -9,7 +10,20 @@ export function labelFromBuffer(
 	offset: LabelOffsetContainer,
 	u64: BigUint64Array
 ) {
-	const labelOffset = offset.label;
+	return stringFromBuffer(pointer, offset.label, u64);
+	// const labelOffset = offset.label;
+	// const labelSize = WGPU_SIZE.u64;
+	// const labelStart = (pointer + labelOffset) / labelSize;
+	// const labelPointer = u64[Number(labelStart)];
+	// const label = jsStringFromJaiStringWithoutLength(BigInt(labelPointer));
+	// return label;
+}
+export function stringFromBuffer(
+	pointer: bigint,
+	stringOffset: bigint,
+	u64: BigUint64Array
+) {
+	const labelOffset = stringOffset;
 	const labelSize = WGPU_SIZE.u64;
 	const labelStart = (pointer + labelOffset) / labelSize;
 	const labelPointer = u64[Number(labelStart)];
@@ -27,6 +41,67 @@ export function numberFromBuffer(
 	const countSize = WGPU_SIZE.u64;
 	const countStart = (pointer + countOffset) / countSize;
 	return u64[Number(countStart)];
+}
+
+export function u64Create(
+	u64: BigUint64Array,
+	pointer: bigint
+): (i: bigint) => bigint {
+	function _u64(elementOffset: bigint) {
+		const elementSize = WGPU_SIZE.u64;
+		const elementStart = (pointer + elementOffset) / elementSize;
+		const elementb = u64[Number(elementStart)];
+		return elementb;
+	}
+	return _u64;
+}
+export function f64Create(
+	u64: Float64Array,
+	pointer: bigint
+): (i: bigint) => number {
+	function _f64(elementOffset: bigint) {
+		const elementSize = WGPU_SIZE.u64;
+		const elementStart = (pointer + elementOffset) / elementSize;
+		const elementb = u64[Number(elementStart)];
+		return elementb;
+	}
+	return _f64;
+}
+export function u32Create(
+	u32: Uint32Array,
+	pointer: bigint
+): (i: bigint) => number {
+	function _u32(elementOffset: bigint) {
+		const elementSize = WGPU_SIZE.u32;
+		const elementStart = (pointer + elementOffset) / elementSize;
+		const elementb = u32[Number(elementStart)];
+		return Number(elementb);
+	}
+	return _u32;
+}
+export function u16Create(
+	u16: Uint16Array,
+	pointer: bigint
+): (i: bigint) => number {
+	function _u16(elementOffset: bigint) {
+		const elementSize = WGPU_SIZE.u16;
+		const elementStart = (pointer + elementOffset) / elementSize;
+		const elementb = u16[Number(elementStart)];
+		return Number(elementb);
+	}
+	return _u16;
+}
+
+export function heapGetItemFromOffset<T>(
+	u64: BigUint64Array,
+	pointer: bigint,
+	elementOffset: bigint
+): T | undefined {
+	//
+	const elementPointer = (pointer + elementOffset) / WGPU_SIZE.u64;
+	const elementHeapIndex = u64[Number(elementPointer)];
+	const element = heapGet<T>(elementHeapIndex);
+	return element;
 }
 
 // export function arrayItemHeapIndex(

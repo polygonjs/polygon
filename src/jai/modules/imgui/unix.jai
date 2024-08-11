@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai - -compile
+// jai generate.jai - -native -debug
 //
 
 
@@ -493,10 +493,16 @@ ImGui :: struct {
     Render :: () -> void #foreign imgui "_ZN5ImGui6RenderEv";
     GetDrawData :: () -> *ImDrawData #foreign imgui "_ZN5ImGui11GetDrawDataEv";
 
+    // Demo, Debug, Information
+    ShowDemoWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui14ShowDemoWindowEPb";
     ShowMetricsWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui17ShowMetricsWindowEPb";
     ShowDebugLogWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui18ShowDebugLogWindowEPb";
     ShowIDStackToolWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui21ShowIDStackToolWindowEPb";
-
+    ShowAboutWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui15ShowAboutWindowEPb";
+    ShowStyleEditor :: (ref: *ImGuiStyle = null) -> void #foreign imgui "_ZN5ImGui15ShowStyleEditorEP10ImGuiStyle";
+    ShowStyleSelector :: (label: *u8) -> bool #foreign imgui "_ZN5ImGui17ShowStyleSelectorEPKc";
+    ShowFontSelector :: (label: *u8) -> void #foreign imgui "_ZN5ImGui16ShowFontSelectorEPKc";
+    ShowUserGuide :: () -> void #foreign imgui "_ZN5ImGui13ShowUserGuideEv";
     GetVersion :: () -> *u8 #foreign imgui "_ZN5ImGui10GetVersionEv";
 
     // Styles

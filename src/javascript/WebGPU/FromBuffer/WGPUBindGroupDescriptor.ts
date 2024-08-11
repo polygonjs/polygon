@@ -16,11 +16,7 @@ export function WGPUBindGroupDescriptorFromBuffer(
 	const offset = WGPU_OFFSET.WGPUBindGroupDescriptor;
 
 	//
-	// const labelOffset = offset.label;
-	// const labelSize = WGPU_SIZE.u64;
-	// const labelStart = (pointer + labelOffset) / labelSize;
-	// const labelPointer = u64[Number(labelStart)];
-	const label = labelFromBuffer(pointer, offset, u64); //jsStringFromJaiStringWithoutLength(BigInt(labelPointer));
+	const label = labelFromBuffer(pointer, offset, u64);
 	//
 	const layoutOffset = offset.layout;
 	const layoutSize = WGPU_SIZE.u64;

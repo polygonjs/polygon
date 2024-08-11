@@ -127,7 +127,7 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 		// 	entryCount = xx bind_group_layout_entries.count,
 		// 	entries = bind_group_layout_entries.data,
 		// }));
-		bind_group_layouts[0] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data);
+		bind_group_layouts[0] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "object uniforms");
 		// print("0:%\n", cast(u64)bind_group_layouts[0]);
 	}
 	// group 1 (camera uniforms)
@@ -143,7 +143,7 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 		// 	entryCount = xx bind_group_layout_entries.count,
 		// 	entries = bind_group_layout_entries.data,
 		// }));
-		bind_group_layouts[1] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data);
+		bind_group_layouts[1] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "camera uniforms");
 		// print("1:%\n", cast(u64)bind_group_layouts[1]);
 	}
 	// group 2 (SDF uniforms)
@@ -159,7 +159,7 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 		// 	entryCount = xx bind_group_layout_entries.count,
 		// 	entries = bind_group_layout_entries.data,
 		// }));
-		bind_group_layouts[2] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data);
+		bind_group_layouts[2] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "sdf uniforms");
 		// print("2:%\n", cast(u64)bind_group_layouts[2]);
 	}
 	//
@@ -267,11 +267,28 @@ wgpu_index_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, indices: []
 	return buffer, size;
 }
 
-wgpu_create_bind_group_layout :: (device: WGPUDevice, entryCount: s64, data: *WGPUBindGroupLayoutEntry) -> WGPUBindGroupLayout {
+wgpu_create_bind_group_layout :: (device: WGPUDevice, entryCount: s64, data: *WGPUBindGroupLayoutEntry, label:string) -> WGPUBindGroupLayout {
 	bind_group_layout := wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
+		label = to_c_string(label),
 		entryCount = xx entryCount,
 		entries = data,
 	}));
 	return bind_group_layout;
 }
 
+wgpu_create_shader_module :: (device: WGPUDevice, source: string, label :string) -> WGPUShaderModule {
+	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
+	wgslDescriptor.chain.next = null;
+	wgslDescriptor.chain.sType=.ShaderModuleWGSLDescriptor;
+	wgslDescriptor.code = to_c_string(source);
+	#if FREE_MEMORY defer free(wgslDescriptor.code);
+
+	shaderModuleDescriptor: WGPUShaderModuleDescriptor;
+	shaderModuleDescriptor.label = to_c_string(label);
+	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
+	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
+	shader_module := wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
+
+
+	return shader_module;
+}

@@ -1,21 +1,5 @@
 
 
-wgpu_create_shader_module :: (device: WGPUDevice, source: string, label :string) -> WGPUShaderModule {
-	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
-	wgslDescriptor.chain.next = null;
-	wgslDescriptor.chain.sType=.ShaderModuleWGSLDescriptor;
-	wgslDescriptor.code = to_c_string(source);
-	#if FREE_MEMORY defer free(wgslDescriptor.code);
-
-	shaderModuleDescriptor: WGPUShaderModuleDescriptor;
-	shaderModuleDescriptor.label = to_c_string(label);
-	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
-	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
-	shader_module := wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
-
-
-	return shader_module;
-}
 
 
 wgpu_texture_get_width_surface :: (wgpu_context: *WGPUContext) -> u32 {

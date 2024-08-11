@@ -61,9 +61,17 @@ BUILD_NATIVE :: true;
 			// We should probably port this allocator to Jai instead…
 			//  -rluba, 2023-11-15
 			walloc_object_file_path := "modules/walloc/walloc.o";
+			EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
 
 			STACK_SIZE :: 1024 * 1024;
-			options.additional_linker_arguments = .["--stack-first", "-z", tprint("stack-size=%", STACK_SIZE), walloc_object_file_path];
+			options.additional_linker_arguments = .[
+				"--stack-first",
+				"-z",
+				tprint("stack-size=%", STACK_SIZE),
+				walloc_object_file_path,
+				// tprint("-L%/upstream/lib", EMSDK_PATH)
+				tprint("-L%/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten/", EMSDK_PATH)
+			];
 
 			set_build_options(options, w);
 
@@ -108,7 +116,7 @@ BUILD_NATIVE :: true;
 			options := get_build_options(w);
 			options.output_path = "../../bin/";
 			make_directory_if_it_does_not_exist(options.output_path);
-			options.output_executable_name = "polygon-next-native";
+			options.output_executable_name = "polygon-next";
 			set_build_options(options, w);
 
 			compiler_begin_intercept(w);
@@ -137,8 +145,6 @@ BUILD_NATIVE :: true;
 			}
 
 			compiler_end_intercept(w);
-
-			print(">> built common native\n");
 		}
 	}
 	

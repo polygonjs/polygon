@@ -75,7 +75,7 @@ ImGui_ImplWGPU_SetupRenderState:: ( draw_data: *ImDrawData, ctx: WGPURenderPassE
 	);
 	index_buffer_format := ifx (size_of(ImDrawIdx) == 2) then WGPUIndexFormat.Uint16 else WGPUIndexFormat.Uint32;
 	wgpuRenderPassEncoderSetIndexBuffer(ctx, fr.IndexBuffer, index_buffer_format, 0, fr.IndexBufferSize * size_of(ImDrawIdx));
-	wgpuRenderPassEncoderSetPipeline(ctx, bd.pipelineState);
+	wgpuRenderPassEncoderSetPipeline(ctx, bd.pipeline);
 	wgpuRenderPassEncoderSetBindGroup(ctx, 0, bd.renderResources.CommonBindGroup, 0, null);
 
 	// Setup blend factor
@@ -86,6 +86,8 @@ ImGui_ImplWGPU_SetupRenderState:: ( draw_data: *ImDrawData, ctx: WGPURenderPassE
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
 ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
+	// print("ImGui_ImplWGPU_RenderDrawData: quick return\n");
+	// if(1+1)return;
 	// print_yellow("ImGui_ImplWGPU_RenderDrawData START\n");
 	// Avoid rendering when minimized
 	width := draw_data.DisplaySize.x * draw_data.FramebufferScale.x;
@@ -243,7 +245,7 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*Im
 // ImGui_ImplWGPU_NewFrame :: () {
 // 	print("ImGui_ImplWGPU_NewFrame START\n");
 // 	bd := ImGui_ImplWGPU_GetBackendData("ImGui_ImplWGPU_NewFrame");
-// 	if (bd.pipelineState==null) {
+// 	if (bd.pipeline==null) {
 // 		print("A2\n");
 // 		ImGui_ImplWGPU_CreateDeviceObjects();
 // 	}

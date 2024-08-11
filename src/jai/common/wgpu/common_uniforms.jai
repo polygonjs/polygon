@@ -24,6 +24,7 @@ wgpu_object_uniform_to_buffer :: (
 		buffer=buffer,
 	};
 	bind_group_descriptor := WGPUBindGroupDescriptor.{
+		label = "uniforms_bind_group/object",
 		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, 0),
 		entryCount = xx entries.count,
 		entries = entries.data
@@ -64,6 +65,7 @@ wgpu_camera_uniform_to_buffer :: (
 	// 	buffer=buffer,
 	// };
 	bind_group_descriptor := WGPUBindGroupDescriptor.{
+		label = "uniforms_bind_group/camera",
 		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, 1),
 		entryCount = xx entries.count,
 		entries = entries.data
@@ -111,6 +113,7 @@ wgpu_sdf_uniform_to_buffer :: (
 	// 	buffer=buffer,
 	// };
 	bind_group_descriptor := WGPUBindGroupDescriptor.{
+		label = "uniforms_bind_group/sdf",
 		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, 2),
 		entryCount = xx entries.count,
 		entries = entries.data

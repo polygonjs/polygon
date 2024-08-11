@@ -8,13 +8,6 @@ export function wgpuQueueWriteBuffer(
 	dataPointer: bigint,
 	size: bigint
 ) {
-	// console.log({
-	// 	queueHeapIndex,
-	// 	bufferHeadIndex,
-	// 	bufferOffset,
-	// 	dataPointer,
-	// 	size,
-	// });
 	const queue = heapGet<GPUQueue>(queueHeapIndex)!;
 	const gpuBuffer = heapGet<GPUBuffer>(bufferHeadIndex)!;
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
@@ -39,6 +32,16 @@ export function wgpuQueueWriteBuffer(
 	// 		console.error("writeBuffer: isNaN", i, f32[i]);
 	// 	}
 	// }
+	// console.log({
+	// 	queueHeapIndex,
+	// 	bufferHeadIndex,
+	// 	bufferOffset,
+	// 	dataPointer,
+	// 	size,
+	// 	queue,
+	// 	gpuBuffer,
+	// });
+
 	return queue.writeBuffer(
 		gpuBuffer,
 		Number(bufferOffset),

@@ -367,9 +367,184 @@ WGPUTextureViewDescriptor (with size=48) contains the following members:
 		arrayLayerCount: BigInt(36),
 		aspect: BigInt(40),
 	},
+	/*
+WGPUShaderModuleDescriptor (with size=32) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: label of type *u8 with offset 8
+- 2: hintCount of type u64 with offset 16
+- 3: hints of type *WGPUShaderModuleCompilationHint with offset 24
+	*/
+	WGPUShaderModuleDescriptor: {
+		nextInChain: BigInt(0),
+		label: BigInt(8),
+		hintCount: BigInt(16),
+		hints: BigInt(24),
+	},
+	/*
+	WGPUShaderModuleWGSLDescriptor (with size=24) contains the following members:
+- 0: chain of type WGPUChainedStruct with offset 0
+- 1: code of type *u8 with offset 16
+	*/
+	WGPUShaderModuleWGSLDescriptor: {
+		chain: BigInt(0),
+		code: BigInt(16),
+	},
+	/*
+WGPUTextureDescriptor (with size=64) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: label of type *u8 with offset 8
+- 2: usage of type u32 with offset 16
+- 3: dimension of type WGPUTextureDimension with offset 20
+- 4: size of type WGPUExtent3D with offset 24
+- 5: format of type WGPUTextureFormat with offset 36
+- 6: mipLevelCount of type u32 with offset 40
+- 7: sampleCount of type u32 with offset 44
+- 8: viewFormatCount of type u64 with offset 48
+- 9: viewFormats of type *WGPUTextureFormat with offset 56
+	*/
+	WGPUTextureDescriptor: {
+		nextInChain: BigInt(0),
+		label: BigInt(8),
+		usage: BigInt(16),
+		dimension: BigInt(20),
+		size: BigInt(24),
+		format: BigInt(36),
+		mipLevelCount: BigInt(40),
+		sampleCount: BigInt(44),
+		viewFormatCount: BigInt(48),
+		viewFormats: BigInt(56),
+	},
+	/**
+WGPUExtent3D (with size=12) contains the following members:
+- 0: width of type u32 with offset 0
+- 1: height of type u32 with offset 4
+- 2: depthOrArrayLayers of type u32 with offset 8
+	 */
+	WGPUExtent3D: {
+		width: BigInt(0),
+		height: BigInt(4),
+		depthOrArrayLayers: BigInt(8),
+	},
+	/*
+WGPUImageCopyTexture (with size=40) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: texture of type *WGPUTextureImpl with offset 8
+- 2: mipLevel of type u32 with offset 16
+- 3: origin of type WGPUOrigin3D with offset 20
+- 4: aspect of type WGPUTextureAspect with offset 32
+	*/
+	WGPUImageCopyTexture: {
+		nextInChain: BigInt(0),
+		texture: BigInt(8),
+		mipLevel: BigInt(16),
+		origin: BigInt(20),
+		aspect: BigInt(32),
+	},
+	/*
+WGPUTextureDataLayout (with size=24) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: offset of type u64 with offset 8
+- 2: bytesPerRow of type u32 with offset 16
+- 3: rowsPerImage of type u32 with offset 20
+	*/
+	WGPUTextureDataLayout: {
+		nextInChain: BigInt(0),
+		offset: BigInt(8),
+		bytesPerRow: BigInt(16),
+		rowsPerImage: BigInt(20),
+	},
+	/*
+WGPUOrigin3D (with size=12) contains the following members:
+- 0: x of type u32 with offset 0
+- 1: y of type u32 with offset 4
+- 2: z of type u32 with offset 8
+	*/
+	WGPUOrigin3D: {
+		x: BigInt(0),
+		y: BigInt(4),
+		z: BigInt(8),
+	},
+	/*
+WGPUSamplerDescriptor (with size=56) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: label of type *u8 with offset 8
+- 2: addressModeU of type WGPUAddressMode with offset 16
+- 3: addressModeV of type WGPUAddressMode with offset 20
+- 4: addressModeW of type WGPUAddressMode with offset 24
+- 5: magFilter of type WGPUFilterMode with offset 28
+- 6: minFilter of type WGPUFilterMode with offset 32
+- 7: mipmapFilter of type WGPUMipmapFilterMode with offset 36
+- 8: lodMinClamp of type float32 with offset 40
+- 9: lodMaxClamp of type float32 with offset 44
+- 10: compare of type WGPUCompareFunction with offset 48
+- 11: maxAnisotropy of type u16 with offset 52
+	*/
+	WGPUSamplerDescriptor: {
+		nextInChain: BigInt(0),
+		label: BigInt(8),
+		addressModeU: BigInt(16),
+		addressModeV: BigInt(20),
+		addressModeW: BigInt(24),
+		magFilter: BigInt(28),
+		minFilter: BigInt(32),
+		mipmapFilter: BigInt(36),
+		lodMinClamp: BigInt(40),
+		lodMaxClamp: BigInt(44),
+		compare: BigInt(48),
+		maxAnisotropy: BigInt(52),
+	},
+	/*
+WGPUColor (with size=32) contains the following members:
+- 0: r of type float64 with offset 0
+- 1: g of type float64 with offset 8
+- 2: b of type float64 with offset 16
+- 3: a of type float64 with offset 24
+	*/
+	WGPUColor: {
+		r: BigInt(0),
+		g: BigInt(8),
+		b: BigInt(16),
+		a: BigInt(24),
+	},
+	/*
+WGPUSamplerBindingLayout (with size=16) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: type of type WGPUSamplerBindingType with offset 8
+	*/
+	WGPUSamplerBindingLayout: {
+		nextInChain: BigInt(0),
+		type: BigInt(8),
+	},
+	/*
+WGPUTextureBindingLayout (with size=24) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: sampleType of type WGPUTextureSampleType with offset 8
+- 2: viewDimension of type WGPUTextureViewDimension with offset 12
+- 3: multisampled of type u32 with offset 16
+	*/
+	WGPUTextureBindingLayout: {
+		nextInChain: BigInt(0),
+		sampleType: BigInt(8),
+		viewDimension: BigInt(12),
+		multisampled: BigInt(16),
+	},
+	/*
+WGPUStorageTextureBindingLayout (with size=24) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: access of type WGPUStorageTextureAccess with offset 8
+- 2: format of type WGPUTextureFormat with offset 12
+- 3: viewDimension of type WGPUTextureViewDimension with offset 16
+	*/
+	WGPUStorageTextureBindingLayout: {
+		nextInChain: BigInt(0),
+		access: BigInt(8),
+		format: BigInt(12),
+		viewDimension: BigInt(16),
+	},
 };
 export const WGPU_SIZE = {
 	u8: BigInt(1),
+	u16: BigInt(2),
 	u32: BigInt(4),
 	u64: BigInt(8),
 	s32: BigInt(4),
@@ -383,4 +558,6 @@ export const WGPU_SIZE = {
 	WGPUColorTargetState: BigInt(32),
 	WGPUBindGroupEntry: BigInt(56),
 	WGPURenderPassColorAttachment: BigInt(64),
+	WGPUExtent3D: BigInt(12),
+	WGPUTextureFormat: BigInt(4),
 };

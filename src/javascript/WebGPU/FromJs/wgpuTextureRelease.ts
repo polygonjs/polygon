@@ -1,4 +1,7 @@
-export function wgpuTextureRelease() {
-	console.warn("wgpuTextureGetWidth not implemented");
-	// TODO: also headDelete
+import { heapDelete, heapGet } from "../../WasmHeap";
+
+export function wgpuTextureRelease(pointer: bigint) {
+	const texture = heapGet<GPUTexture>(pointer);
+	texture?.destroy();
+	heapDelete(pointer);
 }
