@@ -1,6 +1,4 @@
-// wgpu_create_shader_module :: (device: WGPUDevice, source: string, label :string)-> WGPUShaderModule {
-	// return js_wgpu_create_shader_module(device, source.count, source.data, label.count, label.data);
-// }
+
 wgpu_texture_get_width_surface :: (wgpu_context: *WGPUContext) -> u32 {
 	return js_wgpu_texture_get_width_surface(wgpu_context.surface);
 }
@@ -8,9 +6,11 @@ wgpu_texture_get_height_surface :: (wgpu_context: *WGPUContext) -> u32 {
 	return js_wgpu_texture_get_height_surface(wgpu_context.surface);
 }
 
-// js_wgpu_create_shader_module :: (device: WGPUDevice, source_count: s64, source_data: *u8, label_count: s64, label_data: *u8)-> WGPUShaderModule #foreign;
+
 js_wgpu_texture_get_width_surface :: (surface: WGPUSurface)-> u32 #foreign;
 js_wgpu_texture_get_height_surface :: (surface: WGPUSurface)-> u32 #foreign;
+
+wgpuSurfaceGetCurrentTexture :: ()-> WGPUTexture #foreign;
 
 // Methods of BindGroup
 wgpuBindGroupRelease :: (bindGroup: WGPUBindGroup) -> void #foreign;

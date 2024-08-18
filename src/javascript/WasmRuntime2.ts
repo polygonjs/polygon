@@ -27,6 +27,7 @@ import {
 	// js_wgpu_create_shader_module,
 	js_wgpu_texture_get_height_surface,
 	js_wgpu_texture_get_width_surface,
+	wgpuSurfaceGetCurrentTexture,
 } from "./WebGPU/utils/WebGPUCommon";
 import { wgpuCommandEncoderBeginRenderPass } from "./WebGPU/FromJs/wgpuCommandEncoderBeginRenderPass";
 import { wgpuDeviceCreateCommandEncoder } from "./WebGPU/FromJs/wgpuDeviceCreateCommandEncoder";
@@ -190,6 +191,7 @@ const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 	// js_wgpu_create_shader_module,
 	js_wgpu_texture_get_width_surface,
 	js_wgpu_texture_get_height_surface,
+	wgpuSurfaceGetCurrentTexture,
 	wgpuDeviceCreateRenderPipeline,
 	wgpuDeviceCreateBindGroup,
 	wgpuRenderPipelineGetBindGroupLayout,

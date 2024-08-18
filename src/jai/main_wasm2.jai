@@ -1,4 +1,4 @@
-USE_IMGUI :: false;
+USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
 #placeholder WASM;
 USE_COMPUTE_SHADER :: false;
@@ -18,9 +18,9 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 #if WASM == false #load "common/wgpu/native.jai";
 #load "common/wgpu/common.jai";
 #load "common/wgpu/common_depth.jai";
-#load "common/wgpu/common_multisample.jai";
-#if WASM == true #load "common/wgpu/wasm_multisample.jai";
-#if WASM == false #load "common/wgpu/native_multisample.jai";
+#load "common/wgpu/msaa/common.jai";
+#if WASM == true #load "common/wgpu/msaa/wasm.jai";
+#if WASM == false #load "common/wgpu/msaa/native.jai";
 #load "common/wgpu/common_uniforms.jai";
 #load "native/print_utils.jai";
 
@@ -360,10 +360,8 @@ on_request_animation_frame :: (
 	update_camera_uniforms_to_buffer(DRAW_DATA.uniforms.camera.buffer, queue, *SCENE_DATA);
 	update_sdf_uniforms_to_buffer(DRAW_DATA.uniforms.sdf.buffer, queue, *SCENE_DATA);
 
-	#if WASM==false {
-		frame := wgpu_surface_create_current_view( *wgpu_context );
-		defer wgpuTextureViewRelease(frame);
-	}
+	frame := wgpu_surface_create_current_view( *wgpu_context );
+	defer wgpuTextureViewRelease(frame);
 	create_multi_sample_texture_if_needed( *wgpu_context );
 	create_depth_texture_if_needed( *wgpu_context );
 	colorAttachment := WGPURenderPassColorAttachment.{
@@ -371,11 +369,8 @@ on_request_animation_frame :: (
 		storeOp = WGPUStoreOp.Store,
 		clearValue = wgpu_context.bg_color,
 	};
-	#if WASM==true {
-		update_render_pass_descriptor_multisample(wgpu_context.use_msaa, *colorAttachment);
-	} else {
-		update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
-	}
+
+	update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
 
 	render_pass_encoder1: WGPURenderPassEncoder;
 	cmd_buffer1: WGPUCommandBuffer;

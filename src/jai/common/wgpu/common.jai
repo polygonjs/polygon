@@ -10,7 +10,7 @@ WGPUContext :: struct {
 		surface_texture :WGPUSurfaceTexture;
 	}
 	//
-	use_msaa: bool=false;
+	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
 	bg_color :WGPUColor =.{0.1, 0.3, 0.72, 1.0};
 	//
@@ -291,4 +291,23 @@ wgpu_create_shader_module :: (device: WGPUDevice, source: string, label :string)
 
 
 	return shader_module;
+}
+
+wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureView {
+	current_view_descriptor := WGPUTextureViewDescriptor.{
+		format = wgpu_context.preferred_texture_format,
+		dimension = WGPUTextureViewDimension._2D,
+		aspect = WGPUTextureAspect.All,
+		baseMipLevel = 0,
+		mipLevelCount = 1,
+		baseArrayLayer = 0,
+		arrayLayerCount = 1,
+	};
+	#if WASM {
+		texture := wgpuSurfaceGetCurrentTexture();
+		return wgpuTextureCreateView(texture, *current_view_descriptor);
+	} else {
+		wgpuSurfaceGetCurrentTexture(wgpu_context.surface, *(wgpu_context.surface_texture));
+		return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+	}
 }

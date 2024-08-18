@@ -1,24 +1,29 @@
+import { heapGet } from "../../WasmHeap";
 import {
 	loadOpIntToGPULoadOp,
 	storeOpIntToGPUStoreOp,
 } from "../utils/WebGPUMap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import { u32Create } from "../utils/WebGPUUtils";
+import { u32Create, u64Create } from "../utils/WebGPUUtils";
 
 export function WGPURenderPassColorAttachmentFromBuffer(
 	pointer: bigint
 ): GPURenderPassColorAttachment {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	const u32 = new Uint32Array(buffer);
+	const u64 = new BigUint64Array(buffer);
 	const _u32 = u32Create(u32, pointer);
+	const _u64 = u64Create(u64, pointer);
 	//
 	const offset = WGPU_OFFSET.WGPURenderPassColorAttachment;
 	//
 	// const viewOffset = offset.view;
 	// const viewSize = WGPU_SIZE.u64;
 	// const viewStart = (pointer + viewOffset) / viewSize;
-	// const viewPointer = u64[Number(viewStart)];
-	const view = window.webGPUContext.getCurrentTexture().createView(); //heapGet<GPUTextureView>(viewPointer);
+	const viewPointer = _u64(offset.view);
+	const view = heapGet<GPUTextureView>(viewPointer)!; // window.webGPUContext.getCurrentTexture().createView(); //
+	const resolveTargetPointer = _u64(offset.resolveTarget);
+	const resolveTarget = heapGet<GPUTextureView>(resolveTargetPointer);
 	//
 	const clearValueOffset = offset.clearValue;
 	const clearValueSize = WGPU_SIZE.float64;
@@ -41,6 +46,7 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 	//
 	const colorAttachment: GPURenderPassColorAttachment = {
 		view,
+		resolveTarget,
 		clearValue,
 		loadOp,
 		storeOp,

@@ -33,10 +33,10 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 
 	const canvasIndex = heapAdd(canvas);
 	// const contextIndex = heapAdd(context);
-	const currentTexture = context.getCurrentTexture();
-	const currentTextureView = currentTexture.createView();
-	heapAdd(currentTexture);
-	heapAdd(currentTextureView);
+	// const currentTexture = context.getCurrentTexture();
+	// const currentTextureView = currentTexture.createView();
+	// heapAdd(currentTexture);
+	// heapAdd(currentTextureView);
 	const deviceHeapIndex = heapAdd(wgpuRequestResponse.device);
 	const queueHeapIndex = heapAdd(wgpuRequestResponse.device.queue);
 	const formatNative = textureFormatIndex(
@@ -104,7 +104,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	function animate() {
 		clockTick(clockData);
 		render();
-		// if (framesCount < 3) {
+		// if (framesCount < 2) {
 		requestAnimationFrame(animate);
 		// } else {
 		// 	console.log("3 frames rendered, stopping for now");
