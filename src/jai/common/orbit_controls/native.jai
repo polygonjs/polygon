@@ -8,6 +8,7 @@ lastPointer: Vector2Int;
 
 orbit_controls_process_event :: (orbit_controls:*OrbitControls, event :*SDL_Event){
 	using orbit_controls;
+	
 	if event.type == {
 		case SDL_MOUSEBUTTONDOWN; {
 			if (event.button.button == SDL_BUTTON_LEFT) {

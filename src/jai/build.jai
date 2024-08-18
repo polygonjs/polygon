@@ -24,8 +24,9 @@ DONE
 
 BUILD_COMMON :: true;
 BUILD_NON_COMMON :: false;
+//
 BUILD_WASM :: true;
-BUILD_NATIVE :: false;
+BUILD_NATIVE :: true;
 
 #run {
 	checkbox_wasm   := ifx BUILD_WASM then "x" else " ";

@@ -21,8 +21,11 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 #if WASM == true #load "common/wgpu/wasm_multisample.jai";
 #if WASM == false #load "common/wgpu/native_multisample.jai";
 #load "common/wgpu/common_uniforms.jai";
-#load "common/orbit_controls.jai";
 #load "native/print_utils.jai";
+
+#load "common/orbit_controls/common.jai";
+#if WASM #load "common/orbit_controls/wasm.jai";
+else #load "common/orbit_controls/native.jai";
 
 #if OS == .LINUX {
 	// in order to import gcc_s, I initially tried:
@@ -59,7 +62,7 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 	#import "wgpu";
 	#import "SDL";
 	#load "native/helpers_webgpu.jai";
-	#load "native/orbit_controls.jai";
+	
 }
 #if USE_IMGUI {
 	#load "common/imgui/common.jai";
@@ -189,7 +192,7 @@ main :: () {
 						}
 					}
 					case SDL_KEYDOWN; {
-						if(io.WantCaptureKeyboard==false){
+						if(io.WantCaptureKeyboard == false){
 							if event.key.keysym.sym == SDLK_ESCAPE {
 								do_exit = true;
 							}
@@ -197,7 +200,7 @@ main :: () {
 					}
 				}
 
-				if(io.WantCaptureMouse==false){
+				if(io.WantCaptureMouse == false){
 					orbit_controls_process_event(*orbit_controls, *event);
 				}
 
@@ -322,6 +325,7 @@ on_request_animation_frame :: (
 	#if WASM {
 		context = call_from_wasm_context;
 		queue := wgpu_context.queue;
+		orbit_controls_process_event(*orbit_controls);
 	} else {
 		queue := wgpuDeviceGetQueue(wgpu_context.device);
 		assert(queue != null, "Queue is not created correctly");
@@ -335,6 +339,7 @@ on_request_animation_frame :: (
 		update_camera_data_projection(*SCENE_DATA);
 	}
 	time:float = new_time / 1000.0;
+	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 	update_scene_data(*SCENE_DATA, time);
 	update_scene_data_uniforms(*SCENE_DATA);
 
