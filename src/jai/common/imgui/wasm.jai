@@ -6,8 +6,9 @@ ImGui_ImplWasm_NewFrame :: () {
 
 	// Setup display size (every frame to accommodate for window resizing)
 	// w, h: s32;
-	w := 1017;
-	h := 1067;
+	w :u32= 1;
+	h :u32= 1;
+	imguiGetWindowData(*w, *h);
 	display_w, display_h: s32;
 	// SDL_GetWindowSize(window, *w, *h);
 	// SDL_GL_GetDrawableSize(window, *display_w, *display_h);
@@ -31,7 +32,12 @@ ImGui_ImplWasm_NewFrame :: () {
 	// Setup inputs
 	// (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
 	// mx, my: s32;
+	// left_button_pressed:bool = false;
 	// mouseMask := SDL_GetMouseState(*mx, *my);
+	imguiGetMouseData(*io.MousePos.x, *io.MousePos.y, *io.MouseDown[0]);
+	// print("size_of(bool):%\n", size_of(bool));
+	// print("io.MousePos:%\n",io.MousePos.x);
+	// print("io.MouseDown:%,%\n",io.MouseDown[0],io.MouseDown[1]);
 	// if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS) {
 	// 	io.MousePos = .{xx mx, xx my};   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
 	// } else {
@@ -49,3 +55,6 @@ ImGui_ImplWasm_NewFrame :: () {
 	// // Hide OS mouse cursor if ImGui is drawing it
 	// SDL_ShowCursor(xx (io.MouseDrawCursor == false));
 }
+
+imguiGetWindowData :: (w: *u32, h: *u32) -> void #foreign;
+imguiGetMouseData :: (mx: *float, my: *float, left_button_pressed: *bool) -> void #foreign;

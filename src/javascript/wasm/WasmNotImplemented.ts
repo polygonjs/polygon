@@ -5,23 +5,21 @@ function generateNotImplementedFunction(name: string) {
 }
 // function notImplemented() {}
 const functionNames: string[] = [
-	"fclose",
-	"fflush",
-	"fmodf",
-	"fopen",
-	"fread",
-	"fseek",
-	"ftell",
-	"fwrite",
-	"log",
-	"logf",
-	"memchr",
-	"printf",
-	"strcmp",
-	"strncmp",
-	"strncpy",
-	"sscanf", // imgui
-	"strstr", // imgui
+	// "fclose",
+	// "fflush",
+	// "fopen",
+	// "fread",
+	// "fseek",
+	// "ftell",
+	// "fwrite",
+	// "log",
+	// "logf",
+	// "memchr",
+	// "printf",
+	// "strncmp",
+	// "strncpy",
+	// "sscanf", // imgui
+	// "strstr", // imgui
 ];
 function createDict() {
 	const dict: any = {};

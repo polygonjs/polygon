@@ -1,3 +1,5 @@
+// import { WGPU_SIZE } from "./WebGPU/utils/WebGPUOffset";
+
 type HeapObject = any;
 interface Heap {
 	itemByIndex: Map<BigInt, HeapObject>;
@@ -31,13 +33,37 @@ export function heapAdd(item: HeapObject): bigint {
 	// console.log("+ heapAdd", { index, item });
 	return index;
 }
-export function heapDelete(slot: HeapObject) {
-	const index = HEAP.indexByItem.get(slot);
+export function heapDeleteByItem(item: HeapObject) {
+	const index = HEAP.indexByItem.get(item);
 	if (index == null) {
+		console.log("heapDelete: item not in heap", item);
 		return;
 	}
+	_heapDelete(index, item);
+	// console.log("- heapDeleteByItem", { index, item });
+}
+export function heapDeleteByIndex(index: bigint) {
+	const item = HEAP.itemByIndex.get(index);
+	if (item == null) {
+		console.log("heapDelete: item not in heap", index, item);
+		return;
+	}
+	_heapDelete(index, item);
+	// console.log("- heapDeleteByIndex", { index, item });
+}
+// export function heapDeleteByPointer(pointer: bigint) {
+// 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+// 	const u64 = new BigUint64Array(buffer);
+
+// 	//
+// 	const size = WGPU_SIZE.u64;
+// 	const start = pointer / size;
+// 	const index = u64[Number(start)];
+// 	heapDeleteByIndex(index);
+// }
+function _heapDelete(index: bigint, item: HeapObject) {
 	HEAP.itemByIndex.delete(index);
-	HEAP.indexByItem.delete(slot);
+	HEAP.indexByItem.delete(item);
 	if (index < HEAP.nextValue) {
 		HEAP.nextValue = index;
 	}
@@ -45,3 +71,4 @@ export function heapDelete(slot: HeapObject) {
 export function heapGet<T>(slot: bigint): T | undefined {
 	return HEAP.itemByIndex.get(slot);
 }
+

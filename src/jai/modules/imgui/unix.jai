@@ -454,7 +454,14 @@ ImGuiKeyChord :: s32;
 
 ImTextureID :: *void;
 
-ImDrawIdx :: u16;
+// we use u32 here instead of u16,
+// since we compile imgui with the line:
+// ----------
+// #define ImDrawIdx unsigned int
+// ----------
+// in imconfig.h
+// ----------
+ImDrawIdx :: u32;
 
 // Character types
 // (we generally use UTF-8 encoded string in the API. This is storage specifically for a decoded character used for keyboard input and display)

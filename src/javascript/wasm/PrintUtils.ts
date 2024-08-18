@@ -1,5 +1,6 @@
 // console.log and console.error always add newlines so we need to buffer the output from write_string
 // to simulate a more basic I/O behavior. We’ll flush it after a certain time so that you still
+
 // see the last line if you forget to terminate it with a newline for some reason.
 let console_buffer = "";
 let console_buffer_is_standard_error: boolean = false;

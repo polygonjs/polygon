@@ -454,7 +454,14 @@ ImGuiKeyChord :: s32;
 
 ImTextureID :: *void;
 
-ImDrawIdx :: u16;
+// we use u32 here instead of u16,
+// since we compile imgui with the line:
+// ----------
+// #define ImDrawIdx unsigned int
+// ----------
+// in imconfig.h
+// ----------
+ImDrawIdx :: u32;
 
 // Character types
 // (we generally use UTF-8 encoded string in the API. This is storage specifically for a decoded character used for keyboard input and display)
@@ -493,10 +500,16 @@ ImGui :: struct {
     Render :: () -> void #foreign imgui "_ZN5ImGui6RenderEv";
     GetDrawData :: () -> *ImDrawData #foreign imgui "_ZN5ImGui11GetDrawDataEv";
 
+    // Demo, Debug, Information
+    ShowDemoWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui14ShowDemoWindowEPb";
     ShowMetricsWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui17ShowMetricsWindowEPb";
     ShowDebugLogWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui18ShowDebugLogWindowEPb";
     ShowIDStackToolWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui21ShowIDStackToolWindowEPb";
-
+    ShowAboutWindow :: (p_open: *bool = null) -> void #foreign imgui "_ZN5ImGui15ShowAboutWindowEPb";
+    ShowStyleEditor :: (ref: *ImGuiStyle = null) -> void #foreign imgui "_ZN5ImGui15ShowStyleEditorEP10ImGuiStyle";
+    ShowStyleSelector :: (label: *u8) -> bool #foreign imgui "_ZN5ImGui17ShowStyleSelectorEPKc";
+    ShowFontSelector :: (label: *u8) -> void #foreign imgui "_ZN5ImGui16ShowFontSelectorEPKc";
+    ShowUserGuide :: () -> void #foreign imgui "_ZN5ImGui13ShowUserGuideEv";
     GetVersion :: () -> *u8 #foreign imgui "_ZN5ImGui10GetVersionEv";
 
     // Styles

@@ -1,7 +1,8 @@
-import { heapDelete, heapGet } from "../../WasmHeap";
+import { heapDeleteByIndex, heapGet } from "../../WasmHeap";
 
-export function wgpuTextureRelease(pointer: bigint) {
-	const texture = heapGet<GPUTexture>(pointer);
+export function wgpuTextureRelease(index: bigint) {
+	const texture = heapGet<GPUTexture>(index);
 	texture?.destroy();
-	heapDelete(pointer);
+	heapDeleteByIndex(index);
 }
+

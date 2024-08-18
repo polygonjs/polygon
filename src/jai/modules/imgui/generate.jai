@@ -3,6 +3,23 @@ AT_COMPILE_TIME :: true;
 // We don’t ship the Dear ImGui source with the compiler. Download a Dear ImGui release and update this path if you want to re-generate the bindings.
 // cd /home/gui/work/web/github/imgui && git checkout v1.90.9
 //
+// also git clone https://github.com/nothings/stb
+// and ensure that we have #define stbsp__uintptr stbsp__uint64
+// by commenting out the lines before and after
+// (or maybe we could just add "#define __x86_64__" to force it despite compiling for wasm)
+//
+// and make sure to uncomment
+// #define IMGUI_DISABLE_FILE_FUNCTIONS
+// #define IMGUI_DISABLE_DEFAULT_FILE_FUNCTIONS
+// #define IMGUI_STB_SPRINTF_FILENAME    "../stb/stb_sprintf.h"
+// #define IMGUI_USE_STB_SPRINTF
+// #define ImDrawIdx unsigned int
+// in imconfig.h
+//
+// and in generated file:
+// ImDrawIdx :: u32; // instead of u16
+//
+//
 // jai generate.jai - -compile -native -debug
 // jai generate.jai - -native -debug
 //
@@ -10,6 +27,10 @@ AT_COMPILE_TIME :: true;
 //
 // jai generate.jai - -wasm -debug
 // jai generate.jai - -compile -wasm -no_generate -debug
+//
+// or
+//
+// jai generate.jai - -compile -wasm && jai generate.jai - -compile -native
 //
 // test with: nm -g linux/ImGui.a | grep Impl
 IMGUI_PATH :: "/home/gui/work/web/github/imgui";
@@ -69,7 +90,7 @@ generate_bindings :: (args: [] string) -> bool {
 	array_add(*imgui_src_files, tprint("%/imgui_draw.cpp", IMGUI_PATH));
 	array_add(*imgui_src_files, tprint("%/imgui_tables.cpp", IMGUI_PATH));
 	// @ToDo: Maybe add an option to exclude imgui_demo?
-	// array_add(*imgui_src_files, tprint("%/imgui_demo.cpp", IMGUI_PATH));
+	array_add(*imgui_src_files, tprint("%/imgui_demo.cpp", IMGUI_PATH));
 
 	IMGUI_MODULE_PATH := tprint("%/imgui", MODULES_PATH);
 	IMGUI_WASM_MODULE_PATH := tprint("%/wasm", IMGUI_MODULE_PATH);

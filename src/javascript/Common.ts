@@ -32,6 +32,7 @@ export interface Vector3 {
 
 declare global {
 	interface Window {
+		WebGPUCanvas: HTMLCanvasElement;
 		update_wasm: UpdateWasmFunction;
 		onWebGPUReady: OnWebGPUReadyFunction;
 		initDrawData: InitDrawDataFunction;
@@ -122,3 +123,4 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 	
 	`,
 };
+

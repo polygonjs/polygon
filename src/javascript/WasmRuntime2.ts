@@ -4,8 +4,23 @@ import {
 	OnRequestAnimationFrameFunction,
 	OnWebGPUReadyFunction,
 } from "./Common";
-import { jsStringFromJaiString, strlen } from "./wasm/WasmString";
-import { atof, memcmp, memcpy, memmove, memset } from "./wasm/WasmUtils";
+import {
+	jsStringFromJaiString,
+	strcmp,
+	strlen,
+	atof,
+	printf,
+	sprintf,
+	snprintf,
+	// vsnprintf,
+	sscanf,
+	strchr,
+	strncmp,
+	strncpy,
+	toupper,
+	strstr,
+} from "./wasm/WasmString";
+import { memchr, memcmp, memcpy, memmove, memset } from "./wasm/WasmMem";
 // import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
 import { writeToConsoleLog } from "./wasm/PrintUtils";
 import {
@@ -59,9 +74,9 @@ import { wgpuSamplerRelease } from "./WebGPU/FromJs/wgpuSamplerRelease";
 import { wgpuShaderModuleRelease } from "./WebGPU/FromJs/wgpuShaderModuleRelease";
 import { WASM_MATH } from "./wasm/WasmMath";
 import { __assert_fail } from "./wasm/WasmImgui";
-import { vsnprintf } from "./wasm/WasmVsnPrintf";
 import { mapFunctionName } from "./wasm/WasmFunctionMapper";
 import { qsort } from "./wasm/WasmQSort";
+import { imguiGetMouseData, imguiGetWindowData } from "./ImGui/wasm";
 
 // A global reference of the WASM’s memory area so that we can look up pointers
 // let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
@@ -144,9 +159,20 @@ const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 	memset,
 	memcpy,
 	memmove,
+	memchr,
 	strlen,
+	strcmp,
+	sscanf,
+	strchr,
+	strncmp,
+	strncpy,
 	atof,
-	vsnprintf,
+	// vsnprintf,
+	snprintf,
+	printf,
+	sprintf,
+	strstr,
+	toupper,
 	qsort,
 	__assert_fail,
 	...WASM_MATH,
@@ -197,6 +223,9 @@ const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 	wgpuRenderPipelineRelease,
 	wgpuSamplerRelease,
 	wgpuShaderModuleRelease,
+	// imgui
+	imguiGetMouseData,
+	imguiGetWindowData,
 };
 
 // Create the environment for the WASM file,
@@ -307,3 +336,4 @@ export function loadWasm(): Promise<void> {
 }
 
 export function onWasmAndWebGPUReady() {}
+

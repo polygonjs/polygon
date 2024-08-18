@@ -1,7 +1,8 @@
-import { heapDelete } from "../../WasmHeap";
+import { heapDeleteByIndex } from "../../WasmHeap";
 
-export function wgpuQueueRelease(queueHeapIndex: bigint): void {
+export function wgpuQueueRelease(index: bigint): void {
 	// const queue = heapGet<GPUQueue>(queueHeapIndex);
 	// queue?.release();
-	heapDelete(queueHeapIndex);
+	heapDeleteByIndex(index);
 }
+

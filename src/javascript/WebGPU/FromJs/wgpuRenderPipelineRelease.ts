@@ -1,5 +1,6 @@
-import { heapDelete } from "../../WasmHeap";
+import { heapDeleteByIndex } from "../../WasmHeap";
 
-export function wgpuRenderPipelineRelease(pipelineHeapIndex: bigint) {
-	heapDelete(pipelineHeapIndex);
+export function wgpuRenderPipelineRelease(index: bigint) {
+	heapDeleteByIndex(index);
 }
+

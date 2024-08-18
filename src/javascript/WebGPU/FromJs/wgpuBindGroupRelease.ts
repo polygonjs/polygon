@@ -1,5 +1,6 @@
-import { heapDelete } from "../../WasmHeap";
+import { heapDeleteByIndex } from "../../WasmHeap";
 
 export function wgpuBindGroupRelease(pointer: bigint) {
-	heapDelete(pointer);
+	heapDeleteByIndex(pointer);
 }
+

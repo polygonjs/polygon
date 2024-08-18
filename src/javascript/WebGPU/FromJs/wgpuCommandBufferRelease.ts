@@ -1,8 +1,9 @@
-import { heapDelete } from "../../WasmHeap";
+import { heapDeleteByIndex } from "../../WasmHeap";
 
-export function wgpuCommandBufferRelease(pointer: bigint) {
+export function wgpuCommandBufferRelease(index: bigint) {
 	// const commandBuffer = heapGet<GPUCommandBuffer>(pointer);
 	// console.log("wgpuCommandBufferRelease", pointer, commandBuffer);
-	heapDelete(pointer);
+	heapDeleteByIndex(index);
 	// commandBuffer?.release();
 }
+

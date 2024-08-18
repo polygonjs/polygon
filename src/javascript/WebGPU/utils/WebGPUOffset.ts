@@ -543,6 +543,7 @@ WGPUStorageTextureBindingLayout (with size=24) contains the following members:
 	},
 };
 export const WGPU_SIZE = {
+	bool: BigInt(1),
 	u8: BigInt(1),
 	u16: BigInt(2),
 	u32: BigInt(4),

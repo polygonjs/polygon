@@ -65,7 +65,7 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 	#load "common/imgui/common.jai";
 	#load "native/imgui_impl_wgpu/index.jai";
 	#import "imgui";
-	#load "native/helpers_ui.jai";
+	#load "common/imgui/common_ui.jai";
 	#if WASM {
 		#load "common/imgui/wasm.jai";
 	} else {
@@ -152,10 +152,11 @@ main :: () {
 		window_context.window = window;
 
 		imgui_context := ImGui.CreateContext();
-		print("imgui_context: %\n", imgui_context);
 		sdl_init_success := ImGui_ImplSdl_Init(window);
 		assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
-		ImGui.StyleColorsDark();
+		// imgui_style := ImGui.GetStyle(); // ImGuiStyle
+		// imgui_style.AntiAliasedLinesUseTex = false;
+		ImGui.StyleColorsDark(/*imgui_style*/);
 		ImGui_ImplSdl_Init(window);
 
 		wgpuSetLogCallback(wgpu_log_callback, null);

@@ -1,7 +1,8 @@
-import { heapDelete } from "../../WasmHeap";
+import { heapDeleteByIndex } from "../../WasmHeap";
 
-export function wgpuRenderPassEncoderRelease(pointer: bigint) {
+export function wgpuRenderPassEncoderRelease(index: bigint) {
 	// const renderPassEncoder = heapGet<GPURenderPassEncoder>(pointer);
 	// console.log("wgpuRenderPassEncoderRelease", pointer, renderPassEncoder);
-	heapDelete(pointer);
+	heapDeleteByIndex(index);
 }
+

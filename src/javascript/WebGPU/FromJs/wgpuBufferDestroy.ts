@@ -1,7 +1,8 @@
-import { heapDelete, heapGet } from "../../WasmHeap";
+import { heapDeleteByIndex, heapGet } from "../../WasmHeap";
 
-export function wgpuBufferDestroy(pointer: bigint) {
-	const buffer = heapGet<GPUBuffer>(pointer);
+export function wgpuBufferDestroy(index: bigint) {
+	const buffer = heapGet<GPUBuffer>(index);
 	buffer?.destroy();
-	heapDelete(pointer);
+	heapDeleteByIndex(index);
 }
+

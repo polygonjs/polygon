@@ -1,8 +1,8 @@
-import { heapDelete } from "../../WasmHeap";
+import { heapDeleteByIndex } from "../../WasmHeap";
 
-export function wgpuCommandEncoderRelease(pointer: bigint) {
-	// const commandEncoder = heapGet<GPUCommandEncoder>(pointer);
-	// console.log("wgpuCommandEncoderRelease", pointer, commandEncoder);
-	heapDelete(pointer);
+export function wgpuCommandEncoderRelease(index: bigint) {
+	// console.log("wgpuCommandEncoderRelease", pointer);
+	heapDeleteByIndex(index);
 	// commandEncoder?.release();
 }
+

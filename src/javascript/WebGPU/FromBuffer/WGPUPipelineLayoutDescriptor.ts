@@ -71,9 +71,10 @@ export function WGPUPipelineLayoutDescriptorFromBuffer(
 		bindGroupLayouts,
 	};
 	// const pipelineLayout = device.createPipelineLayout(pipelineDescriptor);
-	// for (let i = 0; i < groupLayoutCount; i++) {
-	// 	heapDelete(bindGroupLayouts[i]);
-	// }
+	for (let i = 0; i < groupLayoutCount; i++) {
+		// heapDeleteByItem(bindGroupLayouts[i]);
+	}
 	// TODO: run heapDelete for each bindGroupLayout ?
 	return pipelineDescriptor;
 }
+

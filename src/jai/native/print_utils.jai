@@ -17,7 +17,7 @@ ANSI_PURPLE_BACKGROUND := "\u001B[45m";
 ANSI_CYAN_BACKGROUND := "\u001B[46m";
 ANSI_WHITE_BACKGROUND := "\u001B[47m";
 
-print_with_color::(content:string, bg_color:string){
+print_with_color :: (content:string, bg_color:string){
 	print(
 		"% % % %\n",
 		bg_color,
@@ -27,15 +27,15 @@ print_with_color::(content:string, bg_color:string){
 	);
 }
 
-print_red::(content:string){
+print_red :: (content:string){
 	print_with_color(content, ANSI_RED_BACKGROUND );
 }
-print_yellow::(content:string){
+print_yellow :: (content:string){
 	print_with_color(content, ANSI_YELLOW_BACKGROUND );
 }
-print_green::(content:string){
+print_green :: (content:string){
 	print_with_color(content, ANSI_GREEN_BACKGROUND );
 }
-print_blue::(content:string){
+print_blue :: (content:string){
 	print_with_color(content, ANSI_BLUE_BACKGROUND );
 }

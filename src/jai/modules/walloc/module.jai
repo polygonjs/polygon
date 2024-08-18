@@ -26,10 +26,10 @@ allocator_proc :: (mode: Allocator_Mode, requested_size: s64, old_size: s64, old
             return result;
 
         case .FREE;
-            log("[Walloc]: FREE");
+            // log("[Walloc]: FREE");
             walloc_free(old_memory);
             return null;
-
+// 
         case .CREATE_HEAP; #through;
         case .DESTROY_HEAP;
             context.handling_assertion_failure = true;

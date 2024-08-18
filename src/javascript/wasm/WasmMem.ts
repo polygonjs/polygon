@@ -85,23 +85,18 @@ export function memmove(
 	return destPointer;
 }
 
-export function atof(strPointer: bigint): number {
-	// converts a string to a floating-point number
-	// Assume wasmMemory is the WebAssembly memory object
+export function memchr(sPointer: bigint, c: number, n: bigint): bigint {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	const memory = new Uint8Array(buffer);
+	const start = Number(sPointer);
+	const size = Number(n);
+	const byteValue = c & 0xff; // Ensure the byte value is within 0-255
 
-	// Find the length of the string (until null terminator)
-	let length = 0;
-	let i = Number(strPointer);
-	while (memory[i + length] !== 0) {
-		length++;
+	for (let i = 0; i < size; i++) {
+		if (memory[start + i] === byteValue) {
+			return BigInt(start + i);
+		}
 	}
 
-	// Use TextDecoder to decode the memory range into a string
-	const decoder = new TextDecoder("utf-8");
-	const str = decoder.decode(memory.subarray(i, i + length));
-
-	// Use parseFloat to convert the string to a floating-point number
-	return parseFloat(str);
+	return 0n; // Return 0 (NULL) if the byte is not found
 }

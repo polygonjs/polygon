@@ -88,7 +88,7 @@ ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTextu
 		iwc_font_tex.sampler_desc.addressModeU = WGPUAddressMode.Repeat;
 		iwc_font_tex.sampler_desc.addressModeV = WGPUAddressMode.Repeat;
 		iwc_font_tex.sampler_desc.addressModeW = WGPUAddressMode.Repeat;
-		iwc_font_tex.sampler_desc.maxAnisotropy = 1;
+		iwc_font_tex.sampler_desc.maxAnisotropy = 2;
 		bd.renderResources.Sampler = wgpuDeviceCreateSampler(bd.wgpuDevice, *iwc_font_tex.sampler_desc);
 	}
 

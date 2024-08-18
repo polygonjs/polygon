@@ -1,12 +1,69 @@
 import { defineConfig, PluginOption, Plugin, ViteDevServer } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
 import checker from "vite-plugin-checker";
-import { exec, ExecException } from "child_process";
+import { exec, ExecException, spawn, SpawnOptions } from "child_process";
 // import * as fs from "fs";
 // import * as path from "path";
 
 const BUILD_ON_FILE_CHANGE: boolean = true;
 const RUN_NATIVE_ON_FILE_CHANGE: boolean = false;
+// const CMD_JAI = "jai";
+// const CMD_JAI_ARGS = ["src/jai/build.jai"];
+const CMD_BUILD = "jai src/jai/build.jai";
+
+function logRedBg(message: string) {
+	logStyled(message, {
+		backgroundColor: "red",
+		color: "white",
+		fontWeight: "bold",
+		padding: { x: 10, y: 5 },
+	});
+}
+function logGreenBg(message: string) {
+	logStyled(message, {
+		backgroundColor: "green",
+		color: "white",
+		fontWeight: "bold",
+		padding: { x: 10, y: 5 },
+	});
+}
+function logBlueBg(message: string) {
+	logStyled(message, {
+		backgroundColor: "blue",
+		color: "white",
+		fontWeight: "bold",
+		padding: { x: 10, y: 5 },
+	});
+}
+interface LogStyle {
+	backgroundColor?: string;
+	color?: string;
+	fontWeight?: string;
+	padding?: {
+		x?: number;
+		y?: number;
+	};
+}
+function logStyled(message: string, style: LogStyle) {
+	const styleString = Object.entries(style)
+		.map(([key, value]) => {
+			const propName = key.replace(
+				/([A-Z])/g,
+				(g) => `-${g[0].toLowerCase()}`
+			);
+			if (key == "padding") {
+				const padding = value as { x?: number; y?: number };
+				return `padding: ${padding.y || 0}px ${padding.x || 0}px`;
+			} else {
+				return `${propName}: ${value}`;
+			}
+		})
+		.join("; ");
+	console.log("%c" + message, styleString);
+}
+export function logDefault(message: string) {
+	console.log(message);
+}
 
 function fileIsNotInDotBuildFolder(filePath: string): boolean {
 	return filePath.includes("/.build/") == false;
@@ -27,7 +84,11 @@ const onBuild = (
 	stderr: string
 ) => {
 	if (err) {
-		console.error(`Error compiling .jai files: ${stderr}`);
+		console.warn(`output:`);
+		console.warn(`-----------------------------------------`);
+		console.log(stdout);
+		console.warn(`-----------------------------------------`);
+		logRedBg(`Error compiling .jai files: ${stderr}`);
 		server.ws.send({
 			type: "custom",
 			event: "jai-wasm-error",
@@ -38,7 +99,7 @@ const onBuild = (
 		// exec(`xmessage -center '${stderr}' -timeout 4`);
 	} else {
 		if (RUN_NATIVE_ON_FILE_CHANGE) {
-			console.log(`Compiled .jai files: ${stdout}`);
+			logGreenBg(`+++ Compiled .jai files: ${stdout}`);
 			console.log(`-----------------------------------------`);
 			console.log(`--------------- Running app`);
 			console.log(`-----------------------------------------`);
@@ -46,7 +107,7 @@ const onBuild = (
 				onRun(server, err, stdout, stderr)
 			);
 		} else {
-			console.warn(
+			logGreenBg(
 				`native app compilation succesful, but vite config is set to not run it`
 			);
 		}
@@ -86,9 +147,22 @@ function jaiPlugin() {
 				console.log(`-----------------------------------------`);
 				console.log(`--------------- File changed: ${filePath}`);
 				console.log(`-----------------------------------------`);
-				exec("jai src/jai/build.jai", (err, stdout, stderr) =>
-					onBuild(server, err, stdout, stderr)
+				console.log(
+					`--------------- Compiling .jai files (${performance.now()})`
 				);
+				console.log(`-----------------------------------------`);
+				console.log(`${CMD_BUILD}`);
+				exec(
+					CMD_BUILD,
+					{
+						shell: "/bin/bash",
+						cwd: process.cwd(),
+						env: { ...process.env },
+					},
+					(err, stdout, stderr) =>
+						onBuild(server, err, stdout, stderr)
+				);
+				// spawn(CMD_JAI,CMD_JAI_ARGS)
 			}
 		});
 	};
@@ -125,3 +199,4 @@ export default defineConfig({
 		outDir: "dist",
 	},
 });
+

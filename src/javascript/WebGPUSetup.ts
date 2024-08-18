@@ -1,9 +1,10 @@
 import { clockInit, clockTick } from "./Clock";
 import { USELESS_ARG0 } from "./Common";
+import { addEvents } from "./EventsController";
 import { heapAdd } from "./WasmHeap";
 import { WGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { textureFormatIndex } from "./WebGPU/utils/WebGPUMap";
-import { webGPUListenToResize } from "./WebGPUResize";
+import { canvasSetSize, webGPUListenToResize } from "./WebGPUResize";
 
 export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	const domElement = document.getElementById("app") as HTMLElement;
@@ -14,10 +15,11 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 
 	const clockData = clockInit();
 	const canvas = document.createElement("canvas");
+	window.WebGPUCanvas = canvas;
 	const rect = domElement.getBoundingClientRect();
-	canvas.width = rect.width;
-	canvas.height = rect.height;
+	canvasSetSize(canvas, wgpuRequestResponse.device, rect.width, rect.height);
 	domElement.appendChild(canvas);
+	addEvents(canvas);
 	const context = canvas.getContext("webgpu");
 	if (!context) {
 		alert("failed to create a context");
@@ -86,6 +88,9 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		if (_onRequestAnimationFrameInProgress) {
 			return;
 		}
+		if (framesCount % 100 === 0) {
+			console.log(framesCount);
+		}
 		_onRequestAnimationFrameInProgress = true;
 		window.onRequestAnimationFrame(
 			USELESS_ARG0,
@@ -102,8 +107,9 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		// if (framesCount < 3) {
 		requestAnimationFrame(animate);
 		// } else {
-		// logGreenBg("3 frames rendered, stopping for now");
+		// 	console.log("3 frames rendered, stopping for now");
 		// }
 	}
 	animate();
 }
+

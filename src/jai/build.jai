@@ -25,10 +25,15 @@ DONE
 BUILD_COMMON :: true;
 BUILD_NON_COMMON :: false;
 BUILD_WASM :: true;
-BUILD_NATIVE :: true;
+BUILD_NATIVE :: false;
 
 #run {
-	print("Building WASM: %, Native: %\n", BUILD_WASM, BUILD_NATIVE);
+	checkbox_wasm   := ifx BUILD_WASM then "x" else " ";
+	checkbox_native := ifx BUILD_NATIVE then "x" else " ";
+	print("Building:\n");
+	print("WASM:    [%]\n", checkbox_wasm);
+	print("NATIVE:  [%]\n", checkbox_native);
+	print("\n");
 	set_build_options_dc(.{do_output = false});
 
 	if ( BUILD_COMMON ) {
