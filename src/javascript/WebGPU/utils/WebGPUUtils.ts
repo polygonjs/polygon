@@ -67,6 +67,18 @@ export function f64Create(
 	}
 	return _f64;
 }
+export function f32Create(
+	u64: Float32Array,
+	pointer: bigint
+): (i: bigint) => number {
+	function _f32(elementOffset: bigint) {
+		const elementSize = WGPU_SIZE.float;
+		const elementStart = (pointer + elementOffset) / elementSize;
+		const elementb = u64[Number(elementStart)];
+		return elementb;
+	}
+	return _f32;
+}
 export function u32Create(
 	u32: Uint32Array,
 	pointer: bigint
@@ -192,3 +204,4 @@ export function createWGPUItemsByHeapIndex<T>(
 	// }
 	// return items;
 }
+

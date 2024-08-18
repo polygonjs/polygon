@@ -56,5 +56,3 @@ ImGui_ImplWasm_NewFrame :: () {
 	// SDL_ShowCursor(xx (io.MouseDrawCursor == false));
 }
 
-imguiGetWindowData :: (w: *u32, h: *u32) -> void #foreign;
-imguiGetMouseData :: (mx: *float, my: *float, left_button_pressed: *bool) -> void #foreign;

@@ -1,4 +1,4 @@
-USE_IMGUI :: true;
+USE_IMGUI :: false;
 USE_IMGUI_DEBUG :: false;
 #placeholder WASM;
 USE_COMPUTE_SHADER :: false;
@@ -13,6 +13,7 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 #load "common/draw_data.jai";
 #load "common/scene_data.jai";
 #load "common/type_utils.jai";
+#if WASM == true #load "common/events/wasm.jai";
 #if WASM == true #load "common/wgpu/wasm.jai";
 #if WASM == false #load "common/wgpu/native.jai";
 #load "common/wgpu/common.jai";
@@ -62,7 +63,6 @@ else #load "common/orbit_controls/native.jai";
 	#import "wgpu";
 	#import "SDL";
 	#load "native/helpers_webgpu.jai";
-	
 }
 #if USE_IMGUI {
 	#load "common/imgui/common.jai";
@@ -87,7 +87,7 @@ else #load "common/orbit_controls/native.jai";
 }
 
 wgpu_context:WGPUContext;
-window_context:WindowContext;
+#if USE_IMGUI window_context:WindowContext;
 SCENE_DATA:SceneData;
 DRAW_DATA:DrawData;
 orbit_controls :OrbitControls;
@@ -152,15 +152,17 @@ main :: () {
 			SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE
 		);
 		assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
-		window_context.window = window;
+		#if USE_IMGUI {
+			window_context.window = window;
 
-		imgui_context := ImGui.CreateContext();
-		sdl_init_success := ImGui_ImplSdl_Init(window);
-		assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
-		// imgui_style := ImGui.GetStyle(); // ImGuiStyle
-		// imgui_style.AntiAliasedLinesUseTex = false;
-		ImGui.StyleColorsDark(/*imgui_style*/);
-		ImGui_ImplSdl_Init(window);
+			imgui_context := ImGui.CreateContext();
+			sdl_init_success := ImGui_ImplSdl_Init(window);
+			assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
+			// imgui_style := ImGui.GetStyle(); // ImGuiStyle
+			// imgui_style.AntiAliasedLinesUseTex = false;
+			ImGui.StyleColorsDark(/*imgui_style*/);
+			ImGui_ImplSdl_Init(window);
+		}
 
 		wgpuSetLogCallback(wgpu_log_callback, null);
 		wgpuSetLogLevel(.Error); //(.Warn);
@@ -174,8 +176,10 @@ main :: () {
 		while !do_exit {
 			event: SDL_Event;
 			while SDL_PollEvent(*event) {
-				ImGui_ImplSdl_ProcessEvent(*event);
-				io := ImGui.GetIO();
+				#if USE_IMGUI {
+					ImGui_ImplSdl_ProcessEvent(*event);
+					io := ImGui.GetIO();
+				}
 
 				if event.type == {
 					case SDL_QUIT; {do_exit = true;}
@@ -192,15 +196,24 @@ main :: () {
 						}
 					}
 					case SDL_KEYDOWN; {
-						if(io.WantCaptureKeyboard == false){
+						#if USE_IMGUI {
+							if(io.WantCaptureKeyboard == false){
+								if event.key.keysym.sym == SDLK_ESCAPE {
+									do_exit = true;
+								}
+							}
+						} else {
 							if event.key.keysym.sym == SDLK_ESCAPE {
 								do_exit = true;
 							}
 						}
 					}
 				}
-
-				if(io.WantCaptureMouse == false){
+				#if USE_IMGUI {
+					if(io.WantCaptureMouse == false){
+						orbit_controls_process_event(*orbit_controls, *event);
+					}
+				} else {
 					orbit_controls_process_event(*orbit_controls, *event);
 				}
 

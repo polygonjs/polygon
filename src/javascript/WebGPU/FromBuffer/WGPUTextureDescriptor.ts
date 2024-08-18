@@ -11,7 +11,7 @@ import {
 } from "../utils/WebGPUUtils";
 import { WGPUExtent3DFromBuffer } from "./WGPUExtent3D";
 
-export function WGPUTextureDescriptorFromPointer(
+export function WGPUTextureDescriptorFromBuffer(
 	pointer: bigint
 ): GPUTextureDescriptor {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
@@ -31,10 +31,10 @@ export function WGPUTextureDescriptorFromPointer(
 	// const usageb = u64[Number(usageStart)];
 	const usage = _u32(offset.usage); //Number(usageb);
 	//
-	const dimensionOffset = offset.dimension;
-	const dimensionSize = WGPU_SIZE.u32;
-	const dimensionStart = (pointer + dimensionOffset) / dimensionSize;
-	const dimensionb = u64[Number(dimensionStart)];
+	// const dimensionOffset = offset.dimension;
+	// const dimensionSize = WGPU_SIZE.u32;
+	// const dimensionStart = (pointer + dimensionOffset) / dimensionSize;
+	const dimensionb = _u32(offset.dimension); //u64[Number(dimensionStart)];
 	const dimension = textureDimensionIntToGPUTextureDimension(
 		Number(dimensionb)
 	);
@@ -58,7 +58,7 @@ export function WGPUTextureDescriptorFromPointer(
 		itemsCount: viewFormatCount,
 		itemSize: WGPU_SIZE.WGPUTextureFormat,
 		callback: (itemPointer) => {
-			const itemFormatb = u32[Number(itemPointer)];
+			const itemFormatb = u32[Number(itemPointer / WGPU_SIZE.u32)];
 			const itemFormat = textureFormatIntToGPUTextureFormat(itemFormatb);
 			return itemFormat;
 		},
@@ -76,3 +76,4 @@ export function WGPUTextureDescriptorFromPointer(
 	};
 	return desc;
 }
+

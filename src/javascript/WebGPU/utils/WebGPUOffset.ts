@@ -541,6 +541,29 @@ WGPUStorageTextureBindingLayout (with size=24) contains the following members:
 		format: BigInt(12),
 		viewDimension: BigInt(16),
 	},
+	/*
+WGPURenderPassDepthStencilAttachment (with size=40) contains the following members:
+- 0: view of type *WGPUTextureViewImpl with offset 0
+- 1: depthLoadOp of type WGPULoadOp with offset 8
+- 2: depthStoreOp of type WGPUStoreOp with offset 12
+- 3: depthClearValue of type float32 with offset 16
+- 4: depthReadOnly of type u32 with offset 20
+- 5: stencilLoadOp of type WGPULoadOp with offset 24
+- 6: stencilStoreOp of type WGPUStoreOp with offset 28
+- 7: stencilClearValue of type u32 with offset 32
+- 8: stencilReadOnly of type u32 with offset 36
+	*/
+	WGPURenderPassDepthStencilAttachment: {
+		view: BigInt(0),
+		depthLoadOp: BigInt(8),
+		depthStoreOp: BigInt(12),
+		depthClearValue: BigInt(16),
+		depthReadOnly: BigInt(20),
+		stencilLoadOp: BigInt(24),
+		stencilStoreOp: BigInt(28),
+		stencilClearValue: BigInt(32),
+		stencilReadOnly: BigInt(36),
+	},
 };
 export const WGPU_SIZE = {
 	bool: BigInt(1),
@@ -562,3 +585,4 @@ export const WGPU_SIZE = {
 	WGPUExtent3D: BigInt(12),
 	WGPUTextureFormat: BigInt(4),
 };
+

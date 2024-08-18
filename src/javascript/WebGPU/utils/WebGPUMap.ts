@@ -248,7 +248,7 @@ export function blendFactorIntToGPUBlendFactor(i: number): GPUBlendFactor {
 	return GPU_BLEND_FACTORS[i];
 }
 
-export const GPU_LOAD_OPS: GPULoadOp[] = ["load", "clear"];
+export const GPU_LOAD_OPS: GPULoadOp[] = ["clear", "load"];
 export function loadOpIntToGPULoadOp(i: number): GPULoadOp {
 	return GPU_LOAD_OPS[i - 1]; // in linux.jai, we have the undefined entry at index 0
 }
@@ -349,3 +349,4 @@ export function storageTextureAccessIntToGPUStorageTextureAccess(
 ): GPUStorageTextureAccess {
 	return GPU_STORAGE_TEXTURE_ACCESS[i - 1]; // in linux.jai, we have the undefined entry at index 0
 }
+

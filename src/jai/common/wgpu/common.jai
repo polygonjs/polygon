@@ -11,7 +11,7 @@ WGPUContext :: struct {
 	}
 	//
 	use_msaa: bool=false;
-	use_depth_buffer: bool=false;
+	use_depth_buffer: bool=true;
 	bg_color :WGPUColor =.{0.1, 0.3, 0.72, 1.0};
 	//
 	multisample_texture_descriptor : WGPUTextureDescriptor;

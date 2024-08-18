@@ -1,5 +1,7 @@
-export function wgpuTextureGetWidth(a: bigint, b: bigint): bigint {
-	console.warn("wgpuTextureGetWidth not implemented");
-	console.log({ a, b });
-	return BigInt(0);
+import { heapGet } from "../../WasmHeap";
+
+export function wgpuTextureGetWidth(heapIndex: bigint): number {
+	const texture = heapGet<GPUTexture>(heapIndex)!;
+	return texture.width;
 }
+
