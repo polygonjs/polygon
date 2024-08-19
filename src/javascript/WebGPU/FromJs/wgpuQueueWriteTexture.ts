@@ -25,5 +25,6 @@ export function wgpuQueueWriteTexture(
 	const size = WGPUExtent3DFromBuffer(sizePointer);
 
 	queue.writeTexture(destination, data, dataLayout, size);
-	return null as any;
+	// return null as void;
 }
+

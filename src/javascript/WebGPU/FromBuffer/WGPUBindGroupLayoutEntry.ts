@@ -9,32 +9,14 @@ export function WGPUBindGroupLayoutEntryFromBuffer(
 	pointer: bigint
 ): GPUBindGroupLayoutEntry {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer); //window.ALLOCATED_MEMORY_CONTAINER.u32;
-	// const pointer = Number(pointerb);
-	const offset = WGPU_OFFSET.WGPUBindGroupLayoutEntry;
+	const u32 = new Uint32Array(buffer);
 	const _u32 = u32Create(u32, pointer);
 	//
-	// const bindingOffset = offset.binding;
-	// const bindingSize = WGPU_SIZE.u32;
-	// const bindingStart = (pointer + bindingOffset) / bindingSize;
-	const binding = _u32(offset.binding); //u32[Number(bindingStart)];
-
-	// console.log({
-	// 	u32,
-	// 	pointer,
-	// 	bindingOffset,
-	// 	bindingSize,
-	// 	bindingStart,
-	// 	binding,
-	// });
+	const offset = WGPU_OFFSET.WGPUBindGroupLayoutEntry;
 	//
-	// const visibilityOffset = offset.visibility;
-	// const visibilitySize = WGPU_SIZE.u32;
-	// const visibilityStart = (pointer + visibilityOffset) / visibilitySize;
-	const visibility = _u32(offset.visibility); //u32[Number(visibilityStart)];
+	const binding = _u32(offset.binding);
+	const visibility = _u32(offset.visibility);
 	//
-	// const bufferOffset = offset.buffer;
-	// const bufferSize = offset.sampler - bufferOffset;
 	const layoutBuffer = WGPUBufferBindingLayout(pointer + offset.buffer);
 	const sampler = WGPUSamplerBindingLayoutFromBuffer(
 		pointer + offset.sampler
@@ -45,23 +27,6 @@ export function WGPUBindGroupLayoutEntryFromBuffer(
 	const storageTexture = WGPUStorageTextureBindingLayoutFromBuffer(
 		pointer + offset.storageTexture
 	);
-	//
-	// console.log("WGPUBindGroupLayoutFromBuffer", {
-	// 	binding,
-	// 	visibility,
-	// 	bufferType,
-	// });
-	// let definedElementsCount = 0;
-	// if (buffer) definedElementsCount++;
-	// if (sampler) definedElementsCount++;
-	// if (texture) definedElementsCount++;
-	// if (storageTexture) definedElementsCount++;
-	// if (definedElementsCount > 1) {
-	// 	console.log({ buffer, sampler, texture, storageTexture });
-	// 	// throw new Error(
-	// 	// 	"Multiple defined elements in WGPUBindGroupLayoutEntryFromBuffer"
-	// 	// );
-	// }
 
 	const entry: GPUBindGroupLayoutEntry = {
 		binding,
@@ -72,12 +37,6 @@ export function WGPUBindGroupLayoutEntryFromBuffer(
 		storageTexture,
 		externalTexture: undefined, // there is not externalTexture in native for now
 	};
-	// console.log({ entry });
 	return entry;
-	// const bindGroupLayout = device.createBindGroupLayout({ entries });
-	// console.log(entries, bindGroupLayout);
-	// return bindGroupLayout;
-	// const heapIndex= heapAdd(bindGroupLayout);
-	// console.log(entries,bindGroupLayout,heapIndex)
-	// heapIndex
 }
+

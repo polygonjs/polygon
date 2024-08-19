@@ -56,7 +56,6 @@ import { wgpuCommandEncoderRelease } from "./WebGPU/FromJs/wgpuCommandEncoderRel
 import { wgpuRenderPassEncoderRelease } from "./WebGPU/FromJs/wgpuRenderPassEncoderRelease";
 // import { wgpuSurfaceGetCurrentTexture } from "./WebGPU/FromJs/wgpuSurfaceGetCurrentTexture";
 import { wgpuTextureCreateView } from "./WebGPU/FromJs/wgpuTextureCreateView";
-import { update_render_pass_descriptor_multisample } from "./WebGPU/utils/WebGPUMultisample";
 import { NOT_IMPLEMENTED } from "./wasm/WasmNotImplemented";
 import { wgpuBindGroupLayoutRelease } from "./WebGPU/FromJs/wgpuBindGroupLayoutRelease";
 import { wgpuBindGroupRelease } from "./WebGPU/FromJs/wgpuBindGroupRelease";
@@ -209,7 +208,6 @@ const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 	wgpuRenderPassEncoderRelease,
 	// wgpuSurfaceGetCurrentTexture,
 	wgpuTextureCreateView,
-	update_render_pass_descriptor_multisample,
 	wgpuBindGroupLayoutRelease,
 	wgpuBindGroupRelease,
 	wgpuBufferDestroy,

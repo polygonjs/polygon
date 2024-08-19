@@ -30,5 +30,7 @@ export function canvasSetSize(
 	canvas.height = Math.floor(
 		Math.max(1, Math.min(height, device.limits.maxTextureDimension2D))
 	);
+	canvas.style.width = `${canvas.width}px`;
+	canvas.style.height = `${canvas.height}px`;
 }
 

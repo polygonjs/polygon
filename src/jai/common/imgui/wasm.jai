@@ -9,7 +9,7 @@ ImGui_ImplWasm_NewFrame :: () {
 	w :u32= 1;
 	h :u32= 1;
 	imguiGetWindowData(*w, *h);
-	display_w, display_h: s32;
+	// display_w, display_h: s32;
 	// SDL_GetWindowSize(window, *w, *h);
 	// SDL_GL_GetDrawableSize(window, *display_w, *display_h);
 	io.DisplaySize = .{xx w, xx h};

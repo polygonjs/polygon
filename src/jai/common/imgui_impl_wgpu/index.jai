@@ -1,4 +1,3 @@
-#load "common.jai";
 #load "mem_utils.jai";
 #load "release.jai";
 #load "shaders.jai";

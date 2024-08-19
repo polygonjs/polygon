@@ -1,19 +1,14 @@
 import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import {
-	createWGPUItemsByPointer,
-	numberFromBuffer,
-} from "../utils/WebGPUUtils";
+import { createWGPUItemsByPointer, u64Create } from "../utils/WebGPUUtils";
 import { WGPUColorTargetStateFromBuffer } from "./WGPUColorTargetState";
 
-export function WGPUFragmentStateFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array,
-	u64: BigUint64Array
-): GPUFragmentState {
+export function WGPUFragmentStateFromBuffer(pointer: bigint): GPUFragmentState {
 	const offset = WGPU_OFFSET.WGPUFragmentState;
-
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u64 = new BigUint64Array(buffer);
+	const _u64 = u64Create(u64, pointer);
 	//
 	const modulePointer = (pointer + offset.module) / WGPU_SIZE.u64;
 	const moduleHeapIndex = u64[Number(modulePointer)];
@@ -30,7 +25,7 @@ export function WGPUFragmentStateFromBuffer(
 		BigInt(entryPointPointer)
 	);
 	//
-	const targetCount = numberFromBuffer(u64, pointer, offset.targetCount);
+	const targetCount = _u64(offset.targetCount);
 
 	const targets: GPUColorTargetState[] = createWGPUItemsByPointer({
 		u64,
@@ -38,17 +33,8 @@ export function WGPUFragmentStateFromBuffer(
 		arrayOffset: offset.targets,
 		itemsCount: targetCount,
 		itemSize: WGPU_SIZE.WGPUColorTargetState,
-		callback: (itemPointer) =>
-			WGPUColorTargetStateFromBuffer(itemPointer, u32, u64),
+		callback: (itemPointer) => WGPUColorTargetStateFromBuffer(itemPointer),
 	});
-	// const targetArrayPointerIndex = (pointer + offset.targets) / WGPU_SIZE.u64;
-	// const targetArrayPointer = u64[Number(targetArrayPointerIndex)];
-	// for (let i = 0; i < targetCount; i++) {
-	// 	const targetPointer =
-	// 		targetArrayPointer + BigInt(i) * WGPU_SIZE.WGPUColorTargetState;
-	// 	const target = WGPUColorTargetStateFromBuffer(targetPointer, u32, u64);
-	// 	targets.push(target);
-	// }
 
 	//
 	const fragment: GPUFragmentState = {
@@ -58,3 +44,4 @@ export function WGPUFragmentStateFromBuffer(
 	};
 	return fragment;
 }
+

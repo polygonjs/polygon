@@ -2,7 +2,6 @@ import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
 import {
 	createWGPUItemsByPointer,
 	labelFromBuffer,
-	numberFromBuffer,
 	u64Create,
 } from "../utils/WebGPUUtils";
 import { WGPURenderPassColorAttachmentFromBuffer } from "./WGPURenderPassColorAttachment";
@@ -19,11 +18,7 @@ export function WGPURenderPassDescriptorFromBuffer(
 	//
 	const label = labelFromBuffer(pointer, offset, u64);
 	//
-	const colorAttachmentCount = numberFromBuffer(
-		u64,
-		pointer,
-		offset.colorAttachmentCount
-	);
+	const colorAttachmentCount = _u64(offset.colorAttachmentCount);
 	const colorAttachments =
 		createWGPUItemsByPointer<GPURenderPassColorAttachment>({
 			u64,

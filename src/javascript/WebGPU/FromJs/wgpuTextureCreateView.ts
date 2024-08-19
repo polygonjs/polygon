@@ -13,3 +13,4 @@ export function wgpuTextureCreateView(
 	const textureView = texture.createView(desc);
 	return heapAdd(textureView);
 }
+

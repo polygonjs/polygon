@@ -3,7 +3,7 @@ import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
 import {
 	createWGPUItemsByPointer,
 	labelFromBuffer,
-	numberFromBuffer,
+	u64Create,
 } from "../utils/WebGPUUtils";
 import { WGPUBindGroupEntryFromBuffer } from "./WGPUBindGroupEntry";
 
@@ -13,6 +13,7 @@ export function WGPUBindGroupDescriptorFromBuffer(
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	const u32 = new Uint32Array(buffer);
 	const u64 = new BigUint64Array(buffer);
+	const _u64 = u64Create(u64, pointer);
 	const offset = WGPU_OFFSET.WGPUBindGroupDescriptor;
 
 	//
@@ -27,7 +28,7 @@ export function WGPUBindGroupDescriptorFromBuffer(
 		throw new Error("layout is null");
 	}
 	//
-	const entryCount = numberFromBuffer(u64, pointer, offset.entryCount);
+	const entryCount = _u64(offset.entryCount);
 	//
 	const entries: GPUBindGroupEntry[] = createWGPUItemsByPointer({
 		u64,
@@ -54,3 +55,4 @@ export function WGPUBindGroupDescriptorFromBuffer(
 	};
 	return desc;
 }
+

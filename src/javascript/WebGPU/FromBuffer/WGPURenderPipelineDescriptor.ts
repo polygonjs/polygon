@@ -10,32 +10,24 @@ export function WGPURenderPipelineDescriptorFromBuffer(
 	pointer: bigint
 ): GPURenderPipelineDescriptor {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	// const pointer = Number(pointerb);
-	const offset = WGPU_OFFSET.WGPURenderPipelineDescriptor;
-	// const u8 = new Uint8Array(buffer);
 	const u32 = new Uint32Array(buffer);
 	const u64 = new BigUint64Array(buffer);
 	//
+	const offset = WGPU_OFFSET.WGPURenderPipelineDescriptor;
+	//
 	const label = labelFromBuffer(pointer, offset, u64);
 	//
-	// const layoutPointer = (pointer + offset.layout) / WGPU_SIZE.u64;
-	// const layoutHeapIndex = u64[Number(layoutPointer)];
 	const layout = heapGetItemFromOffset<GPUPipelineLayout>(
 		u64,
 		pointer,
 		offset.layout
-	); //heapGet<GPUPipelineLayout>(layoutHeapIndex);
-	// console.log(
-	// 	"WGPURenderPipelineDescriptorFromBuffer: layout",
-	// 	layout,
-	// 	pointer,
-	// 	offset.layout
-	// );
+	);
+
 	if (!layout) {
 		throw new Error("layout is null");
 	}
 	//
-	const vertex = WGPUVertexStateFromBuffer(pointer + offset.vertex, u32, u64);
+	const vertex = WGPUVertexStateFromBuffer(pointer + offset.vertex);
 	if (!vertex) {
 		throw new Error("vertex is null");
 	}
@@ -65,7 +57,7 @@ export function WGPURenderPipelineDescriptorFromBuffer(
 	}
 	const fragmentPointerIndex = (pointer + offset.fragment) / WGPU_SIZE.u64;
 	const fragmentPointer = u64[Number(fragmentPointerIndex)];
-	const fragment = WGPUFragmentStateFromBuffer(fragmentPointer, u32, u64);
+	const fragment = WGPUFragmentStateFromBuffer(fragmentPointer);
 	if (!fragment) {
 		throw new Error("fragment is null");
 	}
@@ -83,3 +75,4 @@ export function WGPURenderPipelineDescriptorFromBuffer(
 
 	return pipelineDescriptor;
 }
+

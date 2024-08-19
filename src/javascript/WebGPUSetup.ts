@@ -107,7 +107,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		// if (framesCount < 2) {
 		requestAnimationFrame(animate);
 		// } else {
-		// 	console.log("3 frames rendered, stopping for now");
+		// 	console.log(`${framesCount} frames rendered, stopping for now`);
 		// }
 	}
 	animate();

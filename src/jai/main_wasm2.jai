@@ -18,11 +18,9 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 #if WASM == false #load "common/wgpu/native.jai";
 #load "common/wgpu/common.jai";
 #load "common/wgpu/common_depth.jai";
-#load "common/wgpu/msaa/common.jai";
-#if WASM == true #load "common/wgpu/msaa/wasm.jai";
-#if WASM == false #load "common/wgpu/msaa/native.jai";
+#load "common/wgpu/common_msaa.jai";
 #load "common/wgpu/common_uniforms.jai";
-#load "native/print_utils.jai";
+#load "common/print_utils.jai";
 
 #load "common/orbit_controls/common.jai";
 #if WASM #load "common/orbit_controls/wasm.jai";
@@ -47,26 +45,15 @@ else #load "common/orbit_controls/native.jai";
 	// and now we can import with "gcc_s"
 	// libstd :: #library,system,link_always "stdc++";
 }
-#if (USE_IMGUI) && OS == .WASM {
-	// to be used with build option
-	// -L$EMSDK/upstream/emscripten/system/lib/libc
-	// or
-	// -L$EMSDK/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten
-	// #system_library,system,link_always "emscripten_libc_stubs"
-	// #system_library,system,link_always "libc++";
-	// #system_library,system,link_always "libc-debug";
-	// #system_library,system,link_always "libc++abi-debug-noexcept";
-	// #system_library,system,link_always "libstubs-debug";
-}
+
 
 #if WASM==false {
 	#import "wgpu";
 	#import "SDL";
-	#load "native/helpers_webgpu.jai";
 }
 #if USE_IMGUI {
 	#load "common/imgui/common.jai";
-	#load "native/imgui_impl_wgpu/index.jai";
+	#load "common/imgui_impl_wgpu/index.jai";
 	#import "imgui";
 	#load "common/imgui/common_ui.jai";
 	#if WASM {
@@ -123,24 +110,6 @@ FRAMES_COUNT:u64 = 0;
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
-	// if USE_IMGUI_DEBUG {
-	// 	imgui_context := ImGui.CreateContext(null);
-	// 	print("imgui_context: %\n", <<imgui_context);
-	// 	io := ImGui.GetIO();
-	// 	return;
-	// }
-	// a := 1+2;
-	// set_print_string_buffer(PRINT_STRING_BUFFER);
-	// js_print("main called\n");
-	// js_print(tprint("a:%\n",a));
-	// js_print("after tprint\n");
-	// print("%\n",SHADER_RENDER);
-
-	// context.logger = dom_logger;
-	// log("Logging to the DOM via Jai.");
-	// print_type_info(WGPUBufferBindingLayout);
-
-
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO);
 
@@ -160,7 +129,7 @@ main :: () {
 			assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
 			// imgui_style := ImGui.GetStyle(); // ImGuiStyle
 			// imgui_style.AntiAliasedLinesUseTex = false;
-			ImGui.StyleColorsDark(/*imgui_style*/);
+			// ImGui.StyleColorsLight(/*imgui_style*/);
 			ImGui_ImplSdl_Init(window);
 		}
 
@@ -315,6 +284,10 @@ init_draw_data :: (){
 			io := ImGui.GetIO();
 			io.IniFilename = null;
 		}
+
+		// imgui_style := ImGui.GetStyle();
+		// imgui_style.AntiAliasedLinesUseTex = false;
+		// ImGui.StyleColorsLight();
 
 		bd.wgpuDevice = wgpu_context.device;
 		imgui_init_info := ImGui_ImplWGPU_InitInfo.{

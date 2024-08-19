@@ -17,11 +17,8 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 	//
 	const offset = WGPU_OFFSET.WGPURenderPassColorAttachment;
 	//
-	// const viewOffset = offset.view;
-	// const viewSize = WGPU_SIZE.u64;
-	// const viewStart = (pointer + viewOffset) / viewSize;
 	const viewPointer = _u64(offset.view);
-	const view = heapGet<GPUTextureView>(viewPointer)!; // window.webGPUContext.getCurrentTexture().createView(); //
+	const view = heapGet<GPUTextureView>(viewPointer)!;
 	const resolveTargetPointer = _u64(offset.resolveTarget);
 	const resolveTarget = heapGet<GPUTextureView>(resolveTargetPointer);
 	//
@@ -37,7 +34,6 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 		Number(f64[2]),
 		Number(f64[3]),
 	];
-	// console.log("clearValue:", clearValue);
 	//
 	const loadOp = loadOpIntToGPULoadOp(_u32(offset.loadOp));
 	const storeOp = storeOpIntToGPUStoreOp(_u32(offset.storeOp));

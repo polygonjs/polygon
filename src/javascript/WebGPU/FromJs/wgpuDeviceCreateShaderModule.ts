@@ -7,7 +7,7 @@ export function wgpuDeviceCreateShaderModule(
 ) {
 	const device = heapGet<GPUDevice>(deviceHeapIndex)!;
 	const descriptor = WGPUShaderModuleDescriptorFromBuffer(descriptorPointer);
-	// console.log("wgpuDeviceCreateShaderModule", descriptor);
 	const shaderModule = device.createShaderModule(descriptor);
 	return heapAdd(shaderModule);
 }
+

@@ -30,6 +30,7 @@ ImGui_ImplWGPU_CreateImageBindGroup::(layout: WGPUBindGroupLayout, texture_view:
 }
 
 ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTexture) {
+	print("ImGui_ImplWGPU_CreateFontsTexture START\n");
 	// Build texture atlas
 	bd := ImGui_ImplWGPU_GetBackendData();
 	io := ImGui.GetIO();
@@ -81,20 +82,21 @@ ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTextu
 	// Create the associated sampler
 	// (Bilinear sampling is required by default. Set 'io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = false' to allow point/nearest sampling)
 	{	
-		// iwc_font_tex.sampler_desc.label = "this is just a test";
 		iwc_font_tex.sampler_desc.minFilter = WGPUFilterMode.Linear;
 		iwc_font_tex.sampler_desc.magFilter = WGPUFilterMode.Linear;
 		iwc_font_tex.sampler_desc.mipmapFilter = WGPUMipmapFilterMode.Linear;
 		iwc_font_tex.sampler_desc.addressModeU = WGPUAddressMode.Repeat;
 		iwc_font_tex.sampler_desc.addressModeV = WGPUAddressMode.Repeat;
 		iwc_font_tex.sampler_desc.addressModeW = WGPUAddressMode.Repeat;
-		iwc_font_tex.sampler_desc.maxAnisotropy = 2;
+		iwc_font_tex.sampler_desc.maxAnisotropy = 1;
 		bd.renderResources.Sampler = wgpuDeviceCreateSampler(bd.wgpuDevice, *iwc_font_tex.sampler_desc);
 	}
 
 	// Store our identifier
 	assert(size_of(ImTextureID) >= size_of(type_of(bd.renderResources.FontTexture)), "Can't pack descriptor handle into TexID, 32-bit not supported yet.");
 	io.Fonts.TexID = xx bd.renderResources.FontTextureView;
+
+	print("ImGui_ImplWGPU_CreateFontsTexture DONE\n");
 }
 
 ImGui_ImplWGPU_CreateUniformBuffer :: (iwc_uniforms: *ImGui_WGPU_Common_Uniforms) {
@@ -155,19 +157,20 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.image_bg_layout_entries[0].visibility = xx WGPUShaderStage.Fragment;
 	iwc.image_bg_layout_entries[0].texture.sampleType = WGPUTextureSampleType.Float;
 	iwc.image_bg_layout_entries[0].texture.viewDimension = WGPUTextureViewDimension._2D;
+	// iwc.image_bg_layout_entries[0].texture.multisampled = xx true;
 
 	iwc.common_bg_layout_desc.entryCount = iwc.common_bg_layout_entries.count;
 	iwc.common_bg_layout_desc.entries = iwc.common_bg_layout_entries.data;
+	// print("iwc.image_bg_layout_entries[0].texture:%\n", iwc.image_bg_layout_entries[0].texture);
 
 	iwc.image_bg_layout_desc.entryCount = iwc.image_bg_layout_entries.count;
 	iwc.image_bg_layout_desc.entries = iwc.image_bg_layout_entries.data;
 
-	a:WGPUBindGroupLayout= wgpuDeviceCreateBindGroupLayout(bd.wgpuDevice, *iwc.common_bg_layout_desc);
 	iwc.bg_layouts[0] = wgpuDeviceCreateBindGroupLayout(bd.wgpuDevice, *iwc.common_bg_layout_desc);
 	iwc.bg_layouts[1] = wgpuDeviceCreateBindGroupLayout(bd.wgpuDevice, *iwc.image_bg_layout_desc);
 
 	iwc.layout_desc.label = "imgui_layout_desc";
-	iwc.layout_desc.bindGroupLayoutCount = 2;
+	iwc.layout_desc.bindGroupLayoutCount = iwc.bg_layouts.count;
 	iwc.layout_desc.bindGroupLayouts = iwc.bg_layouts.data;
 	iwc.graphics_pipeline_desc.layout = wgpuDeviceCreatePipelineLayout(bd.wgpuDevice, *iwc.layout_desc);
 

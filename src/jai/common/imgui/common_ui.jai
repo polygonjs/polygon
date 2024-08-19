@@ -72,9 +72,11 @@ gui_update :: (
 		ImGui.End();
 	}
 	if (ui_data.show_another_window) {
+		ImGui.SetNextWindowPos(.{400, 100}, ImGuiCond.Always);
+		ImGui.SetNextWindowSize(.{300, 100}, ImGuiCond.Always);
 		ImGui.Begin("Another Window", *ui_data.show_another_window);         // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		ImGui.Text("Hello from another window!");
-		if (ImGui.Button("Close Me")) {
+		if (ImGui.Button("Close Me!")) {
 			ui_data.show_another_window = false;
 		}
 		ImGui.End();

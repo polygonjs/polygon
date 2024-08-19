@@ -1,41 +1,35 @@
 import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import {
-	createWGPUItemsByPointer,
-	numberFromBuffer,
-} from "../utils/WebGPUUtils";
+import { createWGPUItemsByPointer, u64Create } from "../utils/WebGPUUtils";
 import { WGPUVertexBufferLayoutFromBuffer } from "./WGPUVertexBufferLayout";
 
-export function WGPUVertexStateFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array,
-	u64: BigUint64Array
-): GPUVertexState {
+export function WGPUVertexStateFromBuffer(pointer: bigint): GPUVertexState {
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u64 = new BigUint64Array(buffer);
+	const _u64 = u64Create(u64, pointer);
+	//
 	const offset = WGPU_OFFSET.WGPUVertexState;
 	//
-	const modulePointer = (pointer + offset.module) / WGPU_SIZE.u64;
-	const moduleHeapIndex = u64[Number(modulePointer)];
+	const moduleHeapIndex = _u64(offset.module);
 	const module = heapGet<GPUShaderModule>(moduleHeapIndex);
 	if (!module) {
 		throw new Error("module is null");
 	}
 	//
-	const entryPointOffset = offset.entryPoint;
-	const entryPointSize = WGPU_SIZE.u64;
-	const entryPointStart = (pointer + entryPointOffset) / entryPointSize;
-	const entryPointPointer = u64[Number(entryPointStart)];
+	const entryPointPointer = _u64(offset.entryPoint);
 	const entryPoint = jsStringFromJaiStringWithoutLength(
 		BigInt(entryPointPointer)
 	);
 	//
-	// const constantCountOffset = offset.constantCount;
-	// const constantCountSize = SIZE.u64;
-	// const constantCountStart = (pointer + constantCountOffset) / constantCountSize;
-	// const constantCountb = u64[Number(constantCountStart)];
+	const constantsCount = _u64(offset.constantCount);
+	if (constantsCount > 0) {
+		console.warn(
+			"WGPUVertexStateFromBuffer: constantsCount is greater than 0, but not implemented"
+		);
+	}
 	//
-	const bufferCount = numberFromBuffer(u64, pointer, offset.bufferCount);
-
+	const bufferCount = _u64(offset.bufferCount);
 	if (bufferCount >= 2) {
 		console.warn(
 			"WGPUVertexStateFromBuffer: bufferCountb is greater than 1, the pointer lookup with +BigInt(i) may not work. But it works in WGPUVertexBufferLayoutFromBuffer"
@@ -48,25 +42,9 @@ export function WGPUVertexStateFromBuffer(
 		itemsCount: bufferCount,
 		itemSize: WGPU_SIZE.WGPUVertexBufferLayout,
 		callback: (itemPointer) =>
-			WGPUVertexBufferLayoutFromBuffer(itemPointer, u32, u64),
+			WGPUVertexBufferLayoutFromBuffer(itemPointer),
 	});
-	// const bufferLayoutArrayPointerIndex =
-	// 	(pointer + offset.buffers) / WGPU_SIZE.u64;
-	// const bufferLayoutArrayPointer = u64[Number(bufferLayoutArrayPointerIndex)];
-	// for (let i = 0; i < bufferCount; i++) {
-	// 	const bufferLayoutPointer =
-	// 		bufferLayoutArrayPointer +
-	// 		BigInt(i) * WGPU_SIZE.WGPUVertexBufferLayout;
 
-	// 	const bufferLayout = WGPUVertexBufferLayoutFromBuffer(
-	// 		bufferLayoutPointer,
-	// 		u32,
-	// 		u64
-	// 	);
-	// 	buffers.push(bufferLayout);
-	// }
-
-	// console.log({ module, entryPoint });
 	const vertexState: GPUVertexState = {
 		module,
 		entryPoint,
@@ -74,3 +52,4 @@ export function WGPUVertexStateFromBuffer(
 	};
 	return vertexState;
 }
+

@@ -1,37 +1,26 @@
 import { stepModeIntToGPUVertexStepMode } from "../utils/WebGPUMap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import {
-	createWGPUItemsByPointer,
-	numberFromBuffer,
-} from "../utils/WebGPUUtils";
+import { createWGPUItemsByPointer, u64Create } from "../utils/WebGPUUtils";
 import { WGPUVertexAttributeFromBuffer } from "./WGPUVertexAttribute";
 
 export function WGPUVertexBufferLayoutFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array,
-	u64: BigUint64Array
+	pointer: bigint
 ): GPUVertexBufferLayout {
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u64 = new BigUint64Array(buffer);
+	const _u64 = u64Create(u64, pointer);
+	//
 	const offset = WGPU_OFFSET.WGPUVertexBufferLayout;
 	//
-	const arrayStrideOffset = offset.arrayStride;
-	const arrayStrideSize = WGPU_SIZE.u64;
-	const arrayStrideStart = (pointer + arrayStrideOffset) / arrayStrideSize;
-	const arrayStrideb = u64[Number(arrayStrideStart)];
+	const arrayStrideb = _u64(offset.arrayStride);
 	const arrayStride = Number(arrayStrideb);
 	//
-	const stepModeOffset = offset.stepMode;
-	const stepModeSize = WGPU_SIZE.u64;
-	const stepModeStart = (pointer + stepModeOffset) / stepModeSize;
-	const stepModeb = u64[Number(stepModeStart)];
+	const stepModeb = _u64(offset.stepMode);
 	const stepMode: GPUVertexStepMode = stepModeIntToGPUVertexStepMode(
 		Number(stepModeb)
 	);
 	//
-	const attributesCount = numberFromBuffer(
-		u64,
-		pointer,
-		offset.attributeCount
-	); //u64[Number(attributesCountStart)];
+	const attributesCount = _u64(offset.attributeCount);
 	//
 	const attributes: GPUVertexAttribute[] = createWGPUItemsByPointer({
 		u64,
@@ -39,25 +28,9 @@ export function WGPUVertexBufferLayoutFromBuffer(
 		arrayOffset: offset.attributes,
 		itemsCount: attributesCount,
 		itemSize: WGPU_SIZE.WGPUVertexAttribute,
-		callback: (itemPointer) =>
-			WGPUVertexAttributeFromBuffer(itemPointer, u32, u64),
+		callback: (itemPointer) => WGPUVertexAttributeFromBuffer(itemPointer),
 	});
-	// const attributeArrayPointerIndex =
-	// 	(pointer + offset.attributes) / WGPU_SIZE.u64;
-	// const attributeArrayPointer = u64[Number(attributeArrayPointerIndex)];
-	// for (let i = 0; i < attributesCountb; i++) {
-	// 	const attributePointer =
-	// 		attributeArrayPointer + BigInt(i) * WGPU_SIZE.WGPUVertexAttribute;
 
-	// 	const attribute = WGPUVertexAttributeFromBuffer(
-	// 		attributePointer,
-	// 		u32,
-	// 		u64
-	// 	);
-	// 	// console.log(i, attribute);
-	// 	attributes.push(attribute);
-	// }
-	//
 	const vertexBufferLayout: GPUVertexBufferLayout = {
 		arrayStride,
 		stepMode,
@@ -65,3 +38,4 @@ export function WGPUVertexBufferLayoutFromBuffer(
 	};
 	return vertexBufferLayout;
 }
+

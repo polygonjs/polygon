@@ -1,26 +1,24 @@
 import { textureFormatIntToGPUTextureFormat } from "../utils/WebGPUMap";
 import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { u32Create, u64Create } from "../utils/WebGPUUtils";
 import { WGPUBlendStateFromBuffer } from "./WGPUBlendState";
 
 export function WGPUColorTargetStateFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array,
-	u64: BigUint64Array
+	pointer: bigint
 ): GPUColorTargetState {
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u32 = new Uint32Array(buffer);
+	const u64 = new BigUint64Array(buffer);
+	const _u32 = u32Create(u32, pointer);
+	const _u64 = u64Create(u64, pointer); //
 	const offset = WGPU_OFFSET.WGPUColorTargetState;
 	//
 	//
-	const formatOffset = offset.format;
-	const formatSize = WGPU_SIZE.u32;
-	const formatStart = (pointer + formatOffset) / formatSize;
-	const formatb = u32[Number(formatStart)];
+	const formatb = _u32(offset.format);
 	const format = textureFormatIntToGPUTextureFormat(formatb);
 	//
-	const blendPointerOffset = offset.blend;
-	const blendPointerSize = WGPU_SIZE.u64;
-	const blendPointerStart = (pointer + blendPointerOffset) / blendPointerSize;
-	const blendPointer = u64[Number(blendPointerStart)];
-	const blend = WGPUBlendStateFromBuffer(blendPointer, u32);
+	const blendPointer = _u64(offset.blend);
+	const blend = WGPUBlendStateFromBuffer(blendPointer);
 	//
 	const writeMaskOffset = offset.writeMask;
 	const writeMaskSize = WGPU_SIZE.u32;
@@ -34,3 +32,4 @@ export function WGPUColorTargetStateFromBuffer(
 	};
 	return target;
 }
+

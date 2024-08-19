@@ -8,7 +8,6 @@ export function wgpuDeviceCreateBindGroup(
 	const device = heapGet<GPUDevice>(deviceHeadIndex)!;
 	const descriptor = WGPUBindGroupDescriptorFromBuffer(descriptorPointer);
 	const bindGroup = device.createBindGroup(descriptor);
-	const index = heapAdd(bindGroup);
-	// console.log("wgpuDeviceCreateBindGroup", descriptor, bindGroup, index);
-	return index;
+	return heapAdd(bindGroup);
 }
+

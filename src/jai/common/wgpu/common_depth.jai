@@ -69,8 +69,7 @@ create_depth_texture_if_needed :: ( wgpu_context: *WGPUContext ) {
 	}
 
 	sampleCount :u32= xx (ifx wgpu_context.use_msaa then MULTISAMPLE_SAMPLES_COUNT else 1);
-	viewFormats :[..]WGPUTextureFormat;
-	array_add(*viewFormats, DEPTH_TEXTURE_FORMAT);
+	viewFormats :[1]WGPUTextureFormat = .[DEPTH_TEXTURE_FORMAT];
 	texture_descriptor := WGPUTextureDescriptor.{
 		label = "Depth Texture",
 		size = .{
@@ -83,7 +82,7 @@ create_depth_texture_if_needed :: ( wgpu_context: *WGPUContext ) {
 		usage = xx WGPUTextureUsage.RenderAttachment,
 		dimension = WGPUTextureDimension._2D,
 		mipLevelCount = 1,
-		viewFormatCount = 1,
+		viewFormatCount = viewFormats.count,
 		viewFormats = viewFormats.data,
 	};
 	wgpu_context.depth_texture = wgpuDeviceCreateTexture(wgpu_context.device, *texture_descriptor);

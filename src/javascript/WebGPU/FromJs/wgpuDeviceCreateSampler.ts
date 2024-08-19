@@ -8,6 +8,6 @@ export function wgpuDeviceCreateSampler(
 	const device = heapGet<GPUDevice>(deviceHeapIndex)!;
 	const descriptor = WGPUSamplerDescriptorFromBuffer(descriptorHeapIndex);
 	const sampler = device.createSampler(descriptor);
-	const index = heapAdd(sampler);
-	return index;
+	return heapAdd(sampler);
 }
+

@@ -31,18 +31,6 @@ export function stringFromBuffer(
 	return label;
 }
 
-export function numberFromBuffer(
-	u64: BigUint64Array,
-	pointer: bigint,
-	offset: bigint
-): bigint {
-	//
-	const countOffset = offset;
-	const countSize = WGPU_SIZE.u64;
-	const countStart = (pointer + countOffset) / countSize;
-	return u64[Number(countStart)];
-}
-
 export function u64Create(
 	u64: BigUint64Array,
 	pointer: bigint
