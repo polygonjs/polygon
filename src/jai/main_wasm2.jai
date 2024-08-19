@@ -311,7 +311,10 @@ on_request_animation_frame :: (
 	#if WASM {
 		context = call_from_wasm_context;
 		queue := wgpu_context.queue;
-		orbit_controls_process_event(*orbit_controls);
+		io := ImGui.GetIO();
+		if(io.WantCaptureMouse == false){
+			orbit_controls_process_event(*orbit_controls);
+		}
 	} else {
 		queue := wgpuDeviceGetQueue(wgpu_context.device);
 		assert(queue != null, "Queue is not created correctly");
