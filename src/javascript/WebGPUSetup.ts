@@ -53,12 +53,6 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	// 	render();
 	// });
 	// resizeObserver.observe(domElement);
-	webGPUListenToResize(
-		wgpuRequestResponse.device,
-		domElement,
-		canvas,
-		render
-	);
 
 	// console.log("webgpuSetup", wgpuRequestResponse, formatNative);
 	// wgpuRequestResponse.presentationFormat == "bgra8unorm" ? textureFormatIndex()/*23*/ : null;
@@ -84,6 +78,13 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	);
 	window.initDrawData(USELESS_ARG0);
 
+	webGPUListenToResize(
+		wgpuRequestResponse.device,
+		domElement,
+		canvas,
+		render
+	);
+
 	function render() {
 		if (_onRequestAnimationFrameInProgress) {
 			return;
@@ -107,7 +108,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		// if (framesCount < 2) {
 		requestAnimationFrame(animate);
 		// } else {
-		// 	console.log(`${framesCount} frames rendered, stopping for now`);
+		// console.log(`${framesCount} frames rendered, stopping for now`);
 		// }
 	}
 	animate();

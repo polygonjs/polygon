@@ -26,10 +26,27 @@ wgpuBufferRelease :: (buffer: WGPUBuffer) -> void #foreign;
 wgpuRenderPipelineGetBindGroupLayout :: (pipeline: WGPURenderPipeline, index: u32) -> WGPUBindGroupLayout #foreign;
 wgpuRenderPipelineRelease :: (renderPipeline: WGPURenderPipeline) -> void #foreign;
 
+
+// Methods of CommandEncoder
+wgpuCommandEncoderBeginComputePass :: (commandEncoder: WGPUCommandEncoder, descriptor: *WGPUComputePassDescriptor) -> WGPUComputePassEncoder #foreign;
+
+// Methods of ComputePassEncoder
+wgpuComputePassEncoderDispatchWorkgroups :: (computePassEncoder: WGPUComputePassEncoder, workgroupCountX: u32, workgroupCountY: u32, workgroupCountZ: u32) -> void #foreign;
+wgpuComputePassEncoderEnd :: (computePassEncoder: WGPUComputePassEncoder) -> void #foreign;
+wgpuComputePassEncoderSetBindGroup :: (computePassEncoder: WGPUComputePassEncoder, groupIndex: u32, group: WGPUBindGroup, dynamicOffsetCount: u64, dynamicOffsets: *u32) -> void #foreign;
+wgpuComputePassEncoderRelease :: (computePassEncoder: WGPUComputePassEncoder) -> void #foreign;
+wgpuComputePassEncoderSetPipeline :: (computePassEncoder: WGPUComputePassEncoder, pipeline: WGPUComputePipeline) -> void #foreign;
+
+
+// Methods of ComputePipeline
+wgpuComputePipelineGetBindGroupLayout :: (computePipeline: WGPUComputePipeline, groupIndex: u32) -> WGPUBindGroupLayout #foreign;
+
+
 // Methods of Device
 wgpuDeviceCreateTexture :: (device: WGPUDevice, descriptor: *WGPUTextureDescriptor) -> WGPUTexture #foreign;
 wgpuDeviceCreateBindGroup :: (device: WGPUDevice, bind_group_descriptor: *WGPUBindGroupDescriptor) -> WGPUBindGroup #foreign;
 wgpuDeviceCreateCommandEncoder :: (device: WGPUDevice, descriptor: *WGPUCommandEncoderDescriptor) -> WGPUCommandEncoder #foreign;
+wgpuDeviceCreateComputePipeline :: (device: WGPUDevice, descriptor: *WGPUComputePipelineDescriptor) -> WGPUComputePipeline #foreign;
 wgpuDeviceCreateSampler :: (device: WGPUDevice, descriptor: *WGPUSamplerDescriptor) -> WGPUSampler #foreign;
 wgpuDeviceCreateShaderModule :: (device: WGPUDevice, descriptor: *WGPUShaderModuleDescriptor) -> WGPUShaderModule #foreign;
 wgpuDeviceGetQueue :: (device: WGPUDevice) -> WGPUQueue #foreign;

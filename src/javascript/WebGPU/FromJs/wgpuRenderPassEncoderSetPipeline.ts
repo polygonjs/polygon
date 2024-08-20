@@ -1,12 +1,11 @@
 import { heapGet } from "../../WasmHeap";
 
 export function wgpuRenderPassEncoderSetPipeline(
-	renderPassEncoderHeapIndex: bigint,
+	encoderHeapIndex: bigint,
 	pipelineHeapIndex: bigint
 ) {
-	const renderPassEncoder = heapGet<GPURenderPassEncoder>(
-		renderPassEncoderHeapIndex
-	)!;
+	const encoder = heapGet<GPURenderPassEncoder>(encoderHeapIndex)!;
 	const pipeline = heapGet<GPURenderPipeline>(pipelineHeapIndex)!;
-	return renderPassEncoder.setPipeline(pipeline);
+	return encoder.setPipeline(pipeline);
 }
+

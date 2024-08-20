@@ -1,7 +1,7 @@
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
 #placeholder WASM;
-USE_COMPUTE_SHADER :: false;
+USE_COMPUTE_SHADER :: true;
 FREE_MEMORY :: false; // beware wasm memory corruption when in use
 
 #import "Basic";
@@ -20,6 +20,8 @@ FREE_MEMORY :: false; // beware wasm memory corruption when in use
 #load "common/wgpu/common_depth.jai";
 #load "common/wgpu/common_msaa.jai";
 #load "common/wgpu/common_uniforms.jai";
+#load "common/wgpu/common_compute.jai";
+#import "String";
 #load "common/print_utils.jai";
 
 #load "common/orbit_controls/common.jai";
@@ -83,6 +85,7 @@ orbit_controls :OrbitControls;
 	bd:ImGui_ImplWGPU_Data = .{};
 	iwc:ImGui_WGPU_Common = .{};
 }
+#if USE_COMPUTE_SHADER compute_shader_controller:ComputeShaderController;
 
 // MAX_PRINT_SIZE :: 2048;
 // PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
@@ -262,7 +265,7 @@ init_draw_data :: (){
 	assert(DRAW_DATA.pipeline != null, "Pipeline is not created correctly");
 
 	#if USE_COMPUTE_SHADER {
-		// compute_shader_controller := compute_shader_controller_create(*wgpu_context, queue, SHADERS.compute);
+		compute_shader_controller = compute_shader_controller_create(*wgpu_context, queue, SHADER_COMPUTE);
 	} else {
 		DRAW_DATA.vertex.buffer, DRAW_DATA.vertex.buffer_size = wgpu_vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
 	}
@@ -301,7 +304,6 @@ init_draw_data :: (){
 	}
 }
 
-
 on_request_animation_frame :: (
 	new_time: u64,
 	width: u64,
@@ -311,8 +313,12 @@ on_request_animation_frame :: (
 	#if WASM {
 		context = call_from_wasm_context;
 		queue := wgpu_context.queue;
-		io := ImGui.GetIO();
-		if(io.WantCaptureMouse == false){
+		#if USE_IMGUI {
+			io := ImGui.GetIO();
+			if(io.WantCaptureMouse == false){
+				orbit_controls_process_event(*orbit_controls);
+			}
+		} else {
 			orbit_controls_process_event(*orbit_controls);
 		}
 	} else {
@@ -331,6 +337,11 @@ on_request_animation_frame :: (
 	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 	update_scene_data(*SCENE_DATA, time);
 	update_scene_data_uniforms(*SCENE_DATA);
+
+	#if USE_COMPUTE_SHADER {
+		compute_shader_controller.update_box_size(compute_shader_controller, SCENE_DATA.box_size);
+		compute_shader_controller.compute(compute_shader_controller);
+	}
 
 	update_object_uniforms_to_buffer(DRAW_DATA.uniforms.object.buffer, queue, *SCENE_DATA);
 	update_camera_uniforms_to_buffer(DRAW_DATA.uniforms.camera.buffer, queue, *SCENE_DATA);
@@ -373,7 +384,7 @@ on_request_animation_frame :: (
 		wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 2, DRAW_DATA.uniforms.sdf.bind_group, 0, null);
 		//
 		#if USE_COMPUTE_SHADER {
-			// wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, compute_shader_controller.vertex_buffer, 0, compute_shader_controller.vertex_buffer_size);
+			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, compute_shader_controller.vertex_buffer, 0, compute_shader_controller.vertex_buffer_size);
 		} else {
 			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, DRAW_DATA.vertex.buffer, 0, DRAW_DATA.vertex.buffer_size);
 		}

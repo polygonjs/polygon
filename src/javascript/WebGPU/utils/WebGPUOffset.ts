@@ -564,6 +564,45 @@ WGPURenderPassDepthStencilAttachment (with size=40) contains the following membe
 		stencilClearValue: BigInt(32),
 		stencilReadOnly: BigInt(36),
 	},
+	/*
+WGPUProgrammableStageDescriptor (with size=40) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: module of type *WGPUShaderModuleImpl with offset 8
+- 2: entryPoint of type *u8 with offset 16
+- 3: constantCount of type u64 with offset 24
+- 4: constants of type *WGPUConstantEntry with offset 32
+	*/
+	WGPUProgrammableStageDescriptor: {
+		nextInChain: BigInt(0),
+		module: BigInt(8),
+		entryPoint: BigInt(16),
+		constantCount: BigInt(24),
+		constants: BigInt(32),
+	},
+	/*
+WGPUComputePipelineDescriptor (with size=64) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: label of type *u8 with offset 8
+- 2: layout of type *WGPUPipelineLayoutImpl with offset 16
+- 3: compute of type WGPUProgrammableStageDescriptor with offset 24
+	*/
+	WGPUComputePipelineDescriptor: {
+		nextInChain: BigInt(0),
+		label: BigInt(8),
+		layout: BigInt(16),
+		compute: BigInt(24),
+	},
+	/*
+	WGPUComputePassDescriptor (with size=24) contains the following members:
+- 0: nextInChain of type *WGPUChainedStruct with offset 0
+- 1: label of type *u8 with offset 8
+- 2: timestampWrites of type *WGPUComputePassTimestampWrites with offset 16
+	*/
+	WGPUComputePassDescriptor: {
+		nextInChain: BigInt(0),
+		label: BigInt(8),
+		timestampWrites: BigInt(16),
+	},
 };
 export const WGPU_SIZE = {
 	bool: BigInt(1),
@@ -584,5 +623,6 @@ export const WGPU_SIZE = {
 	WGPURenderPassColorAttachment: BigInt(64),
 	WGPUExtent3D: BigInt(12),
 	WGPUTextureFormat: BigInt(4),
+	WGPUProgrammableStageDescriptor: BigInt(40),
 };
 

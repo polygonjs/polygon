@@ -2,9 +2,8 @@
 
 import { heapGet } from "../../WasmHeap";
 
-export function wgpuRenderPassEncoderEnd(renderPassEncoderHeapIndex: bigint) {
-	const renderPassEncoder = heapGet<GPURenderPassEncoder>(
-		renderPassEncoderHeapIndex
-	)!;
-	return renderPassEncoder.end();
+export function wgpuRenderPassEncoderEnd(encoderHeapIndex: bigint) {
+	const encoder = heapGet<GPURenderPassEncoder>(encoderHeapIndex)!;
+	return encoder.end();
 }
+

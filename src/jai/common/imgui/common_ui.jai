@@ -38,10 +38,10 @@ gui_update :: (
 
 		// v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
 		// ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
-		// ImGui.Text("Box Size");
-		// ImGui.SliderFloat("sx", *scene_data.box_size.x, 0.1, 5.0);
-		// ImGui.SliderFloat("sy", *scene_data.box_size.y, 0.1, 5.0);
-		// ImGui.SliderFloat("sz", *scene_data.box_size.z, 0.1, 5.0);
+		ImGui.Text("Box Size");
+		ImGui.SliderFloat("sx", *scene_data.box_size.x, 0.1, 5.0);
+		ImGui.SliderFloat("sy", *scene_data.box_size.y, 0.1, 5.0);
+		ImGui.SliderFloat("sz", *scene_data.box_size.z, 0.1, 5.0);
 
 		ImGui.Text("Position");
 		// print("%\n", scene_data.sdf_data[0].offset.x);

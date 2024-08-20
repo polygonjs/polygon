@@ -3,7 +3,6 @@ import { WGPURenderPassDescriptorFromBuffer } from "../FromBuffer/WGPURenderPass
 
 export function wgpuCommandEncoderBeginRenderPass(
 	commandEncoderHeadIndex: bigint,
-	// commandEncoder: GPUCommandEncoder,
 	descriptorPointer: bigint
 ) {
 	const commandEncoder = heapGet<GPUCommandEncoder>(commandEncoderHeadIndex)!;

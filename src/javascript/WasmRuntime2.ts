@@ -77,6 +77,14 @@ import { __assert_fail } from "./wasm/WasmImgui";
 import { mapFunctionName } from "./wasm/WasmFunctionMapper";
 import { qsort } from "./wasm/WasmQSort";
 import { imguiGetMouseData, imguiGetWindowData } from "./ImGui/wasm";
+import { wgpuCommandEncoderBeginComputePass } from "./WebGPU/FromJs/wgpuCommandEncoderBeginComputePass";
+import { wgpuComputePassEncoderDispatchWorkgroups } from "./WebGPU/FromJs/wgpuComputePassEncoderDispatchWorkgroups";
+import { wgpuComputePassEncoderEnd } from "./WebGPU/FromJs/wgpuComputePassEncoderEnd";
+import { wgpuComputePassEncoderRelease } from "./WebGPU/FromJs/wgpuComputePassEncoderRelease";
+import { wgpuComputePassEncoderSetBindGroup } from "./WebGPU/FromJs/wgpuComputePassEncoderSetBindGroup";
+import { wgpuComputePassEncoderSetPipeline } from "./WebGPU/FromJs/wgpuComputePassEncoderSetPipeline";
+import { wgpuComputePipelineGetBindGroupLayout } from "./WebGPU/FromJs/wgpuComputePipelineGetBindGroupLayout";
+import { wgpuDeviceCreateComputePipeline } from "./WebGPU/FromJs/wgpuDeviceCreateComputePipeline";
 
 // A global reference of the WASM’s memory area so that we can look up pointers
 // let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
@@ -223,6 +231,15 @@ const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 	wgpuRenderPipelineRelease,
 	wgpuSamplerRelease,
 	wgpuShaderModuleRelease,
+	// compute
+	wgpuCommandEncoderBeginComputePass,
+	wgpuComputePassEncoderDispatchWorkgroups,
+	wgpuComputePassEncoderEnd,
+	wgpuComputePassEncoderRelease,
+	wgpuComputePassEncoderSetBindGroup,
+	wgpuComputePassEncoderSetPipeline,
+	wgpuComputePipelineGetBindGroupLayout,
+	wgpuDeviceCreateComputePipeline,
 	// imgui
 	imguiGetMouseData,
 	imguiGetWindowData,

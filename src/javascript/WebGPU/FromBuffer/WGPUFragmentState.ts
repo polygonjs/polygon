@@ -17,10 +17,10 @@ export function WGPUFragmentStateFromBuffer(pointer: bigint): GPUFragmentState {
 		throw new Error("module is null");
 	}
 	//
-	const entryPointOffset = offset.entryPoint;
-	const entryPointSize = WGPU_SIZE.u64;
-	const entryPointStart = (pointer + entryPointOffset) / entryPointSize;
-	const entryPointPointer = u64[Number(entryPointStart)];
+	// const entryPointOffset = offset.entryPoint;
+	// const entryPointSize = WGPU_SIZE.u64;
+	// const entryPointStart = (pointer + entryPointOffset) / entryPointSize;
+	const entryPointPointer = _u64(offset.entryPoint); //u64[Number(entryPointStart)];
 	const entryPoint = jsStringFromJaiStringWithoutLength(
 		BigInt(entryPointPointer)
 	);

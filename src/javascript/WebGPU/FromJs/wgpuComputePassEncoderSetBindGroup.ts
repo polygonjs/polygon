@@ -1,15 +1,13 @@
 import { heapGet } from "../../WasmHeap";
 
-// wgpuRenderPassEncoderSetBindGroup :: (renderPassEncoder: WGPURenderPassEncoder, groupIndex: u32, group: WGPUBindGroup, dynamicOffsetCount: u64, dynamicOffsets: *u32) -> void #foreign;
-
-export function wgpuRenderPassEncoderSetBindGroup(
+export function wgpuComputePassEncoderSetBindGroup(
 	encoderHeapIndex: bigint,
 	groupIndex: number,
 	groupHeapIndex: bigint,
 	dynamicOffsetCount: bigint,
 	_dynamicOffsetsPointer: bigint
-): void {
-	const encoder = heapGet<GPURenderPassEncoder>(encoderHeapIndex)!;
+) {
+	const encoder = heapGet<GPUComputePassEncoder>(encoderHeapIndex)!;
 	const bindGroup = heapGet<GPUBindGroup>(groupHeapIndex)!;
 
 	if (dynamicOffsetCount > 0) {
