@@ -81,8 +81,8 @@ SafeReleaseRenderResources::(res:*RenderResources)
 
 SafeReleaseFrameResources::(res:*FrameResources)
 {	
-	SafeReleaseWGPUBuffer(*res.IndexBuffer);
-	SafeReleaseWGPUBuffer(*res.VertexBuffer);
+	SafeReleaseWGPUBuffer(*(res.IndexBuffer));
+	SafeReleaseWGPUBuffer(*(res.VertexBuffer));
 	if(res.IndexBufferHost) SafeReleaseImDrawIdx(res.IndexBufferHost);
 	if(res.VertexBufferHost) SafeReleaseImDrawVert(res.VertexBufferHost);
 }

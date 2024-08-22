@@ -22,9 +22,6 @@ DONE
 
 #load "common/wgpu/shaders/shaders.jai";
 
-// BUILD_COMMON :: true;
-// BUILD_NON_COMMON :: false;
-//
 BUILD_WASM :: true;
 BUILD_NATIVE :: true;
 

@@ -11,3 +11,4 @@ export function wgpuDeviceCreateBuffer(
 	const bufferHeapIndex = heapAdd(buffer);
 	return bufferHeapIndex;
 }
+

@@ -30,16 +30,28 @@ ComputeShaderController :: struct {
 	}
 }
 
-sprint_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
+// this is an alternative version to replace() from the String module,
+// that reset the segments array after the join,
+// as otherwise we have a memory leak
+// TODO: could there be a faster implementation for the case where we only need to replace a single instance of the string?
+replace_with_array_reset :: (s: string, old: string, new: string) -> string {
+	segments := split(s, old);
+	result := join(..segments, new);
+	array_reset(*segments);
+	return result;
+}
+
+build_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
 	work_group_count := work_group_size.x * work_group_size.y * work_group_size.z;
 
-	shader1 := replace(shader0, "__WORK_GROUP_SIZE_X__", sprint("%", work_group_size.x));
+	shader1 := replace_with_array_reset(shader0, "__WORK_GROUP_SIZE_X__", tprint("%", work_group_size.x));
 	defer free(shader1);
-	shader2 := replace(shader1, "__WORK_GROUP_SIZE_Y__", sprint("%", work_group_size.y));
+	shader2 := replace_with_array_reset(shader1, "__WORK_GROUP_SIZE_Y__", tprint("%", work_group_size.y));
 	defer free(shader2);
-	shader3 := replace(shader2, "__WORK_GROUP_SIZE_Z__", sprint("%", work_group_size.z));
+	shader3 := replace_with_array_reset(shader2, "__WORK_GROUP_SIZE_Z__", tprint("%", work_group_size.z));
 	defer free(shader3);
-	shader4 := replace(shader3, "__WORK_GROUP_COUNT__", sprint("%", work_group_count));
+	shader4 := replace_with_array_reset(shader3, "__WORK_GROUP_COUNT__", tprint("%", work_group_count));
+
 	return shader4;
 }
 
@@ -60,9 +72,10 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 
 	// work_groups_count :Vector3= .{1, 1, 1};
 	// work_groups_count_total :u32= cast(u32)(work_groups_count.x)*cast(u32)(work_groups_count.y)*cast(u32)(work_groups_count.z);
-	shader_compute := sprint_compute_shader(shader_compute_raw, controller.work_groups_count);
+	shader_compute := build_compute_shader(shader_compute_raw, controller.work_groups_count);
 	defer free(shader_compute);
 	entry_point := to_c_string("boxCompute");
+	defer free(entry_point);
 
 	// create shader module
 	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
@@ -128,6 +141,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 		compute = compute_descriptor,
 	};
 	controller.pipeline = wgpuDeviceCreateComputePipeline(device, *pipeline_descriptor);
+	free(pipeline_descriptor.label);
 
 	
 

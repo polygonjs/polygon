@@ -1,7 +1,14 @@
 import { clockInit, clockTick } from "./Clock";
 import { USELESS_ARG0 } from "./Common";
 import { addEvents } from "./EventsController";
-import { heapAdd } from "./WasmHeap";
+import {
+	heapAdd,
+	// Heap,
+	// heapCopy,
+	// heapCreate,
+	// heapDelta,
+	// heapStatus,
+} from "./WasmHeap";
 import { WGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { textureFormatIndex } from "./WebGPU/utils/WebGPUMap";
 import { canvasSetSize, webGPUListenToResize } from "./WebGPUResize";
@@ -85,14 +92,20 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 		render
 	);
 
+	// let previousHeap: Heap = heapCreate();
+	// let deltaHeap: Heap = heapCreate();
 	function render() {
 		if (_onRequestAnimationFrameInProgress) {
 			return;
 		}
 		if (framesCount % 100 === 0) {
 			console.log(framesCount);
+			// console.log(heapStatus());
 		}
 		_onRequestAnimationFrameInProgress = true;
+
+		// heapCopy(previousHeap);
+		// const currentTexture = wgpuSurfaceGetCurrentTexture();
 		window.onRequestAnimationFrame(
 			USELESS_ARG0,
 			BigInt(clockData.time),
@@ -100,15 +113,24 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 			BigInt(canvas.height)
 		);
 		framesCount++;
+		// if (currentTexture) {
+		// 	heapDeleteByItem(currentTexture);
+		// }
 		_onRequestAnimationFrameInProgress = false;
 	}
 	function animate() {
 		clockTick(clockData);
-		render();
-		// if (framesCount < 2) {
+		for (let i = 0; i < 1; i++) {
+			render();
+		}
+		// if (framesCount < 10) {
 		requestAnimationFrame(animate);
 		// } else {
-		// console.log(`${framesCount} frames rendered, stopping for now`);
+		// 	requestAnimationFrame(() => {
+		// 		heapDelta(previousHeap, deltaHeap);
+		// 		console.log(deltaHeap);
+		// 		console.log(`${framesCount} frames rendered, stopping for now`);
+		// 	});
 		// }
 	}
 	animate();

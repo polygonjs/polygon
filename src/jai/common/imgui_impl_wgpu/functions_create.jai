@@ -30,7 +30,6 @@ ImGui_ImplWGPU_CreateImageBindGroup::(layout: WGPUBindGroupLayout, texture_view:
 }
 
 ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTexture) {
-	print("ImGui_ImplWGPU_CreateFontsTexture START\n");
 	// Build texture atlas
 	bd := ImGui_ImplWGPU_GetBackendData();
 	io := ImGui.GetIO();
@@ -95,8 +94,6 @@ ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTextu
 	// Store our identifier
 	assert(size_of(ImTextureID) >= size_of(type_of(bd.renderResources.FontTexture)), "Can't pack descriptor handle into TexID, 32-bit not supported yet.");
 	io.Fonts.TexID = xx bd.renderResources.FontTextureView;
-
-	print("ImGui_ImplWGPU_CreateFontsTexture DONE\n");
 }
 
 ImGui_ImplWGPU_CreateUniformBuffer :: (iwc_uniforms: *ImGui_WGPU_Common_Uniforms) {
@@ -248,6 +245,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 
 	SafeReleaseWGPUShaderModule(*iwc.vertex_shader_desc.module);
 	SafeReleaseWGPUShaderModule(*iwc.pixel_shader_desc.module);
+	// SafeRelease???(graphics_pipeline_desc.layout);
 	SafeReleaseWGPUBindGroupLayout(*iwc.bg_layouts[0]);
 
 	return true;

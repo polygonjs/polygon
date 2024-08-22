@@ -1,22 +1,52 @@
 // import { WGPU_SIZE } from "./WebGPU/utils/WebGPUOffset";
 
 type HeapObject = any;
-interface Heap {
+export interface HeapContent {
 	itemByIndex: Map<BigInt, HeapObject>;
 	indexByItem: Map<HeapObject, bigint>;
+}
+export interface Heap extends HeapContent {
 	nextValue: bigint;
 }
-const HEAP: Heap = {
-	itemByIndex: new Map(),
-	indexByItem: new Map(),
-	// we start with a number > 0, so that failed pointer values of 0 do not resolve to anything
-	nextValue: BigInt(3),
-};
+export function heapCreate(): Heap {
+	return {
+		itemByIndex: new Map(),
+		indexByItem: new Map(),
+		// we start with a number > 0, so that failed pointer values of 0 do not resolve to anything
+		nextValue: BigInt(3),
+	};
+}
+const HEAP: Heap = heapCreate();
+function _heapCopy(src: Heap, target: Heap) {
+	target.itemByIndex = new Map(src.itemByIndex);
+	target.indexByItem = new Map(src.indexByItem);
+	target.nextValue = src.nextValue;
+}
+export function heapCopy(target: Heap) {
+	_heapCopy(HEAP, target);
+}
+function _heapDelta(heap0: Heap, heap1: Heap, delta: HeapContent) {
+	delta.itemByIndex.clear();
+	delta.indexByItem.clear();
+	for (const [key, value] of heap0.itemByIndex) {
+		if (!heap1.itemByIndex.has(key)) {
+			delta.itemByIndex.set(key, value);
+		}
+	}
+	for (const [key, value] of heap0.indexByItem) {
+		if (!heap1.indexByItem.has(key)) {
+			delta.indexByItem.set(key, value);
+		}
+	}
+}
+export function heapDelta(heap1: Heap, delta: HeapContent) {
+	_heapDelta(HEAP, heap1, delta);
+}
 
 export function heapAdd(item: HeapObject): bigint {
 	const currentIndex = HEAP.indexByItem.get(item);
 	if (currentIndex != null) {
-		console.log("item already in heap", item);
+		// console.log("item already in heap", item);
 		return currentIndex;
 	}
 
@@ -33,10 +63,17 @@ export function heapAdd(item: HeapObject): bigint {
 	// console.log("+ heapAdd", { index, item });
 	return index;
 }
+export function heapStatus() {
+	return {
+		itemByIndex: HEAP.itemByIndex.size,
+		indexByItem: HEAP.indexByItem.size,
+		nextValue: HEAP.nextValue,
+	};
+}
 export function heapDeleteByItem(item: HeapObject) {
 	const index = HEAP.indexByItem.get(item);
 	if (index == null) {
-		console.log("heapDelete: item not in heap", item);
+		console.warn("heapDelete: item not in heap", item);
 		return;
 	}
 	_heapDelete(index, item);
@@ -45,12 +82,13 @@ export function heapDeleteByItem(item: HeapObject) {
 export function heapDeleteByIndex(index: bigint) {
 	const item = HEAP.itemByIndex.get(index);
 	if (item == null) {
-		console.log("heapDelete: item not in heap", index, item);
+		console.warn("heapDelete: item not in heap", index);
 		return;
 	}
 	_heapDelete(index, item);
 	// console.log("- heapDeleteByIndex", { index, item });
 }
+
 // export function heapDeleteByPointer(pointer: bigint) {
 // 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 // 	const u64 = new BigUint64Array(buffer);

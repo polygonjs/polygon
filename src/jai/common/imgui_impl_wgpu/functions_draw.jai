@@ -85,7 +85,7 @@ ImGui_ImplWGPU_SetupRenderState:: ( draw_data: *ImDrawData, ctx: WGPURenderPassE
 
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
+ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
 	// print("ImGui_ImplWGPU_RenderDrawData: quick return\n");
 	// if(1+1)return;
 	// print_yellow("ImGui_ImplWGPU_RenderDrawData START\n");
@@ -101,7 +101,8 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*Im
 	// If not, we can't just re-allocate the IB or VB, we'll have to do a proper allocator.
 	bd := ImGui_ImplWGPU_GetBackendData();
 	bd.frameIndex = bd.frameIndex + 1;
-	fr := bd.pFrameResources[bd.frameIndex % bd.numFramesInFlight];
+	frame_index := bd.frameIndex % bd.numFramesInFlight;
+	fr := *(bd.pFrameResources[frame_index]);
 
 	// Create and grow vertex/index buffers if needed
 	array_reset(*iwc_draw.im_draw_verts);
@@ -112,18 +113,24 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*Im
 		if (fr.VertexBuffer) {
 			wgpuBufferDestroy(fr.VertexBuffer);
 			wgpuBufferRelease(fr.VertexBuffer);
+			fr.VertexBuffer = null;
 		}
 		SafeReleaseImDrawVert(fr.VertexBufferHost);
-		fr.VertexBufferSize = cast(u64) draw_data.TotalVtxCount + 5000;
+		if (fr.VertexBuffer == null){
+			fr.VertexBufferSize = cast(u64) draw_data.TotalVtxCount + 5000;
 
-		vb_desc:WGPUBufferDescriptor = .{
-			null,
-			"Dear ImGui Vertex buffer",
-			xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex,
-			memalign(fr.VertexBufferSize * size_of(ImDrawVert), 4),
-			xx false
-		};
-		fr.VertexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *vb_desc);
+			vb_desc:WGPUBufferDescriptor = .{
+				null,
+				"Dear ImGui Vertex buffer",
+				xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex,
+				memalign(fr.VertexBufferSize * size_of(ImDrawVert), 4),
+				xx false
+			};
+
+			fr.VertexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *vb_desc);
+			fr3 := bd.pFrameResources[frame_index];
+			print("imgui create buffer, %, %\n", fr.VertexBuffer, fr3.VertexBuffer);
+		}
 		if (!fr.VertexBuffer) {
 			print_red("fr.VertexBuffer not created\n");
 			return;
@@ -138,21 +145,24 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*Im
 		if (fr.IndexBuffer) {
 			wgpuBufferDestroy(fr.IndexBuffer);
 			wgpuBufferRelease(fr.IndexBuffer);
+			fr.IndexBuffer = null;
 		}
 		SafeReleaseImDrawIdx(fr.IndexBufferHost);
-		fr.IndexBufferSize = cast(u64) draw_data.TotalIdxCount + 10000;
+		if (fr.IndexBuffer == null){
+			fr.IndexBufferSize = cast(u64) draw_data.TotalIdxCount + 10000;
 
-		ib_desc:WGPUBufferDescriptor = .{
-			null,
-			"Dear ImGui Index buffer",
-			xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Index,
-			memalign(fr.IndexBufferSize * size_of(ImDrawIdx), 4),
-			xx false
-		};
-		fr.IndexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *ib_desc);
-		if (!fr.IndexBuffer){
-			print_red("fr.IndexBuffer not created\n");
-			return;
+			ib_desc:WGPUBufferDescriptor = .{
+				null,
+				"Dear ImGui Index buffer",
+				xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Index,
+				memalign(fr.IndexBufferSize * size_of(ImDrawIdx), 4),
+				xx false
+			};
+			fr.IndexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *ib_desc);
+			if (!fr.IndexBuffer){
+				print_red("fr.IndexBuffer not created\n");
+				return;
+			}
 		}
 
 		for 0..(fr.IndexBufferSize-1) {
@@ -181,7 +191,8 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*Im
 	wgpuQueueWriteBuffer(bd.defaultQueue, fr.IndexBuffer,  0, fr.IndexBufferHost,  ib_write_size);
 
 	// Setup desired render state
-	ImGui_ImplWGPU_SetupRenderState(draw_data, pass_encoder, *fr);
+	fr2 := bd.pFrameResources[frame_index];
+	ImGui_ImplWGPU_SetupRenderState(draw_data, pass_encoder, *fr2);
 
 	// Render command lists
 	// (Because we merged all buffers into a single one, we maintain our own offset into them)
@@ -199,7 +210,7 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw,draw_data:*Im
 				// User callback, registered via ImDrawList::AddCallback()
 				// (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
 				// if (pcmd.UserCallback == ImDrawCallback.ResetRenderState)
-					ImGui_ImplWGPU_SetupRenderState(draw_data, pass_encoder, *fr);
+					ImGui_ImplWGPU_SetupRenderState(draw_data, pass_encoder, *fr2);
 				// else
 				// pcmd.UserCallback(cmd_list, *pcmd);
 				print("UserCallback DONE\n");

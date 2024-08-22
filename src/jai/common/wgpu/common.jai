@@ -3,7 +3,9 @@ WGPUContext :: struct {
 	queue:WGPUQueue;
 	preferred_texture_format :WGPUTextureFormat;
 	surface: WGPUSurface; // this is the canvas heapIndex in wasm
-	#if WASM==false {
+	#if WASM {
+		surface_texture :WGPUSurfaceTexture;
+	} else {
 		instance: WGPUInstance;
 		adapter: WGPUAdapter; // only useful to keep around when releasing it
 		config: WGPUSurfaceConfiguration;
@@ -112,7 +114,12 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 
 	
 	bind_group_layouts := NewArray(3, WGPUBindGroupLayout);
-	#if FREE_MEMORY defer array_reset(*bind_group_layouts);
+	bind_group_layout_descs := NewArray(3, WGPUBindGroupLayoutDescriptor);
+	#if FREE_MEMORY defer {
+		for bind_group_layout_descs free(it.label);
+		array_reset(*bind_group_layouts);
+		array_reset(*bind_group_layout_descs);
+	}
 
 	// group 0 (object uniforms)
 	{
@@ -123,12 +130,9 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 			visibility = xx WGPUShaderStage.Vertex,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		// bind_group_layouts[0] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-		// 	entryCount = xx bind_group_layout_entries.count,
-		// 	entries = bind_group_layout_entries.data,
-		// }));
-		bind_group_layouts[0] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "object uniforms");
-		// print("0:%\n", cast(u64)bind_group_layouts[0]);
+		layout, desc := wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "object uniforms");
+		bind_group_layouts[0] = layout;
+		bind_group_layout_descs[0] = desc;
 	}
 	// group 1 (camera uniforms)
 	{
@@ -139,12 +143,9 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		// bind_group_layouts[1] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-		// 	entryCount = xx bind_group_layout_entries.count,
-		// 	entries = bind_group_layout_entries.data,
-		// }));
-		bind_group_layouts[1] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "camera uniforms");
-		// print("1:%\n", cast(u64)bind_group_layouts[1]);
+		layout, desc := wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "camera uniforms");
+		bind_group_layouts[1] = layout;
+		bind_group_layout_descs[1] = desc;
 	}
 	// group 2 (SDF uniforms)
 	{
@@ -155,12 +156,9 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		// bind_group_layouts[2] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-		// 	entryCount = xx bind_group_layout_entries.count,
-		// 	entries = bind_group_layout_entries.data,
-		// }));
-		bind_group_layouts[2] = wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "sdf uniforms");
-		// print("2:%\n", cast(u64)bind_group_layouts[2]);
+		layout, desc := wgpu_create_bind_group_layout(device, bind_group_layout_entries.count, bind_group_layout_entries.data, "sdf uniforms");
+		bind_group_layouts[2] = layout;
+		bind_group_layout_descs[2] = desc;
 	}
 	//
 	pipeline_layout_descriptor.label = "Main Pipeline Layout (only here to test that the label can be re-created in js from wasm)";
@@ -168,6 +166,16 @@ wgpu_update_pipeline_descriptor_layout :: (pipeline_descriptor: *WGPURenderPipel
 	pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
 
 	pipeline_descriptor.layout = wgpuDeviceCreatePipelineLayout(device, *pipeline_layout_descriptor);
+}
+
+wgpu_create_bind_group_layout :: (device: WGPUDevice, entryCount: s64, data: *WGPUBindGroupLayoutEntry, label:string) -> WGPUBindGroupLayout, WGPUBindGroupLayoutDescriptor {
+	desc :WGPUBindGroupLayoutDescriptor= .{
+		label = to_c_string(label),
+		entryCount = xx entryCount,
+		entries = data,
+	};
+	bind_group_layout := wgpuDeviceCreateBindGroupLayout(device, *desc);
+	return bind_group_layout, desc;
 }
 
 wgpu_update_pipeline_descriptor :: (
@@ -267,15 +275,6 @@ wgpu_index_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, indices: []
 	return buffer, size;
 }
 
-wgpu_create_bind_group_layout :: (device: WGPUDevice, entryCount: s64, data: *WGPUBindGroupLayoutEntry, label:string) -> WGPUBindGroupLayout {
-	bind_group_layout := wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
-		label = to_c_string(label),
-		entryCount = xx entryCount,
-		entries = data,
-	}));
-	return bind_group_layout;
-}
-
 wgpu_create_shader_module :: (device: WGPUDevice, source: string, label :string) -> WGPUShaderModule {
 	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
 	wgslDescriptor.chain.next = null;
@@ -304,8 +303,8 @@ wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureV
 		arrayLayerCount = 1,
 	};
 	#if WASM {
-		texture := wgpuSurfaceGetCurrentTexture();
-		return wgpuTextureCreateView(texture, *current_view_descriptor);
+		wgpu_context.surface_texture.texture = wgpuSurfaceGetCurrentTexture();
+		return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
 	} else {
 		wgpuSurfaceGetCurrentTexture(wgpu_context.surface, *(wgpu_context.surface_texture));
 		return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);

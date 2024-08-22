@@ -1,33 +1,3 @@
-USE_IMGUI :: true;
-USE_IMGUI_DEBUG :: false;
-#placeholder WASM;
-USE_COMPUTE_SHADER :: true;
-FREE_MEMORY :: false; // beware wasm memory corruption when in use
-
-#import "Basic";
-#import "Math";
-#if WASM == true #import "wgpu_wasm";
-#if WASM == false #import "wgpu";
-
-#load "common/math_helper.jai";;
-#load "common/draw_data.jai";
-#load "common/scene_data.jai";
-#load "common/type_utils.jai";
-#if WASM == true #load "common/events/wasm.jai";
-#if WASM == true #load "common/wgpu/wasm.jai";
-#if WASM == false #load "common/wgpu/native.jai";
-#load "common/wgpu/common.jai";
-#load "common/wgpu/common_depth.jai";
-#load "common/wgpu/common_msaa.jai";
-#load "common/wgpu/common_uniforms.jai";
-#load "common/wgpu/common_compute.jai";
-#import "String";
-#load "common/print_utils.jai";
-
-#load "common/orbit_controls/common.jai";
-#if WASM #load "common/orbit_controls/wasm.jai";
-else #load "common/orbit_controls/native.jai";
-
 #if OS == .LINUX {
 	// in order to import gcc_s, I initially tried:
 	// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
@@ -48,8 +18,39 @@ else #load "common/orbit_controls/native.jai";
 	// libstd :: #library,system,link_always "stdc++";
 }
 
+USE_IMGUI :: true;
+USE_IMGUI_DEBUG :: false;
+#placeholder WASM;
+USE_COMPUTE_SHADER :: true;
+FREE_MEMORY :: true; // beware wasm memory corruption when in use
+FREE_MEMORY_DEBUG :: false;
 
-#if WASM==false {
+#if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
+else #import "Basic";
+#import "Math";
+#import "String";
+#if WASM == true  #import "wgpu_wasm";
+#if WASM == false #import "wgpu";
+
+#load "common/math_helper.jai";;
+#load "common/draw_data.jai";
+#load "common/scene_data.jai";
+#load "common/type_utils.jai";
+#if WASM == true #load "common/events/wasm.jai";
+#if WASM #load "common/wgpu/wasm.jai";
+else     #load "common/wgpu/native.jai";
+#load "common/wgpu/common.jai";
+#load "common/wgpu/common_depth.jai";
+#load "common/wgpu/common_msaa.jai";
+#load "common/wgpu/common_uniforms.jai";
+#load "common/wgpu/common_compute.jai";
+#load "common/print_utils.jai";
+
+#load "common/orbit_controls/common.jai";
+#if WASM #load "common/orbit_controls/wasm.jai";
+else     #load "common/orbit_controls/native.jai";
+
+#if WASM == false {
 	#import "wgpu";
 	#import "SDL";
 }
@@ -58,12 +59,11 @@ else #load "common/orbit_controls/native.jai";
 	#load "common/imgui_impl_wgpu/index.jai";
 	#import "imgui";
 	#load "common/imgui/common_ui.jai";
-	#if WASM {
-		#load "common/imgui/wasm.jai";
-	} else {
-		#load "common/imgui/native.jai";
-	}
+	#if WASM #load "common/imgui/wasm.jai";
+	else     #load "common/imgui/native.jai";
 }
+
+
 
 #placeholder SHADER_RENDER;
 #placeholder SHADER_COMPUTE;
@@ -79,20 +79,22 @@ wgpu_context:WGPUContext;
 #if USE_IMGUI window_context:WindowContext;
 SCENE_DATA:SceneData;
 DRAW_DATA:DrawData;
-orbit_controls :OrbitControls;
+orbit_controls:OrbitControls;
 #if USE_IMGUI {
-	ui_data :UiData= .{};
+	ui_data:UiData= .{};
 	bd:ImGui_ImplWGPU_Data = .{};
 	iwc:ImGui_WGPU_Common = .{};
 }
 #if USE_COMPUTE_SHADER compute_shader_controller:ComputeShaderController;
 
-// MAX_PRINT_SIZE :: 2048;
-// PRINT_STRING_BUFFER : string =.{ count = MAX_PRINT_SIZE };
 
-
+do_exit := false;
 FRAMES_COUNT:u64 = 0;
-#if WASM==true call_from_wasm_context :Context;
+#if WASM==true {
+	call_from_wasm_context :Context;
+	wasm_debug_break :: ()  #foreign;
+	wasm_write_string :: (count: s64, data: *u8, is_error: bool)  #foreign;
+}
 
 #if WASM==false {
 	wgpu_log_callback :: (level: WGPULogLevel, msg: *u8, userdata: *void) #c_call {
@@ -110,6 +112,11 @@ FRAMES_COUNT:u64 = 0;
 }
 
 
+//
+//
+//
+//
+//
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
@@ -143,8 +150,6 @@ main :: () {
 		on_wgpu_device_ready(wgpu_context.surface, wgpu_context.device, wgpu_context.queue, wgpu_context.preferred_texture_format);
 		init_draw_data();
 
-		do_exit := false;
-		frames_count :u64= 0;
 		while !do_exit {
 			event: SDL_Event;
 			while SDL_PollEvent(*event) {
@@ -190,30 +195,21 @@ main :: () {
 				}
 
 			}
-			time := SDL_GetTicks();// / 1000.0;
+			time := SDL_GetTicks();
 
+			// do_exit = true;
 			on_request_animation_frame(time, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		}
+		reset_temporary_storage();
+		#if FREE_MEMORY_DEBUG defer report_memory_leaks();
 		SDL_Quit();
 	}
 
 }
 
-// set_print_string_buffer :: (string_buffer:string) {
-// 	js_set_print_string_buffer(string_buffer.count, string_buffer.data, size_of(u8));
-// }
-// js_print :: (message:string) {
-// 	memcpy(PRINT_STRING_BUFFER.data, message.data, min(message.count, MAX_PRINT_SIZE) * size_of(u8));
-// 	// print("copied:%,%,%\n", message.count * size_of(u8),PRINT_STRING_BUFFER.count, cast(u8) PRINT_STRING_BUFFER.data[0]);
-// 	js_read_print_buffer(message.count);
-// }
 
 
-wasm_debug_break :: ()  #foreign;
-wasm_write_string :: (count: s64, data: *u8, is_error: bool)  #foreign;
-// js_set_print_string_buffer :: (count: s64, data: *u8, element_size:u8) #foreign;
-// js_read_print_buffer :: (count: s64) #foreign;
 
 
 on_wgpu_device_ready :: (
@@ -239,6 +235,11 @@ on_wgpu_device_ready :: (
 	// on_request_animation_frame(0, 500, 500);
 }
 
+//
+//
+//
+//
+//
 init_draw_data :: (){
 	#if WASM==true context = call_from_wasm_context;
 	device := wgpu_context.device;
@@ -304,6 +305,12 @@ init_draw_data :: (){
 	}
 }
 
+
+//
+//
+//
+//
+//
 on_request_animation_frame :: (
 	new_time: u64,
 	width: u64,
@@ -402,10 +409,12 @@ on_request_animation_frame :: (
 
 	#if WASM == false {
 		wgpuSurfacePresent(wgpu_context.surface);
-		wgpuTextureRelease(wgpu_context.surface_texture.texture);
 	}
+	wgpuTextureRelease(wgpu_context.surface_texture.texture);
 	multisample_release(*wgpu_context);
 	depth_release(*wgpu_context);
 
+	#if WASM==false reset_temporary_storage();
 	FRAMES_COUNT += 1;
+	if(FRAMES_COUNT>20){ do_exit = true; }
 }

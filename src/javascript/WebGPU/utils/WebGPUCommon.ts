@@ -23,4 +23,7 @@ export function wgpuSurfaceGetCurrentTexture() {
 	const index = heapAdd(texture);
 	return index;
 }
+// export function wgpuSurfaceReleaseCurrentTexture(heapIndex: bigint) {
+// 	heapDeleteByIndex(heapIndex);
+// }
 
