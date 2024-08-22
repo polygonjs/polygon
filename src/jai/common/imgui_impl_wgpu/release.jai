@@ -1,16 +1,17 @@
 
-SafeReleaseImDrawIdx::(res: *ImDrawIdx)
-{
-	if (res!=null) free(res);
-		// delete[] res;
-	res = null;
-}
 SafeReleaseImDrawVert::(res: *ImDrawVert)
 {
-	if (res!=null) free(res);
+	// if (res!=null) free(res);
 		// delete[] res;
 	res = null;
 }
+SafeReleaseImDrawIdx::(res: *ImDrawIdx)
+{
+	// if (res!=null) free(res);
+		// delete[] res;
+	res = null;
+}
+
 SafeReleaseWGPUBindGroupLayout::(resptr: *WGPUBindGroupLayout)
 {
 	if (<<resptr)
@@ -83,8 +84,8 @@ SafeReleaseFrameResources::(res:*FrameResources)
 {	
 	SafeReleaseWGPUBuffer(*(res.IndexBuffer));
 	SafeReleaseWGPUBuffer(*(res.VertexBuffer));
-	if(res.IndexBufferHost) SafeReleaseImDrawIdx(res.IndexBufferHost);
-	if(res.VertexBufferHost) SafeReleaseImDrawVert(res.VertexBufferHost);
+	SafeReleaseImDrawVert(res.VertexBufferHost);
+	SafeReleaseImDrawIdx(res.IndexBufferHost);
 }
 
 

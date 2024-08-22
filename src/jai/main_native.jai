@@ -304,7 +304,7 @@ main :: () {
 		wgpuTextureRelease(wgpu_context.surface_texture.texture);
 		multisample_release(*wgpu_context);
 		depth_release(*wgpu_context);
-		#if USE_IMGUI gui_free(*iwc);
+		#if USE_IMGUI imgui_gui_free(*iwc);
 		
 		// if frames_count>1 { do_exit = true; }
 		// print_green(tprint("frames_count:%\n", frames_count));

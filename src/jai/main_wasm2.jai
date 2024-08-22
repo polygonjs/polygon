@@ -202,8 +202,9 @@ main :: () {
 
 		}
 		reset_temporary_storage();
-		#if FREE_MEMORY_DEBUG defer report_memory_leaks();
+		#if WASM==false && FREE_MEMORY_DEBUG==true defer report_memory_leaks();
 		SDL_Quit();
+		print_green("polygon quit\n");
 	}
 
 }
@@ -413,8 +414,8 @@ on_request_animation_frame :: (
 	wgpuTextureRelease(wgpu_context.surface_texture.texture);
 	multisample_release(*wgpu_context);
 	depth_release(*wgpu_context);
+	#if USE_IMGUI imgui_gui_free(*iwc);
 
 	#if WASM==false reset_temporary_storage();
 	FRAMES_COUNT += 1;
-	if(FRAMES_COUNT>20){ do_exit = true; }
 }

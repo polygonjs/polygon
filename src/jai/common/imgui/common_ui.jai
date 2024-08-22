@@ -12,10 +12,10 @@ gui_update :: (
 	width := wgpu_texture_get_width_surface(wgpu_context);
 	height := wgpu_texture_get_height_surface(wgpu_context);
 	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipeline==null) {
-		print_yellow("invalidate and create START");
+		// print_yellow(tprint("invalidate and create START: %x% -> %x%\n", bd.resolution.width, bd.resolution.height, width, height));
 		ImGui_ImplWGPU_InvalidateDeviceObjects();
 		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, wgpu_context);
-		print_yellow("invalidate and create DONE");
+		// print_yellow("invalidate and create DONE");
 		bd.resolution.width = width;
 		bd.resolution.height = height;
 	}
@@ -92,9 +92,3 @@ gui_update :: (
 
 }
 
-gui_free :: (iwc: *ImGui_WGPU_Common){
-	#if FREE_MEMORY {
-		array_reset(*iwc.draw.im_draw_verts);
-		array_reset(*iwc.draw.im_draw_idxs);
-	}
-}

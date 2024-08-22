@@ -105,10 +105,8 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 	fr := *(bd.pFrameResources[frame_index]);
 
 	// Create and grow vertex/index buffers if needed
-	array_reset(*iwc_draw.im_draw_verts);
-	array_reset(*iwc_draw.im_draw_idxs);
-	// im_draw_verts :[..]ImDrawVert;
-	// im_draw_idxs :[..]ImDrawIdx;
+	array_reset(*iwc_draw.vertices);
+	array_reset(*iwc_draw.indices);
 	if (fr.VertexBuffer == null || fr.VertexBufferSize < xx draw_data.TotalVtxCount) {
 		if (fr.VertexBuffer) {
 			wgpuBufferDestroy(fr.VertexBuffer);
@@ -120,16 +118,13 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 			fr.VertexBufferSize = cast(u64) draw_data.TotalVtxCount + 5000;
 
 			vb_desc:WGPUBufferDescriptor = .{
-				null,
-				"Dear ImGui Vertex buffer",
-				xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex,
-				memalign(fr.VertexBufferSize * size_of(ImDrawVert), 4),
-				xx false
+				label = "Dear ImGui Vertex buffer",
+				usage = xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex,
+				size = memalign(fr.VertexBufferSize * size_of(ImDrawVert), 4),
+				mappedAtCreation = xx false
 			};
 
 			fr.VertexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *vb_desc);
-			fr3 := bd.pFrameResources[frame_index];
-			print("imgui create buffer, %, %\n", fr.VertexBuffer, fr3.VertexBuffer);
 		}
 		if (!fr.VertexBuffer) {
 			print_red("fr.VertexBuffer not created\n");
@@ -137,9 +132,9 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 		}
 
 		for 0..(fr.VertexBufferSize-1) {
-			array_add(*iwc_draw.im_draw_verts, .{});
+			array_add(*iwc_draw.vertices, .{});
 		}
-		fr.VertexBufferHost = iwc_draw.im_draw_verts.data; //New(ImDrawVert[fr.VertexBufferSize]);
+		fr.VertexBufferHost = iwc_draw.vertices.data; //New(ImDrawVert[fr.VertexBufferSize]);
 	}
 	if (fr.IndexBuffer == null || fr.IndexBufferSize < xx draw_data.TotalIdxCount) {
 		if (fr.IndexBuffer) {
@@ -147,16 +142,15 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 			wgpuBufferRelease(fr.IndexBuffer);
 			fr.IndexBuffer = null;
 		}
-		SafeReleaseImDrawIdx(fr.IndexBufferHost);
+		// SafeReleaseImDrawIdx(fr.IndexBufferHost);
 		if (fr.IndexBuffer == null){
 			fr.IndexBufferSize = cast(u64) draw_data.TotalIdxCount + 10000;
 
 			ib_desc:WGPUBufferDescriptor = .{
-				null,
-				"Dear ImGui Index buffer",
-				xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Index,
-				memalign(fr.IndexBufferSize * size_of(ImDrawIdx), 4),
-				xx false
+				label = "Dear ImGui Index buffer",
+				usage = xx WGPUBufferUsage.CopyDst | WGPUBufferUsage.Index,
+				size = memalign(fr.IndexBufferSize * size_of(ImDrawIdx), 4),
+				mappedAtCreation = xx false
 			};
 			fr.IndexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *ib_desc);
 			if (!fr.IndexBuffer){
@@ -166,15 +160,15 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 		}
 
 		for 0..(fr.IndexBufferSize-1) {
-			array_add(*iwc_draw.im_draw_idxs, 0);
+			array_add(*iwc_draw.indices, 0);
 		}
-		fr.IndexBufferHost = iwc_draw.im_draw_idxs.data;//New(ImDrawIdx[fr.IndexBufferSize]);
+		fr.IndexBufferHost = iwc_draw.indices.data;
 	}
 
 	// Upload vertex/index data into a single contiguous GPU buffer
-	vtx_dst:*ImDrawVert = xx fr.VertexBufferHost;
+	vtx_dst:*ImDrawVert = fr.VertexBufferHost;
 	assert(vtx_dst!=null, "fr.VertexBufferHost is null\n");
-	idx_dst:*ImDrawIdx = xx fr.IndexBufferHost;
+	idx_dst:*ImDrawIdx = fr.IndexBufferHost;
 	assert(idx_dst!=null, "idx_dst is null\n");
 	for n:0..(draw_data.CmdListsCount-1) {
 		cmd_list:*ImDrawList = draw_data.CmdLists.Data[n];//*size_of(ImDrawList)]; //draw_data.CmdLists[n];

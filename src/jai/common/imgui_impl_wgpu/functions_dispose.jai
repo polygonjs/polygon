@@ -1,16 +1,15 @@
-ImGui_ImplWGPU_InvalidateDeviceObjects::() {
+ImGui_ImplWGPU_InvalidateDeviceObjects :: () {
 	bd :*ImGui_ImplWGPU_Data= ImGui_ImplWGPU_GetBackendData();
 	if (bd.wgpuDevice==null){
 		return;
 	}
-	SafeReleasePipelineState(*bd.pipeline);
-	SafeReleaseRenderResources(*bd.renderResources);
+	// SafeReleasePipelineState(*bd.pipeline);
+	// SafeReleaseRenderResources(*bd.renderResources);
 
-	io := ImGui.GetIO();
-	io.Fonts.TexID = xx 0; //.SetTexID(0); // We copied g_pFontTextureView to io.Fonts->TexID so let's clear that as well.
+	// io := ImGui.GetIO();
+	// io.Fonts.TexID = xx 0; //.SetTexID(0); // We copied g_pFontTextureView to io.Fonts->TexID so let's clear that as well.
 
-	// // for (unsigned int i = 0; i < bd->numFramesInFlight; i++)
-	for bd.pFrameResources SafeReleaseFrameResources(*it);
+	// for bd.pFrameResources SafeReleaseFrameResources(*it);
 }
 
 
@@ -27,7 +26,7 @@ ImGui_ImplWGPU_Shutdown :: () {
 	array_reset(*bd.pFrameResources);
 
 	// bd.pFrameResources = null;
-	wgpuQueueRelease(bd.defaultQueue);
+	// wgpuQueueRelease(bd.defaultQueue);
 	bd.wgpuDevice = null;
 	bd.numFramesInFlight = 0;
 	bd.frameIndex = U64_MAX;
@@ -36,4 +35,11 @@ ImGui_ImplWGPU_Shutdown :: () {
 	io.BackendRendererUserData = null;
 	io.BackendFlags &= ~ImGuiBackendFlags.RendererHasVtxOffset;
 	// free(bd); // IM_DELETE(bd);
+}
+
+imgui_gui_free :: (iwc: *ImGui_WGPU_Common){
+	#if FREE_MEMORY {
+		array_reset(*iwc.draw.vertices);
+		array_reset(*iwc.draw.indices);
+	}
 }

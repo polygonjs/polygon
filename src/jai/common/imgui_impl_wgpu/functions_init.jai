@@ -47,6 +47,7 @@ ImGui_ImplWGPU_Init :: (
 	// Create buffers with a default size (they will later be grown as needed)
 	// frame_resources := [..]FrameResources;
 	// bd.pFrameResources = [..]FrameResources; //New(FrameResources[num_frames_in_flight]);
+	array_reset(*bd.pFrameResources);
 	for 0..(info.NumFramesInFlight-1) {
 		array_add(*bd.pFrameResources, .{
 			IndexBuffer = null,
@@ -57,7 +58,7 @@ ImGui_ImplWGPU_Init :: (
 			VertexBufferSize = 5000,
 		});
 	}
-	this_allocation_is_not_a_leak(bd.pFrameResources.data);
+	// this_allocation_is_not_a_leak(bd.pFrameResources.data);
 	// bd2 := ImGui_ImplWGPU_GetBackendData();
 	return true;
 }

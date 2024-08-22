@@ -14,6 +14,7 @@ ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_Shad
 		module = wgpuDeviceCreateShaderModule(bd.wgpuDevice, *iwc_shader_module.desc),
 		entryPoint = "main",
 	};
+	#if FREE_MEMORY free(iwc_shader_module.desc.label);
 	return iwc_shader_module.stage_desc;
 }
 
@@ -126,10 +127,12 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 		print("ImGui_ImplWGPU_CreateDeviceObjects:bd.wgpuDevice is null, return false\n");
 		return false;
 	}
-	if (bd.pipeline != null) {
-		print_red("invalidate here?!\n");
-		ImGui_ImplWGPU_InvalidateDeviceObjects();
-	}
+	// if (bd.pipeline != null) {
+	// 	print_red("invalidate here?!\n");
+	// 	ImGui_ImplWGPU_InvalidateDeviceObjects();
+	// 	ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, wgpu_context);
+	// 	print_green("ok\n");
+	// }
 
 	// Create render pipeline
 	iwc.graphics_pipeline_desc = .{label = "Dear ImGui Render Pipeline"};

@@ -19,8 +19,8 @@ RenderResources :: struct {
 FrameResources :: struct {
 	IndexBuffer:WGPUBuffer;
 	VertexBuffer:WGPUBuffer;
-	IndexBufferHost:*ImDrawIdx;
 	VertexBufferHost:*ImDrawVert;
+	IndexBufferHost:*ImDrawIdx;
 	IndexBufferSize:u64;
 	VertexBufferSize:u64;
 };
@@ -82,8 +82,8 @@ ImGui_WGPU_Common_Uniforms :: struct {
 	ub_desc:WGPUBufferDescriptor;
 }
 ImGui_WGPU_Common_Draw :: struct {
-	im_draw_verts :[..]ImDrawVert;
-	im_draw_idxs :[..]ImDrawIdx;
+	vertices :[..]ImDrawVert;
+	indices :[..]ImDrawIdx;
 }
 
 
