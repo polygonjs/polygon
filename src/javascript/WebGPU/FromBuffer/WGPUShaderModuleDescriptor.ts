@@ -6,11 +6,9 @@ export function WGPUShaderModuleDescriptorFromBuffer(
 	pointer: bigint
 ): GPUShaderModuleDescriptor {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	// const pointer = Number(pointerb);
-	const offset = WGPU_OFFSET.WGPUShaderModuleDescriptor;
-	// const u8 = new Uint8Array(buffer);
-	// const u32 = new Uint32Array(buffer);
 	const u64 = new BigUint64Array(buffer);
+	//
+	const offset = WGPU_OFFSET.WGPUShaderModuleDescriptor;
 	//
 	const label = labelFromBuffer(pointer, offset, u64);
 	//
@@ -26,3 +24,4 @@ export function WGPUShaderModuleDescriptorFromBuffer(
 	};
 	return descriptor;
 }
+

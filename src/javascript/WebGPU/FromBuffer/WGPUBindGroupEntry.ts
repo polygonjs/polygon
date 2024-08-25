@@ -1,54 +1,40 @@
 import { heapGet } from "../../WasmHeap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { WGPU_OFFSET } from "../utils/WebGPUOffset";
+import { u32Create, u64Create } from "../utils/WebGPUUtils";
 
 export function WGPUBindGroupEntryFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array,
-	u64: BigUint64Array
+	pointer: bigint
+	// u32: Uint32Array,
+	// u64: BigUint64Array
 ): GPUBindGroupEntry {
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u32 = new Uint32Array(buffer);
+	const u64 = new BigUint64Array(buffer);
+	const _u32 = u32Create(u32, pointer);
+	const _u64 = u64Create(u64, pointer);
+	//
 	const offset = WGPU_OFFSET.WGPUBindGroupEntry;
 	//
-	const bindingOffset = offset.binding;
-	const bindingSize = WGPU_SIZE.u32;
-	const bindingStart = (pointer + bindingOffset) / bindingSize;
-	const binding = u32[Number(bindingStart)];
+	const binding = _u32(offset.binding);
 	//
-	const bufferOffset = offset.buffer;
-	const bufferSize = WGPU_SIZE.u64;
-	const bufferStart = (pointer + bufferOffset) / bufferSize;
-	const bufferPointer = u64[Number(bufferStart)];
-	const buffer = heapGet<GPUBuffer>(bufferPointer);
-	//
-	const offsetOffset = offset.offset;
-	const offsetSize = WGPU_SIZE.u64;
-	const offsetStart = (pointer + offsetOffset) / offsetSize;
-	const offsetValue = Number(u64[Number(offsetStart)]);
-	//
-	const sizeOffset = offset.size;
-	const sizeSize = WGPU_SIZE.u64;
-	const sizeStart = (pointer + sizeOffset) / sizeSize;
-	const size = Number(u64[Number(sizeStart)]);
-	//
-	const samplerOffset = offset.sampler;
-	const samplerSize = WGPU_SIZE.u64;
-	const samplerStart = (pointer + samplerOffset) / samplerSize;
-	const samplerPointer = u64[Number(samplerStart)];
+	const bufferPointer = _u64(offset.buffer);
+	const bufferValue = heapGet<GPUBuffer>(bufferPointer)!;
+	const offsetValue = Number(_u64(offset.offset)!);
+
+	const size = Number(_u64(offset.size));
+	const samplerPointer = _u64(offset.sampler);
 	const sampler = heapGet<GPUSampler>(samplerPointer);
-	//
-	const textureViewOffset = offset.textureView;
-	const textureViewSize = WGPU_SIZE.u64;
-	const textureViewStart = (pointer + textureViewOffset) / textureViewSize;
-	const textureViewPointer = u64[Number(textureViewStart)];
+	const textureViewPointer = _u64(offset.textureView);
 	const textureView = heapGet<GPUTextureView>(textureViewPointer);
 
-	if (!(buffer || sampler || textureView)) {
+	if (!(bufferValue || sampler || textureView)) {
 		throw new Error("buffer,sampler,textureView is null");
 	}
-	if (buffer) {
+	if (bufferValue) {
 		const entry: GPUBindGroupEntry = {
 			binding,
 			resource: {
-				buffer,
+				buffer: bufferValue,
 				offset: offsetValue,
 				size,
 			},
@@ -73,3 +59,4 @@ export function WGPUBindGroupEntryFromBuffer(
 	}
 	throw new Error("WGPUBindGroupEntryFromBuffer: fail");
 }
+

@@ -1,24 +1,34 @@
 import "../css/style.css";
-import { logGreenBg } from "./Logger";
+import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
+import { logBlueBg, logGreenBg } from "./Logger";
 // import { computeTest } from "./ComputeTest";
 import { loadWasm } from "./WasmRuntime2";
-import { requestWebGPU } from "./WebGPU";
-import { webgpuSetup } from "./WebGPUSetup";
+import { webGPURequest } from "./WebGPURequest";
+import {
+	WebGPURenderController,
+	webGPURenderControllerCreate,
+} from "./WebGPUController";
+import { ViteHotReloadEvent } from "./config/ViteHotReloadEvent";
 // import { WebGPUSetupOld } from "./WebGPU";
 // @ts-ignore
 // import { debugMain } from "./debug";
 
-let wgpuRequestResponse: WGPURequestResponse | undefined;
+let webGPURequestResponse: WebGPURequestResponse | undefined;
+let webGPUController: WebGPURenderController | undefined;
 
 document.addEventListener("DOMContentLoaded", async () => {
 	const wasmPromise = loadWasm();
-	const webGPUPromise = requestWebGPU();
-	const results = await Promise.all([wasmPromise, webGPUPromise]);
-	wgpuRequestResponse = results[1];
-	if (!wgpuRequestResponse) {
+	const webGPURequestPromise = webGPURequest();
+	const results = await Promise.all([wasmPromise, webGPURequestPromise]);
+	webGPURequestResponse = results[1];
+	if (!webGPURequestResponse) {
 		return;
 	}
-	webgpuSetup(wgpuRequestResponse);
+	webGPUController = webGPURenderControllerCreate({
+		webGPURequestResponse,
+		createCanvas: true,
+	});
+	webGPUController?.start();
 	// WebGPUSetupOld(wgpuRequestResponse);
 	// const computeResult = await computeTest({ device });
 	// if (!computeResult) {
@@ -34,7 +44,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 if (import.meta.hot) {
 	let wamsRebuildCount = 0;
-	import.meta.hot.on("jai-wasm-update", async () => {
+	import.meta.hot.on(ViteHotReloadEvent.BUILD_START, async () => {
+		logBlueBg("building start...");
+		webGPUController?.stop();
+
+		webGPUController = undefined;
+	});
+	import.meta.hot.on(ViteHotReloadEvent.BUILD_SUCCESS, async () => {
 		// logGreenBg("-----------------------------------------");
 		// logGreenBg("-----------------------------------------");
 		logGreenBg(
@@ -42,14 +58,20 @@ if (import.meta.hot) {
 		);
 		// logGreenBg("-----------------------------------------");
 		// logGreenBg("-----------------------------------------");
+		webGPUController?.stop();
 		await loadWasm();
-		if (!wgpuRequestResponse) {
+		if (!webGPURequestResponse) {
 			return;
 		}
-		webgpuSetup(wgpuRequestResponse);
+		webGPUController = webGPURenderControllerCreate({
+			webGPURequestResponse,
+			createCanvas: false,
+		});
+		webGPUController?.start();
 	});
-	import.meta.hot.on("jai-wasm-error", (d) => {
+	import.meta.hot.on(ViteHotReloadEvent.BUILD_ERROR, (d) => {
 		console.error("Jai WASM error", d);
 		console.log(d["message"]);
 	});
 }
+

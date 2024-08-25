@@ -1,69 +1,11 @@
-#if OS == .LINUX {
-	// in order to import gcc_s, I initially tried:
-	// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
-	// as the symlink from libgcc_s.so did not exist. This worked fine,
-	// but to be cleaner, I created it with:
-	// sudo ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so
-	// and now we can import with "gcc_s"
-	gcc_s  :: #library,system,link_always "gcc_s";
-	// c  :: #library,system,link_always "libc";
-	// m  :: #library,system,link_always "libm";
-	// dl :: #library,system,link_always "libdl";
-	// pt :: #library,system,link_always "libpthread";
-
-	// for imgui_impl_wgpu lib (until we convert it to jai)
-	//
-	// sudo ln -s /lib/x86_64-linux-gnu/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so
-	// and now we can import with "gcc_s"
-	// libstd :: #library,system,link_always "stdc++";
-}
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-#placeholder WASM;
-USE_COMPUTE_SHADER :: true;
+USE_COMPUTE_SHADER :: false;
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
 
-#if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
-else #import "Basic";
-#import "Math";
-#import "String";
-#if WASM == true  #import "wgpu_wasm";
-#if WASM == false #import "wgpu";
-
-#load "common/math_helper.jai";;
-#load "common/draw_data.jai";
-#load "common/scene_data.jai";
-#load "common/type_utils.jai";
-#load "common/events/common.jai";
-#if WASM == true #load "common/events/wasm.jai";
-else #load "common/events/native.jai";
-#if WASM #load "common/wgpu/wasm.jai";
-else     #load "common/wgpu/native.jai";
-#load "common/wgpu/common.jai";
-#load "common/wgpu/common_depth.jai";
-#load "common/wgpu/common_msaa.jai";
-#load "common/wgpu/common_uniforms.jai";
-#load "common/wgpu/common_compute.jai";
-#load "common/print_utils.jai";
-#load "common/orbit_controls/common.jai";
-
-#if WASM == false {
-	#import "wgpu";
-	#import "SDL";
-}
-#if USE_IMGUI {
-	#load "common/imgui/common.jai";
-	#load "common/imgui_impl_wgpu/index.jai";
-	#import "imgui";
-	#load "common/imgui/common_ui.jai";
-	#if WASM #load "common/imgui/wasm.jai";
-	else     #load "common/imgui/native.jai";
-}
-
-
-
+#placeholder WASM;
 #placeholder SHADER_RENDER;
 #placeholder SHADER_COMPUTE;
 
@@ -233,8 +175,6 @@ on_wgpu_device_ready :: (
 	preferred_texture_format: WGPUTextureFormat
 ) {
 	if USE_IMGUI_DEBUG return;
-	// print("on_wgpu_device_ready START\n");
-	// defer print("on_wgpu_device_ready DONE\n");
 
 	#if WASM==true {
 		context = call_from_wasm_context;
@@ -242,11 +182,9 @@ on_wgpu_device_ready :: (
 		wgpu_context.queue = queue;
 		wgpu_context.surface = canvas;
 		wgpu_context.preferred_texture_format = preferred_texture_format;
-		
 	}
 
 	init_scene_data(*SCENE_DATA, 1.);
-	// on_request_animation_frame(0, 500, 500);
 }
 
 //
@@ -433,4 +371,63 @@ on_request_animation_frame :: (
 
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
+}
+
+#scope_file
+
+#if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
+else #import "Basic";
+#import "Math";
+#import "String";
+#if WASM == true  #import "wgpu_wasm";
+#if WASM == false #import "wgpu";
+
+#load "common/math_helper.jai";;
+#load "common/draw_data.jai";
+#load "common/scene_data.jai";
+#load "common/type_utils.jai";
+#load "common/events/common.jai";
+#if WASM == true #load "common/events/wasm.jai";
+else #load "common/events/native.jai";
+#if WASM #load "common/wgpu/wasm.jai";
+else     #load "common/wgpu/native.jai";
+#load "common/wgpu/common.jai";
+#load "common/wgpu/common_depth.jai";
+#load "common/wgpu/common_msaa.jai";
+#load "common/wgpu/common_uniforms.jai";
+#load "common/wgpu/common_compute.jai";
+#load "common/print_utils.jai";
+#load "common/orbit_controls/common.jai";
+
+#if WASM == false {
+	#import "wgpu";
+	#import "SDL";
+}
+#if USE_IMGUI {
+	#load "common/imgui/common.jai";
+	#load "common/imgui_impl_wgpu/index.jai";
+	#import "imgui";
+	#load "common/imgui/common_ui.jai";
+	#if WASM #load "common/imgui/wasm.jai";
+	else     #load "common/imgui/native.jai";
+}
+
+#if OS == .LINUX {
+	// in order to import gcc_s, I initially tried:
+	// gcc_s  :: #library,system,link_always "libgcc_s.so.1";
+	// as the symlink from libgcc_s.so did not exist. This worked fine,
+	// but to be cleaner, I created it with:
+	// sudo ln -s /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so
+	// and now we can import with "gcc_s"
+	gcc_s  :: #library,system,link_always "gcc_s";
+	// c  :: #library,system,link_always "libc";
+	// m  :: #library,system,link_always "libm";
+	// dl :: #library,system,link_always "libdl";
+	// pt :: #library,system,link_always "libpthread";
+
+	// for imgui_impl_wgpu lib (until we convert it to jai)
+	//
+	// sudo ln -s /lib/x86_64-linux-gnu/libstdc++.so.6 /lib/x86_64-linux-gnu/libstdc++.so
+	// and now we can import with "gcc_s"
+	// libstd :: #library,system,link_always "stdc++";
 }

@@ -1,3 +1,4 @@
+import { ViteHotReloadEvent } from "./src/javascript/config/ViteHotReloadEvent";
 import { defineConfig, PluginOption, Plugin, ViteDevServer } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
 import checker from "vite-plugin-checker";
@@ -91,7 +92,7 @@ const onBuild = (
 		logRedBg(`Error compiling .jai files: ${stderr}`);
 		server.ws.send({
 			type: "custom",
-			event: "jai-wasm-error",
+			event: ViteHotReloadEvent.BUILD_ERROR,
 			data: {
 				message: stderr,
 			},
@@ -114,7 +115,7 @@ const onBuild = (
 
 		server.ws.send({
 			type: "custom",
-			event: "jai-wasm-update",
+			event: ViteHotReloadEvent.BUILD_SUCCESS,
 		});
 	}
 };
@@ -152,6 +153,10 @@ function jaiPlugin() {
 				);
 				console.log(`-----------------------------------------`);
 				console.log(`${CMD_BUILD}`);
+				server.ws.send({
+					type: "custom",
+					event: ViteHotReloadEvent.BUILD_START,
+				});
 				exec(
 					CMD_BUILD,
 					{

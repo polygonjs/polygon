@@ -10,8 +10,9 @@ export function WGPUTextureBindingLayoutFromBuffer(
 ): GPUTextureBindingLayout | undefined {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	const u32 = new Uint32Array(buffer);
-	const offset = WGPU_OFFSET.WGPUTextureBindingLayout;
 	const _u32 = u32Create(u32, pointer);
+	//
+	const offset = WGPU_OFFSET.WGPUTextureBindingLayout;
 	//
 	const sampleType = textureSampleTypeIntToGPUTextureSampleType(
 		_u32(offset.sampleType)
@@ -31,3 +32,4 @@ export function WGPUTextureBindingLayoutFromBuffer(
 	};
 	return layout;
 }
+

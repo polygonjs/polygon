@@ -1,22 +1,19 @@
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { WGPU_OFFSET } from "../utils/WebGPUOffset";
+import { u32Create } from "../utils/WebGPUUtils";
 
 export function WGPUMultisampleStateFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array
+	pointer: bigint
 ): GPUMultisampleState {
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u32 = new Uint32Array(buffer);
+	const _u32 = u32Create(u32, pointer);
+	//
 	const offset = WGPU_OFFSET.WGPUMultisampleState;
 	//
-	function getu32(pointerOffset: bigint) {
-		const countSize = WGPU_SIZE.u32;
-		const countStart = (pointer + pointerOffset) / countSize;
-		return u32[Number(countStart)];
-	}
-	//
-	const count = getu32(offset.count);
-	const mask = getu32(offset.mask);
-	const alphaToCoverageEnabled = Boolean(
-		getu32(offset.alphaToCoverageEnabled)
-	);
+
+	const count = _u32(offset.count);
+	const mask = _u32(offset.mask);
+	const alphaToCoverageEnabled = Boolean(_u32(offset.alphaToCoverageEnabled));
 
 	//
 	const multisampleState: GPUMultisampleState = {
@@ -26,3 +23,4 @@ export function WGPUMultisampleStateFromBuffer(
 	};
 	return multisampleState;
 }
+

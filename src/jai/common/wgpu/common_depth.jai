@@ -27,14 +27,7 @@ depth_stencil_state_set_default :: (depth_stencil_state: *WGPUDepthStencilState)
 	stencil_face_state_set_default(*depth_stencil_state.stencilBack);
 }
 
-depth_stencil_state_prepare :: (depth_stencil_state: *WGPUDepthStencilState) {
-	depth_stencil_state_set_default(depth_stencil_state);
-	depth_stencil_state.depthCompare = WGPUCompareFunction.Less;
-	depth_stencil_state.depthWriteEnabled = xx true;
-	depth_stencil_state.format = DEPTH_TEXTURE_FORMAT;
-	depth_stencil_state.stencilReadMask = 0;
-	depth_stencil_state.stencilWriteMask = 0;
-}
+
 
 
 wgpu_update_pipeline_descriptor_depth :: (wgpu_context:*WGPUContext, pipeline_descriptor: *WGPURenderPipelineDescriptor, depth_stencil_state: *WGPUDepthStencilState) {
@@ -133,4 +126,15 @@ depth_release :: (wgpu_context: *WGPUContext) {
 	if( wgpu_context.depth_texture_view !=null ) {
 		wgpuTextureViewRelease(<<wgpu_context.depth_texture_view);
 	}
+}
+
+#scope_file
+
+depth_stencil_state_prepare :: (depth_stencil_state: *WGPUDepthStencilState) {
+	depth_stencil_state_set_default(depth_stencil_state);
+	depth_stencil_state.depthCompare = WGPUCompareFunction.Less;
+	depth_stencil_state.depthWriteEnabled = xx true;
+	depth_stencil_state.format = DEPTH_TEXTURE_FORMAT;
+	depth_stencil_state.stencilReadMask = 0;
+	depth_stencil_state.stencilWriteMask = 0;
 }

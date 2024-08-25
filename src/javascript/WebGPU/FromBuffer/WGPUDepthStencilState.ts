@@ -2,70 +2,46 @@ import {
 	compareFunctionIntToGPUCompareFunction,
 	textureFormatIntToGPUTextureFormat,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { WGPU_OFFSET } from "../utils/WebGPUOffset";
+import { f32Create, s32Create, u32Create } from "../utils/WebGPUUtils";
 import { WGPUStencilFaceStateFromBuffer } from "./WGPUStencilFaceState";
 
 export function WGPUDepthStencilStateFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array
+	pointer: bigint
 ): GPUDepthStencilState {
-	const offset = WGPU_OFFSET.WGPUDepthStencilState;
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u32 = new Uint32Array(buffer);
+	const s32 = new Int32Array(buffer);
 	const f32 = new Float32Array(buffer);
+	const _u32 = u32Create(u32, pointer);
+	const _s32 = s32Create(s32, pointer);
+	const _f32 = f32Create(f32, pointer);
 	//
-	const formatOffset = offset.format;
-	const formatSize = WGPU_SIZE.u32;
-	const formatStart = (pointer + formatOffset) / formatSize;
-	const formatb = u32[Number(formatStart)];
+	const offset = WGPU_OFFSET.WGPUDepthStencilState;
+
+	//
+	const formatb = _u32(offset.format);
 	const format = textureFormatIntToGPUTextureFormat(formatb);
 	//
-	const depthWriteEnabledOffset = offset.depthWriteEnabled;
-	const depthWriteEnabledSize = WGPU_SIZE.u32;
-	const depthWriteEnabledStart =
-		(pointer + depthWriteEnabledOffset) / depthWriteEnabledSize;
-	const depthWriteEnabledb = u32[Number(depthWriteEnabledStart)];
+	const depthWriteEnabledb = _u32(offset.depthWriteEnabled);
 	const depthWriteEnabled = Boolean(depthWriteEnabledb);
 	//
-	const depthCompareOffset = offset.depthCompare;
-	const depthCompareSize = WGPU_SIZE.u32;
-	const depthCompareStart = (pointer + depthCompareOffset) / depthCompareSize;
-	const depthCompareb = u32[Number(depthCompareStart)];
+	const depthCompareb = _u32(offset.depthCompare);
 	const depthCompare = compareFunctionIntToGPUCompareFunction(depthCompareb);
 	//
-	function stencilFaceState(b: bigint): GPUStencilFaceState {
-		return WGPUStencilFaceStateFromBuffer(b, u32);
-	}
-	const stencilFront = stencilFaceState(pointer + offset.stencilFront);
-	const stencilBack = stencilFaceState(pointer + offset.stencilBack);
+
+	const stencilFront = WGPUStencilFaceStateFromBuffer(
+		pointer + offset.stencilFront
+	);
+	const stencilBack = WGPUStencilFaceStateFromBuffer(
+		pointer + offset.stencilBack
+	);
 	//
-	const stencilReadMaskOffset = offset.stencilReadMask;
-	const stencilReadMaskSize = WGPU_SIZE.u32;
-	const stencilReadMaskStart =
-		(pointer + stencilReadMaskOffset) / stencilReadMaskSize;
-	const stencilReadMask = u32[Number(stencilReadMaskStart)];
-	//
-	const stencilWriteMaskOffset = offset.stencilWriteMask;
-	const stencilWriteMaskSize = WGPU_SIZE.u32;
-	const stencilWriteMaskStart =
-		(pointer + stencilWriteMaskOffset) / stencilWriteMaskSize;
-	const stencilWriteMask = u32[Number(stencilWriteMaskStart)];
-	//
-	const depthBiasOffset = offset.depthBias;
-	const depthBiasSize = WGPU_SIZE.s32;
-	const depthBiasStart = (pointer + depthBiasOffset) / depthBiasSize;
-	const depthBias = u32[Number(depthBiasStart)];
-	//
-	const depthBiasSlopeScaleOffset = offset.depthBiasSlopeScale;
-	const depthBiasSlopeScaleSize = WGPU_SIZE.float;
-	const depthBiasSlopeScaleStart =
-		(pointer + depthBiasSlopeScaleOffset) / depthBiasSlopeScaleSize;
-	const depthBiasSlopeScale = f32[Number(depthBiasSlopeScaleStart)];
-	//
-	const depthBiasClampOffset = offset.depthBiasClamp;
-	const depthBiasClampSize = WGPU_SIZE.float;
-	const depthBiasClampStart =
-		(pointer + depthBiasClampOffset) / depthBiasClampSize;
-	const depthBiasClamp = f32[Number(depthBiasClampStart)];
+	const stencilReadMask = _u32(offset.stencilReadMask);
+	const stencilWriteMask = _u32(offset.stencilWriteMask);
+	const depthBias = _s32(offset.depthBias);
+	const depthBiasSlopeScale = _f32(offset.depthBiasSlopeScale);
+	const depthBiasClamp = _f32(offset.depthBiasClamp);
 
 	//
 	const depthStencilState: GPUDepthStencilState = {
@@ -80,9 +56,6 @@ export function WGPUDepthStencilStateFromBuffer(
 		depthBiasSlopeScale,
 		depthBiasClamp,
 	};
-	if (depthBias > 256) {
-		console.warn("depthBias doesn't seem right", depthBias);
-	}
 	return depthStencilState;
 }
 

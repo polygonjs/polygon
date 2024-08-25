@@ -3,8 +3,8 @@ import {
 	textureFormatIntToGPUTextureFormat,
 	textureViewDimentionIntToGPUTextureViewDimension,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import { labelFromBuffer } from "../utils/WebGPUUtils";
+import { WGPU_OFFSET } from "../utils/WebGPUOffset";
+import { labelFromBuffer, u32Create } from "../utils/WebGPUUtils";
 
 export function WGPUTextureViewDescriptorFromBuffer(
 	pointer: bigint
@@ -12,51 +12,25 @@ export function WGPUTextureViewDescriptorFromBuffer(
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	const u32 = new Uint32Array(buffer);
 	const u64 = new BigUint64Array(buffer);
-	// const pointer = Number(pointerb);
+	const _u32 = u32Create(u32, pointer);
+	// ;
 	const offset = WGPU_OFFSET.WGPUTextureViewDescriptor;
 	//
 	const label = labelFromBuffer(pointer, offset, u64);
 	//
-	const formatOffset = offset.format;
-	const formatSize = WGPU_SIZE.u32;
-	const formatStart = (pointer + formatOffset) / formatSize;
-	const formatb = u32[Number(formatStart)];
+	const formatb = _u32(offset.format);
 	const format = textureFormatIntToGPUTextureFormat(formatb);
 	//
-	const dimensionOffset = offset.dimension;
-	const dimensionSize = WGPU_SIZE.u32;
-	const dimensionStart = (pointer + dimensionOffset) / dimensionSize;
-	const dimensionb = u32[Number(dimensionStart)];
+	const dimensionb = _u32(offset.dimension);
 	const dimension =
 		textureViewDimentionIntToGPUTextureViewDimension(dimensionb);
 	//
-	const baseMipLevelOffset = offset.baseMipLevel;
-	const baseMipLevelSize = WGPU_SIZE.u32;
-	const baseMipLevelStart = (pointer + baseMipLevelOffset) / baseMipLevelSize;
-	const baseMipLevel = u32[Number(baseMipLevelStart)];
+	const baseMipLevel = _u32(offset.baseMipLevel);
+	const mipLevelCount = _u32(offset.mipLevelCount);
+	const baseArrayLayer = _u32(offset.baseArrayLayer);
+	const arrayLayerCount = _u32(offset.arrayLayerCount);
 	//
-	const mipLevelCountOffset = offset.mipLevelCount;
-	const mipLevelCountSize = WGPU_SIZE.u32;
-	const mipLevelCountStart =
-		(pointer + mipLevelCountOffset) / mipLevelCountSize;
-	const mipLevelCount = u32[Number(mipLevelCountStart)];
-	//
-	const baseArrayLayerOffset = offset.baseArrayLayer;
-	const baseArrayLayerSize = WGPU_SIZE.u32;
-	const baseArrayLayerStart =
-		(pointer + baseArrayLayerOffset) / baseArrayLayerSize;
-	const baseArrayLayer = u32[Number(baseArrayLayerStart)];
-	//
-	const arrayLayerCountOffset = offset.arrayLayerCount;
-	const arrayLayerCountSize = WGPU_SIZE.u32;
-	const arrayLayerCountStart =
-		(pointer + arrayLayerCountOffset) / arrayLayerCountSize;
-	const arrayLayerCount = u32[Number(arrayLayerCountStart)];
-	//
-	const aspectOffset = offset.aspect;
-	const aspectSize = WGPU_SIZE.u32;
-	const aspectStart = (pointer + aspectOffset) / aspectSize;
-	const aspectb = u32[Number(aspectStart)];
+	const aspectb = _u32(offset.aspect);
 	const aspect = textureAspectIntToGPUTextureAspect(aspectb);
 
 	const desc: GPUTextureViewDescriptor = {
@@ -71,3 +45,4 @@ export function WGPUTextureViewDescriptorFromBuffer(
 	};
 	return desc;
 }
+

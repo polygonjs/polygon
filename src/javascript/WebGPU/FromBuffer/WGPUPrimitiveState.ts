@@ -4,38 +4,29 @@ import {
 	indexFormatIntToGPUIndexFormat,
 	topologyIntToGPUPrimitiveTopology,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { WGPU_OFFSET } from "../utils/WebGPUOffset";
+import { u32Create } from "../utils/WebGPUUtils";
 
 export function WGPUPrimitiveStateFromBuffer(
-	pointer: bigint,
-	u32: Uint32Array
+	pointer: bigint
 ): GPUPrimitiveState {
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u32 = new Uint32Array(buffer);
+	const _u32 = u32Create(u32, pointer);
+	//
 	const offset = WGPU_OFFSET.WGPUPrimitiveState;
 
 	//
-	const topologyOffset = offset.topology;
-	const topologySize = WGPU_SIZE.u32;
-	const topologyStart = (pointer + topologyOffset) / topologySize;
-	const topologyb = u32[Number(topologyStart)];
+	const topologyb = _u32(offset.topology);
 	const topology = topologyIntToGPUPrimitiveTopology(topologyb);
 	//
-	const stripIndexFormatOffset = offset.stripIndexFormat;
-	const stripIndexFormatSize = WGPU_SIZE.u32;
-	const stripIndexFormatStart =
-		(pointer + stripIndexFormatOffset) / stripIndexFormatSize;
-	const stripIndexFormatb = u32[Number(stripIndexFormatStart)];
+	const stripIndexFormatb = _u32(offset.stripIndexFormat);
 	const stripIndexFormat = indexFormatIntToGPUIndexFormat(stripIndexFormatb);
 	//
-	const frontFaceOffset = offset.frontFace;
-	const frontFaceSize = WGPU_SIZE.u32;
-	const frontFaceStart = (pointer + frontFaceOffset) / frontFaceSize;
-	const frontFaceb = u32[Number(frontFaceStart)];
+	const frontFaceb = _u32(offset.frontFace);
 	const frontFace = frontFaceIntToGPUFrontFace(frontFaceb);
 	//
-	const cullModeOffset = offset.cullMode;
-	const cullModeSize = WGPU_SIZE.u32;
-	const cullModeStart = (pointer + cullModeOffset) / cullModeSize;
-	const cullModeb = u32[Number(cullModeStart)];
+	const cullModeb = _u32(offset.cullMode);
 	const cullMode = cullModeIntToGPUCullMode(cullModeb);
 
 	//
@@ -47,3 +38,4 @@ export function WGPUPrimitiveStateFromBuffer(
 	};
 	return primitiveState;
 }
+

@@ -21,10 +21,8 @@ import {
 	strstr,
 } from "./wasm/WasmString";
 import { memchr, memcmp, memcpy, memmove, memset } from "./wasm/WasmMem";
-// import { TypeArrayType, typedArrayFromBuffer } from "./wasm/ArrayUtils";
 import { writeToConsoleLog } from "./wasm/PrintUtils";
 import {
-	// js_wgpu_create_shader_module,
 	js_wgpu_texture_get_height_surface,
 	js_wgpu_texture_get_width_surface,
 	wgpuSurfaceGetCurrentTexture,
@@ -54,7 +52,6 @@ import { wgpuQueueSubmit } from "./WebGPU/FromJs/wgpuQueueSubmit";
 import { wgpuCommandBufferRelease } from "./WebGPU/FromJs/wgpuCommandBufferRelease";
 import { wgpuCommandEncoderRelease } from "./WebGPU/FromJs/wgpuCommandEncoderRelease";
 import { wgpuRenderPassEncoderRelease } from "./WebGPU/FromJs/wgpuRenderPassEncoderRelease";
-// import { wgpuSurfaceGetCurrentTexture } from "./WebGPU/FromJs/wgpuSurfaceGetCurrentTexture";
 import { wgpuTextureCreateView } from "./WebGPU/FromJs/wgpuTextureCreateView";
 import { NOT_IMPLEMENTED } from "./wasm/WasmNotImplemented";
 import { wgpuBindGroupLayoutRelease } from "./WebGPU/FromJs/wgpuBindGroupLayoutRelease";
@@ -86,185 +83,126 @@ import { wgpuComputePipelineGetBindGroupLayout } from "./WebGPU/FromJs/wgpuCompu
 import { wgpuDeviceCreateComputePipeline } from "./WebGPU/FromJs/wgpuDeviceCreateComputePipeline";
 import { eventsDataUpdate, eventsSetCursor } from "./EventsController";
 
-// A global reference of the WASM’s memory area so that we can look up pointers
-// let PRINT_STRING_BUFFER: Uint8Array = new Uint8Array(0);
-
-const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
-	// wasm_log_dom: (s_count: number, s_data: BigInt, is_error: boolean) => {
-	// 	const string = jsStringFromJaiString(
-	// 		s_data,
-	// 		s_count,
-	// 		ALLOCATED_MEMORY_CONTAINER.allocatedMemory!
-	// 	);
-	// 	if (!string) {
-	// 		console.warn("No string");
-	// 		return;
-	// 	}
-	// 	console.log(string);
-	// 	// const log = document.getElementById("log");
-	// 	// if (!log) {
-	// 	// 	console.error("No log element found");
-	// 	// 	return;
-	// 	// }
-	// 	// const lines = string.split("\n");
-	// 	// for (let i = 0; i < lines.length; i++) {
-	// 	// 	const line = lines[i];
-	// 	// 	if (!line && i == lines.length - 1) continue; // Don’t create an extra empty line after the last newline
-
-	// 	// 	const element = document.createElement("div");
-	// 	// 	if (is_error) element.style.color = "#d33";
-	// 	// 	element.innerText = line;
-	// 	// 	log.appendChild(element);
-	// 	// }
-	// },
-	wasm_write_string: (
-		s_count: number,
-		s_data: bigint,
-		to_standard_error: boolean
-	) => {
-		// console.log("-- do not use this,but still display to debug --");
-		const string = jsStringFromJaiString(s_data, s_count);
-		if (!string) {
-			console.warn("No string");
-			return;
-		}
-		writeToConsoleLog(string, to_standard_error);
-		// console.log("-- end --");
-	},
-	// js_set_print_string_buffer: (
-	// 	s_count: number,
-	// 	s_data: bigint,
-	// 	elementSize: number
-	// ) => {
-	// 	const buffer = typedArrayFromBuffer<TypeArrayType.Uint8Array>(
-	// 		s_data,
-	// 		s_count,
-	// 		elementSize,
-	// 		Uint8Array
-	// 	);
-	// 	// console.log("js_set_print_string_buffer", buffer);
-	// 	if (buffer) {
-	// 		PRINT_STRING_BUFFER = buffer;
-	// 	} else {
-	// 		console.error("js_set_print_string_buffer failed");
-	// 	}
-	// },
-	// js_read_print_buffer: (s_count: BigInt) => {
-	// 	const count = Number(s_count);
-	// 	// console.log({
-	// 	// 	detached: (PRINT_STRING_BUFFER.buffer as any).detached,
-	// 	// 	PRINT_STRING_BUFFER,
-	// 	// });
-	// 	const buffer = PRINT_STRING_BUFFER.slice(0, count);
-	// 	const textDecoder = new TextDecoder();
-	// 	const string = textDecoder.decode(buffer);
-	// 	console.log(string);
-	// },
-	wasm_debug_break: () => {
-		console.warn("NOT IMPLEMENTED wasm_debug_break");
-	},
-	memcmp,
-	memset,
-	memcpy,
-	memmove,
-	memchr,
-	strlen,
-	strcmp,
-	sscanf,
-	strchr,
-	strncmp,
-	strncpy,
-	atof,
-	// vsnprintf,
-	snprintf,
-	printf,
-	sprintf,
-	strstr,
-	toupper,
-	qsort,
-	__assert_fail,
-	...WASM_MATH,
-	...NOT_IMPLEMENTED,
-	wgpuCommandEncoderBeginRenderPass,
-	wgpuDeviceCreateCommandEncoder,
-	wgpuDeviceCreatePipelineLayout,
-	wgpuDeviceCreateTexture,
-	wgpuTextureGetHeight,
-	wgpuTextureGetWidth,
-	wgpuTextureRelease,
-	wgpuTextureViewRelease,
-	wgpuQueueWriteBuffer,
-	wgpuDeviceCreateBindGroupLayout,
-	// js_wgpu_create_shader_module,
-	js_wgpu_texture_get_width_surface,
-	js_wgpu_texture_get_height_surface,
-	wgpuSurfaceGetCurrentTexture,
-	wgpuDeviceCreateRenderPipeline,
-	wgpuDeviceCreateBindGroup,
-	wgpuRenderPipelineGetBindGroupLayout,
-	wgpuDeviceCreateBuffer,
-	wgpuRenderPassEncoderSetPipeline,
-	wgpuRenderPassEncoderSetBindGroup,
-	wgpuRenderPassEncoderSetVertexBuffer,
-	wgpuRenderPassEncoderSetIndexBuffer,
-	wgpuRenderPassEncoderDrawIndexed,
-	wgpuRenderPassEncoderEnd,
-	wgpuCommandEncoderFinish,
-	wgpuQueueSubmit,
-	wgpuCommandBufferRelease,
-	wgpuCommandEncoderRelease,
-	wgpuRenderPassEncoderRelease,
-	// wgpuSurfaceGetCurrentTexture,
-	wgpuTextureCreateView,
-	wgpuBindGroupLayoutRelease,
-	wgpuBindGroupRelease,
-	wgpuBufferDestroy,
-	wgpuBufferRelease,
-	wgpuDeviceCreateSampler,
-	wgpuDeviceCreateShaderModule,
-	wgpuDeviceGetQueue,
-	wgpuQueueRelease,
-	wgpuQueueWriteTexture,
-	wgpuRenderPassEncoderSetBlendConstant,
-	wgpuRenderPassEncoderSetScissorRect,
-	wgpuRenderPassEncoderSetViewport,
-	wgpuRenderPipelineRelease,
-	wgpuSamplerRelease,
-	wgpuShaderModuleRelease,
-	// compute
-	wgpuCommandEncoderBeginComputePass,
-	wgpuComputePassEncoderDispatchWorkgroups,
-	wgpuComputePassEncoderEnd,
-	wgpuComputePassEncoderRelease,
-	wgpuComputePassEncoderSetBindGroup,
-	wgpuComputePassEncoderSetPipeline,
-	wgpuComputePipelineGetBindGroupLayout,
-	wgpuDeviceCreateComputePipeline,
-	// events
-	eventsDataUpdate,
-	eventsSetCursor,
-};
-
-// Create the environment for the WASM file,
-// which includes the exported JS functions for the WASM:
-const unassignedFunctionNames: string[] = [];
-const imports = {
-	env: new Proxy(EXPORTED_JS_FUNCTIONS, {
-		get(target, prop) {
-			if (target.hasOwnProperty(prop)) {
-				return (target as any)[prop];
-			}
-			unassignedFunctionNames.push(String(prop));
-
-			return () => {
-				console.warn(`NOT IMPLEMENTED: ${String(prop)}`);
-			};
-		},
-	}),
-};
-
 export function loadWasm(): Promise<void> {
+	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
+		wasm_write_string: (
+			s_count: number,
+			s_data: bigint,
+			to_standard_error: boolean
+		) => {
+			// console.log("-- do not use this,but still display to debug --");
+			const string = jsStringFromJaiString(s_data, s_count);
+			if (!string) {
+				console.warn("No string");
+				return;
+			}
+			writeToConsoleLog(string, to_standard_error);
+		},
+
+		wasm_debug_break: () => {
+			console.warn("NOT IMPLEMENTED wasm_debug_break");
+		},
+		memcmp,
+		memset,
+		memcpy,
+		memmove,
+		memchr,
+		strlen,
+		strcmp,
+		sscanf,
+		strchr,
+		strncmp,
+		strncpy,
+		atof,
+		// vsnprintf,
+		snprintf,
+		printf,
+		sprintf,
+		strstr,
+		toupper,
+		qsort,
+		__assert_fail,
+		...WASM_MATH,
+		...NOT_IMPLEMENTED,
+		wgpuCommandEncoderBeginRenderPass,
+		wgpuDeviceCreateCommandEncoder,
+		wgpuDeviceCreatePipelineLayout,
+		wgpuDeviceCreateTexture,
+		wgpuTextureGetHeight,
+		wgpuTextureGetWidth,
+		wgpuTextureRelease,
+		wgpuTextureViewRelease,
+		wgpuQueueWriteBuffer,
+		wgpuDeviceCreateBindGroupLayout,
+		// js_wgpu_create_shader_module,
+		js_wgpu_texture_get_width_surface,
+		js_wgpu_texture_get_height_surface,
+		wgpuSurfaceGetCurrentTexture,
+		wgpuDeviceCreateRenderPipeline,
+		wgpuDeviceCreateBindGroup,
+		wgpuRenderPipelineGetBindGroupLayout,
+		wgpuDeviceCreateBuffer,
+		wgpuRenderPassEncoderSetPipeline,
+		wgpuRenderPassEncoderSetBindGroup,
+		wgpuRenderPassEncoderSetVertexBuffer,
+		wgpuRenderPassEncoderSetIndexBuffer,
+		wgpuRenderPassEncoderDrawIndexed,
+		wgpuRenderPassEncoderEnd,
+		wgpuCommandEncoderFinish,
+		wgpuQueueSubmit,
+		wgpuCommandBufferRelease,
+		wgpuCommandEncoderRelease,
+		wgpuRenderPassEncoderRelease,
+		// wgpuSurfaceGetCurrentTexture,
+		wgpuTextureCreateView,
+		wgpuBindGroupLayoutRelease,
+		wgpuBindGroupRelease,
+		wgpuBufferDestroy,
+		wgpuBufferRelease,
+		wgpuDeviceCreateSampler,
+		wgpuDeviceCreateShaderModule,
+		wgpuDeviceGetQueue,
+		wgpuQueueRelease,
+		wgpuQueueWriteTexture,
+		wgpuRenderPassEncoderSetBlendConstant,
+		wgpuRenderPassEncoderSetScissorRect,
+		wgpuRenderPassEncoderSetViewport,
+		wgpuRenderPipelineRelease,
+		wgpuSamplerRelease,
+		wgpuShaderModuleRelease,
+		// compute
+		wgpuCommandEncoderBeginComputePass,
+		wgpuComputePassEncoderDispatchWorkgroups,
+		wgpuComputePassEncoderEnd,
+		wgpuComputePassEncoderRelease,
+		wgpuComputePassEncoderSetBindGroup,
+		wgpuComputePassEncoderSetPipeline,
+		wgpuComputePipelineGetBindGroupLayout,
+		wgpuDeviceCreateComputePipeline,
+		// events
+		eventsDataUpdate,
+		eventsSetCursor,
+	};
+
+	const unassignedFunctionNames: string[] = [];
+	// Create the environment for the WASM file,
+	// which includes the exported JS functions for the WASM:
+	const imports = {
+		env: new Proxy(EXPORTED_JS_FUNCTIONS, {
+			get(target, prop) {
+				if (target.hasOwnProperty(prop)) {
+					return (target as any)[prop];
+				}
+				unassignedFunctionNames.push(String(prop));
+
+				return () => {
+					console.warn(`NOT IMPLEMENTED: ${String(prop)}`);
+				};
+			},
+		}),
+	};
 	return new Promise((resolve) => {
+		// console.log("wasm load START");
 		WebAssembly.instantiateStreaming(
 			fetch("/polygon-next.wasm"),
 			imports
@@ -276,13 +214,45 @@ export function loadWasm(): Promise<void> {
 				console.log("----------------");
 				// throw new Error("Some functions are not assigned");
 			}
+
+			const container = window.ALLOCATED_MEMORY_CONTAINER;
+
 			const memory = obj.instance.exports[
 				"memory"
 			] as any as AllocatedMemory;
-			const container = window.ALLOCATED_MEMORY_CONTAINER;
+			// function _log(prefix: string) {
+			// 	console.log(
+			// 		prefix,
+			// 		memory,
+			// 		(memory as any).type(),
+			// 		"new:",
+			// 		(memory.buffer as any).byteLength,
+			// 		"new size:",
+			// 		new Uint8Array(memory.buffer).byteLength,
+			// 		"old:",
+			// 		(container.allocatedMemory?.buffer as any)?.byteLength
+			// 	);
+			// }
+			// for (let i = 0; i < 10; i++) {
+			// 	const j = i;
+			// 	setTimeout(() => {
+			// 		console.log(
+			// 			"memory " + j,
+			// 			memory,
+			// 			(memory.buffer as any).byteLength,
+			// 			(memory.buffer as any).maxByteLength
+			// 		);
+			// 	}, 10 * i);
+			// }
+			// _log("> 1");
+			// setTimeout(() => {
+			// 	_log("> 2");
+			// }, 100);
 			container.allocatedMemory = memory;
-			// container.u32 = new Uint32Array(memory.buffer);
-			// container.u64 = new BigUint64Array(memory.buffer);
+
+			// const u64 = new BigUint64Array(memory.buffer);
+			// console.log(u64.length);
+			// u64.fill(BigInt(0));
 			// console.log(container.u32, container.u64);
 			// console.log(
 			// 	"WASM loaded",
@@ -308,6 +278,7 @@ export function loadWasm(): Promise<void> {
 
 			const linkWasmFunctions = () => {
 				const methodNames = Object.keys(obj.instance.exports);
+				// console.log(`export has ${methodNames.length} functions`);
 				for (const methodName of methodNames) {
 					const method = obj.instance.exports[methodName];
 					if (typeof method == "function") {
@@ -351,6 +322,4 @@ export function loadWasm(): Promise<void> {
 		});
 	});
 }
-
-export function onWasmAndWebGPUReady() {}
 

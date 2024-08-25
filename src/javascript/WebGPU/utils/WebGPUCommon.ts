@@ -1,6 +1,6 @@
 import { heapAdd, heapGet } from "../../WasmHeap";
 
-export interface WGPURequestResponse {
+export interface WebGPURequestResponse {
 	device: GPUDevice;
 	presentationFormat: GPUTextureFormat;
 }
@@ -19,11 +19,8 @@ export function js_wgpu_texture_get_height_surface(
 }
 
 export function wgpuSurfaceGetCurrentTexture() {
-	const texture = window.webGPUContext.getCurrentTexture(); //.createView();
+	const texture = window.webGPUContext.getCurrentTexture();
 	const index = heapAdd(texture);
 	return index;
 }
-// export function wgpuSurfaceReleaseCurrentTexture(heapIndex: bigint) {
-// 	heapDeleteByIndex(heapIndex);
-// }
 

@@ -16,6 +16,7 @@ export function webGPUListenToResize(
 		callback();
 	});
 	observer.observe(domElement);
+	return observer;
 }
 
 export function canvasSetSize(

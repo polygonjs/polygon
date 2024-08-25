@@ -69,7 +69,7 @@ BUILD_NATIVE :: true;
 		walloc_object_file_path := "modules/walloc/walloc.o";
 		EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
 
-		STACK_SIZE :: 1 * 1024 * 1024;
+		STACK_SIZE :: 4 * 1024 * 1024;
 		options.additional_linker_arguments = .[
 			"--stack-first",
 			"-z",
@@ -86,7 +86,7 @@ BUILD_NATIVE :: true;
 
 		compiler_begin_intercept(w);
 
-		add_build_file("main_wasm2.jai", w);
+		add_build_file("main.jai", w);
 
 		generated_code := false;
 		while true {
@@ -132,7 +132,7 @@ BUILD_NATIVE :: true;
 
 		compiler_begin_intercept(w);
 
-		add_build_file("main_wasm2.jai", w);
+		add_build_file("main.jai", w);
 
 		generated_code := false;
 		while true {

@@ -7,8 +7,9 @@ export function WGPUSamplerBindingLayoutFromBuffer(
 ): GPUSamplerBindingLayout | undefined {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	const u32 = new Uint32Array(buffer);
-	const offset = WGPU_OFFSET.WGPUSamplerBindingLayout;
 	const _u32 = u32Create(u32, pointer);
+	//
+	const offset = WGPU_OFFSET.WGPUSamplerBindingLayout;
 	//
 	const type = samplerBindingTypeIntToGPUSamplerBindingType(
 		_u32(offset.type)
@@ -22,3 +23,4 @@ export function WGPUSamplerBindingLayoutFromBuffer(
 	};
 	return layout;
 }
+

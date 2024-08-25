@@ -79,6 +79,18 @@ export function u32Create(
 	}
 	return _u32;
 }
+export function s32Create(
+	s32: Int32Array,
+	pointer: bigint
+): (i: bigint) => number {
+	function _s32(elementOffset: bigint) {
+		const elementSize = WGPU_SIZE.s32;
+		const elementStart = (pointer + elementOffset) / elementSize;
+		const elementb = s32[Number(elementStart)];
+		return Number(elementb);
+	}
+	return _s32;
+}
 export function u16Create(
 	u16: Uint16Array,
 	pointer: bigint
