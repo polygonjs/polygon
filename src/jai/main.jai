@@ -373,6 +373,7 @@ on_request_animation_frame :: (
 	FRAMES_COUNT += 1;
 }
 
+// scope_file does not yet prevent unwanted functions to be in the wasm export
 #scope_file
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
