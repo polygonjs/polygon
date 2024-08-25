@@ -52,6 +52,8 @@ SceneData :: struct {
 	// sdf
 	sdf_data: [1]SDFData;
 	sdf_uniforms: [1]SDFUniforms;
+	// string tests
+	node_name: string;
 };
 
 matrix4x4_to_buffer :: (matrix: *Matrix4, buffer: *Matrix4x4Buffer) #expand {

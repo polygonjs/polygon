@@ -3,6 +3,9 @@ ImGui_ImplWGPU_InvalidateDeviceObjects :: () {
 	if (bd.wgpuDevice==null){
 		return;
 	}
+	// we currently don't invalidate
+	// as this crashes and we can resize the window just fine without it.
+	// Although it is a big slow, and may lead to memory leaks.
 	// SafeReleasePipelineState(*bd.pipeline);
 	// SafeReleaseRenderResources(*bd.renderResources);
 

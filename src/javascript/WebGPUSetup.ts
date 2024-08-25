@@ -1,6 +1,6 @@
 import { clockInit, clockTick } from "./Clock";
 import { USELESS_ARG0 } from "./Common";
-import { addEvents } from "./EventsController";
+import { addEvents, eventsDataReset } from "./EventsController";
 import {
 	heapAdd,
 	// Heap,
@@ -22,6 +22,8 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 
 	const clockData = clockInit();
 	const canvas = document.createElement("canvas");
+	canvas.oncontextmenu = () => false;
+	canvas.tabIndex = 1;
 	window.WebGPUCanvas = canvas;
 	const rect = domElement.getBoundingClientRect();
 	canvasSetSize(canvas, wgpuRequestResponse.device, rect.width, rect.height);
@@ -99,7 +101,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 			return;
 		}
 		if (framesCount % 100 === 0) {
-			console.log(framesCount);
+			// console.log(framesCount);
 			// console.log(heapStatus());
 		}
 		_onRequestAnimationFrameInProgress = true;
@@ -112,6 +114,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 			BigInt(canvas.width),
 			BigInt(canvas.height)
 		);
+		eventsDataReset();
 		framesCount++;
 		// if (currentTexture) {
 		// 	heapDeleteByItem(currentTexture);
@@ -120,9 +123,7 @@ export function webgpuSetup(wgpuRequestResponse: WGPURequestResponse) {
 	}
 	function animate() {
 		clockTick(clockData);
-		for (let i = 0; i < 1; i++) {
-			render();
-		}
+		render();
 		// if (framesCount < 10) {
 		requestAnimationFrame(animate);
 		// } else {

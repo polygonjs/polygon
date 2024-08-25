@@ -80,5 +80,9 @@ export function WGPUDepthStencilStateFromBuffer(
 		depthBiasSlopeScale,
 		depthBiasClamp,
 	};
+	if (depthBias > 256) {
+		console.warn("depthBias doesn't seem right", depthBias);
+	}
 	return depthStencilState;
 }
+

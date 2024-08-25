@@ -13,6 +13,39 @@ AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
 AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
 // UP		::Vector3.{x=0.0, y=1.0, z=0.0};
 
+Vector2Int :: struct {
+	x: s32;
+	y: s32;
+}
+lastPointer: Vector2Int;
+
+orbit_controls_process_event :: (orbit_controls:*OrbitControls, events_data:*EventsData){
+	using orbit_controls;
+
+	if (events_data.mouseButton.left) {
+		dx:int = cast(int)events_data.cursor.x - lastPointer.x;
+		dy:int = cast(int)events_data.cursor.y - lastPointer.y;
+
+		theta += dx * sensitivity;
+		phi -= dy * sensitivity;
+
+		lastPointer.x = xx events_data.cursor.x;
+		lastPointer.y = xx events_data.cursor.y;
+	} else {
+		lastPointer.x = xx events_data.cursor.x;
+		lastPointer.y = xx events_data.cursor.y;
+	}
+
+	if(events_data.wheel != 0){
+		radius -= events_data.wheel * 0.1;
+		if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
+	}
+}
+
+
+
+
+
 orbit_controls_update_camera:: (orbit_controls: *OrbitControls, camera_data: *CameraData){
 	using orbit_controls;
 

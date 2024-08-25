@@ -1,58 +1,55 @@
+ImGui_ImplWasm_Init :: () {
+	io := ImGui.GetIO();
+	io.KeyMap[ImGuiKey.LeftArrow] = 0;
+	io.KeyMap[ImGuiKey.RightArrow] = 1;
+	io.KeyMap[ImGuiKey.UpArrow] = 2;
+	io.KeyMap[ImGuiKey.DownArrow] = 3;
+	io.KeyMap[ImGuiKey.PageUp] = 4;
+	io.KeyMap[ImGuiKey.PageDown] = 5;
+	io.KeyMap[ImGuiKey.Home] = 6;
+	io.KeyMap[ImGuiKey.End] = 7;
+	io.KeyMap[ImGuiKey.Delete] = 8;
+	io.KeyMap[ImGuiKey.Backspace] = 9;
+	io.KeyMap[ImGuiKey.Enter] = 10;
+	io.KeyMap[ImGuiKey.Escape] = 11;
+	// I'm not sure if the ones below are required,
+	// but for now, we set them just like in ./native.jai
+	io.KeyMap[ImGuiKey.A] = 12;
+	io.KeyMap[ImGuiKey.C] = 13;
+	io.KeyMap[ImGuiKey.V] = 14;
+	io.KeyMap[ImGuiKey.X] = 15;
+	io.KeyMap[ImGuiKey.Y] = 16;
+	io.KeyMap[ImGuiKey.Z] = 17;
+	// return true;
+}
 
-ImGui_ImplWasm_NewFrame :: () {
-	// if !g_FontTexture ImGui_ImplSdl_CreateDeviceObjects();
-	
+last_cursor:ImGuiMouseCursor;
+ImGui_ImplWasm_NewFrame :: (events_data: *EventsData) {
 	io := ImGui.GetIO();
 
-	// Setup display size (every frame to accommodate for window resizing)
-	// w, h: s32;
-	w :u32= 1;
-	h :u32= 1;
-	imguiGetWindowData(*w, *h);
-	// display_w, display_h: s32;
-	// SDL_GetWindowSize(window, *w, *h);
-	// SDL_GL_GetDrawableSize(window, *display_w, *display_h);
-	io.DisplaySize = .{xx w, xx h};
-	io.DisplayFramebufferScale = .{xx 1, xx 1};//.{cast(float) display_w / w, cast(float) display_h / h};
-	// print("io.DisplaySize:%, io.DisplayFramebufferScale:%\n",io.DisplaySize, io.DisplayFramebufferScale);
+	io.DisplaySize = .{xx events_data.windowSize.w, xx events_data.windowSize.h};
+	io.DisplayFramebufferScale = .{xx 1, xx 1};
 
-	// Setup time step
-	// frequency := SDL_GetPerformanceFrequency();
-	// current_time := SDL_GetPerformanceCounter();
-	// if g_Time > 0 {
-	//     io.DeltaTime = cast(float)((cast(float64)(current_time - g_Time)) / frequency);
-	// } else {
-	//     io.DeltaTime = (1.0/60.0);
-	// }
-	// // if (io.DeltaTime <= 0.0) {
-	// //     io.DeltaTime = (1.0/60.0);
-	// // }
-	// g_Time = current_time;
+	io.MousePos.x = xx events_data.cursor.x;
+	io.MousePos.y = xx events_data.cursor.y;
+	io.MouseDown[0] = events_data.mouseButton.left;
+	io.MouseDown[1] = events_data.mouseButton.right;
+	io.MouseDown[2] = events_data.mouseButton.middle;
+	io.MouseWheel = events_data.wheel;
+	io.KeyShift = events_data.modifiers.shift;
+	io.KeyCtrl  = events_data.modifiers.ctrl;
+	io.KeyAlt   = events_data.modifiers.alt;
+	io.KeySuper = events_data.modifiers.meta;
 
-	// Setup inputs
-	// (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
-	// mx, my: s32;
-	// left_button_pressed:bool = false;
-	// mouseMask := SDL_GetMouseState(*mx, *my);
-	imguiGetMouseData(*io.MousePos.x, *io.MousePos.y, *io.MouseDown[0]);
-	// print("size_of(bool):%\n", size_of(bool));
-	// print("io.MousePos:%\n",io.MousePos.x);
-	// print("io.MouseDown:%,%\n",io.MouseDown[0],io.MouseDown[1]);
-	// if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS) {
-	// 	io.MousePos = .{xx mx, xx my};   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
-	// } else {
-	// 	io.MousePos = .{-FLOAT32_MAX,-FLOAT32_MAX};
-	// }
+	// we don't need to copy the full io.KeysDown for now
+	memcpy(io.KeysDown.data, events_data.keys.data, 18);
 
-	// io.MouseDown[0] = (g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0);      // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-	// io.MouseDown[1] = (g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0);
-	// io.MouseDown[2] = (g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
-	// g_MousePressed[0], g_MousePressed[1], g_MousePressed[2] = false, false, false;
+	io.AddInputCharactersUTF8(io, xx events_data.text.data);
 
-	// io.MouseWheel = g_MouseWheel;
-	// g_MouseWheel = 0.0;
-
-	// // Hide OS mouse cursor if ImGui is drawing it
-	// SDL_ShowCursor(xx (io.MouseDrawCursor == false));
+	cursor := ImGui.GetMouseCursor();
+	if(cursor != last_cursor) {
+		eventsSetCursor(xx cursor);
+		last_cursor = cursor;
+	}
 }
 

@@ -25,4 +25,8 @@ main :: () {
 	e2 := arr[1];
 	print("e2:%\n", e2);
 
+	nums:[3]u32;
+	print("nums:%\n", nums);
+	nums[1]=12;
+	print("nums:%\n", nums);
 }

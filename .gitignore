@@ -26,5 +26,5 @@ dist-ssr
 .build
 src/jai/.build
 bin/
-public/polygon-next.wasm
+public/*.wasm
 imgui.ini

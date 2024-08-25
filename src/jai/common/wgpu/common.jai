@@ -275,21 +275,23 @@ wgpu_index_array_to_buffer :: (device: WGPUDevice, queue: WGPUQueue, indices: []
 	return buffer, size;
 }
 
-wgpu_create_shader_module :: (device: WGPUDevice, source: string, label :string) -> WGPUShaderModule {
-	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
-	wgslDescriptor.chain.next = null;
-	wgslDescriptor.chain.sType=.ShaderModuleWGSLDescriptor;
-	wgslDescriptor.code = to_c_string(source);
-	#if FREE_MEMORY defer free(wgslDescriptor.code);
+wgpu_create_shader_module :: (device: WGPUDevice, source: string, label: string) -> WGPUShaderModule {
+	wgsl_descriptor := WGPUShaderModuleWGSLDescriptor.{
+		chain = .{
+			next = null,
+			sType = .ShaderModuleWGSLDescriptor
+		},
+		code = to_c_string(source)
+	};
+	defer if FREE_MEMORY free(wgsl_descriptor.code);
 
-	shaderModuleDescriptor: WGPUShaderModuleDescriptor;
-	shaderModuleDescriptor.label = to_c_string(label);
-	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
-	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
-	shader_module := wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
+	shader_module_descriptor := WGPUShaderModuleDescriptor.{
+		nextInChain = xx *wgsl_descriptor,
+		label = to_c_string(label),
+	};
+	defer if FREE_MEMORY free(shader_module_descriptor.label);
 
-
-	return shader_module;
+	return wgpuDeviceCreateShaderModule(device, *shader_module_descriptor);
 }
 
 wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureView {

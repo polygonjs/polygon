@@ -6,7 +6,8 @@ gui_update :: (
 	bd: *ImGui_ImplWGPU_Data,
 	iwc: *ImGui_WGPU_Common,
 	ui_data: *UiData,
-	scene_data: *SceneData
+	scene_data: *SceneData,
+	events_data: *EventsData
 ){
 
 	width := wgpu_texture_get_width_surface(wgpu_context);
@@ -20,11 +21,10 @@ gui_update :: (
 		bd.resolution.height = height;
 	}
 
-	// ImGui_ImplWGPU_NewFrame();
 	#if WASM {
-		ImGui_ImplWasm_NewFrame();
+		ImGui_ImplWasm_NewFrame(events_data);
 	} else {
-		ImGui_ImplSdl_NewFrame(window_context.window);
+		ImGui_ImplSdl_NewFrame(window_context.window, events_data);
 	}
 	ImGui.NewFrame();
 	{
@@ -61,6 +61,7 @@ gui_update :: (
 			scene_data.sdf_data[0].offset.y = 0;
 			scene_data.sdf_data[0].offset.z = 0;
 		}
+		ImGui.InputText("input text", scene_data.node_name.data, xx scene_data.node_name.count);
 		// ImGui.ColorEdit3("clear color", clear_color); // Edit 3 floats representing a color
 
 		// if (ImGui.Button("Button")==true){
@@ -71,16 +72,16 @@ gui_update :: (
 
 		ImGui.End();
 	}
-	if (ui_data.show_another_window) {
-		ImGui.SetNextWindowPos(.{400, 100}, ImGuiCond.Always);
-		ImGui.SetNextWindowSize(.{300, 100}, ImGuiCond.Always);
-		ImGui.Begin("Another Window", *ui_data.show_another_window);         // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui.Text("Hello from another window!");
-		if (ImGui.Button("Close Me!")) {
-			ui_data.show_another_window = false;
-		}
-		ImGui.End();
-	}
+	// if (ui_data.show_another_window) {
+	// 	ImGui.SetNextWindowPos(.{400, 100}, ImGuiCond.Always);
+	// 	ImGui.SetNextWindowSize(.{300, 100}, ImGuiCond.Always);
+	// 	ImGui.Begin("Another Window", *ui_data.show_another_window);
+	// 	ImGui.Text("Hello from another window!");
+	// 	if (ImGui.Button("Close Me!")) {
+	// 		ui_data.show_another_window = false;
+	// 	}
+	// 	ImGui.End();
+	// }
 	// if ui_data.show_demo_window {
 	// 	ImGui.SetNextWindowPos(.{650, 20}, ImGuiCond.FirstUseEver, .{0,0}); // Normally user code doesn't need/want to call this because positions are saved in .ini file anyway. Here we just want to make the demo initial state a bit more friendly!
 	// 	ImGui.ShowDemoWindow(*ui_data.show_demo_window);
@@ -89,6 +90,6 @@ gui_update :: (
 	ImGui.Render();
 	draw_data := ImGui.GetDrawData();
 	ImGui_ImplWGPU_RenderDrawData(*iwc.draw, draw_data, render_pass);
-
+	events_data_clear_text(events_data);
 }
 

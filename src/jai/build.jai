@@ -38,6 +38,10 @@ BUILD_NATIVE :: true;
 		w := compiler_create_workspace("Wasm Common");
 
 		options := get_build_options(w);
+		args := options.compile_time_command_line;
+		// we ensure that the jails vscode extension does not generate the same output,
+		// as this would generate an invalid build.
+		jails_diagnostics := array_find(args, "jails_diagnostics");
 		copy_commonly_propagated_fields(get_build_options(), *options);
 
 		options.output_type                         = .EXECUTABLE;
@@ -47,7 +51,7 @@ BUILD_NATIVE :: true;
 		options.emit_debug_info                     = .DWARF;
 		options.backtrace_on_crash                  = .OFF; // Runtime_Support_Crash_Handler doesn’t support WASM (yet?)
 		options.output_path                         = "../../public/";
-		options.output_executable_name              = "polygon-next";
+		options.output_executable_name              = ifx jails_diagnostics then "jails" else "polygon-next";
 		options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
 		options.llvm_options.enable_split_modules   = false;
 		options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
@@ -65,7 +69,7 @@ BUILD_NATIVE :: true;
 		walloc_object_file_path := "modules/walloc/walloc.o";
 		EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
 
-		STACK_SIZE :: 1024 * 1024;
+		STACK_SIZE :: 1 * 1024 * 1024;
 		options.additional_linker_arguments = .[
 			"--stack-first",
 			"-z",
@@ -115,10 +119,15 @@ BUILD_NATIVE :: true;
 	}
 	if ( BUILD_NATIVE ) {
 		w := compiler_create_workspace("Native Common");
+
 		options := get_build_options(w);
+		args := options.compile_time_command_line;
+		// we ensure that the jails vscode extension does not generate the same output,
+		// as this would generate an invalid build.
+		jails_diagnostics := array_find(args, "jails_diagnostics");
 		options.output_path = "../../bin/";
 		make_directory_if_it_does_not_exist(options.output_path);
-		options.output_executable_name = "polygon-next";
+		options.output_executable_name = ifx jails_diagnostics then "jails" else "polygon-next";
 		set_build_options(options, w);
 
 		compiler_begin_intercept(w);

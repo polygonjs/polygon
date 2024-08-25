@@ -36,7 +36,9 @@ else #import "Basic";
 #load "common/draw_data.jai";
 #load "common/scene_data.jai";
 #load "common/type_utils.jai";
+#load "common/events/common.jai";
 #if WASM == true #load "common/events/wasm.jai";
+else #load "common/events/native.jai";
 #if WASM #load "common/wgpu/wasm.jai";
 else     #load "common/wgpu/native.jai";
 #load "common/wgpu/common.jai";
@@ -45,10 +47,7 @@ else     #load "common/wgpu/native.jai";
 #load "common/wgpu/common_uniforms.jai";
 #load "common/wgpu/common_compute.jai";
 #load "common/print_utils.jai";
-
 #load "common/orbit_controls/common.jai";
-#if WASM #load "common/orbit_controls/wasm.jai";
-else     #load "common/orbit_controls/native.jai";
 
 #if WASM == false {
 	#import "wgpu";
@@ -80,6 +79,7 @@ wgpu_context:WGPUContext;
 SCENE_DATA:SceneData;
 DRAW_DATA:DrawData;
 orbit_controls:OrbitControls;
+events_data:EventsData;
 #if USE_IMGUI {
 	ui_data:UiData= .{};
 	bd:ImGui_ImplWGPU_Data = .{};
@@ -120,6 +120,12 @@ FRAMES_COUNT:u64 = 0;
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
+	node_name_size := 128;
+	SCENE_DATA.node_name.data  = alloc(node_name_size);
+	SCENE_DATA.node_name.count = node_name_size;
+	test_string := "Hello World!";
+	memcpy(SCENE_DATA.node_name.data, test_string.data, test_string.count);
+
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO);
 
@@ -140,7 +146,6 @@ main :: () {
 			// imgui_style := ImGui.GetStyle(); // ImGuiStyle
 			// imgui_style.AntiAliasedLinesUseTex = false;
 			// ImGui.StyleColorsLight(/*imgui_style*/);
-			ImGui_ImplSdl_Init(window);
 		}
 
 		wgpuSetLogCallback(wgpu_log_callback, null);
@@ -149,24 +154,32 @@ main :: () {
 
 		on_wgpu_device_ready(wgpu_context.surface, wgpu_context.device, wgpu_context.queue, wgpu_context.preferred_texture_format);
 		init_draw_data();
+		#if USE_IMGUI io := ImGui.GetIO();
 
 		while !do_exit {
-			event: SDL_Event;
-			while SDL_PollEvent(*event) {
+			sdl_event: SDL_Event;
+			events_data_reset(*events_data);
+			
+			while SDL_PollEvent(*sdl_event) {
+				events_data_update(*events_data, *sdl_event);
 				#if USE_IMGUI {
-					ImGui_ImplSdl_ProcessEvent(*event);
-					io := ImGui.GetIO();
+					ImGui_ImplSdl_ProcessEvent(*sdl_event);
+					if(io.WantCaptureMouse == false){
+						orbit_controls_process_event(*orbit_controls, *events_data);
+					}
+				} else {
+					orbit_controls_process_event(*orbit_controls, *events_data);
 				}
 
-				if event.type == {
+				if sdl_event.type == {
 					case SDL_QUIT; {do_exit = true;}
 					case SDL_WINDOWEVENT; {
-						if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-							new_width := event.window.data1;
-							new_height := event.window.data2;
+						if (sdl_event.window.event == SDL_WINDOWEVENT_RESIZED) {
+							new_width := sdl_event.window.data1;
+							new_height := sdl_event.window.data2;
 							if(new_width > 0 && new_height > 0){
-								webgpu_handle_resize(*wgpu_context, xx event.window.data1, xx event.window.data2);
-								SCENE_DATA.camera_aspect = (cast(float32) event.window.data1) / (cast(float32) event.window.data2);
+								webgpu_handle_resize(*wgpu_context, xx sdl_event.window.data1, xx sdl_event.window.data2);
+								SCENE_DATA.camera_aspect = (cast(float32) sdl_event.window.data1) / (cast(float32) sdl_event.window.data2);
 								update_camera_data_projection(*SCENE_DATA);
 
 							}
@@ -175,27 +188,27 @@ main :: () {
 					case SDL_KEYDOWN; {
 						#if USE_IMGUI {
 							if(io.WantCaptureKeyboard == false){
-								if event.key.keysym.sym == SDLK_ESCAPE {
+								if sdl_event.key.keysym.sym == SDLK_ESCAPE {
 									do_exit = true;
 								}
 							}
 						} else {
-							if event.key.keysym.sym == SDLK_ESCAPE {
+							if sdl_event.key.keysym.sym == SDLK_ESCAPE {
 								do_exit = true;
 							}
 						}
 					}
 				}
-				#if USE_IMGUI {
-					if(io.WantCaptureMouse == false){
-						orbit_controls_process_event(*orbit_controls, *event);
-					}
-				} else {
-					orbit_controls_process_event(*orbit_controls, *event);
-				}
-
 			}
 			time := SDL_GetTicks();
+
+			#if USE_IMGUI {
+				if(io.WantCaptureMouse == false){
+					orbit_controls_process_event(*orbit_controls, *events_data);
+				}
+			} else {
+				orbit_controls_process_event(*orbit_controls, *events_data);
+			}
 
 			// do_exit = true;
 			on_request_animation_frame(time, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -288,6 +301,7 @@ init_draw_data :: (){
 		#if WASM {
 			io := ImGui.GetIO();
 			io.IniFilename = null;
+			ImGui_ImplWasm_Init();
 		}
 
 		// imgui_style := ImGui.GetStyle();
@@ -321,14 +335,7 @@ on_request_animation_frame :: (
 	#if WASM {
 		context = call_from_wasm_context;
 		queue := wgpu_context.queue;
-		#if USE_IMGUI {
-			io := ImGui.GetIO();
-			if(io.WantCaptureMouse == false){
-				orbit_controls_process_event(*orbit_controls);
-			}
-		} else {
-			orbit_controls_process_event(*orbit_controls);
-		}
+		events_data_update(*events_data);
 	} else {
 		queue := wgpuDeviceGetQueue(wgpu_context.device);
 		assert(queue != null, "Queue is not created correctly");
@@ -342,6 +349,14 @@ on_request_animation_frame :: (
 		update_camera_data_projection(*SCENE_DATA);
 	}
 	time:float = new_time / 1000.0;
+	#if USE_IMGUI {
+		io := ImGui.GetIO();
+		if(io.WantCaptureMouse == false){
+			orbit_controls_process_event(*orbit_controls, *events_data);
+		}
+	} else {
+		orbit_controls_process_event(*orbit_controls, *events_data);
+	}
 	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 	update_scene_data(*SCENE_DATA, time);
 	update_scene_data_uniforms(*SCENE_DATA);
@@ -399,7 +414,7 @@ on_request_animation_frame :: (
 		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, DRAW_DATA.index.buffer, WGPUIndexFormat.Uint32, 0, DRAW_DATA.index.buffer_size);
 
 		wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-		#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA);
+		#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA, *events_data);
 		wgpuRenderPassEncoderEnd(render_pass_encoder1);
 
 
@@ -416,6 +431,6 @@ on_request_animation_frame :: (
 	depth_release(*wgpu_context);
 	#if USE_IMGUI imgui_gui_free(*iwc);
 
-	#if WASM==false reset_temporary_storage();
+	reset_temporary_storage();
 	FRAMES_COUNT += 1;
 }

@@ -1,146 +1,146 @@
-#import "Basic";
-#import "Math";
-#load "common/math_helper.jai";
-#load "common/orbit_controls.jai";
-#load "common/scene_data.jai";
-#load "common/wgpu_mock.jai";
-#placeholder SHADER_RENDER;
-#placeholder SHADER_COMPUTE;
+// #import "Basic";
+// #import "Math";
+// #load "common/math_helper.jai";
+// #load "common/orbit_controls.jai";
+// #load "common/scene_data.jai";
+// #load "common/wgpu_mock.jai";
+// #placeholder SHADER_RENDER;
+// #placeholder SHADER_COMPUTE;
 
-SCENE_DATA :SceneData;
-orbit_controls :OrbitControls;
+// SCENE_DATA :SceneData;
+// orbit_controls :OrbitControls;
 
-main :: () {
-	print("Hello Jai 25!\n");
-	// write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
-	// log("Hello logger");
+// main :: () {
+// 	print("Hello Jai 25!\n");
+// 	// write_strings("These", " will", " cause", " multiple", " calls", " to" , " write_string_unsynchronized!\n");
+// 	// log("Hello logger");
 
-	// numbers: [..] int;
-	// array_add(*numbers, 10);
-	// array_add(*numbers, 20);
-	// array_add(*numbers, 30);
+// 	// numbers: [..] int;
+// 	// array_add(*numbers, 10);
+// 	// array_add(*numbers, 20);
+// 	// array_add(*numbers, 30);
 
-	// for numbers {
-	// 	print("numbers[%]: %\n", it_index, it);
-	// }
+// 	// for numbers {
+// 	// 	print("numbers[%]: %\n", it_index, it);
+// 	// }
 
-	// debug_break();
+// 	// debug_break();
 
-	// builder: String_Builder;
-	// for 0..10 {
-	// 	append(*builder, sprint("Entry-%\n", it));
-	// }
-	// print("Builder result: \n%", builder_to_string(*builder));
+// 	// builder: String_Builder;
+// 	// for 0..10 {
+// 	// 	append(*builder, sprint("Entry-%\n", it));
+// 	// }
+// 	// print("Builder result: \n%", builder_to_string(*builder));
 
-	// Enable this if you want to see a nice stack trace:
-	// assert(false, "Assert test");
+// 	// Enable this if you want to see a nice stack trace:
+// 	// assert(false, "Assert test");
 
-	// log("Type info test: The type of the builder is %", type_of(builder));
-	// info := type_info(type_of(builder));
-	// log("It contains the following members:");
-	// for info.members {
-	// 	log("%: % of type %", it_index, it.name, type_to_string(it.type));
-	// }
+// 	// log("Type info test: The type of the builder is %", type_of(builder));
+// 	// info := type_info(type_of(builder));
+// 	// log("It contains the following members:");
+// 	// for info.members {
+// 	// 	log("%: % of type %", it_index, it.name, type_to_string(it.type));
+// 	// }
 
-	// Lets try something fancier
-	// context.logger = dom_logger;
-	// log("Logging to the DOM via Jai.");
-	// log_error("We can also log errors.");
+// 	// Lets try something fancier
+// 	// context.logger = dom_logger;
+// 	// log("Logging to the DOM via Jai.");
+// 	// log_error("We can also log errors.");
 
-	SCENE_DATA:SceneData;
-	init_scene_data(*SCENE_DATA, 1);
+// 	SCENE_DATA:SceneData;
+// 	init_scene_data(*SCENE_DATA, 1);
 
-	vertex_buffer_layout := wasm_make_vertex_layout(Vertex);
-	vertex_buffer_layout_buffer := Wasm_VertexBufferLayout_to_buffer(*vertex_buffer_layout);
-	set_webgpu_vertex_layout(vertex_buffer_layout_buffer);
+// 	vertex_buffer_layout := wasm_make_vertex_layout(Vertex);
+// 	vertex_buffer_layout_buffer := Wasm_VertexBufferLayout_to_buffer(*vertex_buffer_layout);
+// 	set_webgpu_vertex_layout(vertex_buffer_layout_buffer);
 
-	set_webgpu_vertex_data(SCENE_DATA.vertices);
-	set_webgpu_index_data(SCENE_DATA.indices);
-	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
-	set_webgpu_camera_uniforms_data(SCENE_DATA.camera_uniforms);
-	set_webgpu_sdf_data_data(SCENE_DATA.sdf_data);
-	set_webgpu_sdf_uniforms_data(SCENE_DATA.sdf_uniforms);
-	set_webgpu_shader(SHADER_RENDER);
-	set_webgpu_orbit_controls_data(*orbit_controls);
+// 	set_webgpu_vertex_data(SCENE_DATA.vertices);
+// 	set_webgpu_index_data(SCENE_DATA.indices);
+// 	set_webgpu_object_uniforms_data(SCENE_DATA.object_uniforms);
+// 	set_webgpu_camera_uniforms_data(SCENE_DATA.camera_uniforms);
+// 	set_webgpu_sdf_data_data(SCENE_DATA.sdf_data);
+// 	set_webgpu_sdf_uniforms_data(SCENE_DATA.sdf_uniforms);
+// 	set_webgpu_shader(SHADER_RENDER);
+// 	set_webgpu_orbit_controls_data(*orbit_controls);
 	
-	// main_call_completed();
-}
-
-// vertices_to_buffer :: (vertices: []Vertex, buffer: []float32){
-// 	buffer.count = 2*3*vertices.count;
-// 	for vertex: vertices {
-// 		offset := it_index*6;
-// 		buffer[offset+0] = vertex.position.x;
-// 		buffer[offset+1] = vertex.position.y;
-// 		buffer[offset+2] = vertex.position.z;
-// 		buffer[offset+3] = vertex.color.x;
-// 		buffer[offset+4] = vertex.color.y;
-// 		buffer[offset+5] = vertex.color.z;
-// 	}
+// 	// main_call_completed();
 // }
 
-dom_logger :: (message: string, data: *void, info: Log_Info) {
-	is_error := (info.common_flags & .ERROR) != 0;
-	wasm_log_dom(message.count, message.data, is_error);
-}
-set_webgpu_shader :: (message: string) {
-	set_webgpu_shader_js(message.count, message.data);
-}
-set_webgpu_vertex_data :: (vertices: []Vertex) {
-	set_webgpu_vertex_data_js(vertices.count * VERTEX_FLOATS_COUNT, vertices.data, size_of(float32));
-}
-set_webgpu_index_data :: (indices: []VertexIndex) {
-	set_webgpu_index_data_js(indices.count, indices.data, size_of(VertexIndex));
-}
-set_webgpu_vertex_layout :: (buffer: []VertexLayoutBuffer) {
-	set_webgpu_vertex_layout_js(buffer.count, buffer.data, size_of(VertexLayoutBuffer));
-}
+// // vertices_to_buffer :: (vertices: []Vertex, buffer: []float32){
+// // 	buffer.count = 2*3*vertices.count;
+// // 	for vertex: vertices {
+// // 		offset := it_index*6;
+// // 		buffer[offset+0] = vertex.position.x;
+// // 		buffer[offset+1] = vertex.position.y;
+// // 		buffer[offset+2] = vertex.position.z;
+// // 		buffer[offset+3] = vertex.color.x;
+// // 		buffer[offset+4] = vertex.color.y;
+// // 		buffer[offset+5] = vertex.color.z;
+// // 	}
+// // }
 
-set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
-	set_webgpu_object_uniforms_js(size_of(ObjectUniforms)/size_of(float), object_uniforms.data, size_of(float));
-}
-set_webgpu_camera_uniforms_data :: (camera_uniforms: [1]CameraUniforms) {
-	set_webgpu_camera_uniforms_js(size_of(CameraUniforms)/size_of(float), camera_uniforms.data, size_of(float));
-}
-set_webgpu_sdf_data_data :: (sdf_data: [1]SDFData) {
-	set_webgpu_sdf_data_js(size_of(SDFData)/size_of(float), sdf_data.data, size_of(float));
-}
-set_webgpu_sdf_uniforms_data :: (sdf_uniforms: [1]SDFUniforms) {
-	set_webgpu_sdf_uniforms_js(size_of(SDFUniforms)/size_of(float), sdf_uniforms.data, size_of(float));
-}
-set_webgpu_orbit_controls_data :: (orbitControls: *OrbitControls) {
-	set_webgpu_orbit_controls_js(size_of(OrbitControls), orbitControls, size_of(float));
-}
+// dom_logger :: (message: string, data: *void, info: Log_Info) {
+// 	is_error := (info.common_flags & .ERROR) != 0;
+// 	wasm_log_dom(message.count, message.data, is_error);
+// }
+// set_webgpu_shader :: (message: string) {
+// 	set_webgpu_shader_js(message.count, message.data);
+// }
+// set_webgpu_vertex_data :: (vertices: []Vertex) {
+// 	set_webgpu_vertex_data_js(vertices.count * VERTEX_FLOATS_COUNT, vertices.data, size_of(float32));
+// }
+// set_webgpu_index_data :: (indices: []VertexIndex) {
+// 	set_webgpu_index_data_js(indices.count, indices.data, size_of(VertexIndex));
+// }
+// set_webgpu_vertex_layout :: (buffer: []VertexLayoutBuffer) {
+// 	set_webgpu_vertex_layout_js(buffer.count, buffer.data, size_of(VertexLayoutBuffer));
+// }
+
+// set_webgpu_object_uniforms_data :: (object_uniforms: [1]ObjectUniforms) {
+// 	set_webgpu_object_uniforms_js(size_of(ObjectUniforms)/size_of(float), object_uniforms.data, size_of(float));
+// }
+// set_webgpu_camera_uniforms_data :: (camera_uniforms: [1]CameraUniforms) {
+// 	set_webgpu_camera_uniforms_js(size_of(CameraUniforms)/size_of(float), camera_uniforms.data, size_of(float));
+// }
+// set_webgpu_sdf_data_data :: (sdf_data: [1]SDFData) {
+// 	set_webgpu_sdf_data_js(size_of(SDFData)/size_of(float), sdf_data.data, size_of(float));
+// }
+// set_webgpu_sdf_uniforms_data :: (sdf_uniforms: [1]SDFUniforms) {
+// 	set_webgpu_sdf_uniforms_js(size_of(SDFUniforms)/size_of(float), sdf_uniforms.data, size_of(float));
+// }
+// set_webgpu_orbit_controls_data :: (orbitControls: *OrbitControls) {
+// 	set_webgpu_orbit_controls_js(size_of(OrbitControls), orbitControls, size_of(float));
+// }
 
 
-// We need to declare all the JS functions that will be passed to our WebAssembly
-// instance from the JS file that loads us.
-wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
-set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
-set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
-set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #foreign;
-set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
-set_webgpu_object_uniforms_js :: (count: s64, data: *ObjectUniforms, element_size:u8) #foreign;
-set_webgpu_camera_uniforms_js :: (count: s64, data: *CameraUniforms, element_size:u8) #foreign;
-set_webgpu_sdf_data_js :: (count: s64, data: *SDFData, element_size:u8) #foreign;
-set_webgpu_sdf_uniforms_js :: (count: s64, data: *SDFUniforms, element_size:u8) #foreign;
-set_webgpu_orbit_controls_js :: (count: s64, data: *OrbitControls, element_size:u8) #foreign;
-// set_webgpu_data :: (value: float) #foreign;
-// main_call_completed :: () #foreign;
+// // We need to declare all the JS functions that will be passed to our WebAssembly
+// // instance from the JS file that loads us.
+// wasm_log_dom :: (count: s64, data: *u8, is_error: bool) #foreign;
+// set_webgpu_shader_js :: (count: s64, data: *u8) #foreign;
+// set_webgpu_vertex_data_js :: (count: s64, data: *Vertex, element_size:u8) #foreign;
+// set_webgpu_index_data_js :: (count: s64, data: *VertexIndex, element_size:u8) #foreign;
+// set_webgpu_vertex_layout_js :: (count: s64, data: *VertexLayoutBuffer, element_size:u8) #foreign;
+// set_webgpu_object_uniforms_js :: (count: s64, data: *ObjectUniforms, element_size:u8) #foreign;
+// set_webgpu_camera_uniforms_js :: (count: s64, data: *CameraUniforms, element_size:u8) #foreign;
+// set_webgpu_sdf_data_js :: (count: s64, data: *SDFData, element_size:u8) #foreign;
+// set_webgpu_sdf_uniforms_js :: (count: s64, data: *SDFUniforms, element_size:u8) #foreign;
+// set_webgpu_orbit_controls_js :: (count: s64, data: *OrbitControls, element_size:u8) #foreign;
+// // set_webgpu_data :: (value: float) #foreign;
+// // main_call_completed :: () #foreign;
 
-update_wasm :: (new_time: s64, _new_aspect: s64) {
-	time:float = new_time / 1000.0;
-	new_aspect:float = ( cast(float32) _new_aspect) / 1000.0;
+// update_wasm :: (new_time: s64, _new_aspect: s64) {
+// 	time:float = new_time / 1000.0;
+// 	new_aspect:float = ( cast(float32) _new_aspect) / 1000.0;
 
-	if(new_aspect != SCENE_DATA.camera_aspect){
-		SCENE_DATA.camera_aspect = new_aspect;
-		update_camera_data_projection(*SCENE_DATA);
-	}
+// 	if(new_aspect != SCENE_DATA.camera_aspect){
+// 		SCENE_DATA.camera_aspect = new_aspect;
+// 		update_camera_data_projection(*SCENE_DATA);
+// 	}
 
-	update_scene_data(*SCENE_DATA, time);
-	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
+// 	update_scene_data(*SCENE_DATA, time);
+// 	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
 
-	update_scene_data_uniforms(*SCENE_DATA);
-}
+// 	update_scene_data_uniforms(*SCENE_DATA);
+// }
 
 
