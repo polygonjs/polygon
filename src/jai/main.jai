@@ -338,6 +338,8 @@ on_request_animation_frame :: (
 		};
 		update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
 		render_pass_encoder1 = wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
+		wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
+
 
 		wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, DRAW_DATA.pipeline);
 		wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 0, DRAW_DATA.uniforms.object.bind_group, 0, null);
