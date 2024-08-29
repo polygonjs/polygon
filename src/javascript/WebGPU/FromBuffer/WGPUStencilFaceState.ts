@@ -2,29 +2,20 @@ import {
 	compareFunctionIntToGPUCompareFunction,
 	stencilOperationIntToGPUStencilOperation,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { u32Create } from "../utils/WebGPUUtils";
+import { _num } from "../utils/WebGPUUtils";
+import { WGPUStencilFaceState } from "../utils/WGPUStructInfos";
 
-export function WGPUStencilFaceStateFromBuffer(
-	pointer: bigint
-): GPUStencilFaceState {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const _u32 = u32Create(u32, pointer);
+export function WGPUStencilFaceStateFromBuffer(p: bigint): GPUStencilFaceState {
 	//
-	const offset = WGPU_OFFSET.WGPUStencilFaceState;
+	const m = WGPUStencilFaceState.members;
 	//
-	const compareb = _u32(offset.compare);
+	const compareb = _num(p, m.compare);
 	const compare = compareFunctionIntToGPUCompareFunction(compareb);
-	const failOp = stencilOperationIntToGPUStencilOperation(
-		Number(_u32(offset.failOp))
-	);
+	const failOp = stencilOperationIntToGPUStencilOperation(_num(p, m.failOp));
 	const depthFailOp = stencilOperationIntToGPUStencilOperation(
-		Number(_u32(offset.depthFailOp))
+		_num(p, m.depthFailOp)
 	);
-	const passOp = stencilOperationIntToGPUStencilOperation(
-		Number(_u32(offset.passOp))
-	);
+	const passOp = stencilOperationIntToGPUStencilOperation(_num(p, m.passOp));
 	//
 	const stencilFaceState: GPUStencilFaceState = {
 		compare,

@@ -1,30 +1,20 @@
 import { heapGet } from "../../WasmHeap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { u32Create, u64Create } from "../utils/WebGPUUtils";
+import { _big, _num } from "../utils/WebGPUUtils";
+import { WGPUBindGroupEntry } from "../utils/WGPUStructInfos";
 
-export function WGPUBindGroupEntryFromBuffer(
-	pointer: bigint
-	// u32: Uint32Array,
-	// u64: BigUint64Array
-): GPUBindGroupEntry {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const u64 = new BigUint64Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	const _u64 = u64Create(u64, pointer);
+export function WGPUBindGroupEntryFromBuffer(p: bigint): GPUBindGroupEntry {
+	const m = WGPUBindGroupEntry.members;
 	//
-	const offset = WGPU_OFFSET.WGPUBindGroupEntry;
+	const binding = _num(p, m.binding);
 	//
-	const binding = _u32(offset.binding);
-	//
-	const bufferPointer = _u64(offset.buffer);
+	const bufferPointer = _big(p, m.buffer);
 	const bufferValue = heapGet<GPUBuffer>(bufferPointer)!;
-	const offsetValue = Number(_u64(offset.offset)!);
+	const offsetValue = Number(_big(p, m.offset)!);
 
-	const size = Number(_u64(offset.size));
-	const samplerPointer = _u64(offset.sampler);
+	const size = Number(_big(p, m.size));
+	const samplerPointer = _big(p, m.sampler);
 	const sampler = heapGet<GPUSampler>(samplerPointer);
-	const textureViewPointer = _u64(offset.textureView);
+	const textureViewPointer = _big(p, m.textureView);
 	const textureView = heapGet<GPUTextureView>(textureViewPointer);
 
 	if (!(bufferValue || sampler || textureView)) {

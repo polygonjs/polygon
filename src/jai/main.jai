@@ -1,7 +1,7 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: false;
+USE_COMPUTE_SHADER :: true;
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
 
@@ -213,7 +213,18 @@ init_draw_data :: (){
 	wgpu_update_pipeline_descriptor_multisample(*wgpu_context, *(DRAW_DATA.pipeline_descriptor));
 	depth_stencil_state: WGPUDepthStencilState;
 	wgpu_update_pipeline_descriptor_depth(*wgpu_context, *(DRAW_DATA.pipeline_descriptor), *depth_stencil_state);
-	
+
+	#if WASM {
+		if(depth_stencil_state.depthBias != 0){
+			// we force the depthBias which is sometimes with an offset of -1 when out of wgpu_update_pipeline_descriptor_depth.
+			// no idea why, could it be because of wasm64 still experimental?
+			// but since depthBias is the only s32 in the wgpu definition, we assume it only happens for this member,
+			// and we therefore do this hack here.
+			print("*** depthBias force to 0 (currently at %)\n", depth_stencil_state.depthBias);
+			depth_stencil_state.depthBias = 0;
+		}
+		assert(depth_stencil_state.depthBias == 0, "bias not correct: %\n", depth_stencil_state.depthBias);
+	}
 	DRAW_DATA.pipeline = wgpuDeviceCreateRenderPipeline(wgpu_context.device, *(DRAW_DATA.pipeline_descriptor));
 	assert(DRAW_DATA.pipeline != null, "Pipeline is not created correctly");
 

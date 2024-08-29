@@ -1,20 +1,17 @@
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import { labelFromBuffer } from "../utils/WebGPUUtils";
+import { _big, _label } from "../utils/WebGPUUtils";
+import { WGPUShaderModuleDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUShaderModuleWGSLDescriptorFromBuffer } from "./WGPUShaderModuleWGSLDescriptor";
 
 export function WGPUShaderModuleDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUShaderModuleDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
+	const m = WGPUShaderModuleDescriptor.members;
 	//
-	const offset = WGPU_OFFSET.WGPUShaderModuleDescriptor;
+	const label = _label(p, m);
 	//
-	const label = labelFromBuffer(pointer, offset, u64);
-	//
-	const nextInChainPointerIndex =
-		(pointer + offset.nextInChain) / WGPU_SIZE.u64;
-	const nextInChainPointer = u64[Number(nextInChainPointerIndex)];
+	// const nextInChainPointerIndex =
+	// (p + m.nextInChain.offset) / WGPU_SIZE.u64;
+	const nextInChainPointer = _big(p, m.nextInChain); //u64[Number(nextInChainPointerIndex)];
 	const wgslDescriptor =
 		WGPUShaderModuleWGSLDescriptorFromBuffer(nextInChainPointer);
 

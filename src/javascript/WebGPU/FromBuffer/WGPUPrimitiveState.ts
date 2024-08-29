@@ -4,29 +4,23 @@ import {
 	indexFormatIntToGPUIndexFormat,
 	topologyIntToGPUPrimitiveTopology,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { u32Create } from "../utils/WebGPUUtils";
+import { _num } from "../utils/WebGPUUtils";
+import { WGPUPrimitiveState } from "../utils/WGPUStructInfos";
 
-export function WGPUPrimitiveStateFromBuffer(
-	pointer: bigint
-): GPUPrimitiveState {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	//
-	const offset = WGPU_OFFSET.WGPUPrimitiveState;
+export function WGPUPrimitiveStateFromBuffer(p: bigint): GPUPrimitiveState {
+	const m = WGPUPrimitiveState.members;
 
 	//
-	const topologyb = _u32(offset.topology);
+	const topologyb = _num(p, m.topology);
 	const topology = topologyIntToGPUPrimitiveTopology(topologyb);
 	//
-	const stripIndexFormatb = _u32(offset.stripIndexFormat);
+	const stripIndexFormatb = _num(p, m.stripIndexFormat);
 	const stripIndexFormat = indexFormatIntToGPUIndexFormat(stripIndexFormatb);
 	//
-	const frontFaceb = _u32(offset.frontFace);
+	const frontFaceb = _num(p, m.frontFace);
 	const frontFace = frontFaceIntToGPUFrontFace(frontFaceb);
 	//
-	const cullModeb = _u32(offset.cullMode);
+	const cullModeb = _num(p, m.cullMode);
 	const cullMode = cullModeIntToGPUCullMode(cullModeb);
 
 	//

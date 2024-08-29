@@ -1,22 +1,18 @@
 import { heapGet } from "../../WasmHeap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { labelFromBuffer, u64Create } from "../utils/WebGPUUtils";
+import { _big, _label, _pointerValue } from "../utils/WebGPUUtils";
+import { WGPUComputePipelineDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUProgrammableStageDescriptorFromBuffer } from "./WGPUProgrammableStageDescriptor";
 
 export function WGPUComputePipelineDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUComputePipelineDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	const _u64 = u64Create(u64, pointer);
+	const m = WGPUComputePipelineDescriptor.members;
 	//
-	const offset = WGPU_OFFSET.WGPUComputePipelineDescriptor;
-	//
-	const label = labelFromBuffer(pointer, offset, u64);
-	const layoutPointer = _u64(offset.layout);
+	const label = _label(p, m);
+	const layoutPointer = _big(p, m.layout);
 	const layout = heapGet<GPUPipelineLayout>(layoutPointer) || "auto";
 	const compute = WGPUProgrammableStageDescriptorFromBuffer(
-		pointer + offset.compute
+		p + m.compute.offset
 	);
 	//
 

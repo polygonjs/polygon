@@ -2,28 +2,24 @@ import {
 	textureSampleTypeIntToGPUTextureSampleType,
 	textureViewDimentionIntToGPUTextureViewDimension,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { u32Create } from "../utils/WebGPUUtils";
+import { _num } from "../utils/WebGPUUtils";
+import { WGPUTextureBindingLayout } from "../utils/WGPUStructInfos";
 
 export function WGPUTextureBindingLayoutFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUTextureBindingLayout | undefined {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	//
-	const offset = WGPU_OFFSET.WGPUTextureBindingLayout;
+	const m = WGPUTextureBindingLayout.members;
 	//
 	const sampleType = textureSampleTypeIntToGPUTextureSampleType(
-		_u32(offset.sampleType)
+		_num(p, m.sampleType)
 	);
 	if (sampleType == null) {
 		return;
 	}
 	const viewDimension = textureViewDimentionIntToGPUTextureViewDimension(
-		_u32(offset.viewDimension)
+		_num(p, m.viewDimension)
 	);
-	const multisampled = _u32(offset.multisampled) > 0;
+	const multisampled = _num(p, m.multisampled) > 0;
 
 	const layout: GPUTextureBindingLayout = {
 		sampleType,

@@ -1,6 +1,8 @@
+import { getU64, updateMemoryArrayViewsIfNeeded } from "../../Common";
 import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
 import { WGPU_SIZE } from "./WebGPUOffset";
+import { MemberInfo } from "./WGPUStructInfos";
 
 interface LabelOffsetContainer {
 	label: bigint;
@@ -116,6 +118,33 @@ export function heapGetItemFromOffset<T>(
 	return element;
 }
 
+export function _num(structPointer: bigint, memberInfo: MemberInfo): number {
+	return memberInfo.arrayView(
+		Number(structPointer + memberInfo.offset)
+	) as number;
+}
+export function _big(structPointer: bigint, memberInfo: MemberInfo): bigint {
+	updateMemoryArrayViewsIfNeeded();
+
+	return memberInfo.arrayView(
+		Number(structPointer + memberInfo.offset)
+	) as bigint;
+}
+export function _pointerValue(pointer: bigint) {
+	return getU64(Number(pointer));
+}
+export function _str(structPointer: bigint, memberInfo: MemberInfo) {
+	return jsStringFromJaiStringWithoutLength(_big(structPointer, memberInfo));
+}
+export function _label(
+	structPointer: bigint,
+	members: Record<"label", MemberInfo>
+) {
+	return jsStringFromJaiStringWithoutLength(
+		_big(structPointer, members.label)
+	);
+}
+
 // export function arrayItemHeapIndex(
 // 	u64: BigUint64Array,
 // 	pointer: bigint,
@@ -137,11 +166,10 @@ export function heapGetItemFromOffset<T>(
 // 	itemHeapIndex: bigint;
 // }
 interface CreateWGPUItemsByPointerOptions<T> {
-	u64: BigUint64Array;
 	pointer: bigint;
-	arrayOffset: bigint;
 	itemsCount: bigint;
 	itemSize: bigint;
+	memberInfo: MemberInfo;
 	callback: (itemPointer: bigint) => T;
 }
 interface CreateWGPUItemsByHeapIndexOptions<T> {
@@ -155,29 +183,12 @@ interface CreateWGPUItemsByHeapIndexOptions<T> {
 export function createWGPUItemsByPointer<T>(
 	options: CreateWGPUItemsByPointerOptions<T>
 ) {
-	const { u64, pointer, arrayOffset, itemsCount, itemSize, callback } =
-		options;
-	// const items: T[] = [];
-	const arrayPointerIndex = (pointer + arrayOffset) / WGPU_SIZE.u64;
-	const arrayPointer = u64[Number(arrayPointerIndex)];
+	const { pointer, itemsCount, memberInfo, itemSize, callback } = options;
+	const arrayPointer = _big(pointer, memberInfo);
 	return new Array(Number(itemsCount)).fill(1).map((_, i) => {
 		const itemPointer = arrayPointer + BigInt(i) * itemSize;
-		// const itemHeapIndex = u64[Number(arrayPointer / WGPU_SIZE.u64) + i];
 		return callback(itemPointer);
-
-		// const attribute = WGPUVertexAttributeFromBuffer(
-		// 	attributePointer,
-		// 	u32,
-		// 	u64
-		// );
-		// return attribute
 	});
-	// for (let i = 0; i < itemsCount; i++) {
-
-	// 	// console.log(i, attribute);
-	// 	items.push(attribute);
-	// }
-	// return items;
 }
 export function createWGPUItemsByHeapIndex<T>(
 	options: CreateWGPUItemsByHeapIndexOptions<T>

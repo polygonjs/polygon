@@ -4,42 +4,34 @@ import {
 	filterModeIntToGPUFilterMode,
 	mipmapFilterModeIntToGPUMipmapFilterMode,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { labelFromBuffer, u16Create, u32Create } from "../utils/WebGPUUtils";
+import { _label, _num } from "../utils/WebGPUUtils";
+import { WGPUSamplerDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUSamplerDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUSamplerDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u16 = new Uint16Array(buffer);
-	const u32 = new Uint32Array(buffer);
-	const u64 = new BigUint64Array(buffer);
-	const offset = WGPU_OFFSET.WGPUSamplerDescriptor;
-	const _u32 = u32Create(u32, pointer);
-	const _u16 = u16Create(u16, pointer);
+	const m = WGPUSamplerDescriptor.members;
 
 	//
-	const label = labelFromBuffer(pointer, offset, u64);
+	const label = _label(p, m);
 	const addressModeU = addressModeIntToGPUAddressMode(
-		_u32(offset.addressModeU)
+		_num(p, m.addressModeU)
 	);
 	const addressModeV = addressModeIntToGPUAddressMode(
-		_u32(offset.addressModeV)
+		_num(p, m.addressModeV)
 	);
 	const addressModeW = addressModeIntToGPUAddressMode(
-		_u32(offset.addressModeW)
+		_num(p, m.addressModeW)
 	);
-	const magFilter = filterModeIntToGPUFilterMode(_u32(offset.magFilter));
-	const minFilter = filterModeIntToGPUFilterMode(_u32(offset.minFilter));
+	const magFilter = filterModeIntToGPUFilterMode(_num(p, m.magFilter));
+	const minFilter = filterModeIntToGPUFilterMode(_num(p, m.minFilter));
 	const mipmapFilter = mipmapFilterModeIntToGPUMipmapFilterMode(
-		_u32(offset.mipmapFilter)
+		_num(p, m.mipmapFilter)
 	);
-	const lodMinClamp = _u32(offset.lodMinClamp);
-	const lodMaxClamp = _u32(offset.lodMaxClamp);
-	const compare = compareFunctionIntToGPUCompareFunction(
-		_u32(offset.compare)
-	);
-	const maxAnisotropy = _u16(offset.maxAnisotropy);
+	const lodMinClamp = _num(p, m.lodMinClamp);
+	const lodMaxClamp = _num(p, m.lodMaxClamp);
+	const compare = compareFunctionIntToGPUCompareFunction(_num(p, m.compare));
+	const maxAnisotropy = _num(p, m.maxAnisotropy);
 
 	const sampler: GPUSamplerDescriptor = {
 		label,
@@ -57,3 +49,4 @@ export function WGPUSamplerDescriptorFromBuffer(
 
 	return sampler;
 }
+

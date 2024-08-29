@@ -292,17 +292,17 @@ export function loadWasm(): Promise<void> {
 						}
 						mapFunc("c_style_strlen", "strlen");
 						if (methodName.startsWith("on_wgpu_device_ready")) {
-							window.onWebGPUReady =
+							window.wasmFunctions.onWebGPUReady =
 								method as OnWebGPUReadyFunction;
 						}
 						if (methodName.startsWith("init_draw_data")) {
-							window.initDrawData =
+							window.wasmFunctions.initDrawData =
 								method as InitDrawDataFunction;
 						}
 						if (
 							methodName.startsWith("on_request_animation_frame")
 						) {
-							window.onRequestAnimationFrame =
+							window.wasmFunctions.onRequestAnimationFrame =
 								method as OnRequestAnimationFrameFunction;
 						}
 					}
@@ -310,8 +310,8 @@ export function loadWasm(): Promise<void> {
 			};
 			linkWasmFunctions();
 			if (
-				window.onWebGPUReady == null ||
-				window.onRequestAnimationFrame == null
+				window.wasmFunctions.onWebGPUReady == null ||
+				window.wasmFunctions.onRequestAnimationFrame == null
 			) {
 				console.error("functions not assigned");
 			}

@@ -28,3 +28,4 @@ src/jai/.build
 bin/
 public/*.wasm
 imgui.ini
+wgpu_wasm/generate_ts

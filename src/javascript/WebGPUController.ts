@@ -1,5 +1,5 @@
 import { clockInit, clockTick } from "./Clock";
-import { USELESS_ARG0 } from "./Common";
+import { updateMemoryArrayViews, USELESS_ARG0 } from "./Common";
 import { addEvents, eventsDataReset } from "./EventsController";
 import { heapAdd } from "./WasmHeap";
 import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
@@ -63,14 +63,16 @@ export function webGPURenderControllerCreate(
 	let framesCount = 0;
 	let animateAllowed: boolean = true;
 
-	window.onWebGPUReady(
+	updateMemoryArrayViews();
+	window.wasmFunctions.onWebGPUReady(
 		USELESS_ARG0,
 		canvasIndex,
 		deviceHeapIndex,
 		queueHeapIndex,
 		formatNative
 	);
-	window.initDrawData(USELESS_ARG0);
+	updateMemoryArrayViews();
+	window.wasmFunctions.initDrawData(USELESS_ARG0);
 
 	const resizeObserver = webGPUListenToResize(
 		webGPURequestResponse.device,
@@ -93,7 +95,8 @@ export function webGPURenderControllerCreate(
 
 		// heapCopy(previousHeap);
 		// const currentTexture = wgpuSurfaceGetCurrentTexture();
-		window.onRequestAnimationFrame(
+		updateMemoryArrayViews();
+		window.wasmFunctions.onRequestAnimationFrame(
 			USELESS_ARG0,
 			BigInt(clockData.time),
 			BigInt(canvas.width),

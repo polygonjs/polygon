@@ -1,7 +1,7 @@
 import { heapGet } from "../../WasmHeap";
 import { WGPUExtent3DFromBuffer } from "../FromBuffer/WGPUExtent3D";
 import { WGPUImageCopyTextureFromBuffer } from "../FromBuffer/WGPUImageCopyTexture";
-import { WGPUTextureDataLayout } from "../FromBuffer/WGPUTextureDataLayout";
+import { WGPUTextureDataLayoutFromBuffer } from "../FromBuffer/WGPUTextureDataLayout";
 
 export function wgpuQueueWriteTexture(
 	queuHeapIndex: bigint,
@@ -21,7 +21,7 @@ export function wgpuQueueWriteTexture(
 		Number(dataPointer) + Number(dataSize)
 	);
 
-	const dataLayout = WGPUTextureDataLayout(dataLayoutPointer);
+	const dataLayout = WGPUTextureDataLayoutFromBuffer(dataLayoutPointer);
 	const size = WGPUExtent3DFromBuffer(sizePointer);
 
 	queue.writeTexture(destination, data, dataLayout, size);

@@ -1,18 +1,15 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { stringFromBuffer } from "../utils/WebGPUUtils";
+import { _str } from "../utils/WebGPUUtils";
+import { WGPUShaderModuleWGSLDescriptor } from "../utils/WGPUStructInfos";
 
 interface Mock_GPUShaderModuleWGSLDescriptor {
 	code: string;
 }
 export function WGPUShaderModuleWGSLDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): Mock_GPUShaderModuleWGSLDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	//
-	const offset = WGPU_OFFSET.WGPUShaderModuleWGSLDescriptor;
+	const m = WGPUShaderModuleWGSLDescriptor.members;
 
-	const code = stringFromBuffer(pointer, offset.code, u64);
+	const code = _str(p, m.code);
 	if (!code) {
 		throw new Error(
 			"WGPUShaderModuleWGSLDescriptorFromBuffer:code is null"

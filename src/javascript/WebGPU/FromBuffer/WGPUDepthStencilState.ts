@@ -2,46 +2,38 @@ import {
 	compareFunctionIntToGPUCompareFunction,
 	textureFormatIntToGPUTextureFormat,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { f32Create, s32Create, u32Create } from "../utils/WebGPUUtils";
+import { _num } from "../utils/WebGPUUtils";
+import { WGPUDepthStencilState } from "../utils/WGPUStructInfos";
 import { WGPUStencilFaceStateFromBuffer } from "./WGPUStencilFaceState";
 
 export function WGPUDepthStencilStateFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUDepthStencilState {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const s32 = new Int32Array(buffer);
-	const f32 = new Float32Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	const _s32 = s32Create(s32, pointer);
-	const _f32 = f32Create(f32, pointer);
-	//
-	const offset = WGPU_OFFSET.WGPUDepthStencilState;
+	const m = WGPUDepthStencilState.members;
 
 	//
-	const formatb = _u32(offset.format);
+	const formatb = _num(p, m.format);
 	const format = textureFormatIntToGPUTextureFormat(formatb);
 	//
-	const depthWriteEnabledb = _u32(offset.depthWriteEnabled);
+	const depthWriteEnabledb = _num(p, m.depthWriteEnabled);
 	const depthWriteEnabled = Boolean(depthWriteEnabledb);
 	//
-	const depthCompareb = _u32(offset.depthCompare);
+	const depthCompareb = _num(p, m.depthCompare);
 	const depthCompare = compareFunctionIntToGPUCompareFunction(depthCompareb);
 	//
 
 	const stencilFront = WGPUStencilFaceStateFromBuffer(
-		pointer + offset.stencilFront
+		p + m.stencilFront.offset
 	);
 	const stencilBack = WGPUStencilFaceStateFromBuffer(
-		pointer + offset.stencilBack
+		p + m.stencilBack.offset
 	);
 	//
-	const stencilReadMask = _u32(offset.stencilReadMask);
-	const stencilWriteMask = _u32(offset.stencilWriteMask);
-	const depthBias = _s32(offset.depthBias);
-	const depthBiasSlopeScale = _f32(offset.depthBiasSlopeScale);
-	const depthBiasClamp = _f32(offset.depthBiasClamp);
+	const stencilReadMask = _num(p, m.stencilReadMask);
+	const stencilWriteMask = _num(p, m.stencilWriteMask);
+	const depthBias = _num(p, m.depthBias);
+	const depthBiasSlopeScale = _num(p, m.depthBiasSlopeScale);
+	const depthBiasClamp = _num(p, m.depthBiasClamp);
 
 	//
 	const depthStencilState: GPUDepthStencilState = {

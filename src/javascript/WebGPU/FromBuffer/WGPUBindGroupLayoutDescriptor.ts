@@ -1,28 +1,22 @@
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { _big, createWGPUItemsByPointer, _label } from "../utils/WebGPUUtils";
 import {
-	createWGPUItemsByPointer,
-	labelFromBuffer,
-	u64Create,
-} from "../utils/WebGPUUtils";
+	WGPUBindGroupLayoutDescriptor,
+	WGPUBindGroupLayoutEntry,
+} from "../utils/WGPUStructInfos";
 import { WGPUBindGroupLayoutEntryFromBuffer } from "./WGPUBindGroupLayoutEntry";
 
 export function WGPUBindGroupLayoutDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUBindGroupLayoutDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	const _u64 = u64Create(u64, pointer);
+	const m = WGPUBindGroupLayoutDescriptor.members;
 	//
-	const offset = WGPU_OFFSET.WGPUBindGroupLayoutDescriptor;
-	//
-	const label = labelFromBuffer(pointer, offset, u64);
-	const entriesCount = _u64(offset.entryCount);
+	const label = _label(p, m);
+	const entriesCount = _big(p, m.entryCount);
 	const entries = createWGPUItemsByPointer<GPUBindGroupLayoutEntry>({
-		u64,
-		pointer,
-		arrayOffset: offset.entries,
+		pointer: p,
 		itemsCount: entriesCount,
-		itemSize: WGPU_SIZE.WGPUBindGroupLayoutEntry,
+		itemSize: WGPUBindGroupLayoutEntry.size,
+		memberInfo: m.entries,
 		callback: (itemPointer) =>
 			WGPUBindGroupLayoutEntryFromBuffer(itemPointer),
 	});

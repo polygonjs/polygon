@@ -1,15 +1,12 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { labelFromBuffer } from "../utils/WebGPUUtils";
+import { _label } from "../utils/WebGPUUtils";
+import { WGPUCommandEncoderDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUCommandEncoderDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUCommandEncoderDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
+	const m = WGPUCommandEncoderDescriptor.members;
 	//
-	const offset = WGPU_OFFSET.WGPUCommandEncoderDescriptor;
-	//
-	const label = labelFromBuffer(pointer, offset, u64);
+	const label = _label(p, m);
 	//
 	const desc: GPUCommandEncoderDescriptor = { label };
 	return desc;

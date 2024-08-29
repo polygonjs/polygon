@@ -2,61 +2,46 @@ import {
 	textureDimensionIntToGPUTextureDimension,
 	textureFormatIntToGPUTextureFormat,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { WGPU_SIZE } from "../utils/WebGPUOffset";
 import {
+	_big,
+	_label,
+	_num,
 	createWGPUItemsByPointer,
-	labelFromBuffer,
-	u32Create,
-	u64Create,
 } from "../utils/WebGPUUtils";
+import { WGPUTextureDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUExtent3DFromBuffer } from "./WGPUExtent3D";
 
 export function WGPUTextureDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUTextureDescriptor {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	// const pointer = Number(pointerb);
-	const offset = WGPU_OFFSET.WGPUTextureDescriptor;
-	// const u8 = new Uint8Array(buffer);
+	const m = WGPUTextureDescriptor.members;
 	const u32 = new Uint32Array(buffer);
-	const u64 = new BigUint64Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	const _u64 = u64Create(u64, pointer);
 
-	const label = labelFromBuffer(pointer, offset, u64);
+	const label = _label(p, m);
 	//
-	// const usageOffset = offset.usage;
-	// const usageSize = WGPU_SIZE.u32;
-	// const usageStart = (pointer + usageOffset) / usageSize;
-	// const usageb = u64[Number(usageStart)];
-	const usage = _u32(offset.usage); //Number(usageb);
+	const usage = _num(p, m.usage);
 	//
-	// const dimensionOffset = offset.dimension;
-	// const dimensionSize = WGPU_SIZE.u32;
-	// const dimensionStart = (pointer + dimensionOffset) / dimensionSize;
-	const dimensionb = _u32(offset.dimension); //u64[Number(dimensionStart)];
+	const dimensionb = _num(p, m.dimension);
 	const dimension = textureDimensionIntToGPUTextureDimension(
 		Number(dimensionb)
 	);
 	//
-	const size = WGPUExtent3DFromBuffer(pointer + offset.size);
+	const size = WGPUExtent3DFromBuffer(p + m.size.offset);
 	//
-	// const formatOffset = offset.format;
-	// const formatSize = WGPU_SIZE.u32;
-	// const formatStart = (pointer + formatOffset) / formatSize;
-	const formatb = _u32(offset.format); // u32[Number(formatStart)];
+	const formatb = _num(p, m.format);
 	const format = textureFormatIntToGPUTextureFormat(formatb);
 	//
-	const mipLevelCount = _u32(offset.mipLevelCount);
-	const sampleCount = _u32(offset.sampleCount);
-	const viewFormatCount = _u64(offset.viewFormatCount);
+	const mipLevelCount = _num(p, m.mipLevelCount);
+	const sampleCount = _num(p, m.sampleCount);
+	const viewFormatCount = _big(p, m.viewFormatCount);
 
 	const viewFormats = createWGPUItemsByPointer<GPUTextureFormat>({
-		u64,
-		pointer,
-		arrayOffset: offset.viewFormats,
+		pointer: p,
 		itemsCount: viewFormatCount,
-		itemSize: WGPU_SIZE.WGPUTextureFormat,
+		itemSize: WGPU_SIZE.u32,
+		memberInfo: m.viewFormats,
 		callback: (itemPointer) => {
 			const itemFormatb = u32[Number(itemPointer / WGPU_SIZE.u32)];
 			const itemFormat = textureFormatIntToGPUTextureFormat(itemFormatb);

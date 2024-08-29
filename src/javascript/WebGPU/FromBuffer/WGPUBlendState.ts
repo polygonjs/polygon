@@ -1,11 +1,11 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
+import { WGPUBlendState } from "../utils/WGPUStructInfos";
 import { WGPUBlendComponentFromBuffer } from "./WGPUBlendComponent";
 
 export function WGPUBlendStateFromBuffer(pointer: bigint): GPUBlendState {
-	const offset = WGPU_OFFSET.WGPUBlendState;
+	const m = WGPUBlendState.members;
 	//
-	const color = WGPUBlendComponentFromBuffer(pointer + offset.color);
-	const alpha = WGPUBlendComponentFromBuffer(pointer + offset.alpha);
+	const color = WGPUBlendComponentFromBuffer(pointer + m.color.offset);
+	const alpha = WGPUBlendComponentFromBuffer(pointer + m.alpha.offset);
 	//
 	const blendState: GPUBlendState = { color, alpha };
 	return blendState;

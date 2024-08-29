@@ -1,18 +1,15 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { f64Create } from "../utils/WebGPUUtils";
+import { _num } from "../utils/WebGPUUtils";
+import { WGPUColor } from "../utils/WGPUStructInfos";
 
-export function WGPUColorFromBuffer(pointer: bigint): GPUColor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const offset = WGPU_OFFSET.WGPUColor;
-	const u64 = new Float64Array(buffer);
+export function WGPUColorFromBuffer(p: bigint): GPUColor {
+	const m = WGPUColor.members;
 
-	const _f64 = f64Create(u64, pointer);
-
-	const r = _f64(offset.r);
-	const g = _f64(offset.g);
-	const b = _f64(offset.b);
-	const a = _f64(offset.a);
+	const r = _num(p, m.r);
+	const g = _num(p, m.g);
+	const b = _num(p, m.b);
+	const a = _num(p, m.a);
 
 	const color: GPUColor = { r, g, b, a };
 	return color;
 }
+

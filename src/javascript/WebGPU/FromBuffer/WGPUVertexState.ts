@@ -1,46 +1,44 @@
 import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import { createWGPUItemsByPointer, u64Create } from "../utils/WebGPUUtils";
+import { _big, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
+import {
+	WGPUVertexBufferLayout,
+	WGPUVertexState,
+} from "../utils/WGPUStructInfos";
 import { WGPUVertexBufferLayoutFromBuffer } from "./WGPUVertexBufferLayout";
 
-export function WGPUVertexStateFromBuffer(pointer: bigint): GPUVertexState {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	const _u64 = u64Create(u64, pointer);
+export function WGPUVertexStateFromBuffer(p: bigint): GPUVertexState {
+	const m = WGPUVertexState.members;
 	//
-	const offset = WGPU_OFFSET.WGPUVertexState;
-	//
-	const moduleHeapIndex = _u64(offset.module);
+	const moduleHeapIndex = _big(p, m.module);
 	const module = heapGet<GPUShaderModule>(moduleHeapIndex);
 	if (!module) {
 		throw new Error("module is null");
 	}
 	//
-	const entryPointPointer = _u64(offset.entryPoint);
+	const entryPointPointer = _big(p, m.entryPoint);
 	const entryPoint = jsStringFromJaiStringWithoutLength(
 		BigInt(entryPointPointer)
 	);
 	//
-	const constantsCount = _u64(offset.constantCount);
+	const constantsCount = _big(p, m.constantCount);
 	if (constantsCount > 0) {
 		console.warn(
 			"WGPUVertexStateFromBuffer: constantsCount is greater than 0, but not implemented"
 		);
 	}
 	//
-	const bufferCount = _u64(offset.bufferCount);
+	const bufferCount = _big(p, m.bufferCount);
 	if (bufferCount >= 2) {
 		console.warn(
 			"WGPUVertexStateFromBuffer: bufferCountb is greater than 1, the pointer lookup with +BigInt(i) may not work. But it works in WGPUVertexBufferLayoutFromBuffer"
 		);
 	}
 	const buffers: GPUVertexBufferLayout[] = createWGPUItemsByPointer({
-		u64,
-		pointer,
-		arrayOffset: offset.buffers,
+		pointer: p,
 		itemsCount: bufferCount,
-		itemSize: WGPU_SIZE.WGPUVertexBufferLayout,
+		itemSize: WGPUVertexBufferLayout.size,
+		memberInfo: m.buffers,
 		callback: (itemPointer) =>
 			WGPUVertexBufferLayoutFromBuffer(itemPointer),
 	});

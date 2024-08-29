@@ -3,28 +3,26 @@ import {
 	loadOpIntToGPULoadOp,
 	storeOpIntToGPUStoreOp,
 } from "../utils/WebGPUMap";
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
-import { u32Create, u64Create } from "../utils/WebGPUUtils";
+import { WGPU_SIZE } from "../utils/WebGPUOffset";
+import { _big, _num } from "../utils/WebGPUUtils";
+import { WGPURenderPassColorAttachment } from "../utils/WGPUStructInfos";
 
 export function WGPURenderPassColorAttachmentFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPURenderPassColorAttachment {
 	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const u64 = new BigUint64Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	const _u64 = u64Create(u64, pointer);
 	//
-	const offset = WGPU_OFFSET.WGPURenderPassColorAttachment;
+	// const offset = WGPU_OFFSET.WGPURenderPassColorAttachment;
+	const m = WGPURenderPassColorAttachment.members;
 	//
-	const viewPointer = _u64(offset.view);
+	const viewPointer = _big(p, m.view);
 	const view = heapGet<GPUTextureView>(viewPointer)!;
-	const resolveTargetPointer = _u64(offset.resolveTarget);
+	const resolveTargetPointer = _big(p, m.resolveTarget);
 	const resolveTarget = heapGet<GPUTextureView>(resolveTargetPointer);
 	//
-	const clearValueOffset = offset.clearValue;
+	const clearValueOffset = m.clearValue.offset;
 	const clearValueSize = WGPU_SIZE.float64;
-	const clearValueStart = (pointer + clearValueOffset) / clearValueSize;
+	const clearValueStart = (p + clearValueOffset) / clearValueSize;
 	const start = Number(clearValueStart);
 	const sizeN = Number(4);
 	const f64 = new Float64Array(buffer).subarray(start, start + sizeN);
@@ -35,8 +33,8 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 		Number(f64[3]),
 	];
 	//
-	const loadOp = loadOpIntToGPULoadOp(_u32(offset.loadOp));
-	const storeOp = storeOpIntToGPUStoreOp(_u32(offset.storeOp));
+	const loadOp = loadOpIntToGPULoadOp(_num(p, m.loadOp));
+	const storeOp = storeOpIntToGPUStoreOp(_num(p, m.storeOp));
 	//
 
 	//

@@ -1,15 +1,14 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { labelFromBuffer } from "../utils/WebGPUUtils";
+import { _label } from "../utils/WebGPUUtils";
+import { WGPUCommandBufferDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUCommandBufferDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUCommandBufferDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	const offset = WGPU_OFFSET.WGPUCommandBufferDescriptor;
+	const m = WGPUCommandBufferDescriptor.members;
 
-	const label = labelFromBuffer(pointer, offset, u64);
+	const label = _label(p, m);
 
 	const desc: GPUCommandBufferDescriptor = { label };
 	return desc;
 }
+

@@ -1,31 +1,25 @@
-import { WGPU_OFFSET, WGPU_SIZE } from "../utils/WebGPUOffset";
+import { _big, _label, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
 import {
-	createWGPUItemsByPointer,
-	labelFromBuffer,
-	u64Create,
-} from "../utils/WebGPUUtils";
+	WGPURenderPassColorAttachment,
+	WGPURenderPassDescriptor,
+} from "../utils/WGPUStructInfos";
 import { WGPURenderPassColorAttachmentFromBuffer } from "./WGPURenderPassColorAttachment";
 import { WGPURenderPassDepthStencilAttachmentFromBuffer } from "./WGPURenderPassDepthStencilAttachment";
 
 export function WGPURenderPassDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPURenderPassDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	const _u64 = u64Create(u64, pointer);
+	const m = WGPURenderPassDescriptor.members;
 	//
-	const offset = WGPU_OFFSET.WGPURenderPassDescriptor;
+	const label = _label(p, m);
 	//
-	const label = labelFromBuffer(pointer, offset, u64);
-	//
-	const colorAttachmentCount = _u64(offset.colorAttachmentCount);
+	const colorAttachmentCount = _big(p, m.colorAttachmentCount);
 	const colorAttachments =
 		createWGPUItemsByPointer<GPURenderPassColorAttachment>({
-			u64,
-			pointer,
-			arrayOffset: offset.colorAttachments,
+			pointer: p,
 			itemsCount: colorAttachmentCount,
-			itemSize: WGPU_SIZE.WGPURenderPassColorAttachment,
+			itemSize: WGPURenderPassColorAttachment.size,
+			memberInfo: m.colorAttachments,
 			callback: (itemPointer) => {
 				return WGPURenderPassColorAttachmentFromBuffer(itemPointer);
 			},
@@ -34,7 +28,7 @@ export function WGPURenderPassDescriptorFromBuffer(
 
 	const depthStencilAttachment =
 		WGPURenderPassDepthStencilAttachmentFromBuffer(
-			_u64(offset.depthStencilAttachment)
+			_big(p, m.depthStencilAttachment)
 		);
 
 	const desc: GPURenderPassDescriptor = {

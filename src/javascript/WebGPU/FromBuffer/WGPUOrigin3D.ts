@@ -1,16 +1,12 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { u32Create } from "../utils/WebGPUUtils";
+import { _num } from "../utils/WebGPUUtils";
+import { WGPUOrigin3D } from "../utils/WGPUStructInfos";
 
-export function WGPUOrigin3DFromBuffer(pointer: bigint): GPUOrigin3D {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const offset = WGPU_OFFSET.WGPUOrigin3D;
-	const u32 = new Uint32Array(buffer);
-
-	const _u32 = u32Create(u32, pointer);
+export function WGPUOrigin3DFromBuffer(p: bigint): GPUOrigin3D {
+	const m = WGPUOrigin3D.members;
 	//
-	const x = _u32(offset.x);
-	const y = _u32(offset.y);
-	const z = _u32(offset.z);
+	const x = _num(p, m.x);
+	const y = _num(p, m.y);
+	const z = _num(p, m.z);
 
 	const desc: GPUOrigin3D = {
 		x,
@@ -19,3 +15,4 @@ export function WGPUOrigin3DFromBuffer(pointer: bigint): GPUOrigin3D {
 	};
 	return desc;
 }
+

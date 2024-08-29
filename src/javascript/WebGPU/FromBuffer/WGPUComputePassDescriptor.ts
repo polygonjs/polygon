@@ -1,15 +1,12 @@
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { labelFromBuffer } from "../utils/WebGPUUtils";
+import { _label } from "../utils/WebGPUUtils";
+import { WGPUComputePassDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUComputePassDescriptorFromBuffer(
-	pointer: bigint
+	p: bigint
 ): GPUComputePassDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
+	const m = WGPUComputePassDescriptor.members;
 	//
-	const offset = WGPU_OFFSET.WGPUComputePipelineDescriptor;
-	//
-	const label = labelFromBuffer(pointer, offset, u64);
+	const label = _label(p, m);
 	//
 
 	const desc: GPUComputePassDescriptor = {

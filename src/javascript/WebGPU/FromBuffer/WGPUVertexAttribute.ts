@@ -1,29 +1,18 @@
 import { vertexFormatIntToGPUVertexFormat } from "../utils/WebGPUMap";
-import { WGPU_OFFSET } from "../utils/WebGPUOffset";
-import { u32Create, u64Create } from "../utils/WebGPUUtils";
+import { _big, _num } from "../utils/WebGPUUtils";
+import { WGPUVertexAttribute } from "../utils/WGPUStructInfos";
 
-export function WGPUVertexAttributeFromBuffer(
-	pointer: bigint
-): GPUVertexAttribute {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u32 = new Uint32Array(buffer);
-	const u64 = new BigUint64Array(buffer);
-	const _u32 = u32Create(u32, pointer);
-	const _u64 = u64Create(u64, pointer);
+export function WGPUVertexAttributeFromBuffer(p: bigint): GPUVertexAttribute {
+	const m = WGPUVertexAttribute.members;
 	//
-	const offset = WGPU_OFFSET.WGPUVertexAttribute;
-	//
-	const formatb = _u32(offset.format);
+	const formatb = _num(p, m.format);
 	const format = vertexFormatIntToGPUVertexFormat(Number(formatb));
 	if (format == null) {
 		throw new Error("format is null, memory is most likely corrupted");
 	}
 	//
-	const offsetb = _u64(offset.offset);
-
-	//
-	const shaderLocationb = _u32(offset.shaderLocation);
-	const shaderLocation = Number(shaderLocationb);
+	const offsetb = _big(p, m.offset);
+	const shaderLocation = _num(p, m.shaderLocation);
 
 	const attribute: GPUVertexAttribute = {
 		format,
