@@ -13,7 +13,8 @@
 	// @builtin(local_invocation_index) local_invocation_index: u32,
 	// @builtin(num_workgroups) num_workgroups: vec3<u32>
 ) {
-	let stride:i32 = 3+3+2;
+	let stride:i32 = 3+3+3+2;
+	let points_count:i32 = 8;
 	// let invocation_id:u32 = id.x*id.y*id.z;
 	// vertexBuffer[0] = f32(num_workgroups.x*num_workgroups.y*num_workgroups.z);
 
@@ -33,7 +34,7 @@
 	// vertexBuffer[num_workgroups.x+0] = f32(num_workgroups.x);
 	// vertexBuffer[num_workgroups.x+1] = f32(num_workgroups.y);
 	// vertexBuffer[num_workgroups.x+2] = f32(num_workgroups.z);
-	let a = size[0];
+	// let a = size[0];
 	// vertex
 	// vertexBuffer[vertex_id + 0] = 2.;
 	// vertexBuffer[vertex_id + 0] = size[0] * (f32(id.x % 2)-0.5);
@@ -53,9 +54,9 @@
 	// dest2[i*4] = src[i]*16.;
 
 	var vertex_id:i32 = 0;
-	for (var i = 0; i < 8; i += 1) {
-		for (var j = 0; j < 8; j += 1) {
-			vertexBuffer[8*i + j] = 0.8;//f32(vertex_id + j);
+	for (var i = 0; i < points_count; i += 1) {
+		for (var j = 0; j < stride; j += 1) {
+			vertexBuffer[stride*i + j] = 0.8;//f32(vertex_id + j);
 		}
 	}
 	workgroupBarrier();
@@ -104,7 +105,7 @@
 
 	workgroupBarrier();
 
-	for (var k = 0; k < 8; k += 1) {
+	for (var k = 0; k < points_count; k += 1) {
 		vertexBuffer[k*stride + 0] *= size[0];
 		vertexBuffer[k*stride + 1] *= size[1];
 		vertexBuffer[k*stride + 2] *= size[2];

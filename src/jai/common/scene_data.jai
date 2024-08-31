@@ -1,10 +1,11 @@
 
 Vertex :: struct {
 	position: Vector3;
+	normal: Vector3;
 	color: Vector3;
 	uv: Vector2;
 }
-VERTEX_FLOATS_COUNT :: 3 + 3 + 2;
+// VERTEX_FLOATS_COUNT :: 3 + 3 + 3 + 2;
 Time :: float32;
 VertexIndex :: u32;
 VertexLayoutBuffer :: u8;

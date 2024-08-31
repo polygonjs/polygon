@@ -231,7 +231,7 @@ init_draw_data :: (){
 	assert(DRAW_DATA.pipeline != null, "Pipeline is not created correctly");
 
 	#if USE_COMPUTE_SHADER {
-		compute_shader_controller = compute_shader_controller_create(*wgpu_context, queue, SHADER_COMPUTE);
+		compute_shader_controller = compute_shader_controller_create(*wgpu_context, queue, SHADER_COMPUTE, xx (SCENE_DATA.vertices.count * size_of(Vertex)));
 	} else {
 		DRAW_DATA.vertex.buffer, DRAW_DATA.vertex.buffer_size = wgpu_vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
 	}

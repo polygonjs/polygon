@@ -55,7 +55,9 @@ build_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
 	return shader4;
 }
 
-compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue, shader_compute_raw: string) -> ComputeShaderController {
+// InputType :: [3]float;
+// ResultType :: [64]float;
+compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue, shader_compute_raw: string, vertex_buffer_size :u64) -> ComputeShaderController {
 	controller: ComputeShaderController = .{
 		wgpu_context = wgpu_context,
 		queue = queue,
@@ -64,11 +66,8 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 	};
 	device := wgpu_context.device;
 
-	InputType :: [3]float;
-	ResultType :: [64]float;
-	box_size:InputType = .[2, 1, 1];
+	box_size :[3]float= .[2, 1, 1];
 	box_size_buffer_size := cast(u64) size_of(type_of(box_size));//cast(u64) input.count * size_of(float);
-	vertex_buffer_size :u64= 64 * size_of(float);
 
 	// work_groups_count :Vector3= .{1, 1, 1};
 	// work_groups_count_total :u32= cast(u32)(work_groups_count.x)*cast(u32)(work_groups_count.y)*cast(u32)(work_groups_count.z);
@@ -282,7 +281,8 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 		#if MAP_BUFFER {
 			wgpuBufferMapAsync(controller.vertex_buffer_map, xx WGPUMapMode.Read, 0, controller.vertex_buffer_size, wgpu_compute_buffer_map_async_callback, null);
 			wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
-			result_values := cast(ResultType) wgpuBufferGetMappedRange(controller.vertex_buffer_map, 0, controller.vertex_buffer_size);
+			// result_values := /*cast(ResultType)*/ 
+			wgpuBufferGetMappedRange(controller.vertex_buffer_map, 0, controller.vertex_buffer_size);
 
 			//
 			// print_green(tprint("pipeline created:%\n", controller.pipeline));
