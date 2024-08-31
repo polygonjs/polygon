@@ -1,10 +1,5 @@
 const text_decoder = new TextDecoder();
 export function jsStringFromJaiString(pointer: bigint, strlength: number) {
-	// console.log({ pointer });
-	// if(!allocated){
-	// 	console.error("Memory not allocated")
-	// 	return
-	// }
 	const u8 = new Uint8Array(
 		window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer
 	);
@@ -12,12 +7,10 @@ export function jsStringFromJaiString(pointer: bigint, strlength: number) {
 		console.error("Pointer out of bounds", Number(pointer), u8.length);
 		return;
 	}
-	// console.log({ buffer: allocated!.buffer, u8, allocated });
 	const bytes = u8.subarray(
 		Number(pointer),
 		Number(pointer) + Number(strlength)
 	);
-	// console.log("length", Number(pointer), Number(length), bytes);
 	return text_decoder.decode(bytes);
 }
 export function jsStringFromJaiStringWithoutLength(
@@ -34,7 +27,6 @@ export function jsStringFromJaiStringWithoutLength(
 		console.error("Pointer out of bounds", startIndex, u8.length);
 		return;
 	}
-	// console.log({ buffer: allocated!.buffer, u8, allocated });
 	let charCode = u8[startIndex];
 	let strLength = 0;
 	for (let i = startIndex; i < u8.length; i++) {
@@ -46,7 +38,6 @@ export function jsStringFromJaiStringWithoutLength(
 	}
 
 	const bytes = u8.subarray(startIndex, startIndex + strLength - 1);
-	// console.log("length", Number(pointer), Number(length), bytes);
 	return text_decoder.decode(bytes);
 }
 
@@ -467,3 +458,4 @@ export function toupper(c: number): number {
 	}
 	return c;
 }
+

@@ -75,9 +75,20 @@ export function updateMemoryArrayViewsIfNeeded() {
 	}
 }
 const LITTLE_ENDIAN = true;
+export function setBoolean(i: number, value: boolean) {
+	updateMemoryArrayViewsIfNeeded();
+	return window.ALLOCATED_MEMORY_CONTAINER.dataView.setUint8(
+		i,
+		value ? 0xff : 0
+	);
+}
 export const getU8 = (i: number) => {
 	updateMemoryArrayViewsIfNeeded();
 	return window.ALLOCATED_MEMORY_CONTAINER.dataView.getUint8(i);
+};
+export const setU8 = (i: number, value: number) => {
+	updateMemoryArrayViewsIfNeeded();
+	return window.ALLOCATED_MEMORY_CONTAINER.dataView.setUint8(i, value);
 };
 export const getU16 = (i: number) => {
 	updateMemoryArrayViewsIfNeeded();
@@ -94,6 +105,15 @@ export const getU32 = (i: number) => {
 		LITTLE_ENDIAN
 	);
 };
+export const setU32 = (i: number, value: number) => {
+	updateMemoryArrayViewsIfNeeded();
+
+	return window.ALLOCATED_MEMORY_CONTAINER.dataView.setUint32(
+		i,
+		value,
+		LITTLE_ENDIAN
+	);
+};
 export const getU64 = (i: number) => {
 	updateMemoryArrayViewsIfNeeded();
 	return window.ALLOCATED_MEMORY_CONTAINER.dataView.getBigUint64(
@@ -106,6 +126,14 @@ export const getS32 = (i: number) =>
 export const getFLOAT32 = (i: number) => {
 	return window.ALLOCATED_MEMORY_CONTAINER.dataView.getFloat32(
 		i,
+		LITTLE_ENDIAN
+	);
+};
+export const setFLOAT32 = (i: number, value: number) => {
+	updateMemoryArrayViewsIfNeeded();
+	return window.ALLOCATED_MEMORY_CONTAINER.dataView.setFloat32(
+		i,
+		value,
 		LITTLE_ENDIAN
 	);
 };

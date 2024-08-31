@@ -1,7 +1,6 @@
 import "../css/style.css";
 import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { logBlueBg, logGreenBg } from "./Logger";
-// import { computeTest } from "./ComputeTest";
 import { loadWasm } from "./WasmRuntime2";
 import { webGPURequest } from "./WebGPURequest";
 import {
@@ -9,9 +8,6 @@ import {
 	webGPURenderControllerCreate,
 } from "./WebGPUController";
 import { ViteHotReloadEvent } from "./config/ViteHotReloadEvent";
-// import { WebGPUSetupOld } from "./WebGPU";
-// @ts-ignore
-// import { debugMain } from "./debug";
 
 let webGPURequestResponse: WebGPURequestResponse | undefined;
 let webGPUController: WebGPURenderController | undefined;
@@ -29,17 +25,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		createCanvas: true,
 	});
 	webGPUController?.start();
-	// WebGPUSetupOld(wgpuRequestResponse);
-	// const computeResult = await computeTest({ device });
-	// if (!computeResult) {
-	// 	console.error("computeResult is null");
-	// 	return;
-	// }
-	// setupAndRenderWebGPU(
-	// 	device
-	// 	// computeResult.verticesBufferRead,
-	// 	// computeResult.verticesBufferResult
-	// );
 });
 
 if (import.meta.hot) {
@@ -51,13 +36,9 @@ if (import.meta.hot) {
 		webGPUController = undefined;
 	});
 	import.meta.hot.on(ViteHotReloadEvent.BUILD_SUCCESS, async () => {
-		// logGreenBg("-----------------------------------------");
-		// logGreenBg("-----------------------------------------");
 		logGreenBg(
 			`------------ WASM HOT RELOAD ------------ ${wamsRebuildCount++}`
 		);
-		// logGreenBg("-----------------------------------------");
-		// logGreenBg("-----------------------------------------");
 		webGPUController?.stop();
 		await loadWasm();
 		if (!webGPURequestResponse) {

@@ -1,4 +1,4 @@
-import { WGPU_SIZE } from "./WebGPU/utils/WebGPUOffset";
+import { setBoolean, setFLOAT32, setU32, setU8 } from "./Common";
 
 // TODO: an improvement would be to only write to the memory
 // when an event happens.
@@ -124,6 +124,10 @@ export const EVENTS_DATA: EventsData = {
 
 export function addEvents(canvas: HTMLCanvasElement) {
 	function onPointerdown(event: PointerEvent) {
+		if (event.altKey) EVENTS_DATA.modifiers.alt = true;
+		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = true;
+		if (event.metaKey) EVENTS_DATA.modifiers.meta = true;
+		if (event.shiftKey) EVENTS_DATA.modifiers.shift = true;
 		if (event.button === 0) {
 			EVENTS_DATA.mouseButton.left = true;
 		}
@@ -140,6 +144,10 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		EVENTS_DATA.cursor.y = Math.round(event.clientY);
 	}
 	function onPointerup(event: PointerEvent) {
+		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
+		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = false;
+		if (event.metaKey) EVENTS_DATA.modifiers.meta = false;
+		if (event.shiftKey) EVENTS_DATA.modifiers.shift = false;
 		if (event.button === 0) {
 			EVENTS_DATA.mouseButton.left = false;
 		}
@@ -154,6 +162,10 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		EVENTS_DATA.wheel = event.deltaY;
 	}
 	function onKeydown(event: KeyboardEvent) {
+		if (event.altKey) EVENTS_DATA.modifiers.alt = true;
+		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = true;
+		if (event.metaKey) EVENTS_DATA.modifiers.meta = true;
+		if (event.shiftKey) EVENTS_DATA.modifiers.shift = true;
 		if (event.key.length > 1) {
 			for (let i = 0; i < KEYS_COUNT; i++) {
 				const key = KEYS[i];
@@ -166,10 +178,10 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		EVENTS_DATA.textCharCodes.push(event.key.charCodeAt(0));
 	}
 	function onKeyup(event: KeyboardEvent) {
-		if (event.altKey) EVENTS_DATA.modifiers.alt = true;
-		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = true;
-		if (event.metaKey) EVENTS_DATA.modifiers.meta = true;
-		if (event.shiftKey) EVENTS_DATA.modifiers.shift = true;
+		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
+		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = false;
+		if (event.metaKey) EVENTS_DATA.modifiers.meta = false;
+		if (event.shiftKey) EVENTS_DATA.modifiers.shift = false;
 		if (event.key.length > 1) {
 			for (let i = 0; i < KEYS_COUNT; i++) {
 				const key = KEYS[i];
@@ -189,10 +201,10 @@ export function addEvents(canvas: HTMLCanvasElement) {
 export function eventsDataReset() {
 	EVENTS_DATA.wheel = 0;
 	EVENTS_DATA.textCharCodes.length = 0;
-	EVENTS_DATA.modifiers.alt = false;
-	EVENTS_DATA.modifiers.ctrl = false;
-	EVENTS_DATA.modifiers.meta = false;
-	EVENTS_DATA.modifiers.shift = false;
+	// EVENTS_DATA.modifiers.alt = false;
+	// EVENTS_DATA.modifiers.ctrl = false;
+	// EVENTS_DATA.modifiers.meta = false;
+	// EVENTS_DATA.modifiers.shift = false;
 	// EVENTS_DATA.keys.fill(false);
 }
 
@@ -215,53 +227,35 @@ export function eventsDataUpdate(
 	// keys
 	keysPointer: bigint
 ) {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u8 = new Uint8Array(buffer);
-	const u32 = new Uint32Array(buffer);
-	const f32 = new Float32Array(buffer);
-
-	const _setBoolean = (pointer: bigint, value: boolean) => {
-		u8[Number(pointer / WGPU_SIZE.bool)] = value ? 0xff : 0;
-	};
-	const _setU8 = (pointer: bigint, value: number) => {
-		u8[Number(pointer / WGPU_SIZE.u8)] = value;
-	};
-	const _setU32 = (pointer: bigint, value: number) => {
-		u32[Number(pointer / WGPU_SIZE.u32)] = value;
-	};
-	const _setFloat32 = (pointer: bigint, value: number) => {
-		f32[Number(pointer / WGPU_SIZE.float)] = value;
-	};
-
 	// window
-	_setU32(windowWidthPointer, window.WebGPUCanvas.width);
-	_setU32(windowHeightPointer, window.WebGPUCanvas.height);
+	setU32(Number(windowWidthPointer), window.WebGPUCanvas.width);
+	setU32(Number(windowHeightPointer), window.WebGPUCanvas.height);
 
 	// mouse
-	_setU32(mxPointer, EVENTS_DATA.cursor.x);
-	_setU32(myPointer, EVENTS_DATA.cursor.y);
-	_setBoolean(lmbPressedPointer, EVENTS_DATA.mouseButton.left);
-	_setBoolean(mmbPressedPointer, EVENTS_DATA.mouseButton.middle);
-	_setBoolean(rmbPressedPointer, EVENTS_DATA.mouseButton.right);
+	setU32(Number(mxPointer), EVENTS_DATA.cursor.x);
+	setU32(Number(myPointer), EVENTS_DATA.cursor.y);
+	setBoolean(Number(lmbPressedPointer), EVENTS_DATA.mouseButton.left);
+	setBoolean(Number(mmbPressedPointer), EVENTS_DATA.mouseButton.middle);
+	setBoolean(Number(rmbPressedPointer), EVENTS_DATA.mouseButton.right);
 	// wheel
 	const wheel = EVENTS_DATA.wheel == 0 ? 0 : EVENTS_DATA.wheel > 0 ? -1 : 1;
-	_setFloat32(wheelPointer, wheel);
+	setFLOAT32(Number(wheelPointer), wheel);
 
 	let j = 0;
 	const texSize = Math.min(textDataSize, EVENTS_DATA.textCharCodes.length);
 	for (let i = BigInt(0); i < texSize; i++) {
-		_setU8(textDataPointer + i, EVENTS_DATA.textCharCodes[j]);
+		setU8(Number(textDataPointer + i), EVENTS_DATA.textCharCodes[j]);
 		j++;
 	}
 
 	// modifiers
-	_setBoolean(altPointer, EVENTS_DATA.modifiers.alt);
-	_setBoolean(ctrlPointer, EVENTS_DATA.modifiers.ctrl);
-	_setBoolean(metaPointer, EVENTS_DATA.modifiers.meta);
-	_setBoolean(shiftPointer, EVENTS_DATA.modifiers.shift);
+	setBoolean(Number(altPointer), EVENTS_DATA.modifiers.alt);
+	setBoolean(Number(ctrlPointer), EVENTS_DATA.modifiers.ctrl);
+	setBoolean(Number(metaPointer), EVENTS_DATA.modifiers.meta);
+	setBoolean(Number(shiftPointer), EVENTS_DATA.modifiers.shift);
 	// keys
 	for (let i = BigInt(0); i < KEYS_COUNT; i++) {
-		_setBoolean(keysPointer + i, EVENTS_DATA.keys[Number(i)]);
+		setBoolean(Number(keysPointer + i), EVENTS_DATA.keys[Number(i)]);
 	}
 }
 
