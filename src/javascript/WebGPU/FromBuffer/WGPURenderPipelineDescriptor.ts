@@ -1,4 +1,5 @@
-import { _big, _label, heapGetItemFromOffset } from "../utils/WebGPUUtils";
+import { heapGet } from "../../WasmHeap";
+import { _big, _label, _pointerValue } from "../utils/WebGPUUtils";
 import { WGPURenderPipelineDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUDepthStencilStateFromBuffer } from "./WGPUDepthStencilState";
 import { WGPUFragmentStateFromBuffer } from "./WGPUFragmentState";
@@ -9,17 +10,12 @@ import { WGPUVertexStateFromBuffer } from "./WGPUVertexState";
 export function WGPURenderPipelineDescriptorFromBuffer(
 	p: bigint
 ): GPURenderPipelineDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
-	//
 	const m = WGPURenderPipelineDescriptor.members;
 	//
 	const label = _label(p, m);
 	//
-	const layout = heapGetItemFromOffset<GPUPipelineLayout>(
-		u64,
-		p,
-		m.layout.offset
+	const layout = heapGet<GPUPipelineLayout>(
+		_pointerValue(p + m.layout.offset)
 	);
 
 	if (!layout) {

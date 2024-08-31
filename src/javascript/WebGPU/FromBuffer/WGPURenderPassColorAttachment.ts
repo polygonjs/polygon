@@ -3,16 +3,14 @@ import {
 	loadOpIntToGPULoadOp,
 	storeOpIntToGPUStoreOp,
 } from "../utils/WebGPUMap";
-import { WGPU_SIZE } from "../utils/WebGPUOffset";
-import { _big, _num } from "../utils/WebGPUUtils";
+import { _big, _num, _pointerValue } from "../utils/WebGPUUtils";
 import { WGPURenderPassColorAttachment } from "../utils/WGPUStructInfos";
+import { WGPUColorFromBuffer } from "./WGPUColor";
 
 export function WGPURenderPassColorAttachmentFromBuffer(
 	p: bigint
 ): GPURenderPassColorAttachment {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
 	//
-	// const offset = WGPU_OFFSET.WGPURenderPassColorAttachment;
 	const m = WGPURenderPassColorAttachment.members;
 	//
 	const viewPointer = _big(p, m.view);
@@ -20,18 +18,10 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 	const resolveTargetPointer = _big(p, m.resolveTarget);
 	const resolveTarget = heapGet<GPUTextureView>(resolveTargetPointer);
 	//
-	const clearValueOffset = m.clearValue.offset;
-	const clearValueSize = WGPU_SIZE.float64;
-	const clearValueStart = (p + clearValueOffset) / clearValueSize;
-	const start = Number(clearValueStart);
-	const sizeN = Number(4);
-	const f64 = new Float64Array(buffer).subarray(start, start + sizeN);
-	const clearValue: GPUColor = [
-		Number(f64[0]),
-		Number(f64[1]),
-		Number(f64[2]),
-		Number(f64[3]),
-	];
+	const clearValue = WGPUColorFromBuffer(p + m.clearValue.offset);
+	// const clearValue: GPUColorDict = { r: 0, g: 0, b: 0, a: 1 };
+	// srgbToLinear(clearValueSRGB, clearValue);
+	// console.log(clearValueSRGB, clearValue);
 	//
 	const loadOp = loadOpIntToGPULoadOp(_num(p, m.loadOp));
 	const storeOp = storeOpIntToGPUStoreOp(_num(p, m.storeOp));
@@ -47,4 +37,15 @@ export function WGPURenderPassColorAttachmentFromBuffer(
 	};
 	return colorAttachment;
 }
+
+// function srgbToLinearNum(color: number) {
+// 	return color <= 0.04045
+// 		? color / 12.92
+// 		: Math.pow((color + 0.055) / 1.055, 2.4);
+// }
+// function srgbToLinear(color: GPUColorDict, target: GPUColorDict) {
+// 	target.r = srgbToLinearNum(color.r);
+// 	target.g = srgbToLinearNum(color.g);
+// 	target.b = srgbToLinearNum(color.b);
+// }
 

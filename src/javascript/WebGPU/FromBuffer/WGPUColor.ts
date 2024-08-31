@@ -1,7 +1,7 @@
 import { _num } from "../utils/WebGPUUtils";
 import { WGPUColor } from "../utils/WGPUStructInfos";
 
-export function WGPUColorFromBuffer(p: bigint): GPUColor {
+export function WGPUColorFromBuffer(p: bigint): GPUColorDict /*GPUColor*/ {
 	const m = WGPUColor.members;
 
 	const r = _num(p, m.r);
@@ -9,7 +9,7 @@ export function WGPUColorFromBuffer(p: bigint): GPUColor {
 	const b = _num(p, m.b);
 	const a = _num(p, m.a);
 
-	const color: GPUColor = { r, g, b, a };
+	const color: GPUColorDict = { r, g, b, a };
 	return color;
 }
 

@@ -42,8 +42,8 @@ events_data_update :: (events_data :*EventsData, sdl_event :*SDL_Event){
 			}
 		}
 		case SDL_MOUSEMOTION; {
-			events_data.cursor.x = xx sdl_event.motion.x;
-			events_data.cursor.y = xx sdl_event.motion.y;
+			events_data.cursor.x = xx max(0, sdl_event.motion.x);
+			events_data.cursor.y = xx max(0, sdl_event.motion.y);
 		}
 		case SDL_MOUSEWHEEL; {
 			events_data.wheel = xx sdl_event.wheel.y;

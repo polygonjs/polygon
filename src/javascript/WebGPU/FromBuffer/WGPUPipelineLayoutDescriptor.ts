@@ -5,8 +5,6 @@ import { WGPUPipelineLayoutDescriptor } from "../utils/WGPUStructInfos";
 export function WGPUPipelineLayoutDescriptorFromBuffer(
 	p: bigint
 ): GPUPipelineLayoutDescriptor {
-	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
-	const u64 = new BigUint64Array(buffer);
 	const m = WGPUPipelineLayoutDescriptor.members;
 	//
 
@@ -14,10 +12,9 @@ export function WGPUPipelineLayoutDescriptorFromBuffer(
 	const groupLayoutCount = _big(p, m.bindGroupLayoutCount);
 	//
 	const bindGroupLayouts: GPUBindGroupLayout[] = createWGPUItemsByHeapIndex({
-		u64,
 		pointer: p,
-		arrayOffset: m.bindGroupLayouts.offset,
 		itemsCount: groupLayoutCount,
+		memberInfo: m.bindGroupLayouts,
 		callback: (itemHeapIndex) => {
 			const bindGroupLayout = heapGet<GPUBindGroupLayout>(itemHeapIndex);
 			if (!bindGroupLayout) {

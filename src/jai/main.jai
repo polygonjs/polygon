@@ -4,6 +4,8 @@ USE_IMGUI_DEBUG :: false;
 USE_COMPUTE_SHADER :: true;
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
+RENDER_IN_VIEWPORT :: false;
+RENDER_SCENE :: true;
 
 #placeholder WASM;
 #placeholder SHADER_RENDER;
@@ -349,7 +351,7 @@ on_request_animation_frame :: (
 		};
 		update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
 		render_pass_encoder1 = wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
-		wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
+		#if RENDER_IN_VIEWPORT wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
 
 
 		wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, DRAW_DATA.pipeline);
@@ -364,7 +366,7 @@ on_request_animation_frame :: (
 		}
 		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, DRAW_DATA.index.buffer, WGPUIndexFormat.Uint32, 0, DRAW_DATA.index.buffer_size);
 
-		wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
+		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
 		#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA, *events_data);
 		wgpuRenderPassEncoderEnd(render_pass_encoder1);
 

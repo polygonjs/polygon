@@ -153,7 +153,6 @@ export function loadWasm(): Promise<void> {
 		wgpuCommandBufferRelease,
 		wgpuCommandEncoderRelease,
 		wgpuRenderPassEncoderRelease,
-		// wgpuSurfaceGetCurrentTexture,
 		wgpuTextureCreateView,
 		wgpuBindGroupLayoutRelease,
 		wgpuBindGroupRelease,

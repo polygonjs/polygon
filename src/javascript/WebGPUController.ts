@@ -46,10 +46,15 @@ export function webGPURenderControllerCreate(
 			alert("failed to create a context");
 			return;
 		}
-		context.configure({
+		const contextConfigurationOptions: GPUCanvasConfiguration = {
 			device: webGPURequestResponse.device,
 			format: webGPURequestResponse.presentationFormat,
-		});
+			usage: GPUTextureUsage.RENDER_ATTACHMENT,
+			// viewFormats: ["bgra8unorm"], //["bgra8unorm", "bgra8unorm-srgb"],
+			// colorSpace: "srgb", //"display-p3",
+			alphaMode: "opaque", //"premultiplied",
+		};
+		context.configure(contextConfigurationOptions);
 		window.webGPUContext = context;
 	}
 	const canvasIndex = heapAdd(canvas);
