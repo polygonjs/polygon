@@ -6,11 +6,15 @@
 	"license": "Commercial",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "yarn build_js && yarn build_jai && yarn clean_dist",
+		"release": "yarn build_js && yarn release_jai && yarn clean_dist",
+		"build_js": "tsc && vite build",
+		"build_jai": "jai src/jai/build.jai",
+		"release_jai": "jai src/jai/build.jai -release && yarn optimize_wasm",
 		"preview": "vite preview",
-		"optimize_wasm": "wasm-opt -Oz --dce --strip-debug public/polygon-next.wasm -o public/polygon-next.wasm",
 		"jai_dev": "jai src/jai/build.jai",
-		"jai_release": "jai src/jai/build.jai -release && yarn optimize_wasm"
+		"clean_dist": "rm -rf dist/jails.wasm",
+		"optimize_wasm": "wasm-opt -Oz --dce --strip-debug dist/polygon-next.wasm -o dist/polygon-next.wasm"
 	},
 	"devDependencies": {
 		"@types/node": "^20.14.9",
@@ -28,3 +32,4 @@
 	},
 	"dependencies": {}
 }
+
