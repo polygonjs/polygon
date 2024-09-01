@@ -65,5 +65,5 @@ orbit_controls_update_camera:: (orbit_controls: *OrbitControls, camera_data: *Ca
 	transformMatrix = rotate(transformMatrix, quaternionY);
 	transformMatrix = rotate(transformMatrix, quaternionX);
 	translate(*transformMatrix, .{x=0.0, y=0.0, z=radius});
-	camera_data.transformMatrix = transformMatrix;
+	camera_data.matrices.transformMatrix = transformMatrix;
 }

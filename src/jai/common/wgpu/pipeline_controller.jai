@@ -112,7 +112,7 @@ pipeline_controller_create :: (wgpu_context: *WGPUContext, meshes: [..]Mesh, sha
 
 	pc.uniforms.camera.buffer,
 	pc.uniforms.camera.bind_group,
-	pc.uniforms.camera.bind_group_entries = wgpu_camera_uniform_to_buffer(wgpu_context, pc.pipeline, SCENE_DATA.camera_uniforms);
+	pc.uniforms.camera.bind_group_entries = wgpu_camera_uniform_to_buffer(wgpu_context, pc.pipeline, SCENE_DATA.camera.uniforms);
 
 	pc.uniforms.sdf.buffer,
 	pc.uniforms.sdf.bind_group,

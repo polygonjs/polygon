@@ -36,10 +36,10 @@ wgpu_object_uniform_to_buffer :: (
 wgpu_camera_uniform_to_buffer :: (
 	wgpu_context: *WGPUContext,
 	pipeline: WGPURenderPipeline,
-	uniforms: [1]CameraUniforms
+	uniforms: CameraUniforms
 ) -> WGPUBuffer,  WGPUBindGroup, []WGPUBindGroupEntry {
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	size := max( cast(u64)16, cast(u64) uniforms.count * size_of(CameraUniforms));
+	size := max( cast(u64)16, cast(u64) /*uniforms.count **/ size_of(CameraUniforms));
 
 	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
 		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
@@ -47,7 +47,7 @@ wgpu_camera_uniform_to_buffer :: (
 	}));
 	assert(buffer != null, "Buffer is not created correctly");
 
-	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, uniforms.data, size);
+	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, cast(*void)*uniforms, size);
 
 	entries := NewArray(1, WGPUBindGroupEntry); // TODO: free this
 	entries[0] = WGPUBindGroupEntry.{
@@ -132,7 +132,7 @@ update_camera_uniforms_to_buffer :: (wgpu_context: *WGPUContext, buffer:WGPUBuff
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
 	// size := cast(u64) /*vertices.count **/ size_of(ObjectUniforms);
 	size := max( cast(u64)16, cast(u64) size_of(CameraUniforms));
-	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, scene_data.camera_uniforms.data, size);
+	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, cast(*void) *scene_data.camera.uniforms, size);
 }
 
 

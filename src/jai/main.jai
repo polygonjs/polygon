@@ -126,8 +126,8 @@ main :: () {
 							new_height := sdl_event.window.data2;
 							if(new_width > 0 && new_height > 0){
 								webgpu_handle_resize(*wgpu_context, xx sdl_event.window.data1, xx sdl_event.window.data2);
-								SCENE_DATA.camera_aspect = (cast(float32) sdl_event.window.data1) / (cast(float32) sdl_event.window.data2);
-								update_camera_data_projection(*SCENE_DATA);
+								SCENE_DATA.camera.aspect = (cast(float32) sdl_event.window.data1) / (cast(float32) sdl_event.window.data2);
+								camera_data_projection_update(*SCENE_DATA.camera);
 
 							}
 						}
@@ -259,11 +259,11 @@ on_request_animation_frame :: (
 
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
-	if(new_aspect != SCENE_DATA.camera_aspect){
-		SCENE_DATA.camera_aspect = new_aspect;
-		update_camera_data_projection(*SCENE_DATA);
+	if(new_aspect != SCENE_DATA.camera.aspect){
+		SCENE_DATA.camera.aspect = new_aspect;
+		camera_data_projection_update(*SCENE_DATA.camera);
 	}
-	time:float = new_time / 1000.0;
+	SCENE_DATA.time = new_time / 1000.0;
 	#if USE_IMGUI {
 		io := ImGui.GetIO();
 		if(io.WantCaptureMouse == false){
@@ -272,8 +272,7 @@ on_request_animation_frame :: (
 	} else {
 		orbit_controls_process_event(*orbit_controls, *events_data);
 	}
-	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera_data[0]);
-	update_scene_data(*SCENE_DATA, time);
+	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera);
 	update_scene_data_uniforms(*SCENE_DATA);
 
 	#if USE_COMPUTE_SHADER {
@@ -345,9 +344,8 @@ else #import "Basic";
 #if WASM == true  #import "wgpu_wasm";
 #if WASM == false #import "wgpu";
 
-#load "common/math_helper.jai";;
-#load "common/mesh.jai";
-#load "common/scene_data.jai";
+#load "scene/index.jai";
+#load "common/math_helper.jai";
 #load "common/type_utils.jai";
 #load "common/events/common.jai";
 #if WASM == true #load "common/events/wasm.jai";
@@ -359,7 +357,7 @@ else     #load "common/wgpu/native.jai";
 #load "common/wgpu/common_depth.jai";
 #load "common/wgpu/common_msaa.jai";
 #load "common/wgpu/common_uniforms.jai";
-#load "common/wgpu/geometry.jai";
+#load "common/wgpu/wgpu_geometry.jai";
 #load "common/wgpu/pipeline_controller.jai";
 #if USE_COMPUTE_SHADER #load "common/wgpu/compute_controller.jai";
 #load "common/print_utils.jai";
