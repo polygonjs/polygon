@@ -89,6 +89,9 @@ const onBuild = (
 		console.warn(`-----------------------------------------`);
 		console.log(stdout);
 		console.warn(`-----------------------------------------`);
+		for (let i = 0; i < 12; i++) {
+			console.log("*");
+		}
 		logRedBg(`Error compiling .jai files: ${stderr}`);
 		server.ws.send({
 			type: "custom",
@@ -109,7 +112,7 @@ const onBuild = (
 			);
 		} else {
 			logGreenBg(
-				`native app compilation succesful, but vite config is set to not run it`
+				`native app compilation successful, but vite config is set to not run it`
 			);
 		}
 

@@ -1,11 +1,12 @@
 import { clockInit, clockTick } from "./Clock";
 import { updateMemoryArrayViews, USELESS_ARG0 } from "./Common";
 import { addEvents, eventsDataReset } from "./EventsController";
-import { heapAdd } from "./WasmHeap";
+import { Heap, heapAdd, heapCopy, heapCreate, heapStatus } from "./WasmHeap";
 import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { textureFormatIndex } from "./WebGPU/utils/WebGPUMap";
 import { canvasSetSize, webGPUListenToResize } from "./WebGPUResize";
 
+const DEBUG_HEAP: boolean = false;
 interface WebGPURenderControllerOptions {
 	webGPURequestResponse: WebGPURequestResponse;
 	createCanvas: boolean;
@@ -86,19 +87,18 @@ export function webGPURenderControllerCreate(
 		render
 	);
 
-	// let previousHeap: Heap = heapCreate();
-	// let deltaHeap: Heap = heapCreate();
+	let previousHeap: Heap = heapCreate();
 	function render() {
 		if (_onRequestAnimationFrameInProgress) {
 			return;
 		}
-		// if (framesCount % 100 === 0) {
-		// 	// console.log(framesCount);
-		// 	// console.log(heapStatus());
-		// }
+		if (DEBUG_HEAP && framesCount % 100 === 0) {
+			console.log(framesCount);
+			console.log(heapStatus());
+		}
 		_onRequestAnimationFrameInProgress = true;
 
-		// heapCopy(previousHeap);
+		if (DEBUG_HEAP) heapCopy(previousHeap);
 		// const currentTexture = wgpuSurfaceGetCurrentTexture();
 		updateMemoryArrayViews();
 		window.wasmFunctions.onRequestAnimationFrame(
@@ -109,6 +109,7 @@ export function webGPURenderControllerCreate(
 		);
 		eventsDataReset();
 		framesCount++;
+		// if (framesCount > 3) animateAllowed = false;
 		// if (currentTexture) {
 		// 	heapDeleteByItem(currentTexture);
 		// }

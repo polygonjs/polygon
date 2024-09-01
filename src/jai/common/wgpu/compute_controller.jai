@@ -1,11 +1,8 @@
 // TODO: there are lots of wgpu things to release here
 
-MAP_BUFFER :: false; // to read the buffer from the GPU to the CPU
 
-BufferContainer :: struct {
-	buffer:WGPUBuffer;
-	buffer_size: u64;
-}
+
+
 
 ComputeShaderControllerBindGroup :: struct {
 	data_size:WGPUBindGroup;
@@ -18,7 +15,7 @@ ComputeShaderController :: struct {
 	vertex:BufferContainer;
 	// release:(this:ComputeShaderController);
 	// private
-	queue:WGPUQueue;
+	// queue:WGPUQueue;
 	data:BufferContainer;
 	// encoder: WGPUComputePassEncoder;
 	// command_buffer: WGPUCommandBuffer;
@@ -37,6 +34,8 @@ ComputeShaderController :: struct {
 // that reset the segments array after the join,
 // as otherwise we have a memory leak
 // TODO: could there be a faster implementation for the case where we only need to replace a single instance of the string?
+// I could actually replace the characters of the string in place, even if that leaves empty spaces:
+// "__WORK_GROUP_SIZE_X__" -> "   3                  "
 replace_with_array_reset :: (s: string, old: string, new: string) -> string {
 	segments := split(s, old);
 	result := join(..segments, new);
@@ -58,37 +57,37 @@ build_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
 	return shader4;
 }
 
-buffer_container_create :: (wgpu_context: *WGPUContext, size:u64, label:string) -> BufferContainer {
-	#if MAP_BUFFER {
-		vertex_buffer_usage := WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex;
-	} else {
-		vertex_buffer_usage := WGPUBufferUsage.Storage | WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex;
-	}
-	label_c := to_c_string(label);
-	defer free(label_c);
-	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
-		label = label_c,
-		usage = xx vertex_buffer_usage,
-		size = size
-	}));
+// buffer_container_create :: (wgpu_context: *WGPUContext, size:u64, label:string) -> BufferContainer {
+// 	#if MAP_BUFFER {
+// 		vertex_buffer_usage := WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex;
+// 	} else {
+// 		vertex_buffer_usage := WGPUBufferUsage.Storage | WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex;
+// 	}
+// 	label_c := to_c_string(label);
+// 	defer free(label_c);
+// 	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
+// 		label = label_c,
+// 		usage = xx vertex_buffer_usage,
+// 		size = size
+// 	}));
 
-	container :BufferContainer = .{
-		buffer = buffer,
-		buffer_size = size,
-	};
-	return container;
-}
+// 	container :BufferContainer = .{
+// 		buffer = buffer,
+// 		buffer_size = size,
+// 	};
+// 	return container;
+// }
 
 // InputType :: [3]float;
 // ResultType :: [64]float;
-compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue, shader_compute_raw: string, entry_point:string, buffer_container:BufferContainer) -> ComputeShaderController {
+compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_raw: string, entry_point:string, buffer_container:BufferContainer) -> ComputeShaderController {
 	controller: ComputeShaderController = .{
 		wgpu_context = wgpu_context,
-		queue = queue,
+		// queue = queue,
 		work_groups_count = .{1, 1, 1},
 		bind_group = .{}
 	};
-	device := wgpu_context.device;
+	// device := wgpu_context.device;
 
 	box_size :[3]float= .[2, 1, 1];
 	box_size_buffer_size := cast(u64) size_of(type_of(box_size));//cast(u64) input.count * size_of(float);
@@ -117,7 +116,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 	shaderModuleDescriptor.label = to_c_string(label);
 	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
 	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
-	shader_module := wgpuDeviceCreateShaderModule(device, *shaderModuleDescriptor);
+	shader_module := wgpuDeviceCreateShaderModule(wgpu_context.device, *shaderModuleDescriptor);
 
 	// create pipeline
 	
@@ -132,7 +131,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 			visibility = xx WGPUShaderStage.Compute,
 			buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
 		};
-		bind_group_layouts[0] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
+		bind_group_layouts[0] = wgpuDeviceCreateBindGroupLayout(wgpu_context.device, *(WGPUBindGroupLayoutDescriptor.{
 			entryCount = xx bind_group_layout_entries0.count,
 			entries = bind_group_layout_entries0.data,
 		}));
@@ -146,7 +145,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 			visibility = xx WGPUShaderStage.Compute,
 			buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
 		};
-		bind_group_layouts[1] = wgpuDeviceCreateBindGroupLayout(device, *(WGPUBindGroupLayoutDescriptor.{
+		bind_group_layouts[1] = wgpuDeviceCreateBindGroupLayout(wgpu_context.device, *(WGPUBindGroupLayoutDescriptor.{
 			entryCount = xx bind_group_layout_entries1.count,
 			entries = bind_group_layout_entries1.data,
 		}));
@@ -159,13 +158,13 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 	compute_layout_desc:WGPUPipelineLayoutDescriptor;
 	compute_layout_desc.bindGroupLayoutCount = xx bind_group_layouts.count;
 	compute_layout_desc.bindGroupLayouts = bind_group_layouts.data;
-	compute_layout := wgpuDeviceCreatePipelineLayout(device, *compute_layout_desc);
+	compute_layout := wgpuDeviceCreatePipelineLayout(wgpu_context.device, *compute_layout_desc);
 	pipeline_descriptor: WGPUComputePipelineDescriptor = .{
 		label = to_c_string("box geometry compute pipeline"),
 		layout = compute_layout,
 		compute = compute_descriptor,
 	};
-	controller.pipeline = wgpuDeviceCreateComputePipeline(device, *pipeline_descriptor);
+	controller.pipeline = wgpuDeviceCreateComputePipeline(wgpu_context.device, *pipeline_descriptor);
 	free(pipeline_descriptor.label);
 
 	
@@ -176,7 +175,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 	// input and output
 	//
 	//
-	box_size_buffer := wgpuDeviceCreateBuffer(device,*(WGPUBufferDescriptor.{
+	box_size_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
 		label = "input size buffer",
 		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
 		size = box_size_buffer_size
@@ -207,7 +206,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 	controller.vertex = buffer_container;
 	// controller.vertex.buffer_size = vertex_buffer_size;
 	#if MAP_BUFFER {
-		controller.vertex_buffer_map = wgpuDeviceCreateBuffer(device, *(WGPUBufferDescriptor.{
+			controller.vertex_buffer_map = wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
 			label = "vertex buffer",
 			usage = xx (WGPUBufferUsage.MapRead | WGPUBufferUsage.CopyDst),
 			size = controller.vertex.buffer_size
@@ -236,7 +235,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 			entryCount = xx bind_group_box_size_entries.count,
 			entries = bind_group_box_size_entries.data
 		};
-		controller.bind_group.data_size = wgpuDeviceCreateBindGroup(device, *bind_group_descriptor);
+		controller.bind_group.data_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 	// bind_group_vertex :WGPUBindGroup;
 	bind_group_vertex_entries := NewArray(1, WGPUBindGroupEntry);
@@ -254,7 +253,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 			entryCount = xx bind_group_vertex_entries.count,
 			entries = bind_group_vertex_entries.data
 		};
-		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(device, *bind_group_descriptor);
+		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
 	controller_shader_controller_compute(*controller);
@@ -273,7 +272,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, queue:WGPUQueue
 
 computer_shader_controller_update_buffer :: (controller:*ComputeShaderController, size:Vector3){
 	size_float: [3]float = .[size.x, size.y, size.z];
-	wgpuQueueWriteBuffer(controller.queue, controller.data.buffer, 0, size_float.data, controller.data.buffer_size);
+	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.data.buffer, 0, size_float.data, controller.data.buffer_size);
 };
 controller_shader_controller_compute :: (controller:*ComputeShaderController) {
 	compute_pass_encoder: WGPUComputePassEncoder;
@@ -304,7 +303,7 @@ controller_shader_controller_compute :: (controller:*ComputeShaderController) {
 
 	command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer Compute"}));
 	defer wgpuCommandBufferRelease(command_buffer);
-	wgpuQueueSubmit(controller.queue, commands_count, *command_buffer);
+	wgpuQueueSubmit(controller.wgpu_context.queue, commands_count, *command_buffer);
 
 	#if MAP_BUFFER {
 		wgpuBufferMapAsync(controller.vertex_buffer_map, xx WGPUMapMode.Read, 0, controller.vertex.buffer_size, wgpu_compute_buffer_map_async_callback, null);

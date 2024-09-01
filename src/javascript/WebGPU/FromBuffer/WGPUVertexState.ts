@@ -29,11 +29,7 @@ export function WGPUVertexStateFromBuffer(p: bigint): GPUVertexState {
 	}
 	//
 	const bufferCount = _big(p, m.bufferCount);
-	if (bufferCount >= 2) {
-		console.warn(
-			"WGPUVertexStateFromBuffer: bufferCountb is greater than 1, the pointer lookup with +BigInt(i) may not work. But it works in WGPUVertexBufferLayoutFromBuffer"
-		);
-	}
+
 	const buffers: GPUVertexBufferLayout[] = createWGPUItemsByPointer({
 		pointer: p,
 		itemsCount: bufferCount,

@@ -2,6 +2,7 @@
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
 USE_COMPUTE_SHADER :: true;
+MAP_BUFFER :: false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
 RENDER_IN_VIEWPORT :: false;
@@ -22,7 +23,7 @@ RENDER_SCENE :: true;
 wgpu_context:WGPUContext;
 #if USE_IMGUI window_context:WindowContext;
 SCENE_DATA:SceneData;
-DRAW_DATA:DrawData;
+PIPELINE_CONTROLLERS:[..]PipelineController;
 orbit_controls:OrbitControls;
 events_data:EventsData;
 #if USE_IMGUI {
@@ -206,63 +207,8 @@ init_draw_data :: (){
 		queue := wgpuDeviceGetQueue(wgpu_context.device);
 		assert(queue != null, "Queue is not created correctly");
 	}
-	DRAW_DATA.shader_module = wgpu_create_shader_module(device, SHADER_RENDER, "render");
-	DRAW_DATA.vertex_buffer_layout, DRAW_DATA.vertex_attributes = wgpu_make_vertex_layout(Vertex);
-
-	// defer array_reset(*vertex_attributes);
-	DRAW_DATA.pipeline_descriptor = .{label = "Render Pipeline"};
-
-	wgpu_fragment_state_prepare(*(DRAW_DATA.fragment_state), *(DRAW_DATA.color_target_state), DRAW_DATA.shader_module, wgpu_context.preferred_texture_format);
-	wgpu_update_pipeline_descriptor( *(DRAW_DATA.pipeline_descriptor), device, DRAW_DATA.shader_module, *(DRAW_DATA.vertex_buffer_layout), *(DRAW_DATA.fragment_state) );
-	wgpu_update_pipeline_descriptor_multisample(*wgpu_context, *(DRAW_DATA.pipeline_descriptor));
-	depth_stencil_state: WGPUDepthStencilState;
-	wgpu_update_pipeline_descriptor_depth(*wgpu_context, *(DRAW_DATA.pipeline_descriptor), *depth_stencil_state);
-
-	#if WASM {
-		if(depth_stencil_state.depthBias != 0){
-			// we force the depthBias which is sometimes with an offset of -1 when out of wgpu_update_pipeline_descriptor_depth.
-			// no idea why, could it be because of wasm64 still experimental?
-			// but since depthBias is the only s32 in the wgpu definition, we assume it only happens for this member,
-			// and we therefore do this hack here.
-			print("*** depthBias force to 0 (currently at %)\n", depth_stencil_state.depthBias);
-			depth_stencil_state.depthBias = 0;
-		}
-		assert(depth_stencil_state.depthBias == 0, "bias not correct: %\n", depth_stencil_state.depthBias);
-	}
-	DRAW_DATA.pipeline = wgpuDeviceCreateRenderPipeline(wgpu_context.device, *(DRAW_DATA.pipeline_descriptor));
-	assert(DRAW_DATA.pipeline != null, "Pipeline is not created correctly");
-
-	#if USE_COMPUTE_SHADER {
-		buffer_container := buffer_container_create(*wgpu_context, xx (SCENE_DATA.vertices.count * size_of(Vertex)), "vertex buffer");
-
-		box_controller = compute_shader_controller_create(
-			*wgpu_context,
-			queue,
-			SHADER_COMPUTE_BOX,
-			"boxCompute",
-			buffer_container
-		);
-
-		offset_controller = compute_shader_controller_create(
-			*wgpu_context,
-			queue,
-			SHADER_COMPUTE_OFFSET,
-			"boxOffsetCompute",
-			buffer_container
-		);
-	} else {
-		DRAW_DATA.vertex.buffer, DRAW_DATA.vertex.buffer_size = wgpu_vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
-	}
-	DRAW_DATA.index.buffer, DRAW_DATA.index.buffer_size = wgpu_index_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.indices);
-	DRAW_DATA.uniforms.object.buffer,
-	DRAW_DATA.uniforms.object.bind_group,
-	DRAW_DATA.uniforms.object.bind_group_entries = wgpu_object_uniform_to_buffer(wgpu_context.device, queue, DRAW_DATA.pipeline, SCENE_DATA.object_uniforms);
-	DRAW_DATA.uniforms.camera.buffer,
-	DRAW_DATA.uniforms.camera.bind_group,
-	DRAW_DATA.uniforms.camera.bind_group_entries = wgpu_camera_uniform_to_buffer(wgpu_context.device, queue, DRAW_DATA.pipeline, SCENE_DATA.camera_uniforms);
-	DRAW_DATA.uniforms.sdf.buffer,
-	DRAW_DATA.uniforms.sdf.bind_group,
-	DRAW_DATA.uniforms.sdf.bind_group_entries = wgpu_sdf_uniform_to_buffer(wgpu_context.device, queue, DRAW_DATA.pipeline, SCENE_DATA.sdf_uniforms);
+	pipeline_controller := pipeline_controller_create(*wgpu_context, SCENE_DATA.meshes, SHADER_RENDER, "render");
+	array_add(*PIPELINE_CONTROLLERS, pipeline_controller);
 
 	#if USE_IMGUI {
 		ImGui.CreateContext(null);
@@ -338,9 +284,7 @@ on_request_animation_frame :: (
 		controller_shader_controller_compute(*offset_controller);
 	}
 
-	update_object_uniforms_to_buffer(DRAW_DATA.uniforms.object.buffer, queue, *SCENE_DATA);
-	update_camera_uniforms_to_buffer(DRAW_DATA.uniforms.camera.buffer, queue, *SCENE_DATA);
-	update_sdf_uniforms_to_buffer(DRAW_DATA.uniforms.sdf.buffer, queue, *SCENE_DATA);
+	for PIPELINE_CONTROLLERS pipeline_controller_update_buffers(*wgpu_context, *it, *SCENE_DATA);
 
 	frame := wgpu_surface_create_current_view( *wgpu_context );
 	defer wgpuTextureViewRelease(frame);
@@ -354,48 +298,30 @@ on_request_animation_frame :: (
 
 	update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
 
-	render_pass_encoder1: WGPURenderPassEncoder;
-	cmd_buffer1: WGPUCommandBuffer;
 	cmd_encoder1 := wgpuDeviceCreateCommandEncoder(
 		wgpu_context.device,
 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Render"}),
 	);
-	defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
-	defer wgpuCommandBufferRelease(cmd_buffer1);
 	defer wgpuCommandEncoderRelease(cmd_encoder1);
 
-	{
-		render_pass_descriptor := WGPURenderPassDescriptor.{
-			label = "Render Pass 3D",
-			colorAttachmentCount = 1,
-			colorAttachments = *colorAttachment,
-		};
-		update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
-		render_pass_encoder1 = wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
-		#if RENDER_IN_VIEWPORT wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
+	render_pass_descriptor := WGPURenderPassDescriptor.{
+		label = "Render Pass 3D",
+		colorAttachmentCount = 1,
+		colorAttachments = *colorAttachment,
+	};
+	update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
+	render_pass_encoder1 := wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
+	defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
+	#if RENDER_IN_VIEWPORT wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
 
+	for PIPELINE_CONTROLLERS pipeline_controller_update_render_pass(*it, *render_pass_encoder1, *SCENE_DATA);
+	#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA, *events_data);
+	wgpuRenderPassEncoderEnd(render_pass_encoder1);
 
-		wgpuRenderPassEncoderSetPipeline(render_pass_encoder1, DRAW_DATA.pipeline);
-		wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 0, DRAW_DATA.uniforms.object.bind_group, 0, null);
-		wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 1, DRAW_DATA.uniforms.camera.bind_group, 0, null);
-		wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 2, DRAW_DATA.uniforms.sdf.bind_group, 0, null);
-		//
-		#if USE_COMPUTE_SHADER {
-			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
-		} else {
-			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, DRAW_DATA.vertex.buffer, 0, DRAW_DATA.vertex.buffer_size);
-		}
-		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder1, DRAW_DATA.index.buffer, WGPUIndexFormat.Uint32, 0, DRAW_DATA.index.buffer_size);
+	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer 3D"}));
+	defer wgpuCommandBufferRelease(cmd_buffer1);
 
-		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(render_pass_encoder1, xx SCENE_DATA.indices.count, 1, 0, 0, 0);
-		#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA, *events_data);
-		wgpuRenderPassEncoderEnd(render_pass_encoder1);
-
-
-		cmd_buffer1 = wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer 3D"}));
-
-		wgpuQueueSubmit(queue, 1, *cmd_buffer1);
-	}
+	wgpuQueueSubmit(queue, 1, *cmd_buffer1);
 
 	#if WASM == false {
 		wgpuSurfacePresent(wgpu_context.surface);
@@ -420,7 +346,7 @@ else #import "Basic";
 #if WASM == false #import "wgpu";
 
 #load "common/math_helper.jai";;
-#load "common/draw_data.jai";
+#load "common/mesh.jai";
 #load "common/scene_data.jai";
 #load "common/type_utils.jai";
 #load "common/events/common.jai";
@@ -428,11 +354,14 @@ else #import "Basic";
 else #load "common/events/native.jai";
 #if WASM #load "common/wgpu/wasm.jai";
 else     #load "common/wgpu/native.jai";
+#load "common/wgpu/wgpu_context.jai";
 #load "common/wgpu/common.jai";
 #load "common/wgpu/common_depth.jai";
 #load "common/wgpu/common_msaa.jai";
 #load "common/wgpu/common_uniforms.jai";
-#load "common/wgpu/common_compute.jai";
+#load "common/wgpu/geometry.jai";
+#load "common/wgpu/pipeline_controller.jai";
+#if USE_COMPUTE_SHADER #load "common/wgpu/compute_controller.jai";
 #load "common/print_utils.jai";
 #load "common/orbit_controls/common.jai";
 

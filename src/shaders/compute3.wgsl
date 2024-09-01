@@ -3,7 +3,7 @@
 // and StorageAccess is not found in the bindings. TODO: check if it is in the source library https://github.com/gfx-rs/wgpu-native/
 
 @group(0) @binding(0) var<storage, read_write> size: array<f32>;
-@group(1) @binding(0) var<storage, read_write> vertexBuffer: array<f32>;
+@group(1) @binding(0) var<storage, read_write> position: array<f32>;
 // @group(2) @binding(0) var<storage, read_write> indices: array<f32>;
 
 @compute @workgroup_size( __WORK_GROUP_SIZE_X__ , __WORK_GROUP_SIZE_Y__ , __WORK_GROUP_SIZE_Z__ ) fn boxCompute(
@@ -13,7 +13,7 @@
 	// @builtin(local_invocation_index) local_invocation_index: u32,
 	// @builtin(num_workgroups) num_workgroups: vec3<u32>
 ) {
-	let stride:i32 = 3+3+3+2;
+	let stride:i32 = 3;//+3+3+2;
 	let points_count:i32 = 8;
 	// let invocation_id:u32 = id.x*id.y*id.z;
 	// vertexBuffer[0] = f32(num_workgroups.x*num_workgroups.y*num_workgroups.z);
@@ -56,59 +56,59 @@
 	var vertex_id:i32 = 0;
 	for (var i = 0; i < points_count; i += 1) {
 		for (var j = 0; j < stride; j += 1) {
-			vertexBuffer[stride*i + j] = 0.8;//f32(vertex_id + j);
+			position[stride*i + j] = 0.8;//f32(vertex_id + j);
 		}
 	}
 	workgroupBarrier();
 
 	// position=.{-0.5, -0.5, 0.5}, color=.{1.0, 0.0, 0.0}, uv=.{0.0, 0.0}}
 	vertex_id = 0;
-	vertexBuffer[vertex_id + 0] = -0.5;
-	vertexBuffer[vertex_id + 1] = -0.5;
-	vertexBuffer[vertex_id + 2] = 0.5;
+	position[vertex_id + 0] = -0.5;
+	position[vertex_id + 1] = -0.5;
+	position[vertex_id + 2] = 0.5;
 	// // array_add(*vertices, Vertex.{ position=.{0.5, -0.5, 0.5}, color=.{0.0, 1.0, 0.0}, uv=.{1.0, 0.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = 0.5;
-	vertexBuffer[vertex_id + 1] = -0.5;
-	vertexBuffer[vertex_id + 2] = 0.5;
+	position[vertex_id + 0] = 0.5;
+	position[vertex_id + 1] = -0.5;
+	position[vertex_id + 2] = 0.5;
 	// array_add(*vertices, Vertex.{ position=.{0.5, 0.5, 0.5}, color=.{0.0, 0.0, 1.0}, uv=.{1.0, 1.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = 0.5;
-	vertexBuffer[vertex_id + 1] = 0.5;
-	vertexBuffer[vertex_id + 2] = 0.5;
+	position[vertex_id + 0] = 0.5;
+	position[vertex_id + 1] = 0.5;
+	position[vertex_id + 2] = 0.5;
 	// array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, 0.5}, color=.{1.0, 1.0, 0.0}, uv=.{0.0, 1.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = -0.5;
-	vertexBuffer[vertex_id + 1] = 0.5;
-	vertexBuffer[vertex_id + 2] = 0.5;
+	position[vertex_id + 0] = -0.5;
+	position[vertex_id + 1] = 0.5;
+	position[vertex_id + 2] = 0.5;
 
 	// array_add(*vertices, Vertex.{ position=.{-0.5, -0.5, -0.5}, color=.{1.0, 0.0, 1.0}, uv=.{0.0, 0.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = -0.5;
-	vertexBuffer[vertex_id + 1] = -0.5;
-	vertexBuffer[vertex_id + 2] = -0.5;
+	position[vertex_id + 0] = -0.5;
+	position[vertex_id + 1] = -0.5;
+	position[vertex_id + 2] = -0.5;
 	// array_add(*vertices, Vertex.{ position=.{0.5, -0.5, -0.5}, color=.{0.0, 1.0, 1.0}, uv=.{1.0, 0.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = 0.5;
-	vertexBuffer[vertex_id + 1] = -0.5;
-	vertexBuffer[vertex_id + 2] = -0.5;
+	position[vertex_id + 0] = 0.5;
+	position[vertex_id + 1] = -0.5;
+	position[vertex_id + 2] = -0.5;
 	// array_add(*vertices, Vertex.{ position=.{0.5, 0.5, -0.5}, color=.{1.0, 1.0, 1.0}, uv=.{1.0, 1.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = 0.5;
-	vertexBuffer[vertex_id + 1] = 0.5;
-	vertexBuffer[vertex_id + 2] = -0.5;
+	position[vertex_id + 0] = 0.5;
+	position[vertex_id + 1] = 0.5;
+	position[vertex_id + 2] = -0.5;
 	// array_add(*vertices, Vertex.{ position=.{-0.5, 0.5, -0.5}, color=.{0.5, 0.5, 0.5}, uv=.{0.0, 1.0}});
 	vertex_id += stride;
-	vertexBuffer[vertex_id + 0] = -0.5;
-	vertexBuffer[vertex_id + 1] = 0.5;
-	vertexBuffer[vertex_id + 2] = -0.5;
+	position[vertex_id + 0] = -0.5;
+	position[vertex_id + 1] = 0.5;
+	position[vertex_id + 2] = -0.5;
 
 	workgroupBarrier();
 
 	for (var k = 0; k < points_count; k += 1) {
-		vertexBuffer[k*stride + 0] *= size[0];
-		vertexBuffer[k*stride + 1] *= size[1];
-		vertexBuffer[k*stride + 2] *= size[2];
+		position[k*stride + 0] *= size[0];
+		position[k*stride + 1] *= size[1];
+		position[k*stride + 2] *= size[2];
 	}
 
 }
