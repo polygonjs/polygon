@@ -12,10 +12,10 @@ ShadersContainer :: struct {
 
 create_shaders :: ()-> ShadersContainer {
 	shaders :ShadersContainer= .{};
-	// filepath_render :: #run tprint("%../../../../shaders/basic.pos.wgsl", #filepath);
-	filepath_render :: #run tprint("%../../../../shaders/raymarching.wgsl", #filepath);
-	filepath_compute_box :: #run tprint("%../../../../shaders/compute3.wgsl", #filepath);
-	filepath_compute_offset :: #run tprint("%../../../../shaders/compute_offset.wgsl", #filepath);
+	filepath_render :: #run tprint("%../../../shaders/basic.pos.wgsl", #filepath);
+	// filepath_render :: #run tprint("%../../../shaders/raymarching.wgsl", #filepath);
+	filepath_compute_box :: #run tprint("%../../../shaders/compute3.wgsl", #filepath);
+	filepath_compute_offset :: #run tprint("%../../../shaders/compute_offset.wgsl", #filepath);
 	shader_render, success_render :: #run read_entire_file(filepath_render);
 	if !success_render {
 		log_error("Could not read file \"%\"", filepath_render);

@@ -1,7 +1,7 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: true;
+USE_COMPUTE_SHADER :: false;
 MAP_BUFFER :: false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
@@ -347,22 +347,10 @@ else #import "Basic";
 #load "scene/index.jai";
 #load "common/math_helper.jai";
 #load "common/type_utils.jai";
-#load "common/events/common.jai";
-#if WASM == true #load "common/events/wasm.jai";
-else #load "common/events/native.jai";
-#if WASM #load "common/wgpu/wasm.jai";
-else     #load "common/wgpu/native.jai";
-#load "common/wgpu/wgpu_context.jai";
-#load "common/wgpu/wgpu_geometry.jai";
-#load "common/wgpu/wgpu_color.jai";
-#load "common/wgpu/common.jai";
-#load "common/wgpu/common_depth.jai";
-#load "common/wgpu/common_msaa.jai";
-#load "common/wgpu/common_uniforms.jai";
-#load "common/wgpu/pipeline_controller.jai";
-#if USE_COMPUTE_SHADER #load "common/wgpu/compute_controller.jai";
+#load "common/events/index.jai";
+#load "common/wgpu/index.jai";
 #load "common/print_utils.jai";
-#load "common/orbit_controls/common.jai";
+
 
 #if WASM == false {
 	#import "wgpu";

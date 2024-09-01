@@ -24,7 +24,7 @@ WGSL
 
 DONE
 
-#load "common/wgpu/shaders/shaders.jai";
+#load "scene/shaders/shaders.jai";
 
 BUILD_WASM :: true;
 BUILD_NATIVE :: true;
