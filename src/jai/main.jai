@@ -9,7 +9,8 @@ RENDER_SCENE :: true;
 
 #placeholder WASM;
 #placeholder SHADER_RENDER;
-#placeholder SHADER_COMPUTE;
+#placeholder SHADER_COMPUTE_BOX;
+#placeholder SHADER_COMPUTE_OFFSET;
 
 #if WASM==false {
 	WINDOW_WIDTH  :u32: 1280;
@@ -29,7 +30,8 @@ events_data:EventsData;
 	bd:ImGui_ImplWGPU_Data = .{};
 	iwc:ImGui_WGPU_Common = .{};
 }
-#if USE_COMPUTE_SHADER compute_shader_controller:ComputeShaderController;
+#if USE_COMPUTE_SHADER box_controller:ComputeShaderController;
+#if USE_COMPUTE_SHADER offset_controller:ComputeShaderController;
 
 
 do_exit := false;
@@ -231,7 +233,23 @@ init_draw_data :: (){
 	assert(DRAW_DATA.pipeline != null, "Pipeline is not created correctly");
 
 	#if USE_COMPUTE_SHADER {
-		compute_shader_controller = compute_shader_controller_create(*wgpu_context, queue, SHADER_COMPUTE, xx (SCENE_DATA.vertices.count * size_of(Vertex)));
+		buffer_container := buffer_container_create(*wgpu_context, xx (SCENE_DATA.vertices.count * size_of(Vertex)), "vertex buffer");
+
+		box_controller = compute_shader_controller_create(
+			*wgpu_context,
+			queue,
+			SHADER_COMPUTE_BOX,
+			"boxCompute",
+			buffer_container
+		);
+
+		offset_controller = compute_shader_controller_create(
+			*wgpu_context,
+			queue,
+			SHADER_COMPUTE_OFFSET,
+			"boxOffsetCompute",
+			buffer_container
+		);
 	} else {
 		DRAW_DATA.vertex.buffer, DRAW_DATA.vertex.buffer_size = wgpu_vertex_array_to_buffer(wgpu_context.device, queue, SCENE_DATA.vertices);
 	}
@@ -313,8 +331,11 @@ on_request_animation_frame :: (
 	update_scene_data_uniforms(*SCENE_DATA);
 
 	#if USE_COMPUTE_SHADER {
-		compute_shader_controller.update_box_size(compute_shader_controller, SCENE_DATA.box_size);
-		compute_shader_controller.compute(compute_shader_controller);
+		computer_shader_controller_update_buffer(*box_controller, *SCENE_DATA.box_size);
+		controller_shader_controller_compute(*box_controller);
+
+		computer_shader_controller_update_buffer(*offset_controller, *SCENE_DATA.offset);
+		controller_shader_controller_compute(*offset_controller);
 	}
 
 	update_object_uniforms_to_buffer(DRAW_DATA.uniforms.object.buffer, queue, *SCENE_DATA);
@@ -360,7 +381,7 @@ on_request_animation_frame :: (
 		wgpuRenderPassEncoderSetBindGroup(render_pass_encoder1, 2, DRAW_DATA.uniforms.sdf.bind_group, 0, null);
 		//
 		#if USE_COMPUTE_SHADER {
-			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, compute_shader_controller.vertex_buffer, 0, compute_shader_controller.vertex_buffer_size);
+			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
 		} else {
 			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder1, 0, DRAW_DATA.vertex.buffer, 0, DRAW_DATA.vertex.buffer_size);
 		}

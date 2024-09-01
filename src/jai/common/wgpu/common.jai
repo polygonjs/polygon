@@ -26,7 +26,8 @@ WGPUContext :: struct {
 
 ShadersContainer :: struct {
 	render: string;
-	compute: string;
+	compute_box: string;
+	compute_offset: string;
 }
 
 wgpu_make_vertex_layout :: ($type: Type) -> WGPUVertexBufferLayout, []WGPUVertexAttribute {

@@ -74,6 +74,11 @@ gui_update :: (
 		ImGui.SliderFloat("y", *scene_data.sdf_data[0].offset.y, -1.0, 1.0);
 		ImGui.SliderFloat("z", *scene_data.sdf_data[0].offset.z, -1.0, 1.0);
 
+		ImGui.Text_CFormat("Offset");
+		ImGui.SliderFloat("offset x", *scene_data.offset.x, -1.0, 1.0);
+		ImGui.SliderFloat("offset y", *scene_data.offset.y, -1.0, 1.0);
+		ImGui.SliderFloat("offset z", *scene_data.offset.z, -1.0, 1.0);
+
 		// scene_data.sdf_data[0].offset.x = v3_array[0];
 		// scene_data.sdf_data[0].offset.y = v3_array[1];
 		// scene_data.sdf_data[0].offset.z = v3_array[2];

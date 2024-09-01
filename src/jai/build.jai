@@ -14,8 +14,12 @@ SHADER_RENDER :: #string WGSL
 %1;
 WGSL
 
-SHADER_COMPUTE :: #string WGSL
+SHADER_COMPUTE_BOX :: #string WGSL
 %2;
+WGSL
+
+SHADER_COMPUTE_OFFSET :: #string WGSL
+%3;
 WGSL
 
 DONE
@@ -103,7 +107,7 @@ BUILD_NATIVE :: true;
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
 							SHADER :: #run create_shaders();
-							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute);
+							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute_box, SHADER.compute_offset);
 							add_build_string(build_string, w);
 							add_build_string("WASM :: true;", w);
 							generated_code = true;
@@ -143,7 +147,7 @@ BUILD_NATIVE :: true;
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
 							SHADER :: #run create_shaders();
-							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute);
+							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute_box, SHADER.compute_offset);
 							add_build_string(build_string, w);
 							add_build_string("WASM :: false;", w);
 							generated_code = true;
