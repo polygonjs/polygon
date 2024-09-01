@@ -46,21 +46,17 @@ gui_update :: (
 		// v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
 		// ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
 
-		bg_color :WGPUColor32= .{
-			r = xx wgpu_context.bg_color.r,
-			g = xx wgpu_context.bg_color.g,
-			b = xx wgpu_context.bg_color.b,
-			a = xx wgpu_context.bg_color.a,
-		};
+		bg_color :WGPUColor32= wgpu_color_32_create(scene_data.bg_color);
 		ImGui.Text_CFormat("BG Color");
 		ImGui.SliderFloat("r", *bg_color.r, 0.0, 1.0);
 		ImGui.SliderFloat("g", *bg_color.g, 0.0, 1.0);
 		ImGui.SliderFloat("b", *bg_color.b, 0.0, 1.0);
 		ImGui.SliderFloat("a", *bg_color.a, 0.0, 1.0);
-		wgpu_context.bg_color.r = clamp(bg_color.r, 0.0, 1.0);
-		wgpu_context.bg_color.g = clamp(bg_color.g, 0.0, 1.0);
-		wgpu_context.bg_color.b = clamp(bg_color.b, 0.0, 1.0);
-		wgpu_context.bg_color.a = clamp(bg_color.a, 0.0, 1.0);
+		color_set_from_wgpu_color_32(*scene_data.bg_color, *bg_color);
+		// scene_data.bg_color.r = clamp(bg_color.r, 0.0, 1.0);
+		// scene_data.bg_color.g = clamp(bg_color.g, 0.0, 1.0);
+		// scene_data.bg_color.b = clamp(bg_color.b, 0.0, 1.0);
+		// scene_data.bg_color.a = clamp(bg_color.a, 0.0, 1.0);
 
 
 		ImGui.Text_CFormat("Box Size");

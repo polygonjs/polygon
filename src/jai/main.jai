@@ -292,7 +292,7 @@ on_request_animation_frame :: (
 	colorAttachment := WGPURenderPassColorAttachment.{
 		loadOp = WGPULoadOp.Clear,
 		storeOp = WGPUStoreOp.Store,
-		clearValue = wgpu_context.bg_color,
+		clearValue = wgpu_color_create(SCENE_DATA.bg_color),
 	};
 
 	update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
@@ -353,11 +353,12 @@ else #load "common/events/native.jai";
 #if WASM #load "common/wgpu/wasm.jai";
 else     #load "common/wgpu/native.jai";
 #load "common/wgpu/wgpu_context.jai";
+#load "common/wgpu/wgpu_geometry.jai";
+#load "common/wgpu/wgpu_color.jai";
 #load "common/wgpu/common.jai";
 #load "common/wgpu/common_depth.jai";
 #load "common/wgpu/common_msaa.jai";
 #load "common/wgpu/common_uniforms.jai";
-#load "common/wgpu/wgpu_geometry.jai";
 #load "common/wgpu/pipeline_controller.jai";
 #if USE_COMPUTE_SHADER #load "common/wgpu/compute_controller.jai";
 #load "common/print_utils.jai";

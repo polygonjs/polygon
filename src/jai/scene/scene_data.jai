@@ -17,6 +17,8 @@ SceneData :: struct {
 	box_size: Vector3=.{3.0, 1.0, 1.0};
 	offset: Vector3;
 	//
+	bg_color :Color =.{0.1, 0.3, 0.72, 1.0};
+	//
 	// vertices: [..]Vertex;
 	// indices: [..]VertexIndex;
 	// object_data: [1]ObjectData;
