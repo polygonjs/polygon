@@ -65,6 +65,14 @@ function logStyled(message: string, style: LogStyle) {
 export function logDefault(message: string) {
 	console.log(message);
 }
+function terminalLogGreenBg(message: string) {
+	console.log("\x1b[42m\x1b[30m%s\x1b[0m", message);
+}
+function terminalLogRedBg(message: string) {
+	console.log("\x1b[41m\x1b[30m%s\x1b[0m", message);
+}
+const realConsoleClear = console.clear;
+console.clear = () => {};
 
 function fileIsNotInDotBuildFolder(filePath: string): boolean {
 	return filePath.includes("/.build/") == false;
@@ -102,6 +110,10 @@ const onBuild = (
 		});
 		// exec(`xmessage -center '${stderr}' -timeout 4`);
 	} else {
+		server.ws.send({
+			type: "custom",
+			event: ViteHotReloadEvent.BUILD_SUCCESS,
+		});
 		if (RUN_NATIVE_ON_FILE_CHANGE) {
 			logGreenBg(`+++ Compiled .jai files: ${stdout}`);
 			console.log(`-----------------------------------------`);
@@ -111,15 +123,12 @@ const onBuild = (
 				onRun(server, err, stdout, stderr)
 			);
 		} else {
-			logGreenBg(
+			realConsoleClear();
+			console.clear = () => {};
+			terminalLogGreenBg(
 				`native app compilation successful, but vite config is set to not run it`
 			);
 		}
-
-		server.ws.send({
-			type: "custom",
-			event: ViteHotReloadEvent.BUILD_SUCCESS,
-		});
 	}
 };
 const onRun = (

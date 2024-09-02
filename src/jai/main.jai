@@ -342,7 +342,7 @@ else #import "Basic";
 #import "Math";
 #import "String";
 #if WASM == true  #import "wgpu_wasm";
-#if WASM == false #import "wgpu";
+else              #import "wgpu";
 
 #load "scene/index.jai";
 #load "common/math_helper.jai";
@@ -353,7 +353,6 @@ else #import "Basic";
 
 
 #if WASM == false {
-	#import "wgpu";
 	#import "SDL";
 }
 #if USE_IMGUI {

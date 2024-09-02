@@ -29,15 +29,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 if (import.meta.hot) {
 	let wamsRebuildCount = 0;
+	let buildStartAt = 0;
 	import.meta.hot.on(ViteHotReloadEvent.BUILD_START, async () => {
+		buildStartAt = performance.now();
 		logBlueBg("building start...");
 		webGPUController?.stop();
 
 		webGPUController = undefined;
 	});
 	import.meta.hot.on(ViteHotReloadEvent.BUILD_SUCCESS, async () => {
+		const buildTime = (performance.now() - buildStartAt).toFixed(0);
 		logGreenBg(
-			`------------ WASM HOT RELOAD ------------ ${wamsRebuildCount++}`
+			`------------ WASM HOT RELOAD ------------ #${wamsRebuildCount++} in ${buildTime}ms`
 		);
 		webGPUController?.stop();
 		await loadWasm();
