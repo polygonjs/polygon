@@ -64,28 +64,67 @@ gui_update :: (
 		ImGui.SliderFloat("sy", *scene_data.box_size.y, 0.1, 5.0);
 		ImGui.SliderFloat("sz", *scene_data.box_size.z, 0.1, 5.0);
 
-		ImGui.Text_CFormat("Position");
+		// ImGui.Text_CFormat("Position");
 		// print("%\n", scene_data.sdf_data[0].offset.x);
-		ImGui.SliderFloat("x", *scene_data.sdf_data[0].offset.x, -1.0, 1.0);
-		ImGui.SliderFloat("y", *scene_data.sdf_data[0].offset.y, -1.0, 1.0);
-		ImGui.SliderFloat("z", *scene_data.sdf_data[0].offset.z, -1.0, 1.0);
+		// ImGui.SliderFloat("x", *scene_data.sdf_data[0].offset.x, -1.0, 1.0);
+		// ImGui.SliderFloat("y", *scene_data.sdf_data[0].offset.y, -1.0, 1.0);
+		// ImGui.SliderFloat("z", *scene_data.sdf_data[0].offset.z, -1.0, 1.0);
+
+		ImGui.Text_CFormat("Raymarching");
+		ImGui.SliderFloat("sdf x", *MATERIAL_RAYMARCHING.uniforms.offset.x, -1.0, 1.0);
+		ImGui.SliderFloat("sdf y", *MATERIAL_RAYMARCHING.uniforms.offset.y, -1.0, 1.0);
+		ImGui.SliderFloat("sdf z", *MATERIAL_RAYMARCHING.uniforms.offset.z, -1.0, 1.0);
 
 		ImGui.Text_CFormat("Offset");
 		ImGui.SliderFloat("offset x", *scene_data.offset.x, -1.0, 1.0);
 		ImGui.SliderFloat("offset y", *scene_data.offset.y, -1.0, 1.0);
 		ImGui.SliderFloat("offset z", *scene_data.offset.z, -1.0, 1.0);
-
 		// scene_data.sdf_data[0].offset.x = v3_array[0];
 		// scene_data.sdf_data[0].offset.y = v3_array[1];
 		// scene_data.sdf_data[0].offset.z = v3_array[2];
+
+		if(scene_data.meshes0.count>=1){
+			mesh00 := *scene_data.meshes0[0];
+			ImGui.Text_CFormat("Mesh 0");
+			ImGui.SliderFloat("tx 0", *mesh00.position.x, -2.0, 2.0);
+			ImGui.SliderFloat("ty 0", *mesh00.position.y, -2.0, 2.0);
+			ImGui.SliderFloat("tz 0", *mesh00.position.z, -2.0, 2.0);
+			rx0, ry0, rz0, theta0 := get_axis_and_angle(*mesh00.quaternion);
+			theta0_32: float32 = xx theta0;
+			ImGui.SliderFloat("ry 0", *theta0_32, -PI, PI);
+			ImGui.SliderFloat("sx 0", *mesh00.scale.x, 0.0, 2.0);
+			ImGui.SliderFloat("sy 0", *mesh00.scale.y, 0.0, 2.0);
+			ImGui.SliderFloat("sz 0", *mesh00.scale.z, 0.0, 2.0);
+			set_from_axis_and_angle(*mesh00.quaternion, 0,1,0, theta0_32);
+		}
+		if(scene_data.meshes0.count>=2){
+			mesh10 := *scene_data.meshes0[1];
+			ImGui.Text_CFormat("Mesh 1");
+			ImGui.SliderFloat("tx 1", *mesh10.position.x, -2.0, 2.0);
+			ImGui.SliderFloat("ty 1", *mesh10.position.y, -2.0, 2.0);
+			ImGui.SliderFloat("tz 1", *mesh10.position.z, -2.0, 2.0);
+			rx1, ry1, rz1, theta1 := get_axis_and_angle(*mesh10.quaternion);
+			theta1_32: float32 = xx theta1;
+			ImGui.SliderFloat("ry 1", *theta1_32, -PI, PI);
+			ImGui.SliderFloat("sx 1", *mesh10.scale.x, 0.0, 2.0);
+			ImGui.SliderFloat("sy 1", *mesh10.scale.y, 0.0, 2.0);
+			ImGui.SliderFloat("sz 1", *mesh10.scale.z, 0.0, 2.0);
+			set_from_axis_and_angle(*mesh10.quaternion, 0,1,0, theta1_32);
+		}
+		for scene_data.meshes0 {
+			mesh_update_matrix(*it);
+		}
+		for scene_data.meshes1 {
+			mesh_update_matrix(*it);
+		}
 
 		if (ImGui.Button("Reset")) {
 			scene_data.box_size.x = 1;
 			scene_data.box_size.y = 1;
 			scene_data.box_size.z = 1;
-			scene_data.sdf_data[0].offset.x = 0;
-			scene_data.sdf_data[0].offset.y = 0;
-			scene_data.sdf_data[0].offset.z = 0;
+			// scene_data.sdf_data[0].offset.x = 0;
+			// scene_data.sdf_data[0].offset.y = 0;
+			// scene_data.sdf_data[0].offset.z = 0;
 		}
 		ImGui.InputText("input text", scene_data.node_name.data, xx scene_data.node_name.count);
 		// ImGui.ColorEdit3("clear color", clear_color); // Edit 3 floats representing a color

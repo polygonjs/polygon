@@ -186,7 +186,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 	// wgpuQueueWriteBuffer(queue, box_size_buffer, 0, box_size.data, box_size_buffer_size);
 	
 	box_size_v:Vector3 = .{x=box_size[0], y=box_size[1], z=box_size[2]};
-	computer_shader_controller_update_buffer(*controller, box_size_v);
+	compute_shader_controller_update_buffer(*controller, box_size_v);
 
 	//
 	//
@@ -256,7 +256,7 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller_shader_controller_compute(*controller);
+	compute_shader_controller_compute(*controller);
 	
 
 	
@@ -270,11 +270,11 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 	return controller;
 }
 
-computer_shader_controller_update_buffer :: (controller:*ComputeShaderController, size:Vector3){
+compute_shader_controller_update_buffer :: (controller:*ComputeShaderController, size:Vector3){
 	size_float: [3]float = .[size.x, size.y, size.z];
 	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.data.buffer, 0, size_float.data, controller.data.buffer_size);
 };
-controller_shader_controller_compute :: (controller:*ComputeShaderController) {
+compute_shader_controller_compute :: (controller:*ComputeShaderController) {
 	compute_pass_encoder: WGPUComputePassEncoder;
 	commands_count :u64= 1;
 	command_encoder := wgpuDeviceCreateCommandEncoder(

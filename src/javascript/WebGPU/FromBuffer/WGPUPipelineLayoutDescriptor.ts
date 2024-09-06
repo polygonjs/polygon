@@ -9,11 +9,11 @@ export function WGPUPipelineLayoutDescriptorFromBuffer(
 	//
 
 	const label = _label(p, m);
-	const groupLayoutCount = _big(p, m.bindGroupLayoutCount);
+	const bindGroupLayoutCount = _big(p, m.bindGroupLayoutCount);
 	//
 	const bindGroupLayouts: GPUBindGroupLayout[] = createWGPUItemsByHeapIndex({
 		pointer: p,
-		itemsCount: groupLayoutCount,
+		itemsCount: bindGroupLayoutCount,
 		memberInfo: m.bindGroupLayouts,
 		callback: (itemHeapIndex) => {
 			const bindGroupLayout = heapGet<GPUBindGroupLayout>(itemHeapIndex);
@@ -30,11 +30,7 @@ export function WGPUPipelineLayoutDescriptorFromBuffer(
 		label,
 		bindGroupLayouts,
 	};
-	// const pipelineLayout = device.createPipelineLayout(pipelineDescriptor);
-	for (let i = 0; i < groupLayoutCount; i++) {
-		// heapDeleteByItem(bindGroupLayouts[i]);
-	}
-	// TODO: run heapDelete for each bindGroupLayout ?
+
 	return pipelineDescriptor;
 }
 

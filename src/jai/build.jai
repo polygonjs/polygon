@@ -10,24 +10,30 @@
 
 WASM_INSERTION_STRING :: #string DONE
 
-SHADER_RENDER :: #string WGSL
+SHADER_RENDER_BASIC :: #string WGSL
 %1;
 WGSL
 
-SHADER_COMPUTE_BOX :: #string WGSL
+SHADER_RENDER_RAYMARCHING :: #string WGSL
 %2;
 WGSL
 
-SHADER_COMPUTE_OFFSET :: #string WGSL
+SHADER_COMPUTE_BOX :: #string WGSL
 %3;
+WGSL
+
+SHADER_COMPUTE_OFFSET :: #string WGSL
+%4;
 WGSL
 
 DONE
 
+
+
 #load "scene/shaders/shaders.jai";
 
 BUILD_WASM :: true;
-BUILD_NATIVE :: true;
+BUILD_NATIVE :: false;
 
 #run {
 	checkbox_wasm   := ifx BUILD_WASM then "x" else " ";
@@ -37,6 +43,12 @@ BUILD_NATIVE :: true;
 	print("NATIVE:  [%]\n", checkbox_native);
 	print("\n");
 	set_build_options_dc(.{do_output = false});
+
+	add_shaders :: (w: *Workspace) {
+		SHADER :: #run create_shaders();
+		build_string := sprint(WASM_INSERTION_STRING, SHADER.render_basic, SHADER.render_raymarching, SHADER.compute_box, SHADER.compute_offset);
+		add_build_string(build_string, <<w);
+	}
 
 	if ( BUILD_WASM ) {
 		w := compiler_create_workspace("Wasm Common");
@@ -106,9 +118,8 @@ BUILD_NATIVE :: true;
 					phase := cast(*Message_Phase) message;
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
-							SHADER :: #run create_shaders();
-							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute_box, SHADER.compute_offset);
-							add_build_string(build_string, w);
+
+							add_shaders(*w);
 							add_build_string("WASM :: true;", w);
 							generated_code = true;
 						}
@@ -146,9 +157,8 @@ BUILD_NATIVE :: true;
 					phase := cast(*Message_Phase) message;
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
-							SHADER :: #run create_shaders();
-							build_string := sprint(WASM_INSERTION_STRING, SHADER.render, SHADER.compute_box, SHADER.compute_offset);
-							add_build_string(build_string, w);
+
+							add_shaders(*w);
 							add_build_string("WASM :: false;", w);
 							generated_code = true;
 						}

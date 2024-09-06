@@ -230,6 +230,6 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 		return applyShading(rayOrigin, rayDir, sdfContext);//vec4(1.0);//applyShading(rayOrigin, rayDir, sdfContext);
 		
 	} else {
-		return vec4(0.5);
+		return vec4(0.0);
 	}
 }
