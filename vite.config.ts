@@ -114,19 +114,16 @@ const onBuild = (
 			type: "custom",
 			event: ViteHotReloadEvent.BUILD_SUCCESS,
 		});
+		realConsoleClear();
+		console.clear = () => {};
+		terminalLogGreenBg(
+			`+ build successful ( ${
+				RUN_NATIVE_ON_FILE_CHANGE ? "WASM + NATIVE" : "WASM ONLY"
+			} )`
+		);
 		if (RUN_NATIVE_ON_FILE_CHANGE) {
-			logGreenBg(`+++ Compiled .jai files: ${stdout}`);
-			console.log(`-----------------------------------------`);
-			console.log(`--------------- Running app`);
-			console.log(`-----------------------------------------`);
 			exec(`bin/polygon-next-native`, (err, stdout, stderr) =>
 				onRun(server, err, stdout, stderr)
-			);
-		} else {
-			realConsoleClear();
-			console.clear = () => {};
-			terminalLogGreenBg(
-				`native app compilation successful, but vite config is set to not run it`
 			);
 		}
 	}

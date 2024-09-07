@@ -38,11 +38,11 @@ gui_update :: (
 
 		ImGui.SetNextWindowSize(.{300, 900}, ImGuiCond.FirstUseEver);
 		ImGui.SetNextWindowPos(.{0, 0}, ImGuiCond.FirstUseEver);
-		ImGui.Begin("SDF Controls");                          // Create a window called "Hello, world!" and append into it.
+		ImGui.Begin("Controls");
 
-		ImGui.Text_CFormat("This is some useful text");               // Display some text (you can use a format string too)
-		ImGui.Checkbox("Demo Window", *ui_data.show_demo_window);      // Edit bools storing our window open/close state
-		ImGui.Checkbox("Another Window", *ui_data.show_another_window);
+		ImGui.Text_CFormat("This is some useful text");
+		// ImGui.Checkbox("Demo Window", *ui_data.show_demo_window);      // Edit bools storing our window open/close state
+		// ImGui.Checkbox("Another Window", *ui_data.show_another_window);
 
 		// v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
 		// ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
