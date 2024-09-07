@@ -36,7 +36,8 @@ gui_update :: (
 	ImGui.NewFrame();
 	{
 
-		ImGui.SetNextWindowSize(.{300, 600}, ImGuiCond.FirstUseEver);
+		ImGui.SetNextWindowSize(.{300, 900}, ImGuiCond.FirstUseEver);
+		ImGui.SetNextWindowPos(.{0, 0}, ImGuiCond.FirstUseEver);
 		ImGui.Begin("SDF Controls");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui.Text_CFormat("This is some useful text");               // Display some text (you can use a format string too)

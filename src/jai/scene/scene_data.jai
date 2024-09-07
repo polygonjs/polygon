@@ -16,6 +16,7 @@ SceneData :: struct {
 	//
 	meshes0: [..]Mesh;
 	meshes1: [..]Mesh;
+	meshes2: [..]Mesh;
 	// string tests
 	node_name: string;
 };
@@ -34,22 +35,32 @@ init_scene_data :: (scene_data: *SceneData, aspect:float32) {
 	{
 		mesh0 := mesh_create();
 		mesh1 := mesh_create();
-		mesh0.position = .{x = -2.0, y = 0.0, z = -2.0};
-		mesh1.position = .{x = 2.0, y = 1.0, z = -1.0};
+		mesh0.position = .{x = -2.0, y = 0.0, z = -4.0};
+		mesh1.position = .{x = 2.0, y = 1.0, z = -3.0};
 		mesh_update_matrix(*mesh0);
 		mesh_update_matrix(*mesh1);
 		array_add(*scene_data.meshes0, mesh0);
 		array_add(*scene_data.meshes0, mesh1);
 	}
 	{
-		mesh2 := mesh_create();
-		mesh3 := mesh_create();
-		mesh2.material = cast(*Material(Any)) *MATERIAL_RAYMARCHING;
-		mesh3.material = cast(*Material(Any)) *MATERIAL_RAYMARCHING;
-		mesh2.position = .{x = -0.0, y = 1.0, z = 0.0};
-		mesh3.position = .{x = -0.0, y = -1.0, z = 1.0};
-		array_add(*scene_data.meshes1, mesh2);
-		array_add(*scene_data.meshes1, mesh3);
+		mesh0 := mesh_create();
+		mesh1 := mesh_create();
+		mesh0.material = cast(*Material(Any)) *MATERIAL_RAYMARCHING;
+		mesh1.material = cast(*Material(Any)) *MATERIAL_RAYMARCHING;
+		mesh0.position = .{x = -0.0, y = 1.0, z = -2.0};
+		mesh1.position = .{x = -0.0, y = -1.0, z = -1.0};
+		array_add(*scene_data.meshes1, mesh0);
+		array_add(*scene_data.meshes1, mesh1);
+	}
+	{
+		mesh0 := mesh_create();
+		mesh1 := mesh_create();
+		mesh0.material = cast(*Material(Any)) *MATERIAL_BASIC;
+		mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
+		mesh0.position = .{x = -1.0, y = 1.0, z = 0.0};
+		mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
+		array_add(*scene_data.meshes2, mesh0);
+		// array_add(*scene_data.meshes2, mesh1);
 	}
 }
 

@@ -1,7 +1,7 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: false;
+USE_COMPUTE_SHADER :: true;
 MAP_BUFFER :: false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
@@ -26,6 +26,7 @@ wgpu_context:WGPUContext;
 SCENE_DATA:SceneData;
 pipeline_controller0: PipelineController;
 pipeline_controller1: PipelineController;
+pipeline_controller2: PipelineController;
 PIPELINE_CONTROLLERS:[..]PipelineController;
 orbit_controls:OrbitControls;
 events_data:EventsData;
@@ -34,8 +35,10 @@ events_data:EventsData;
 	bd:ImGui_ImplWGPU_Data = .{};
 	iwc:ImGui_WGPU_Common = .{};
 }
-#if USE_COMPUTE_SHADER box_controller:ComputeShaderController;
-#if USE_COMPUTE_SHADER offset_controller:ComputeShaderController;
+#if USE_COMPUTE_SHADER {
+	COMPUTE_CONTROLLER_COLLECTION:ComputeControllerCollection;
+}
+
 
 
 do_exit := false;
@@ -212,8 +215,16 @@ init_draw_data :: (){
 	}
 	pipeline_controller_init(*pipeline_controller0, *wgpu_context, *SCENE_DATA.meshes0, "render meshes 0");
 	pipeline_controller_init(*pipeline_controller1, *wgpu_context, *SCENE_DATA.meshes1, "render meshes 1");
+	pipeline_controller_init(*pipeline_controller2, *wgpu_context, *SCENE_DATA.meshes2, "render meshes 2");
 	array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
 	array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
+	array_add(*PIPELINE_CONTROLLERS, pipeline_controller2);
+
+	#if USE_COMPUTE_SHADER {
+		COMPUTE_CONTROLLER_COLLECTION = compute_controller_collection_create(*wgpu_context);
+		pipeline_controlller_update(*pipeline_controller2, *COMPUTE_CONTROLLER_COLLECTION);
+	}
+	// array_add(*pipeline_controller2.compute_shader_controllers, offset_controller);
 
 	#if USE_IMGUI {
 		ImGui.CreateContext(null);
@@ -281,14 +292,10 @@ on_request_animation_frame :: (
 	update_scene_data_uniforms(*SCENE_DATA);
 
 	#if USE_COMPUTE_SHADER {
-		compute_shader_controller_update_buffer(*box_controller, *SCENE_DATA.box_size);
-		compute_shader_controller_compute(*box_controller);
-
-		compute_shader_controller_update_buffer(*offset_controller, *SCENE_DATA.offset);
-		compute_shader_controller_compute(*offset_controller);
+		compute_controller_collection_compute(*COMPUTE_CONTROLLER_COLLECTION);
 	}
 
-	for PIPELINE_CONTROLLERS pipeline_controller_update_buffers(*it, *SCENE_DATA);
+	for PIPELINE_CONTROLLERS pipeline_controller_update_uniform_buffers(*it, *SCENE_DATA);
 
 	frame := wgpu_surface_create_current_view( *wgpu_context );
 	defer wgpuTextureViewRelease(frame);

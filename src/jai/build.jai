@@ -33,7 +33,7 @@ DONE
 #load "scene/shaders/shaders.jai";
 
 BUILD_WASM :: true;
-BUILD_NATIVE :: false;
+BUILD_NATIVE :: true;
 
 #run {
 	checkbox_wasm   := ifx BUILD_WASM then "x" else " ";

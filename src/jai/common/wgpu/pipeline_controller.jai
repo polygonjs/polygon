@@ -32,6 +32,8 @@ PipelineController :: struct {
 	meshes: *[..]Mesh;
 	material: *Material(Any);
 	meshes_draw_data:[..]MeshDrawData;
+	// compute
+	// compute_shader_controllers:[..]ComputeShaderController;
 };
 
 
@@ -93,29 +95,31 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 		attributes := mesh.geometry.attributes;
 		indices := mesh.geometry.indices;
 		draw_data :MeshDrawData;
-		#if USE_COMPUTE_SHADER {
-			// buffer_container := wgpu_geometry_attribute_to_buffer(wgpu_context, *mesh.geometry.attributes.position, Vector3);
-			buffer_container := wgpu_geometry_attribute_to_buffer(wgpu_context, *attributes.position, Vector3, compute=true);
+		// if pc.compute_shader_controllers.count > 0 {
+		// 	// buffer_container := wgpu_geometry_attribute_to_buffer(wgpu_context, *mesh.geometry.attributes.position, Vector3);
+		// 	buffer_container := wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.position, Vector3, compute=true);
+		// 	for pc.compute_shader_controllers {
 
-			box_controller = compute_shader_controller_create(
-				wgpu_context,
-				SHADER_COMPUTE_BOX,
-				"boxCompute",
-				buffer_container
-			);
+		// 		box_controller = compute_shader_controller_create(
+		// 			wgpu_context,
+		// 			SHADER_COMPUTE_BOX,
+		// 			"boxCompute",
+		// 			buffer_container
+		// 		);
 
-			offset_controller = compute_shader_controller_create(
-				wgpu_context,
-				SHADER_COMPUTE_OFFSET,
-				"boxOffsetCompute",
-				buffer_container
-			);
-		} else {
-			array_add(*draw_data.vertex, wgpu_geometry_attribute_to_buffer(wgpu_context, *attributes.position, Vector3));
-		}
-		array_add(*draw_data.vertex, wgpu_geometry_attribute_to_buffer(wgpu_context, *attributes.normal, Vector3));
-		array_add(*draw_data.vertex, wgpu_geometry_attribute_to_buffer(wgpu_context, *attributes.color, Vector3));
-		array_add(*draw_data.vertex, wgpu_geometry_attribute_to_buffer(wgpu_context, *attributes.uv, Vector2));
+		// 		offset_controller = compute_shader_controller_create(
+		// 			wgpu_context,
+		// 			SHADER_COMPUTE_OFFSET,
+		// 			"boxOffsetCompute",
+		// 			buffer_container
+		// 		);
+		// 	}
+		// } else {
+			array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.position, Vector3));
+		// }
+		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.normal, Vector3));
+		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.color, Vector3));
+		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.uv, Vector2));
 		draw_data.index.buffer,
 		draw_data.index.buffer_size = wgpu_index_array_to_buffer(wgpu_context, indices);
 
@@ -138,7 +142,7 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 	return pc;
 }
 
-pipeline_controller_update_buffers :: (pc: *PipelineController, SCENE_DATA:*SceneData) {
+pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DATA:*SceneData) {
 	for (<<pc.meshes) {
 		mesh := it;
 		draw_data := pc.meshes_draw_data[it_index];
@@ -167,23 +171,16 @@ pipeline_controller_update_render_pass::(pc: *PipelineController, render_pass_en
 	wgpuRenderPassEncoderSetPipeline(<<render_pass_encoder, pc.pipeline);
 	for pc.meshes_draw_data {
 		draw_data := it;
-		mesh := (<<pc.meshes)[it_index];
 		wgpuRenderPassEncoderSetBindGroup(<<render_pass_encoder, 0, draw_data.uniforms.object.bind_group, 0, null);
 		wgpuRenderPassEncoderSetBindGroup(<<render_pass_encoder, 1, draw_data.uniforms.camera.bind_group, 0, null);
 		wgpuRenderPassEncoderSetBindGroup(<<render_pass_encoder, 2, draw_data.uniforms.material.bind_group, 0, null);
 		//
-		#if USE_COMPUTE_SHADER {
-			wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
-			for v, vi: draw_data.vertex {
-				wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, xx (vi+1), v.buffer, 0, v.buffer_size);
-			}
-		} else {
-			for v, vi: draw_data.vertex {
-				wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, xx vi, v.buffer, 0, v.buffer_size);
-			}
+		for v, vi: draw_data.vertex {
+			wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, xx vi, v.buffer, 0, v.buffer_size);
 		}
 		wgpuRenderPassEncoderSetIndexBuffer(<<render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
 
+		mesh := (<<pc.meshes)[it_index];
 		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(<<render_pass_encoder, xx mesh.geometry.indices.count, 1, 0, 0, 0);
 	}
 }
