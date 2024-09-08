@@ -1,27 +1,8 @@
-GeometryAttribute :: struct($T: Type, $F: WGPUVertexFormat) {
-	values: [..]T;
-	format:WGPUVertexFormat = F;
-}
 
-GeometryAttributes :: struct {
-	position: GeometryAttribute(Vector3, .Float32x3);
-	normal: GeometryAttribute(Vector3, .Float32x3);
-	color: GeometryAttribute(Vector3, .Float32x3);
-	uv: GeometryAttribute(Vector2, .Float32x2);
-}
-Geometry :: struct {
-	attributes: GeometryAttributes;
-	indices: [..]VertexIndex;
-}
 Object3DUniforms :: struct {
 	transformMatrix: Matrix4x4Buffer;
 }
-EmptyUniforms :: struct {};
-Material :: struct($UniformType: Type) {
-	name: string;
-	shader: string;
-	uniforms: UniformType;
-}
+
 Mesh :: struct {
 	geometry: Geometry;
 	position: Vector3;
@@ -32,18 +13,7 @@ Mesh :: struct {
 	material: *Material(Any);
 };
 
-// EMPTY_UNIFORMS:EmptyUniforms = .{};
-MATERIAL_BASIC :Material(EmptyUniforms) = .{
-	name = "basic",
-	shader = SHADER_RENDER_BASIC,
-	// uniforms = EMPTY_UNIFORMS,
-};
-// SDF_UNIFORMS:SDFUniforms;
-MATERIAL_RAYMARCHING :Material(SDFUniforms) = .{
-	name = "raymarching",
-	shader = SHADER_RENDER_RAYMARCHING,
-	// uniforms = SDF_UNIFORMS,
-};
+
 
 mesh_create :: () -> Mesh {
 	mesh :Mesh;
@@ -52,9 +22,17 @@ mesh_create :: () -> Mesh {
 	translate(*mesh.matrix, .{x = 0.0, y = 0.0, z = 0.0});
 	mesh_uniforms_update(*mesh);
 
-	geometry_box_attributes_create(*mesh.geometry);
-	geometry_box_indices_create(*mesh.geometry);
+	geometry_box_attributes_set(*mesh.geometry, .{segments = .{32, 32, 32}});
 	geometry_attributes_validate(*mesh.geometry);
+
+	{
+		using mesh.geometry.attributes;
+		for position.values {
+			position.values[it_index] += normal.values[it_index]*(0.5*abs(perlin_noise(it.x*2, it.y*2, it.z*2)));
+		}
+		print("points count: %\n", position.values.count);
+	}
+	normals_compute(*mesh.geometry);
 
 	// TODO: this cast may seem like it gives the expected result,
 	// but it may be because we create a wgpu buffer of at least 16 bytes,

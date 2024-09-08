@@ -1,12 +1,13 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: true;
+USE_COMPUTE_SHADER :: false;
 MAP_BUFFER :: false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
 RENDER_IN_VIEWPORT :: false;
 RENDER_SCENE :: true;
+RUN_TESTS :: false;
 
 #placeholder WASM;
 #placeholder SHADER_RENDER_BASIC;
@@ -72,6 +73,8 @@ FRAMES_COUNT:u64 = 0;
 //
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
+
+	#if RUN_TESTS run_tests();
 
 	node_name_size := 128;
 	SCENE_DATA.node_name.data  = alloc(node_name_size);
@@ -214,11 +217,11 @@ init_draw_data :: (){
 		assert(queue != null, "Queue is not created correctly");
 	}
 	pipeline_controller_init(*pipeline_controller0, *wgpu_context, *SCENE_DATA.meshes0, "render meshes 0");
-	pipeline_controller_init(*pipeline_controller1, *wgpu_context, *SCENE_DATA.meshes1, "render meshes 1");
-	pipeline_controller_init(*pipeline_controller2, *wgpu_context, *SCENE_DATA.meshes2, "render meshes 2");
+	// pipeline_controller_init(*pipeline_controller1, *wgpu_context, *SCENE_DATA.meshes1, "render meshes 1");
+	// pipeline_controller_init(*pipeline_controller2, *wgpu_context, *SCENE_DATA.meshes2, "render meshes 2");
 	array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
-	array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
-	array_add(*PIPELINE_CONTROLLERS, pipeline_controller2);
+	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
+	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller2);
 
 	#if USE_COMPUTE_SHADER {
 		COMPUTE_CONTROLLER_COLLECTION = compute_controller_collection_create(*wgpu_context);
@@ -375,6 +378,8 @@ else              #import "wgpu";
 	#if WASM #load "common/imgui/wasm.jai";
 	else     #load "common/imgui/native.jai";
 }
+
+#load "test/index.jai";
 
 #if OS == .LINUX {
 	// in order to import gcc_s, I initially tried:

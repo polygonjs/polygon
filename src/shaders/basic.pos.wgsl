@@ -54,6 +54,6 @@ fn vertex(model: VertexInput) -> VertexOutput {
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 	// return vec4<f32>(in.uv.x, in.uv.y, 1.0, 1.0);
 	// return vec4<f32>(in.color, 1.0);
-	return vec4<f32>(abs(in.worldPos), 1.0);
+	return vec4<f32>(abs(in.normal), 1.0);
 	// return vec4<f32>(abs(in.worldPos - camera.worldPos.xyz), 1.0);
 }

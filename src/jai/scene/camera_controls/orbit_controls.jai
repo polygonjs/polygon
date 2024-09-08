@@ -13,10 +13,7 @@ AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
 AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
 // UP		::Vector3.{x=0.0, y=1.0, z=0.0};
 
-Vector2Int :: struct {
-	x: s32;
-	y: s32;
-}
+
 lastPointer: Vector2Int;
 
 orbit_controls_process_event :: (orbit_controls:*OrbitControls, events_data:*EventsData){
