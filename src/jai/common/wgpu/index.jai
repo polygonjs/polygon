@@ -8,7 +8,9 @@
 #load "wgpu_shaders.jai";
 #load "wgpu_uniforms.jai";
 
+#load "draw_data.jai";
 #load "pipeline_controller.jai";
+
 #if USE_COMPUTE_SHADER {
 	#load "compute_controller.jai";
 	#load "compute_controller_collection.jai";

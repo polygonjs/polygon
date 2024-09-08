@@ -1,3 +1,8 @@
+BufferContainer :: struct {
+	buffer:WGPUBuffer;
+	buffer_size: u64;
+}
+
 wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *GeometryAttribute, $T: Type/*, compute:bool=false*/) -> BufferContainer {
 	assert(attribute.values.count > 0, "Attribute values count is 0");
 	size := cast(u64) attribute.values.count * size_of(T);
@@ -24,6 +29,7 @@ wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *
 	container :BufferContainer= .{buffer, size};
 	return container;
 }
+
 
 wgpu_buffer_for_compute :: (wgpu_context: *WGPUContext, size: u64) -> BufferContainer {
 	assert(size > 0, "size is 0");

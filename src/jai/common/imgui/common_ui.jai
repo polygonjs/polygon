@@ -44,8 +44,6 @@ gui_update :: (
 		// ImGui.Checkbox("Demo Window", *ui_data.show_demo_window);      // Edit bools storing our window open/close state
 		// ImGui.Checkbox("Another Window", *ui_data.show_another_window);
 
-		// v3_array: [3]float = .[scene_data.sdf_data[0].offset.x, scene_data.sdf_data[0].offset.y, scene_data.sdf_data[0].offset.z];
-		// ImGui.InputFloat3("offset", *v3_array);//, -1.0, 1.0);
 
 		bg_color :WGPUColor32= wgpu_color_32_create(scene_data.bg_color);
 		ImGui.Text_CFormat("BG Color");
@@ -54,22 +52,13 @@ gui_update :: (
 		ImGui.SliderFloat("b", *bg_color.b, 0.0, 1.0);
 		ImGui.SliderFloat("a", *bg_color.a, 0.0, 1.0);
 		color_set_from_wgpu_color_32(*scene_data.bg_color, *bg_color);
-		// scene_data.bg_color.r = clamp(bg_color.r, 0.0, 1.0);
-		// scene_data.bg_color.g = clamp(bg_color.g, 0.0, 1.0);
-		// scene_data.bg_color.b = clamp(bg_color.b, 0.0, 1.0);
-		// scene_data.bg_color.a = clamp(bg_color.a, 0.0, 1.0);
+
 
 
 		ImGui.Text_CFormat("Box Size");
 		ImGui.SliderFloat("sx", *scene_data.box_size.x, 0.1, 5.0);
 		ImGui.SliderFloat("sy", *scene_data.box_size.y, 0.1, 5.0);
 		ImGui.SliderFloat("sz", *scene_data.box_size.z, 0.1, 5.0);
-
-		// ImGui.Text_CFormat("Position");
-		// print("%\n", scene_data.sdf_data[0].offset.x);
-		// ImGui.SliderFloat("x", *scene_data.sdf_data[0].offset.x, -1.0, 1.0);
-		// ImGui.SliderFloat("y", *scene_data.sdf_data[0].offset.y, -1.0, 1.0);
-		// ImGui.SliderFloat("z", *scene_data.sdf_data[0].offset.z, -1.0, 1.0);
 
 		ImGui.Text_CFormat("Raymarching");
 		ImGui.SliderFloat("sdf x", *MATERIAL_RAYMARCHING.uniforms.offset.x, -1.0, 1.0);
@@ -80,9 +69,28 @@ gui_update :: (
 		ImGui.SliderFloat("offset x", *scene_data.offset.x, -1.0, 1.0);
 		ImGui.SliderFloat("offset y", *scene_data.offset.y, -1.0, 1.0);
 		ImGui.SliderFloat("offset z", *scene_data.offset.z, -1.0, 1.0);
-		// scene_data.sdf_data[0].offset.x = v3_array[0];
-		// scene_data.sdf_data[0].offset.y = v3_array[1];
-		// scene_data.sdf_data[0].offset.z = v3_array[2];
+
+		ImGui.Text_CFormat("Segments");
+		previous_segments := scene_data.segments;
+		ImGui.SliderInt("segments x", *scene_data.segments.x, 1, 128);
+		ImGui.SliderInt("segments y", *scene_data.segments.y, 1, 128);
+		ImGui.SliderInt("segments z", *scene_data.segments.z, 1, 128);
+		if( previous_segments != scene_data.segments){
+			// print("updated: %x%x% = %\n", scene_data.segments.x, scene_data.segments.y, scene_data.segments.z, scene_data.segments.x*scene_data.segments.y*scene_data.segments.z);
+			geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
+			pipeline_controller_mesh_update_draw_data(*PIPELINE_CONTROLLERS[0], *scene_data.meshes0[0]);
+		}
+
+		ImGui.Text_CFormat("Noise");
+		previous_freq := scene_data.freq;
+		ImGui.SliderFloat("freq x", *scene_data.freq.x, 0.01, 20);
+		ImGui.SliderFloat("freq y", *scene_data.freq.y, 0.01, 20);
+		ImGui.SliderFloat("freq z", *scene_data.freq.z, 0.01, 20);
+		if(previous_freq != scene_data.freq){
+			print("freq:%\n", scene_data.freq);
+			geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
+			draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
+		}
 
 		if(scene_data.meshes0.count>=1){
 			mesh00 := *scene_data.meshes0[0];

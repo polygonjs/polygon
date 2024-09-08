@@ -19,6 +19,9 @@ SceneData :: struct {
 	meshes2: [..]Mesh;
 	// string tests
 	node_name: string;
+	//
+	segments: Vector3Int = .{32, 32, 32};
+	freq: Vector3 = .{1.0, 1.0, 1.0};
 };
 
 

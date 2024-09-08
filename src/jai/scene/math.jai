@@ -18,4 +18,9 @@ Vector3UInt :: struct {
 	z: u32;
 }
 
-
+operator == :: (a:Vector3UInt, b:Vector3UInt) -> bool {
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+operator == :: (a:Vector3Int, b:Vector3Int) -> bool {
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}

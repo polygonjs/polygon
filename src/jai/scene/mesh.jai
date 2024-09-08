@@ -22,17 +22,7 @@ mesh_create :: () -> Mesh {
 	translate(*mesh.matrix, .{x = 0.0, y = 0.0, z = 0.0});
 	mesh_uniforms_update(*mesh);
 
-	geometry_box_attributes_set(*mesh.geometry, .{segments = .{32, 32, 32}});
-	geometry_attributes_validate(*mesh.geometry);
-
-	{
-		using mesh.geometry.attributes;
-		for position.values {
-			position.values[it_index] += normal.values[it_index]*(0.5*abs(perlin_noise(it.x*2, it.y*2, it.z*2)));
-		}
-		print("points count: %\n", position.values.count);
-	}
-	normals_compute(*mesh.geometry);
+	geometry_box_update(*mesh.geometry, .{32, 32, 32}, .{2,2,2});
 
 	// TODO: this cast may seem like it gives the expected result,
 	// but it may be because we create a wgpu buffer of at least 16 bytes,

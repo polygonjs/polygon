@@ -1,8 +1,5 @@
 
-BufferContainer :: struct {
-	buffer:WGPUBuffer;
-	buffer_size: u64;
-}
+
 PipelineUniformData :: struct {
 	buffer: WGPUBuffer;
 	bind_group_entries: []WGPUBindGroupEntry;
@@ -13,11 +10,7 @@ PipelineDataUniform :: struct {
 	camera: PipelineUniformData;
 	material: PipelineUniformData;
 }
-MeshDrawData :: struct {
-	vertex:[..]BufferContainer;
-	index:BufferContainer;
-	uniforms:PipelineDataUniform;
-}
+
 
 PipelineController :: struct {
 	wgpu_context: *WGPUContext;
@@ -91,49 +84,7 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 
 	array_reset(*pc.meshes_draw_data);
 	for (<<pc.meshes) {
-		mesh := it;
-		attributes := mesh.geometry.attributes;
-		indices := mesh.geometry.indices;
-		draw_data :MeshDrawData;
-		// if pc.compute_shader_controllers.count > 0 {
-		// 	// buffer_container := wgpu_geometry_attribute_to_buffer(wgpu_context, *mesh.geometry.attributes.position, Vector3);
-		// 	buffer_container := wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.position, Vector3, compute=true);
-		// 	for pc.compute_shader_controllers {
-
-		// 		box_controller = compute_shader_controller_create(
-		// 			wgpu_context,
-		// 			SHADER_COMPUTE_BOX,
-		// 			"boxCompute",
-		// 			buffer_container
-		// 		);
-
-		// 		offset_controller = compute_shader_controller_create(
-		// 			wgpu_context,
-		// 			SHADER_COMPUTE_OFFSET,
-		// 			"boxOffsetCompute",
-		// 			buffer_container
-		// 		);
-		// 	}
-		// } else {
-			array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.position, Vector3));
-		// }
-		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.normal, Vector3));
-		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.color, Vector3));
-		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.uv, Vector2));
-		draw_data.index.buffer,
-		draw_data.index.buffer_size = wgpu_index_array_to_buffer(wgpu_context, indices);
-
-		draw_data.uniforms.object.buffer,
-		draw_data.uniforms.object.bind_group,
-		draw_data.uniforms.object.bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 0, mesh.uniforms);//wgpu_object_uniform_to_buffer(wgpu_context, pc.pipeline, mesh.uniforms);
-
-		draw_data.uniforms.camera.buffer,
-		draw_data.uniforms.camera.bind_group,
-		draw_data.uniforms.camera.bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 1, SCENE_DATA.camera.uniforms);//wgpu_camera_uniform_to_buffer(wgpu_context, pc.pipeline, SCENE_DATA.camera.uniforms);
-
-		draw_data.uniforms.material.buffer,
-		draw_data.uniforms.material.bind_group,
-		draw_data.uniforms.material.bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 2, pc.material.uniforms);//wgpu_sdf_uniform_to_buffer(wgpu_context, pc.pipeline, SCENE_DATA.sdf_uniforms);
+		draw_data := draw_data_create(pc, *it);
 
 		array_add(*pc.meshes_draw_data, draw_data);
 	}
@@ -141,6 +92,15 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 
 	return pc;
 }
+
+pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh)-> MeshDrawData {
+	draw_data := draw_data_create(pc, mesh);
+	// TODO: release old draw data buffers
+	draw_data_release(*pc.meshes_draw_data[0]);
+	pc.meshes_draw_data[0] = draw_data;
+}
+
+
 
 pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DATA:*SceneData) {
 	for (<<pc.meshes) {
@@ -181,7 +141,7 @@ pipeline_controller_update_render_pass::(pc: *PipelineController, render_pass_en
 		wgpuRenderPassEncoderSetIndexBuffer(<<render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
 
 		mesh := (<<pc.meshes)[it_index];
-		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(<<render_pass_encoder, xx mesh.geometry.indices.count, 1, 0, 0, 0);
+		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(<<render_pass_encoder, xx (mesh.geometry.indices.count), 1, 0, 0, 0);
 	}
 }
 
@@ -280,38 +240,3 @@ pipeline_controller_pipeline_descriptor_layout_init :: (wgpu_context: *WGPUConte
 	pipeline_descriptor.layout = wgpuDeviceCreatePipelineLayout(wgpu_context.device, *pipeline_layout_descriptor);
 }
 
-wgpu_uniform_to_buffer :: (
-	wgpu_context: *WGPUContext,
-	pipeline: WGPURenderPipeline,
-	bind_group_layout_index: u32,
-	uniforms: $UniformType
-) -> WGPUBuffer, WGPUBindGroup, []WGPUBindGroupEntry {
-	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	size := cast(u64) max( 16, size_of(UniformType));
-
-	buffer_desc: WGPUBufferDescriptor = .{
-		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
-		size = size
-	};
-	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
-	assert(buffer != null, "Buffer is not created correctly");
-
-	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *uniforms, size);
-
-	entries := NewArray(1, WGPUBindGroupEntry);
-	entries[0] = WGPUBindGroupEntry.{
-		binding=0,
-		size=size,
-		offset=0,
-		buffer=buffer,
-	};
-	bind_group_descriptor := WGPUBindGroupDescriptor.{
-		label = "uniforms_bind_group/object",
-		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, bind_group_layout_index),
-		entryCount = xx entries.count,
-		entries = entries.data
-	};
-	bind_group := wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
-
-	return buffer, bind_group, entries;
-}
