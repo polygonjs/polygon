@@ -264,3 +264,7 @@ export function eventsSetCursor(cursor: number) {
 	window.WebGPUCanvas.style.cursor = pointerStyle;
 }
 
+export function performance_now(): bigint {
+	return BigInt(Math.floor(performance.now()));
+}
+

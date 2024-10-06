@@ -270,6 +270,8 @@ on_request_animation_frame :: (
 		context = call_from_wasm_context;
 		queue := wgpu_context.queue;
 		events_data_update(*events_data);
+		time := performance_now();
+		compute_fps(time, *ui_data);
 	} else {
 		queue := wgpuDeviceGetQueue(wgpu_context.device);
 		assert(queue != null, "Queue is not created correctly");

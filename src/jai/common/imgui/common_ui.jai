@@ -88,7 +88,6 @@ gui_update :: (
 		ImGui.SliderFloat("freq y", *scene_data.freq.y, 0.01, 20);
 		ImGui.SliderFloat("freq z", *scene_data.freq.z, 0.01, 20);
 		if(previous_freq != scene_data.freq){
-			print("freq:%\n", scene_data.freq);
 			geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
 			draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
 		}

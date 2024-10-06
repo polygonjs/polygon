@@ -81,7 +81,11 @@ import { wgpuComputePassEncoderSetBindGroup } from "./WebGPU/FromJs/wgpuComputeP
 import { wgpuComputePassEncoderSetPipeline } from "./WebGPU/FromJs/wgpuComputePassEncoderSetPipeline";
 import { wgpuComputePipelineGetBindGroupLayout } from "./WebGPU/FromJs/wgpuComputePipelineGetBindGroupLayout";
 import { wgpuDeviceCreateComputePipeline } from "./WebGPU/FromJs/wgpuDeviceCreateComputePipeline";
-import { eventsDataUpdate, eventsSetCursor } from "./EventsController";
+import {
+	eventsDataUpdate,
+	eventsSetCursor,
+	performance_now,
+} from "./EventsController";
 
 export function loadWasm(): Promise<void> {
 	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
@@ -181,6 +185,7 @@ export function loadWasm(): Promise<void> {
 		// events
 		eventsDataUpdate,
 		eventsSetCursor,
+		performance_now,
 	};
 	window.wasmFunctions = {
 		onWebGPUReady: () => {},
