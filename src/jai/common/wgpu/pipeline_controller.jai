@@ -93,7 +93,7 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 	return pc;
 }
 
-pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh)-> MeshDrawData {
+pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh) {
 	draw_data := draw_data_create(pc, mesh);
 	// TODO: release old draw data buffers
 	draw_data_release(*pc.meshes_draw_data[0]);

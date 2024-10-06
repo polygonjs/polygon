@@ -53,14 +53,6 @@ export interface AllocatedMemoryContainer {
 	allocatedMemory?: AllocatedMemory;
 	dataView: DataView;
 }
-window.wasmFunctions = {
-	onWebGPUReady: () => {},
-	initDrawData: () => {},
-	onRequestAnimationFrame: () => {},
-};
-window.ALLOCATED_MEMORY_CONTAINER = {
-	dataView: new DataView(new ArrayBuffer(0)),
-};
 
 export function updateMemoryArrayViews() {
 	const container = window.ALLOCATED_MEMORY_CONTAINER;

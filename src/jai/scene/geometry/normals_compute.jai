@@ -1,5 +1,5 @@
 INDICES_PER_FACE :s64 = 3;
-normals_compute :: (geometry : *Geometry) -> void {
+normals_compute :: (geometry : *Geometry) {
 	faces_count :u32= xx (geometry.indices.count / 3);
 
 	using geometry.attributes;

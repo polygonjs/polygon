@@ -182,6 +182,14 @@ export function loadWasm(): Promise<void> {
 		eventsDataUpdate,
 		eventsSetCursor,
 	};
+	window.wasmFunctions = {
+		onWebGPUReady: () => {},
+		initDrawData: () => {},
+		onRequestAnimationFrame: () => {},
+	};
+	window.ALLOCATED_MEMORY_CONTAINER = {
+		dataView: new DataView(new ArrayBuffer(0)),
+	};
 
 	const unassignedFunctionNames: string[] = [];
 	// Create the environment for the WASM file,
