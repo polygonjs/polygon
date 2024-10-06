@@ -22,7 +22,7 @@ mesh_create :: () -> Mesh {
 	translate(*mesh.matrix, .{x = 0.0, y = 0.0, z = 0.0});
 	mesh_uniforms_update(*mesh);
 
-	geometry_box_update(*mesh.geometry, .{32, 32, 32}, .{2,2,2});
+	geometry_box_update(*mesh.geometry, .{32, 32, 32}, SCENE_DATA.freq);
 
 	// TODO: this cast may seem like it gives the expected result,
 	// but it may be because we create a wgpu buffer of at least 16 bytes,

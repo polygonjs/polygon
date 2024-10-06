@@ -1,4 +1,4 @@
-ImGui_ImplWGPU_SetupRenderState:: ( draw_data: *ImDrawData, ctx: WGPURenderPassEncoder, fr: *FrameResources) {
+ImGui_ImplWGPU_SetupRenderState :: ( draw_data: *ImDrawData, ctx: WGPURenderPassEncoder, fr: *FrameResources) {
 	bd := ImGui_ImplWGPU_GetBackendData();
 
 	// Setup orthographic projection matrix into our constant buffer
@@ -85,7 +85,7 @@ ImGui_ImplWGPU_SetupRenderState:: ( draw_data: *ImDrawData, ctx: WGPURenderPassE
 
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
+ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
 	// print("ImGui_ImplWGPU_RenderDrawData: quick return\n");
 	// if(1+1)return;
 	// print_yellow("ImGui_ImplWGPU_RenderDrawData START\n");
@@ -110,7 +110,7 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 	if (fr.VertexBuffer == null || fr.VertexBufferSize < xx draw_data.TotalVtxCount) {
 		if (fr.VertexBuffer) {
 			wgpuBufferDestroy(fr.VertexBuffer);
-			wgpuBufferRelease(fr.VertexBuffer);
+			// wgpuBufferRelease(fr.VertexBuffer);
 			fr.VertexBuffer = null;
 		}
 		SafeReleaseImDrawVert(fr.VertexBufferHost);
@@ -139,7 +139,7 @@ ImGui_ImplWGPU_RenderDrawData:: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*I
 	if (fr.IndexBuffer == null || fr.IndexBufferSize < xx draw_data.TotalIdxCount) {
 		if (fr.IndexBuffer) {
 			wgpuBufferDestroy(fr.IndexBuffer);
-			wgpuBufferRelease(fr.IndexBuffer);
+			// wgpuBufferRelease(fr.IndexBuffer);
 			fr.IndexBuffer = null;
 		}
 		// SafeReleaseImDrawIdx(fr.IndexBufferHost);

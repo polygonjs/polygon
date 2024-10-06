@@ -1,9 +1,10 @@
 BufferContainer :: struct {
 	buffer:WGPUBuffer;
 	buffer_size: u64;
+	label: string;
 }
 
-wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *GeometryAttribute, $T: Type/*, compute:bool=false*/) -> BufferContainer {
+wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *GeometryAttribute, $T: Type ,label: string/*, compute:bool=false*/) -> BufferContainer {
 	assert(attribute.values.count > 0, "Attribute values count is 0");
 	size := cast(u64) attribute.values.count * size_of(T);
 
@@ -16,22 +17,25 @@ wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *
 	// 		usage = xx WGPUBufferUsage.Storage | WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex;
 	// 	}
 	// }
-
-	buffer_desc:WGPUBufferDescriptor = .{
+	current_label := tprint("%-%",label, FRAMES_COUNT);
+	buffer_label := to_c_string(current_label);
+	defer free(buffer_label);
+	desc:WGPUBufferDescriptor = .{
 		usage = usage,
-		size=size
+		size=size,
+		label = buffer_label,
 	};
-	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
+	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
 	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, attribute.values.data, size);
 
-	container :BufferContainer= .{buffer, size};
+	container :BufferContainer= .{buffer, size, current_label};
 	return container;
 }
 
 
-wgpu_buffer_for_compute :: (wgpu_context: *WGPUContext, size: u64) -> BufferContainer {
+wgpu_buffer_for_compute :: (wgpu_context: *WGPUContext, size: u64, label: string) -> BufferContainer {
 	assert(size > 0, "size is 0");
 	// size := cast(u64) attribute.values.count * size_of(T);
 
@@ -45,15 +49,15 @@ wgpu_buffer_for_compute :: (wgpu_context: *WGPUContext, size: u64) -> BufferCont
 	}
 	// }
 
-	buffer_desc:WGPUBufferDescriptor = .{
+	desc:WGPUBufferDescriptor = .{
 		usage = usage,
-		size=size
+		size = size
 	};
-	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
+	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
 	// wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, attribute.values.data, size);
 
-	container :BufferContainer= .{buffer, size};
+	container :BufferContainer= .{buffer, size, label};
 	return container;
 }

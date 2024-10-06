@@ -27,7 +27,7 @@ SafeReleaseWGPUBindGroup::(resptr: *WGPUBindGroup)
 SafeReleaseWGPUBuffer::(resptr: *WGPUBuffer)
 {
 	if (<<resptr)
-		wgpuBufferRelease(<<resptr);
+		wgpuBufferDestroy(<<resptr);
 	resptr = null;
 }
 SafeReleasePipelineState::(resptr: *WGPURenderPipeline)
@@ -64,7 +64,7 @@ SafeReleaseWGPUTexture::(resptr: *WGPUTexture)
 SafeReleaseUniforms::(resptr: *WGPUBuffer) /*not sure about that one*/
 {
 	if (<<resptr)
-		wgpuBufferRelease(<<resptr);
+		wgpuBufferDestroy(<<resptr);
 	resptr = null;
 }
 

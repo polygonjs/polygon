@@ -50,11 +50,9 @@ export function heapAdd(item: HeapObject): bigint {
 		return currentIndex;
 	}
 
-	// const slot = HEAP.availableSlots.values().next().value;
 	const index = HEAP.nextValue;
 	HEAP.itemByIndex.set(index, item);
 	HEAP.indexByItem.set(item, index);
-	// HEAP.availableSlots.delete(index);
 
 	HEAP.nextValue++;
 	while (HEAP.itemByIndex.has(HEAP.nextValue)) {
@@ -106,7 +104,7 @@ function _heapDelete(index: bigint, item: HeapObject) {
 		HEAP.nextValue = index;
 	}
 }
-export function heapGet<T>(slot: bigint): T | undefined {
-	return HEAP.itemByIndex.get(slot);
+export function heapGet<T>(index: bigint): T | undefined {
+	return HEAP.itemByIndex.get(index);
 }
 

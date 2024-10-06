@@ -76,7 +76,7 @@ gui_update :: (
 		ImGui.SliderInt("segments x", *scene_data.segments.x, 1, 128);
 		ImGui.SliderInt("segments y", *scene_data.segments.y, 1, 128);
 		ImGui.SliderInt("segments z", *scene_data.segments.z, 1, 128);
-		if( previous_segments != scene_data.segments){
+		if( previous_segments != scene_data.segments ){
 			// print("updated: %x%x% = %\n", scene_data.segments.x, scene_data.segments.y, scene_data.segments.z, scene_data.segments.x*scene_data.segments.y*scene_data.segments.z);
 			geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
 			pipeline_controller_mesh_update_draw_data(*PIPELINE_CONTROLLERS[0], *scene_data.meshes0[0]);
@@ -95,9 +95,13 @@ gui_update :: (
 		if(scene_data.meshes0.count>=1){
 			mesh00 := *scene_data.meshes0[0];
 			ImGui.Text_CFormat("Mesh 0");
+			previous_position := mesh00.position;
 			ImGui.SliderFloat("tx 0", *mesh00.position.x, -2.0, 2.0);
 			ImGui.SliderFloat("ty 0", *mesh00.position.y, -2.0, 2.0);
 			ImGui.SliderFloat("tz 0", *mesh00.position.z, -2.0, 2.0);
+			if(previous_position != mesh00.position){
+				PIPELINE_CONTROLLERS[0].uniforms_dirty = true;
+			}
 			rx0, ry0, rz0, theta0 := get_axis_and_angle(*mesh00.quaternion);
 			theta0_32: float32 = xx theta0;
 			ImGui.SliderFloat("ry 0", *theta0_32, -PI, PI);

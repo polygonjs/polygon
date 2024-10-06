@@ -51,7 +51,8 @@ wgpu_index_array_to_buffer :: (wgpu_context: *WGPUContext, indices: []VertexInde
 
 	buffer_desc:WGPUBufferDescriptor= .{
 		usage = xx (WGPUBufferUsage.Index | WGPUBufferUsage.CopyDst),
-		size=size
+		size=size,
+		label = "index buffer",
 	};
 	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");

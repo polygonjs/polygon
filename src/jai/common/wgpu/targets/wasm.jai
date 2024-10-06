@@ -20,7 +20,7 @@ wgpuBindGroupLayoutRelease :: (bindGroupLayout: WGPUBindGroupLayout) -> void #fo
 
 // Methods of Buffer
 wgpuBufferDestroy :: (buffer: WGPUBuffer) -> void #foreign;
-wgpuBufferRelease :: (buffer: WGPUBuffer) -> void #foreign;
+// wgpuBufferRelease :: (buffer: WGPUBuffer) -> void #foreign;
 
 // Methods of RenderPipeline
 wgpuRenderPipelineGetBindGroupLayout :: (pipeline: WGPURenderPipeline, index: u32) -> WGPUBindGroupLayout #foreign;

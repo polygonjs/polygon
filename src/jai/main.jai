@@ -113,6 +113,7 @@ main :: () {
 		#if USE_IMGUI io := ImGui.GetIO();
 
 		while !do_exit {
+			
 			time := current_time_monotonic();
 			compute_fps(time, *ui_data);
 			sdl_event: SDL_Event;
@@ -320,8 +321,10 @@ on_request_animation_frame :: (
 	);
 	defer wgpuCommandEncoderRelease(cmd_encoder1);
 
+	render_pass_descriptor_label := to_c_string(tprint("Render Pass 3D %", FRAMES_COUNT));
+	defer free(render_pass_descriptor_label);
 	render_pass_descriptor := WGPURenderPassDescriptor.{
-		label = "Render Pass 3D",
+		label = render_pass_descriptor_label,
 		colorAttachmentCount = 1,
 		colorAttachments = *colorAttachment,
 	};
@@ -330,11 +333,13 @@ on_request_animation_frame :: (
 	defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
 	#if RENDER_IN_VIEWPORT wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
 
-	for PIPELINE_CONTROLLERS pipeline_controller_update_render_pass(*it, *render_pass_encoder1, *SCENE_DATA);
+	for PIPELINE_CONTROLLERS pipeline_controller_update_render_pass(*it, render_pass_encoder1, *SCENE_DATA);
 	#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA, *events_data);
 	wgpuRenderPassEncoderEnd(render_pass_encoder1);
 
-	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer 3D"}));
+	cmd_buffer1_label := to_c_string(tprint("Cmd Buffer 3D %", FRAMES_COUNT));
+	defer free(cmd_buffer1_label);
+	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
 	defer wgpuCommandBufferRelease(cmd_buffer1);
 
 	wgpuQueueSubmit(queue, 1, *cmd_buffer1);
@@ -348,6 +353,7 @@ on_request_animation_frame :: (
 	#if USE_IMGUI imgui_gui_free(*iwc);
 
 	reset_temporary_storage();
+	for PIPELINE_CONTROLLERS pipeline_controller_destroy_scheduled_buffers(*it);
 	FRAMES_COUNT += 1;
 }
 
@@ -374,12 +380,7 @@ else              #import "wgpu";
 	#import "SDL";
 }
 #if USE_IMGUI {
-	#load "common/imgui/common.jai";
-	#load "common/imgui_impl_wgpu/index.jai";
-	#import "imgui";
-	#load "common/imgui/common_ui.jai";
-	#if WASM #load "common/imgui/wasm.jai";
-	else     #load "common/imgui/native.jai";
+	#load "common/imgui/index.jai";
 }
 
 #load "test/index.jai";

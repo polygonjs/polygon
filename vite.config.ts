@@ -118,12 +118,16 @@ const onBuild = (
 		console.clear = () => {};
 		terminalLogGreenBg(
 			`+ build successful ( ${
-				RUN_NATIVE_ON_FILE_CHANGE ? "WASM + NATIVE" : "WASM ONLY"
+				RUN_NATIVE_ON_FILE_CHANGE
+					? "WASM + NATIVE"
+					: "WASM ONLY, do not run native"
 			} )`
 		);
 		if (RUN_NATIVE_ON_FILE_CHANGE) {
-			exec(`bin/polygon-next-native`, (err, stdout, stderr) =>
-				onRun(server, err, stdout, stderr)
+			exec(`killall polygon-next`, () =>
+				exec(`bin/polygon-next`, (err, stdout, stderr) =>
+					onRun(server, err, stdout, stderr)
+				)
 			);
 		}
 	}

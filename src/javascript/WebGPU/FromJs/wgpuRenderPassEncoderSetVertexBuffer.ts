@@ -20,3 +20,4 @@ export function wgpuRenderPassEncoderSetVertexBuffer(
 		Number(size)
 	);
 }
+

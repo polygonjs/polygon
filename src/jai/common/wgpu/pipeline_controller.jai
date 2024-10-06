@@ -27,6 +27,9 @@ PipelineController :: struct {
 	meshes_draw_data:[..]MeshDrawData;
 	// compute
 	// compute_shader_controllers:[..]ComputeShaderController;
+	//
+	uniforms_dirty: bool=true;
+	buffers_to_destroy: [..]BufferContainer;
 };
 
 
@@ -94,15 +97,22 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 }
 
 pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh) {
+	// TODO: release old draw data buffers, using this [0] is not good, we should look up which index matches this mesh
+	draw_data_buffers_schedule_destroy(pc, *pc.meshes_draw_data[0]);
+
 	draw_data := draw_data_create(pc, mesh);
-	// TODO: release old draw data buffers
-	draw_data_release(*pc.meshes_draw_data[0]);
 	pc.meshes_draw_data[0] = draw_data;
 }
 
 
 
 pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DATA:*SceneData) {
+	// using the dirty flag may need a bit more work:
+	// - ensure mesh uniforms trigger it
+	// - ensure camera uniforms is shared and triggers it
+	// - ensure material uniforms is shared and triggers it
+	// if(!pc.uniforms_dirty) return;
+	// defer pc.uniforms_dirty = false;
 	for (<<pc.meshes) {
 		mesh := it;
 		draw_data := pc.meshes_draw_data[it_index];
@@ -127,24 +137,33 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DA
 	}
 }
 
-pipeline_controller_update_render_pass::(pc: *PipelineController, render_pass_encoder: *WGPURenderPassEncoder, SCENE_DATA:*SceneData) {
-	wgpuRenderPassEncoderSetPipeline(<<render_pass_encoder, pc.pipeline);
-	for pc.meshes_draw_data {
-		draw_data := it;
-		wgpuRenderPassEncoderSetBindGroup(<<render_pass_encoder, 0, draw_data.uniforms.object.bind_group, 0, null);
-		wgpuRenderPassEncoderSetBindGroup(<<render_pass_encoder, 1, draw_data.uniforms.camera.bind_group, 0, null);
-		wgpuRenderPassEncoderSetBindGroup(<<render_pass_encoder, 2, draw_data.uniforms.material.bind_group, 0, null);
+pipeline_controller_update_render_pass :: (pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder, SCENE_DATA:*SceneData) {
+	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pc.pipeline);
+	for draw_data: pc.meshes_draw_data {
+		{
+			using draw_data.uniforms;
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 0, object.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 1, camera.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 2, material.bind_group, 0, null);
+		}
 		//
 		for v, vi: draw_data.vertex {
-			wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, xx vi, v.buffer, 0, v.buffer_size);
+			// print("submit attribute buffer START: % % (%/%)\n", v.buffer, v.label, vi+1, draw_data.vertex.count);
+			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder, xx vi, v.buffer, 0, v.buffer_size);
 		}
-		wgpuRenderPassEncoderSetIndexBuffer(<<render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
+		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
 
 		mesh := (<<pc.meshes)[it_index];
-		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(<<render_pass_encoder, xx (mesh.geometry.indices.count), 1, 0, 0, 0);
+		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(render_pass_encoder, xx (mesh.geometry.indices.count), 1, 0, 0, 0);
 	}
 }
 
+pipeline_controller_destroy_scheduled_buffers :: (pc: *PipelineController) {
+	for container: pc.buffers_to_destroy {
+		wgpuBufferDestroy(container.buffer);
+	}
+	array_reset(*pc.buffers_to_destroy);
+}
 
 
 #scope_file

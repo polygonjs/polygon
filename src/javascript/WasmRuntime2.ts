@@ -57,7 +57,7 @@ import { NOT_IMPLEMENTED } from "./wasm/WasmNotImplemented";
 import { wgpuBindGroupLayoutRelease } from "./WebGPU/FromJs/wgpuBindGroupLayoutRelease";
 import { wgpuBindGroupRelease } from "./WebGPU/FromJs/wgpuBindGroupRelease";
 import { wgpuBufferDestroy } from "./WebGPU/FromJs/wgpuBufferDestroy";
-import { wgpuBufferRelease } from "./WebGPU/FromJs/wgpuBufferRelease";
+// import { wgpuBufferRelease } from "./WebGPU/FromJs/wgpuBufferRelease";
 import { wgpuDeviceCreateSampler } from "./WebGPU/FromJs/wgpuDeviceCreateSampler";
 import { wgpuDeviceCreateShaderModule } from "./WebGPU/FromJs/wgpuDeviceCreateShaderModule";
 import { wgpuDeviceGetQueue } from "./WebGPU/FromJs/wgpuDeviceGetQueue";
@@ -161,7 +161,7 @@ export function loadWasm(): Promise<void> {
 		wgpuBindGroupLayoutRelease,
 		wgpuBindGroupRelease,
 		wgpuBufferDestroy,
-		wgpuBufferRelease,
+		// wgpuBufferRelease,
 		wgpuDeviceCreateSampler,
 		wgpuDeviceCreateShaderModule,
 		wgpuDeviceGetQueue,
