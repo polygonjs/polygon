@@ -16,7 +16,6 @@ gui_update :: (
 	scene_data: *SceneData,
 	events_data: *EventsData
 ){
-
 	width := wgpu_texture_get_width_surface(wgpu_context);
 	height := wgpu_texture_get_height_surface(wgpu_context);
 	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipeline==null) {
@@ -40,7 +39,9 @@ gui_update :: (
 		ImGui.SetNextWindowPos(.{0, 0}, ImGuiCond.FirstUseEver);
 		ImGui.Begin("Controls");
 
-		ImGui.Text_CFormat("This is some useful text");
+		frame_rate_str := to_c_string(tprint("Frame Rate: %\n", ui_data.fps));
+		defer free(frame_rate_str);
+		ImGui.Text_CFormat(frame_rate_str);
 		// ImGui.Checkbox("Demo Window", *ui_data.show_demo_window);      // Edit bools storing our window open/close state
 		// ImGui.Checkbox("Another Window", *ui_data.show_another_window);
 

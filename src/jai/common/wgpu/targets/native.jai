@@ -137,12 +137,45 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context:*WGPUContext,width: u32,
 	// surface_configure(*wgpu_context, width, height);
 	surface_capabilities :WGPUSurfaceCapabilities;
 	wgpuSurfaceGetCapabilities(wgpu_context.surface, wgpu_context.adapter, *surface_capabilities);
+	presentModeAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, mode: WGPUPresentMode) -> bool {
+		for 0..(surface_capabilities.presentModeCount-1) {
+			if surface_capabilities.presentModes[it] == mode {
+				return true;
+			}
+		}
+		return false;
+	}
+	// printFormats :: (surface_capabilities :*WGPUSurfaceCapabilities) {
+	// 	for 0..(surface_capabilities.formatCount-1) {
+	// 		print("format: %\n", surface_capabilities.formats[it]);
+	// 	}
+	// }
+	// printAlphaModes :: (surface_capabilities :*WGPUSurfaceCapabilities) {
+	// 	for 0..(surface_capabilities.alphaModeCount-1) {
+	// 		print("alphaMode: %\n", surface_capabilities.alphaModes[it]);
+	// 	}
+	// }
+	// printFormats(*surface_capabilities);
+	// printAlphaModes(*surface_capabilities);
+
+	fifoPresentMode := ifx presentModeAvailable(*surface_capabilities, WGPUPresentMode.FifoRelaxed) then
+		WGPUPresentMode.FifoRelaxed
+		else
+		WGPUPresentMode.Fifo;
+	#if WASM || VSYNC {
+		presentMode := fifoPresentMode;
+	} else {
+		presentMode := ifx presentModeAvailable(*surface_capabilities, WGPUPresentMode.Mailbox) then
+			WGPUPresentMode.Mailbox
+			else
+			WGPUPresentMode.Immediate;
+	}
 
 	wgpu_context.config = WGPUSurfaceConfiguration.{
 		device = wgpu_context.device,
 		usage = xx WGPUTextureUsage.RenderAttachment,
 		format = surface_capabilities.formats[0],
-		presentMode = WGPUPresentMode.Fifo,
+		presentMode = presentMode,
 		alphaMode = surface_capabilities.alphaModes[0],
 		width = width,
 		height = height,

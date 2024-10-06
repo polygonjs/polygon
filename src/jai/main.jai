@@ -8,6 +8,7 @@ FREE_MEMORY_DEBUG :: false;
 RENDER_IN_VIEWPORT :: false;
 RENDER_SCENE :: true;
 RUN_TESTS :: false;
+VSYNC :: false;
 
 #placeholder WASM;
 #placeholder SHADER_RENDER_BASIC;
@@ -43,7 +44,6 @@ events_data:EventsData;
 
 
 do_exit := false;
-FRAMES_COUNT:u64 = 0;
 #if WASM==true {
 	call_from_wasm_context :Context;
 	wasm_debug_break :: ()  #foreign;
@@ -113,6 +113,8 @@ main :: () {
 		#if USE_IMGUI io := ImGui.GetIO();
 
 		while !do_exit {
+			time := current_time_monotonic();
+			compute_fps(time, *ui_data);
 			sdl_event: SDL_Event;
 			events_data_reset(*events_data);
 			
@@ -156,8 +158,6 @@ main :: () {
 					}
 				}
 			}
-			time := SDL_GetTicks();
-
 			#if USE_IMGUI {
 				if(io.WantCaptureMouse == false){
 					orbit_controls_process_event(*orbit_controls, *events_data);
@@ -167,7 +167,7 @@ main :: () {
 			}
 
 			// do_exit = true;
-			on_request_animation_frame(time, WINDOW_WIDTH, WINDOW_HEIGHT);
+			on_request_animation_frame(xx to_microseconds(time), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		}
 		reset_temporary_storage();
@@ -360,6 +360,7 @@ else #import "Basic";
 else              #import "wgpu";
 
 #load "scene/index.jai";
+#load "common/fps.jai";
 #load "common/math_helper.jai";
 #load "common/type_utils.jai";
 #load "common/events/index.jai";
