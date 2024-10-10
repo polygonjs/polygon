@@ -7,8 +7,9 @@
 ShadersContainer :: struct {
 	render_basic: string;
 	render_raymarching: string;
-	compute_box: string;
-	compute_offset: string;
+	compute_box_create: string;
+	compute_translate: string;
+	compute_noise: string;
 }
 
 read_shader :: (filepath: string)-> string {
@@ -24,8 +25,10 @@ create_shaders :: ()-> ShadersContainer {
 	shaders :ShadersContainer= .{};
 	filepath_render_basic :: #run tprint("%../../../shaders/basic.pos.wgsl", #filepath);
 	filepath_render_raymarching :: #run tprint("%./raymarching/raymarching.wgsl", #filepath);
-	filepath_compute_box :: #run tprint("%../../../shaders/compute3.wgsl", #filepath);
-	filepath_compute_offset :: #run tprint("%../../../shaders/compute_offset.wgsl", #filepath);
+	// filepath_compute_box_create :: #run tprint("%../../../shaders/compute3.wgsl", #filepath);
+	filepath_compute_box_create :: #run tprint("%../../../shaders/compute_box_create.wgsl", #filepath);
+	filepath_compute_translate :: #run tprint("%../../../shaders/compute_translate.wgsl", #filepath);
+	filepath_compute_noise :: #run tprint("%../../../shaders/compute_noise.wgsl", #filepath);
 	{
 		shader :: #run read_shader(filepath_render_basic);
 		shaders.render_basic = shader;
@@ -35,12 +38,16 @@ create_shaders :: ()-> ShadersContainer {
 		shaders.render_raymarching = shader;
 	}
 	{
-		shader :: #run read_shader(filepath_compute_box);
-		shaders.compute_box = shader;
+		shader :: #run read_shader(filepath_compute_box_create);
+		shaders.compute_box_create = shader;
 	}
 	{
-		shader :: #run read_shader(filepath_compute_offset);
-		shaders.compute_offset = shader;
+		shader :: #run read_shader(filepath_compute_translate);
+		shaders.compute_translate = shader;
+	}
+	{
+		shader :: #run read_shader(filepath_compute_noise);
+		shaders.compute_noise = shader;
 	}
 
 

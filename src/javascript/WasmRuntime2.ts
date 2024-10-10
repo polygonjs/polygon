@@ -86,6 +86,11 @@ import {
 	eventsSetCursor,
 	performance_now,
 } from "./EventsController";
+import { wgpuCommandEncoderCopyBufferToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyBufferToBuffer";
+import { wgpuBufferGetMappedRange } from "./WebGPU/FromJs/wgpuBufferGetMappedRange";
+import { wgpuBufferMapAsync } from "./WebGPU/FromJs/wgpuBufferMapAsync";
+import { wgpuBufferUnmap } from "./WebGPU/FromJs/wgpuBufferUnmap";
+import { wgpuDevicePoll } from "./WebGPU/FromJs/wgpuDevicePoll";
 
 export function loadWasm(): Promise<void> {
 	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
@@ -141,6 +146,11 @@ export function loadWasm(): Promise<void> {
 		// js_wgpu_create_shader_module,
 		js_wgpu_texture_get_width_surface,
 		js_wgpu_texture_get_height_surface,
+		wgpuCommandEncoderCopyBufferToBuffer,
+		wgpuBufferGetMappedRange,
+		wgpuBufferMapAsync,
+		wgpuBufferUnmap,
+		wgpuDevicePoll,
 		wgpuSurfaceGetCurrentTexture,
 		wgpuDeviceCreateRenderPipeline,
 		wgpuDeviceCreateBindGroup,

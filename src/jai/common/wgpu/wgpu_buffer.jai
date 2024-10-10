@@ -9,7 +9,7 @@ wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *
 	size := cast(u64) attribute.values.count * size_of(T);
 
 
-	usage :WGPUBufferUsageFlags= xx WGPUBufferUsage.Vertex | WGPUBufferUsage.CopyDst;
+	usage :WGPUBufferUsageFlags= xx WGPUBufferUsage.Vertex | WGPUBufferUsage.CopyDst | WGPUBufferUsage.CopySrc;
 	// if(compute){
 	// 	#if MAP_BUFFER {
 	// 		usage = xx WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst | WGPUBufferUsage.Vertex;

@@ -25,8 +25,6 @@ PipelineController :: struct {
 	meshes: *[..]Mesh;
 	material: *Material(Any);
 	meshes_draw_data:[..]MeshDrawData;
-	// compute
-	// compute_shader_controllers:[..]ComputeShaderController;
 	//
 	uniforms_dirty: bool=true;
 	buffers_to_destroy: [..]BufferContainer;

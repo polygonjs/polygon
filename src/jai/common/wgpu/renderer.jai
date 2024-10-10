@@ -22,23 +22,21 @@ renderer_init_draw_data :: (){
 	device := WGPU_CONTEXT.device;
 	#if WASM==true {
 		queue := WGPU_CONTEXT.queue;
-	}
-	#if WASM==false {
+	} else {
 		queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
 		assert(queue != null, "Queue is not created correctly");
 	}
-	pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
-	// pipeline_controller_init(*pipeline_controller1, *wgpu_context, *SCENE_DATA.meshes1, "render meshes 1");
-	// pipeline_controller_init(*pipeline_controller2, *wgpu_context, *SCENE_DATA.meshes2, "render meshes 2");
-	array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
+	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
+	// pipeline_controller_init(*pipeline_controller1, *WGPU_CONTEXT, *SCENE_DATA.meshes1, "render meshes 1");
+	pipeline_controller_init(*pipeline_controller2, *WGPU_CONTEXT, *SCENE_DATA.meshes2, "render meshes 2");
+	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
 	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller2);
+	array_add(*PIPELINE_CONTROLLERS, pipeline_controller2);
 
 	#if USE_COMPUTE_SHADER {
-		COMPUTE_CONTROLLER_COLLECTION = compute_controller_collection_create(*WGPU_CONTEXT);
-		pipeline_controlller_update(*pipeline_controller2, *COMPUTE_CONTROLLER_COLLECTION);
+		COMPUTE_CONTROLLER_COLLECTION = compute_controller_collection_create(*WGPU_CONTEXT, *SCENE_DATA);
+		pipeline_controller_update(*pipeline_controller2, *COMPUTE_CONTROLLER_COLLECTION);
 	}
-	// array_add(*pipeline_controller2.compute_shader_controllers, offset_controller);
 
 	#if USE_IMGUI {
 		ImGui.CreateContext(null);

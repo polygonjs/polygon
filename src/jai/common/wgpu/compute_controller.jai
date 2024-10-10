@@ -3,20 +3,15 @@
 
 
 
-
-ComputeShaderControllerBindGroup :: struct {
-	data_size:WGPUBindGroup;
-	vertex:WGPUBindGroup;
-}
-
-ComputeShaderController :: struct {
+ComputeController :: struct {
+	type: Type;
 	wgpu_context: *WGPUContext;
-	work_groups_count:Vector3;
-	vertex:BufferContainer;
-	// release:(this:ComputeShaderController);
+	work_group_size:Vector3;
+	// vertex:BufferContainer;
+	// release:(this:ComputeController);
 	// private
 	// queue:WGPUQueue;
-	data:BufferContainer;
+	// data:BufferContainer;
 	// encoder: WGPUComputePassEncoder;
 	// command_buffer: WGPUCommandBuffer;
 	// commands_count: u32;
@@ -24,10 +19,19 @@ ComputeShaderController :: struct {
 	// for release
 	// compute_pass_encoder: WGPUComputePassEncoder;
 	// command_encoder: WGPUCommandEncoder;
-	bind_group:ComputeShaderControllerBindGroup;
-	#if MAP_BUFFER {
-		vertex_buffer_map: WGPUBuffer;
-	}
+	// bind_group:ComputeControllerBindGroup;
+	data_bind_group_size:WGPUBindGroup;
+	// #if MAP_BUFFER {
+	// 	vertex_buffer_map: WGPUBuffer;
+	// }
+}
+
+heap_compute_controller :: ($T: Type) -> *T {  // Return a pointer to a heap-allocated Document of the appropriate type.
+	doc: *T = alloc(size_of(T));  // alloc returns us a pointer to a series of contiguous bytes allocated on the heap.
+	doc.type     = T;
+	// doc.filename = name;
+
+	return doc;
 }
 
 // this is an alternative version to replace() from the String module,
@@ -80,23 +84,24 @@ build_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
 
 // InputType :: [3]float;
 // ResultType :: [64]float;
-compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_raw: string, entry_point:string, buffer_container:BufferContainer) -> ComputeShaderController {
-	controller: ComputeShaderController = .{
-		wgpu_context = wgpu_context,
-		// queue = queue,
-		work_groups_count = .{1, 1, 1},
-		bind_group = .{}
-	};
-	// device := wgpu_context.device;
 
-	box_size :[3]float= .[2, 1, 1];
-	box_size_buffer_size := cast(u64) size_of(type_of(box_size));//cast(u64) input.count * size_of(float);
+compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUContext, shader: string, entry_point:string, work_group_size:Vector3=.{256,1,1}, params_bind_groups_count:u32=1, attributes_bind_groups_count:u32=1, compute_controller_label:string="unnamed compute controller") {
+	// controller: ComputeController = .{
+	// 	wgpu_context = wgpu_context,
+	// 	// queue = queue,
+	// 	work_groups_count = .{1, 1, 1},
+	// 	bind_group = .{}
+	// };
+	// device := wgpu_context.device;
+	controller.wgpu_context = wgpu_context;
+	controller.work_group_size = work_group_size;
+
 	// print("entry_point:%\n", entry_point);
 	// print("shader_compute_raw:%\n", shader_compute_raw);
 
 	// work_groups_count :Vector3= .{1, 1, 1};
 	// work_groups_count_total :u32= cast(u32)(work_groups_count.x)*cast(u32)(work_groups_count.y)*cast(u32)(work_groups_count.z);
-	shader_compute := build_compute_shader(shader_compute_raw, controller.work_groups_count);
+	shader_compute := build_compute_shader(shader, controller.work_group_size);
 	defer free(shader_compute);
 	entry_point_c := to_c_string(entry_point);
 	defer free(entry_point_c);
@@ -118,33 +123,41 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
 	shader_module := wgpuDeviceCreateShaderModule(wgpu_context.device, *shaderModuleDescriptor);
 
-	// create pipeline
-	
+	//
 	bind_group_layouts := NewArray(2, WGPUBindGroupLayout);
 	#if FREE_MEMORY defer array_reset(*bind_group_layouts);
 	// group 0
-	bind_group_layout_entries0 := NewArray(1, WGPUBindGroupLayoutEntry);
+	bind_group_layout_entries0 := NewArray(params_bind_groups_count, WGPUBindGroupLayoutEntry);
 	#if FREE_MEMORY defer array_reset(*bind_group_layout_entries0);
 	{
-		bind_group_layout_entries0[0] = WGPUBindGroupLayoutEntry.{
-			binding = 0,
-			visibility = xx WGPUShaderStage.Compute,
-			buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
-		};
+		for 0..(params_bind_groups_count-1){
+			bind_group_layout_entries0[it] = WGPUBindGroupLayoutEntry.{
+				binding = it,
+				visibility = xx WGPUShaderStage.Compute,
+				buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
+			};
+		}
+		// bind_group_layout_entries0[1] = WGPUBindGroupLayoutEntry.{
+		// 	binding = 1,
+		// 	visibility = xx WGPUShaderStage.Compute,
+		// 	buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
+		// };
 		bind_group_layouts[0] = wgpuDeviceCreateBindGroupLayout(wgpu_context.device, *(WGPUBindGroupLayoutDescriptor.{
 			entryCount = xx bind_group_layout_entries0.count,
 			entries = bind_group_layout_entries0.data,
 		}));
 	}
 	// group 1
-	bind_group_layout_entries1 := NewArray(1, WGPUBindGroupLayoutEntry);
+	bind_group_layout_entries1 := NewArray(attributes_bind_groups_count, WGPUBindGroupLayoutEntry);
 	#if FREE_MEMORY defer array_reset(*bind_group_layout_entries1);
 	{
-		bind_group_layout_entries1[0] = WGPUBindGroupLayoutEntry.{
-			binding = 0,
-			visibility = xx WGPUShaderStage.Compute,
-			buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
-		};
+		for 0..(attributes_bind_groups_count-1){
+			bind_group_layout_entries1[it] = WGPUBindGroupLayoutEntry.{
+				binding = it,
+				visibility = xx WGPUShaderStage.Compute,
+				buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
+			};
+		}
 		bind_group_layouts[1] = wgpuDeviceCreateBindGroupLayout(wgpu_context.device, *(WGPUBindGroupLayoutDescriptor.{
 			entryCount = xx bind_group_layout_entries1.count,
 			entries = bind_group_layout_entries1.data,
@@ -160,33 +173,13 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 	compute_layout_desc.bindGroupLayouts = bind_group_layouts.data;
 	compute_layout := wgpuDeviceCreatePipelineLayout(wgpu_context.device, *compute_layout_desc);
 	pipeline_descriptor: WGPUComputePipelineDescriptor = .{
-		label = to_c_string("box geometry compute pipeline"),
+		label = to_c_string(compute_controller_label),
 		layout = compute_layout,
 		compute = compute_descriptor,
 	};
 	controller.pipeline = wgpuDeviceCreateComputePipeline(wgpu_context.device, *pipeline_descriptor);
 	free(pipeline_descriptor.label);
 
-	
-
-	//
-	//
-	// create a buffer on the GPU to hold our computation
-	// input and output
-	//
-	//
-	box_size_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
-		label = "input size buffer",
-		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
-		size = box_size_buffer_size
-	}));
-	controller.data.buffer = box_size_buffer;
-	controller.data.buffer_size = box_size_buffer_size;
-	// Copy our input data to that buffer
-	// wgpuQueueWriteBuffer(queue, box_size_buffer, 0, box_size.data, box_size_buffer_size);
-	
-	box_size_v:Vector3 = .{x=box_size[0], y=box_size[1], z=box_size[2]};
-	compute_shader_controller_update_buffer(*controller, box_size_v);
 
 	//
 	//
@@ -203,15 +196,8 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 	// 	usage = xx vertex_buffer_usage,
 	// 	size = vertex_buffer_size
 	// }));
-	controller.vertex = buffer_container;
 	// controller.vertex.buffer_size = vertex_buffer_size;
-	#if MAP_BUFFER {
-			controller.vertex_buffer_map = wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
-			label = "vertex buffer",
-			usage = xx (WGPUBufferUsage.MapRead | WGPUBufferUsage.CopyDst),
-			size = controller.vertex.buffer_size
-		}));
-	}
+	
 
 	//
 	//
@@ -220,61 +206,120 @@ compute_shader_controller_create :: (wgpu_context: *WGPUContext, shader_compute_
 	//
 	//
 	// bind_group_box_size :WGPUBindGroup;
-	bind_group_box_size_entries := NewArray(1, WGPUBindGroupEntry);
-	defer array_reset(*bind_group_box_size_entries);
-	{
-		bind_group_box_size_entries[0] = WGPUBindGroupEntry.{
-			binding = 0,
-			size = box_size_buffer_size,
-			offset = 0,
-			buffer = box_size_buffer,
-		};
-		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "bind_group_data_size",
-			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 0),
-			entryCount = xx bind_group_box_size_entries.count,
-			entries = bind_group_box_size_entries.data
-		};
-		controller.bind_group.data_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
-	}
+	// compute_controller_add_data_bind_group(*controller, 0, box_size_buffer_size);
 	// bind_group_vertex :WGPUBindGroup;
-	bind_group_vertex_entries := NewArray(1, WGPUBindGroupEntry);
-	defer array_reset(*bind_group_vertex_entries);
-	{
-		bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
-			binding = 0,
-			size = buffer_container.buffer_size,
-			offset = 0,
-			buffer = buffer_container.buffer,
-		};
-		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "bind_group_vertex",
-			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
-			entryCount = xx bind_group_vertex_entries.count,
-			entries = bind_group_vertex_entries.data
-		};
-		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
-	}
+	// bind_group_vertex_entries := NewArray(1, WGPUBindGroupEntry);
+	// defer array_reset(*bind_group_vertex_entries);
+	// {
+	// 	bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
+	// 		binding = 0,
+	// 		size = buffer_container.buffer_size,
+	// 		offset = 0,
+	// 		buffer = buffer_container.buffer,
+	// 	};
+	// 	bind_group_descriptor := WGPUBindGroupDescriptor.{
+	// 		label = "bind_group_vertex",
+	// 		layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
+	// 		entryCount = xx bind_group_vertex_entries.count,
+	// 		entries = bind_group_vertex_entries.data
+	// 	};
+	// 	controller.bind_group.vertex = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
+	// }
 
-	compute_shader_controller_compute(*controller);
+	// compute_shader_controller_compute(controller);
 	
 
 	
 
-	// controller.release = (controller:ComputeShaderController) {
+	// controller.release = (controller:ComputeController) {
 	// 	wgpuComputePassEncoderRelease(controller.compute_pass_encoder);
 	// 	// wgpuCommandBufferRelease(controller.command_buffer);
 	// 	// wgpuCommandEncoderRelease(controller.command_encoder);
 	// };
 
-	return controller;
+	// return controller;
 }
+// ComputeControllerBindGroupAdd :: struct {
+// 	buffer_size: u64;
+// 	buffer: WGPUBuffer;
+// 	groupIndex: u32;
+// 	label:string;
+// };
 
-compute_shader_controller_update_buffer :: (controller:*ComputeShaderController, size:Vector3){
-	size_float: [3]float = .[size.x, size.y, size.z];
-	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.data.buffer, 0, size_float.data, controller.data.buffer_size);
+// compute_controller_add_data_bind_group :: (controller:*ComputeController, data: ComputeControllerBindGroupAdd) {
+// 	bind_group_box_size_entries := NewArray(1, WGPUBindGroupEntry);
+// 	defer array_reset(*bind_group_box_size_entries);
+// 	{
+// 		bind_group_box_size_entries[0] = WGPUBindGroupEntry.{
+// 			binding = 0,
+// 			size = data.buffer_size,
+// 			offset = 0,
+// 			buffer = data.buffer,
+// 		};
+// 		bind_group_descriptor := WGPUBindGroupDescriptor.{
+// 			label = data.label,
+// 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, data.groupIndex),
+// 			entryCount = xx bind_group_box_size_entries.count,
+// 			entries = bind_group_box_size_entries.data
+// 		};
+// 		controller.bind_group.data_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
+// 	}
+// }
+
+compute_controller_update_buffer :: (controller:*ComputeController, scene_data:*SceneData){
+	if controller.type == {
+		case ComputeControllerBoxCreate; {
+			compute_controller_update_buffer_box_create(cast(*ComputeControllerBoxCreate)controller, scene_data);
+		}
+		case ComputeControllerTranslate; {
+			compute_controller_update_buffer_translate(cast(*ComputeControllerTranslate)controller, scene_data);
+		}
+		case ComputeControllerNoise; {
+			compute_controller_update_buffer_noise(cast(*ComputeControllerNoise)controller, scene_data);
+		}
+	}
 };
-compute_shader_controller_compute :: (controller:*ComputeShaderController) {
+compute_controller_set_bind_group :: (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
+	if controller.type == {
+		case ComputeControllerBoxCreate; {
+			compute_controller_set_bind_group_box_create(cast(*ComputeControllerBoxCreate)controller, compute_pass_encoder, command_encoder);
+		}
+		case ComputeControllerTranslate; {
+			compute_controller_set_bind_group_translate(cast(*ComputeControllerTranslate)controller, compute_pass_encoder, command_encoder);
+		}
+		case ComputeControllerNoise; {
+			compute_controller_set_bind_group_noise(cast(*ComputeControllerNoise)controller, compute_pass_encoder, command_encoder);
+		}
+	}
+};
+compute_controller_handle_mapped_buffers :: (controller:*ComputeController){
+	if controller.type == {
+		case ComputeControllerBoxCreate; {
+			compute_controller_handle_mapped_buffers_box_create(cast(*ComputeControllerBoxCreate)controller);
+		}
+		case ComputeControllerTranslate; {
+			compute_controller_handle_mapped_buffers_translate(cast(*ComputeControllerTranslate)controller);
+		}
+		case ComputeControllerNoise; {
+			compute_controller_handle_mapped_buffers_noise(cast(*ComputeControllerNoise)controller);
+		}
+	}
+};
+compute_controller_points_count :: (controller:*ComputeController)->u64{
+	if controller.type == {
+		case ComputeControllerBoxCreate; {
+			return compute_controller_points_count_box_create(cast(*ComputeControllerBoxCreate)controller);
+		}
+		case ComputeControllerTranslate; {
+			return compute_controller_points_count_translate(cast(*ComputeControllerTranslate)controller);
+		}
+		case ComputeControllerNoise; {
+			return compute_controller_points_count_noise(cast(*ComputeControllerNoise)controller);
+		}
+	}
+	return 0;
+};
+compute_controller_compute :: (controller:*ComputeController) {
 	compute_pass_encoder: WGPUComputePassEncoder;
 	commands_count :u64= 1;
 	command_encoder := wgpuDeviceCreateCommandEncoder(
@@ -290,33 +335,22 @@ compute_shader_controller_compute :: (controller:*ComputeShaderController) {
 	{
 		compute_pass_encoder = wgpuCommandEncoderBeginComputePass(command_encoder, *compute_pass_descriptor);
 		wgpuComputePassEncoderSetPipeline(compute_pass_encoder, controller.pipeline);
-		wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 0, controller.bind_group.data_size, 0, null);
-		wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 1, controller.bind_group.vertex, 0, null);
-		wgpuComputePassEncoderDispatchWorkgroups(compute_pass_encoder, xx controller.work_groups_count.x, xx controller.work_groups_count.y, xx controller.work_groups_count.z);
+		wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 0, controller.data_bind_group_size, 0, null);
+		compute_controller_set_bind_group(controller, *compute_pass_encoder, *command_encoder);
+		points_count := compute_controller_points_count(controller);
+		workgroup_size_x := controller.work_group_size.x;
+		workgroups_x :u32= xx ((points_count + workgroup_size_x - 1) / workgroup_size_x);
+		wgpuComputePassEncoderDispatchWorkgroups(compute_pass_encoder, workgroups_x,1,1);
 		wgpuComputePassEncoderEnd(compute_pass_encoder);
 	}
 
-	#if MAP_BUFFER {
-		// Encode a command to copy the results to a mappable buffer.
-		wgpuCommandEncoderCopyBufferToBuffer(command_encoder, controller.vertex.buffer, 0, controller.vertex_buffer_map, 0, controller.vertex.buffer_size);
-	}
+	
 
 	command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer Compute"}));
 	defer wgpuCommandBufferRelease(command_buffer);
 	wgpuQueueSubmit(controller.wgpu_context.queue, commands_count, *command_buffer);
 
-	#if MAP_BUFFER {
-		wgpuBufferMapAsync(controller.vertex_buffer_map, xx WGPUMapMode.Read, 0, controller.vertex.buffer_size, wgpu_compute_buffer_map_async_callback, null);
-		wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
-		// result_values := /*cast(ResultType)*/ 
-		wgpuBufferGetMappedRange(controller.vertex_buffer_map, 0, controller.vertex.buffer_size);
-
-		//
-		// print_green(tprint("pipeline created:%\n", controller.pipeline));
-		// print("result_values:%\n", cast([64]float)result_values);
-
-		wgpuBufferUnmap(controller.vertex_buffer_map);
-	}
+	#if MAP_BUFFER compute_controller_handle_mapped_buffers(controller);
 };
 
 wgpu_compute_buffer_map_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {

@@ -1,8 +1,8 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: false;
-MAP_BUFFER :: false; // to read the buffer from the GPU to the CPU
+USE_COMPUTE_SHADER :: true;
+MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
 RENDER_IN_VIEWPORT :: false;
@@ -13,13 +13,10 @@ VSYNC :: false;
 #placeholder WASM;
 #placeholder SHADER_RENDER_BASIC;
 #placeholder SHADER_RENDER_RAYMARCHING;
-#placeholder SHADER_COMPUTE_BOX;
-#placeholder SHADER_COMPUTE_OFFSET;
+#placeholder SHADER_COMPUTE_BOX_CREATE;
+#placeholder SHADER_COMPUTE_TRANSLATE;
+#placeholder SHADER_COMPUTE_noise;
 
-#if WASM==false {
-	INIT_WINDOW_SIZE :Vector2UInt: .{1280, 720};
-	window:*SDL_Window;
-}
 
 #if USE_IMGUI window_context:WindowContext;
 SCENE_DATA:SceneData;
@@ -83,17 +80,32 @@ main :: () {
 	init_scene_data(*SCENE_DATA, 1.);
 
 	#if WASM==false {
-		current_window_size :Vector2UInt = INIT_WINDOW_SIZE;
-		SDL_Init(SDL_INIT_VIDEO);
+		SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
+		current_window_size :Vector2UInt = .{1280, 720};
 
-		window = SDL_CreateWindow("Polygon Compute",
+		display_mode: SDL_DisplayMode;
+		get_display_mode_result := SDL_GetDesktopDisplayMode(0, *display_mode);
+		if(get_display_mode_result == 0){
+			display_name :string= to_string(SDL_GetDisplayName(0));
+			current_window_size = .{xx display_mode.w, xx display_mode.h};
+		}
+
+		window:*SDL_Window = SDL_CreateWindow("Polygon Compute",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			xx current_window_size.x,
 			xx current_window_size.y,
-			SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE
+			SDL_WINDOW_ALLOW_HIGHDPI
+			|SDL_WINDOW_RESIZABLE
+			|SDL_WINDOW_MAXIMIZED
+			|SDL_WINDOW_INPUT_FOCUS
+			|SDL_WINDOW_MOUSE_FOCUS
+			//|SDL_WINDOW_FULLSCREEN
 		);
 		assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
+		// if(get_display_mode_result==0){
+		// 	SDL_SetWindowFullscreen(*window, xx SDL_WINDOW_RESIZABLE);
+		// }
 		#if USE_IMGUI {
 			window_context.window = window;
 
@@ -231,7 +243,7 @@ on_request_animation_frame :: (
 	update_scene_data_uniforms(*SCENE_DATA);
 
 	#if USE_COMPUTE_SHADER {
-		compute_controller_collection_compute(*COMPUTE_CONTROLLER_COLLECTION);
+		compute_controller_collection_compute(*COMPUTE_CONTROLLER_COLLECTION, *SCENE_DATA);
 	}
 
 	render();

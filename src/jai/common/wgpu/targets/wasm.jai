@@ -21,6 +21,8 @@ wgpu_texture_get_height_surface :: (wgpu_context: *WGPUContext) -> u32 {
 js_wgpu_texture_get_width_surface :: (surface: WGPUSurface)-> u32 #foreign;
 js_wgpu_texture_get_height_surface :: (surface: WGPUSurface)-> u32 #foreign;
 
+wgpuDevicePoll :: (device: WGPUDevice, wait: WGPUBool, wrappedSubmissionIndex: *WGPUWrappedSubmissionIndex) -> WGPUBool #foreign;
+
 wgpuSurfaceGetCurrentTexture :: ()-> WGPUTexture #foreign;
 
 // Methods of BindGroup
@@ -32,6 +34,9 @@ wgpuBindGroupLayoutRelease :: (bindGroupLayout: WGPUBindGroupLayout) -> void #fo
 // Methods of Buffer
 wgpuBufferDestroy :: (buffer: WGPUBuffer) -> void #foreign;
 // wgpuBufferRelease :: (buffer: WGPUBuffer) -> void #foreign;
+wgpuBufferGetMappedRange :: (buffer: WGPUBuffer, offset: u64, size: u64) -> *void #foreign;
+wgpuBufferMapAsync :: (buffer: WGPUBuffer, mode: WGPUMapModeFlags, offset: u64, size: u64, callback: WGPUBufferMapCallback, userdata: *void) -> void #foreign;
+wgpuBufferUnmap :: (buffer: WGPUBuffer) -> void #foreign;
 
 // Methods of RenderPipeline
 wgpuRenderPipelineGetBindGroupLayout :: (pipeline: WGPURenderPipeline, index: u32) -> WGPUBindGroupLayout #foreign;
@@ -40,6 +45,8 @@ wgpuRenderPipelineRelease :: (renderPipeline: WGPURenderPipeline) -> void #forei
 
 // Methods of CommandEncoder
 wgpuCommandEncoderBeginComputePass :: (commandEncoder: WGPUCommandEncoder, descriptor: *WGPUComputePassDescriptor) -> WGPUComputePassEncoder #foreign;
+wgpuCommandEncoderCopyBufferToBuffer :: (commandEncoder: WGPUCommandEncoder, source: WGPUBuffer, sourceOffset: u64, destination: WGPUBuffer, destinationOffset: u64, size: u64) -> void #foreign;
+
 
 // Methods of ComputePassEncoder
 wgpuComputePassEncoderDispatchWorkgroups :: (computePassEncoder: WGPUComputePassEncoder, workgroupCountX: u32, workgroupCountY: u32, workgroupCountZ: u32) -> void #foreign;

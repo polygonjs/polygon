@@ -1,38 +1,91 @@
 ComputeControllerCollection :: struct {
-	controllers: [..]ComputeShaderController;
+	controllers: [..]*ComputeController;
 }
 
-compute_controller_collection_create :: (wgpu_context: *WGPUContext) -> ComputeControllerCollection {
+compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene_data:*SceneData) -> ComputeControllerCollection {
 	ccc :ComputeControllerCollection;
-	buffer_container := wgpu_buffer_for_compute(wgpu_context, 8 * size_of(Vector3));
+	print("beware the hard coded value\n");
+	points_count :u64= 99846;//6534;
+	position_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position in");
+	position_out := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position out");
 
-	box_controller := compute_shader_controller_create(
-		wgpu_context,
-		SHADER_COMPUTE_BOX,
-		"boxCompute",
-		buffer_container
-	);
+	// box_create_controller := heap_compute_controller(ComputeControllerBoxCreate);
+	// compute_controller_box_create_init( box_create_controller, wgpu_context, position_in, scene_data );
 
-	offset_controller := compute_shader_controller_create(
-		wgpu_context,
-		SHADER_COMPUTE_OFFSET,
-		"boxOffsetCompute",
-		buffer_container
-	);
+	// {
+	// 	controller := heap_compute_controller(ComputeControllerTranslate);
+	// 	compute_controller_translate_init( controller, wgpu_context, scene_data );
+	// 	compute_controller_translate_set_buffer( controller, *position_in, *position_out );
+	// 	array_add(*ccc.controllers, controller);
+	// }
 
-	array_add(*ccc.controllers, box_controller);
-	array_add(*ccc.controllers, offset_controller);
+	{
+		controller := heap_compute_controller(ComputeControllerNoise);
+		compute_controller_noise_init( controller, wgpu_context, scene_data );
+		compute_controller_noise_set_buffer( controller, *position_in, *position_out );
+		array_add(*ccc.controllers, controller);
+	}
+
+	// offset_controller := compute_controller_create(
+	// 	wgpu_context,
+	// 	SHADER_COMPUTE_OFFSET,
+	// 	"geometryOffset",
+	// 	buffer_container
+	// );
+
+	// array_add(*ccc.controllers, box_create_controller);
+	
 	return ccc;
 }
 
-pipeline_controlller_update :: (pc: *PipelineController, ccc: *ComputeControllerCollection) {
-	pc.meshes_draw_data[0].vertex[0] = ccc.controllers[0].vertex;
-	// wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
+pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerCollection) {
+	if (ccc.controllers.count == 0) return;
+
+	// {
+	// 	if (ccc.controllers[0].type != ComputeControllerTranslate) return;
+	// 	translate_controller := cast(*ComputeControllerTranslate) ccc.controllers[0];
+
+	// 	commands_count :u64= 1;
+	// 	command_encoder := wgpuDeviceCreateCommandEncoder(
+	// 		translate_controller.wgpu_context.device,
+	// 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder pipeline_controller_update"}),
+	// 	);
+	// 	defer wgpuCommandEncoderRelease(command_encoder);
+
+	// 	wgpuCommandEncoderCopyBufferToBuffer(command_encoder, pc.meshes_draw_data[0].vertex[0].buffer, 0, translate_controller.attributes.position_in.buffer, 0, translate_controller.attributes.position_in.buffer_size);
+	// 	pc.meshes_draw_data[0].vertex[0] = translate_controller.attributes.position_out;
+	// 	// wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
+
+	// 	command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer pipeline_controller_update"}));
+	// 	defer wgpuCommandBufferRelease(command_buffer);
+	// 	wgpuQueueSubmit(translate_controller.wgpu_context.queue, commands_count, *command_buffer);
+	// }
+
+	{
+		if (ccc.controllers[0].type != ComputeControllerNoise) return;
+		translate_controller := cast(*ComputeControllerNoise) ccc.controllers[0];
+
+		commands_count :u64= 1;
+		command_encoder := wgpuDeviceCreateCommandEncoder(
+			translate_controller.wgpu_context.device,
+			*(WGPUCommandEncoderDescriptor.{label = "Command Encoder pipeline_controller_update"}),
+		);
+		defer wgpuCommandEncoderRelease(command_encoder);
+
+		wgpuCommandEncoderCopyBufferToBuffer(command_encoder, pc.meshes_draw_data[0].vertex[0].buffer, 0, translate_controller.attributes.position_in.buffer, 0, translate_controller.attributes.position_in.buffer_size);
+		pc.meshes_draw_data[0].vertex[0] = translate_controller.attributes.position_out;
+		// wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
+
+		command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer pipeline_controller_update"}));
+		defer wgpuCommandBufferRelease(command_buffer);
+		wgpuQueueSubmit(translate_controller.wgpu_context.queue, commands_count, *command_buffer);
+	}
+
 }
 
-compute_controller_collection_compute :: (ccc: *ComputeControllerCollection) {
-	compute_shader_controller_update_buffer(*ccc.controllers[0], *SCENE_DATA.box_size);
-	compute_shader_controller_update_buffer(*ccc.controllers[1], *SCENE_DATA.offset);
+compute_controller_collection_compute :: (ccc: *ComputeControllerCollection, scene_data: *SceneData) {
+	// compute_controller_update_buffer(ccc.controllers[0], scene_data);
+	// compute_controller_update_buffer(*ccc.controllers[1], *SCENE_DATA.offset);
 
-	for ccc.controllers compute_shader_controller_compute(*it);
+	for ccc.controllers compute_controller_compute(it);
 }

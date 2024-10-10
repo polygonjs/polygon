@@ -15,10 +15,13 @@ Geometry :: struct {
 }
 
 
-geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt, freq: Vector3) {
+geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt) {
 	geometry_box_attributes_set(geometry, .{segments = segments});
 	geometry_attributes_validate(geometry);
+	normals_compute(geometry);
+}
 
+geometry_add_noise :: (geometry: *Geometry, freq: Vector3) {
 	{
 		using geometry.attributes;
 		for position.values {

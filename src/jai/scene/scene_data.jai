@@ -3,13 +3,16 @@ VertexIndex :: u32;
 VertexLayoutBuffer :: u8;
 Matrix4x4Buffer :: [16]float;
 
-
+SceneDataNoise :: struct {
+	freq: Vector3 = .{2.0, 2.0, 2.0};
+	offset: Vector3 = .{0.0, 0.0, 0.0};
+}
 
 SceneData :: struct {
 	time: Time;
 	// object
 	box_size: Vector3=.{3.0, 1.0, 1.0};
-	offset: Vector3;
+	translate: Vector3;
 	//
 	bg_color :Color =.{0.1, 0.3, 0.72, 1.0};
 	camera: CameraData;
@@ -20,8 +23,8 @@ SceneData :: struct {
 	// string tests
 	node_name: string;
 	//
-	segments: Vector3Int = .{32, 32, 32};
-	freq: Vector3 = .{2.0, 2.0, 2.0};
+	segments: Vector3Int = .{128, 128, 128};
+	noise:SceneDataNoise;
 };
 
 
@@ -35,36 +38,42 @@ init_scene_data :: (scene_data: *SceneData, aspect:float32) {
 	scene_data.camera.aspect = aspect;
 	scene_data.camera = camera_data_create();
 
-	{
-		mesh0 := mesh_create();
-		// mesh1 := mesh_create();
-		// mesh0.position = .{x = -2.0, y = 0.0, z = -4.0};
-		// mesh1.position = .{x = 2.0, y = 1.0, z = -3.0};
-		mesh_update_matrix(*mesh0);
-		// mesh_update_matrix(*mesh1);
-		array_add(*scene_data.meshes0, mesh0);
-		// array_add(*scene_data.meshes0, mesh1);
-	}
 	// {
 	// 	mesh0 := mesh_create();
+	// 	// mesh1 := mesh_create();
+	// 	// mesh0.position = .{x = -2.0, y = 0.0, z = -4.0};
+	// 	// mesh1.position = .{x = 2.0, y = 1.0, z = -3.0};
+	// 	// mesh_update_matrix(*mesh0);
+	// 	// mesh_update_matrix(*mesh1);
+	// 	mesh_update_matrix(*mesh0);
+	// 	array_add(*scene_data.meshes0, mesh0);
+	// 	// array_add(*scene_data.meshes0, mesh1);
+	// }
+	// {
+	// 	mesh0 := mesh_create();
+	// 	geometry_add_noise(*mesh0.geometry, scene_data.freq);
 	// 	mesh1 := mesh_create();
 	// 	mesh0.material = cast(*Material(Any)) *MATERIAL_RAYMARCHING;
 	// 	mesh1.material = cast(*Material(Any)) *MATERIAL_RAYMARCHING;
 	// 	mesh0.position = .{x = -0.0, y = 1.0, z = -2.0};
-	// 	mesh1.position = .{x = -0.0, y = -1.0, z = -1.0};
+	// 	mesh1.position = .{x = -0.0, y = -2.0, z = -1.0};
+	// 	mesh_update_matrix(*mesh0);
+	// 	mesh_update_matrix(*mesh1);
 	// 	array_add(*scene_data.meshes1, mesh0);
 	// 	array_add(*scene_data.meshes1, mesh1);
 	// }
-	// {
-	// 	mesh0 := mesh_create();
-	// 	mesh1 := mesh_create();
-	// 	mesh0.material = cast(*Material(Any)) *MATERIAL_BASIC;
-	// 	mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
-	// 	mesh0.position = .{x = -1.0, y = 1.0, z = 0.0};
-	// 	mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
-	// 	array_add(*scene_data.meshes2, mesh0);
-	// 	// array_add(*scene_data.meshes2, mesh1);
-	// }
+	{
+		mesh0 := mesh_create();
+		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
+		// mesh1 := mesh_create();
+		mesh0.material = cast(*Material(Any)) *MATERIAL_BASIC;
+		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
+		mesh0.position = .{x = 0.0, y = 0.0, z = 0.0};
+		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
+		mesh_update_matrix(*mesh0);
+		array_add(*scene_data.meshes2, mesh0);
+		// array_add(*scene_data.meshes2, mesh1);
+	}
 }
 
 update_scene_data_uniforms :: (scene_data: *SceneData) {

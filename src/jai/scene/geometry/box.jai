@@ -11,6 +11,7 @@ geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) 
 	count1 := plane_points_and_indices_count(params.segments.x, params.segments.z);
 	count2 := plane_points_and_indices_count(params.segments.y, params.segments.z);
 	points_count := (count0.points_count + count1.points_count + count2.points_count) * 2;
+	print("points_count:%\n", points_count);
 	indices_count := (count0.indices_count + count1.indices_count + count2.indices_count) * 2;
 
 	array_resize(*geometry.attributes.position.values, points_count, false);
@@ -21,12 +22,12 @@ geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) 
 
 	offset:BuildPlaneOffset = .{points = 0, indices = 0};
 
-	build_plane(geometry, BuildPlaneParams.{normal = .{1.0, 0.0, 0.0}, size = params.size, segments = .{params.segments.y, params.segments.z}, offset = *offset}); // px
-	build_plane(geometry, BuildPlaneParams.{normal = .{-1.0, 0.0, 0.0}, size = params.size, segments = .{params.segments.y, params.segments.z}, offset = *offset}); // nx
-	build_plane(geometry, BuildPlaneParams.{normal = .{0.0, 1.0, 0.0}, size = params.size, segments = .{params.segments.x, params.segments.z}, offset = *offset}); // py
-	build_plane(geometry, BuildPlaneParams.{normal = .{0.0, -1.0, 0.0}, size = params.size, segments = .{params.segments.x, params.segments.z}, offset = *offset}); // ny
-	build_plane(geometry, BuildPlaneParams.{normal = .{0.0, 0.0, 1.0}, size = params.size, segments = .{params.segments.x, params.segments.y}, offset = *offset}); // pz
-	build_plane(geometry, BuildPlaneParams.{normal = .{0.0, 0.0, -1.0}, size = params.size, segments = .{params.segments.x, params.segments.y}, offset = *offset}); // nz
+	build_plane(geometry, .{normal = .{1.0, 0.0, 0.0}, size = params.size, segments = .{params.segments.y, params.segments.z}, offset = *offset}); // px
+	build_plane(geometry, .{normal = .{-1.0, 0.0, 0.0}, size = params.size, segments = .{params.segments.y, params.segments.z}, offset = *offset}); // nx
+	build_plane(geometry, .{normal = .{0.0, 1.0, 0.0}, size = params.size, segments = .{params.segments.x, params.segments.z}, offset = *offset}); // py
+	build_plane(geometry, .{normal = .{0.0, -1.0, 0.0}, size = params.size, segments = .{params.segments.x, params.segments.z}, offset = *offset}); // ny
+	build_plane(geometry, .{normal = .{0.0, 0.0, 1.0}, size = params.size, segments = .{params.segments.x, params.segments.y}, offset = *offset}); // pz
+	build_plane(geometry, .{normal = .{0.0, 0.0, -1.0}, size = params.size, segments = .{params.segments.x, params.segments.y}, offset = *offset}); // nz
 
 }
 
@@ -94,7 +95,7 @@ build_plane :: ( geometry: *Geometry, params: BuildPlaneParams ) {
 				indices[i+4] = c;
 				indices[i+5] = d;
 
-				offset.indices+=6;
+				offset.indices += 6;
 			}
 		}
 	}

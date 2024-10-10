@@ -1,6 +1,6 @@
 OPTIMIZED :: false;
 BUILD_WASM :: true;
-BUILD_NATIVE :: true;
+BUILD_NATIVE :: false;
 
 WASM_INSERTION_STRING :: #string DONE
 
@@ -12,12 +12,16 @@ SHADER_RENDER_RAYMARCHING :: #string WGSL
 %2;
 WGSL
 
-SHADER_COMPUTE_BOX :: #string WGSL
+SHADER_COMPUTE_BOX_CREATE :: #string WGSL
 %3;
 WGSL
 
-SHADER_COMPUTE_OFFSET :: #string WGSL
+SHADER_COMPUTE_TRANSLATE :: #string WGSL
 %4;
+WGSL
+
+SHADER_COMPUTE_NOISE :: #string WGSL
+%5;
 WGSL
 
 DONE
@@ -39,7 +43,13 @@ DONE
 
 	add_shaders :: (w: *Workspace) {
 		SHADER :: #run create_shaders();
-		build_string := sprint(WASM_INSERTION_STRING, SHADER.render_basic, SHADER.render_raymarching, SHADER.compute_box, SHADER.compute_offset);
+		build_string := sprint(WASM_INSERTION_STRING,
+			SHADER.render_basic,
+			SHADER.render_raymarching,
+			SHADER.compute_box_create,
+			SHADER.compute_translate,
+			SHADER.compute_noise
+		);
 		add_build_string(build_string, <<w);
 	}
 

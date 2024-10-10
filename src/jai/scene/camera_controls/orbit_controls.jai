@@ -1,17 +1,12 @@
+
+
 OrbitControls :: struct {
-	theta:float  = 0.0; // Angle around the Y-axis
-	phi:float  = 0.0;  // Angle around the X-axis
+	theta:float  = -PI/4; // Angle around the Y-axis
+	phi:float  = -PI/4;  // Angle around the X-axis
 	radius:float  = 5.0; // Distance from the target
 	target :Vector3 = .{x=0.0,y=0.0,z=0.0}; // Target point the camera looks at
 	sensitivity: float = 0.0025;
 }
-
-
-PHI_MIN :: -PI/2;
-PHI_MAX :: +PI/2;
-AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
-AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
-// UP		::Vector3.{x=0.0, y=1.0, z=0.0};
 
 
 lastPointer: Vector2Int;
@@ -64,3 +59,12 @@ orbit_controls_update_camera:: (orbit_controls: *OrbitControls, camera_data: *Ca
 	translate(*transformMatrix, .{x=0.0, y=0.0, z=radius});
 	camera_data.matrices.transformMatrix = transformMatrix;
 }
+
+
+#scope_file
+
+PHI_MIN :: -PI/2;
+PHI_MAX :: +PI/2;
+AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
+AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
+// UP		::Vector3.{x=0.0, y=1.0, z=0.0};
