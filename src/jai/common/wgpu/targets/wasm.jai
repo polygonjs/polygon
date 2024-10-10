@@ -1,3 +1,14 @@
+on_wgpu_device_ready :: (
+	canvas: WGPUSurface,
+	device: WGPUDevice,
+	queue: WGPUQueue,
+	preferred_texture_format: WGPUTextureFormat
+) {
+	if USE_IMGUI_DEBUG return;
+
+	context = call_from_wasm_context;
+	renderer_init_wasm(canvas, device, queue, preferred_texture_format);
+}
 
 wgpu_texture_get_width_surface :: (wgpu_context: *WGPUContext) -> u32 {
 	return js_wgpu_texture_get_width_surface(wgpu_context.surface);

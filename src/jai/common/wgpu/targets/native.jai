@@ -110,11 +110,11 @@ request_device :: (adapter: WGPUAdapter, width:int, height:int) -> WGPUDevice {
 
 	return device;
 }
-webgpu_handle_resize :: (wgpu_context: *WGPUContext, width: u32, height: u32){
-	surface_configure(wgpu_context, width, height);
+webgpu_handle_resize :: (wgpu_context: *WGPUContext, size: Vector2UInt){
+	surface_configure(wgpu_context, size);
 }
 
-wgpu_context_init :: (window: *SDL_Window, wgpu_context:*WGPUContext,width: u32, height: u32)-> WGPUSurfaceCapabilities {
+wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vector2UInt)-> WGPUSurfaceCapabilities {
 
 	instance_desc: WGPUInstanceDescriptor;
 	wgpu_context.instance = wgpuCreateInstance(*instance_desc);
@@ -128,7 +128,7 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context:*WGPUContext,width: u32,
 
 	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
 
-	wgpu_context.device = request_device(wgpu_context.adapter, WINDOW_WIDTH, WINDOW_HEIGHT);
+	wgpu_context.device = request_device(wgpu_context.adapter, size.x, size.y);
 	assert(wgpu_context.device != null, "Device is not created correctly");
 
 	wgpu_context.queue = wgpuDeviceGetQueue(wgpu_context.device);
@@ -177,8 +177,8 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context:*WGPUContext,width: u32,
 		format = surface_capabilities.formats[0],
 		presentMode = presentMode,
 		alphaMode = surface_capabilities.alphaModes[0],
-		width = width,
-		height = height,
+		width = size.x,
+		height = size.y,
 	};
 	wgpuSurfaceConfigure(wgpu_context.surface, *wgpu_context.config);
 
@@ -188,9 +188,9 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context:*WGPUContext,width: u32,
 
 	return surface_capabilities;
 }
-surface_configure :: (wgpu_context: *WGPUContext, width: u32, height: u32){
-	(<<wgpu_context).config.width = width;
-	(<<wgpu_context).config.height = height;
+surface_configure :: (wgpu_context: *WGPUContext, size: Vector2UInt){
+	(<<wgpu_context).config.width = size.x;
+	(<<wgpu_context).config.height = size.y;
 	wgpuSurfaceConfigure((<<wgpu_context).surface, *((<<wgpu_context).config));
 }
 

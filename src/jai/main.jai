@@ -17,13 +17,10 @@ VSYNC :: false;
 #placeholder SHADER_COMPUTE_OFFSET;
 
 #if WASM==false {
-	WINDOW_WIDTH  :u32: 1280;
-	WINDOW_HEIGHT :u32: 720;
-	INIT_RATIO :float = (cast(float) WINDOW_WIDTH) / (cast(float) WINDOW_HEIGHT);
+	INIT_WINDOW_SIZE :Vector2UInt: .{1280, 720};
 	window:*SDL_Window;
 }
 
-wgpu_context:WGPUContext;
 #if USE_IMGUI window_context:WindowContext;
 SCENE_DATA:SceneData;
 pipeline_controller0: PipelineController;
@@ -82,14 +79,18 @@ main :: () {
 	test_string := "Hello World!";
 	memcpy(SCENE_DATA.node_name.data, test_string.data, test_string.count);
 
+
+	init_scene_data(*SCENE_DATA, 1.);
+
 	#if WASM==false {
+		current_window_size :Vector2UInt = INIT_WINDOW_SIZE;
 		SDL_Init(SDL_INIT_VIDEO);
 
 		window = SDL_CreateWindow("Polygon Compute",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			xx WINDOW_WIDTH,
-			xx WINDOW_HEIGHT,
+			xx current_window_size.x,
+			xx current_window_size.y,
 			SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE
 		);
 		assert(window != null, "Could not create window: %\n", to_string(SDL_GetError()));
@@ -106,9 +107,7 @@ main :: () {
 
 		wgpuSetLogCallback(wgpu_log_callback, null);
 		wgpuSetLogLevel(.Error); //(.Warn);
-		surface_capabilities := wgpu_context_init(window, *wgpu_context, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-		on_wgpu_device_ready(wgpu_context.surface, wgpu_context.device, wgpu_context.queue, wgpu_context.preferred_texture_format);
+		renderer_init_native(window, current_window_size);
 		init_draw_data();
 		#if USE_IMGUI io := ImGui.GetIO();
 
@@ -137,10 +136,8 @@ main :: () {
 							new_width := sdl_event.window.data1;
 							new_height := sdl_event.window.data2;
 							if(new_width > 0 && new_height > 0){
-								webgpu_handle_resize(*wgpu_context, xx sdl_event.window.data1, xx sdl_event.window.data2);
-								SCENE_DATA.camera.aspect = (cast(float32) sdl_event.window.data1) / (cast(float32) sdl_event.window.data2);
-								camera_data_projection_update(*SCENE_DATA.camera);
-
+								current_window_size = .{xx new_width, xx new_height};
+								renderer_resize_native(current_window_size);
 							}
 						}
 					}
@@ -168,7 +165,7 @@ main :: () {
 			}
 
 			// do_exit = true;
-			on_request_animation_frame(xx to_microseconds(time), WINDOW_WIDTH, WINDOW_HEIGHT);
+			on_request_animation_frame(xx to_microseconds(time), current_window_size.x, current_window_size.y);
 
 		}
 		reset_temporary_storage();
@@ -183,76 +180,15 @@ main :: () {
 
 
 
-on_wgpu_device_ready :: (
-	canvas: WGPUSurface,
-	device: WGPUDevice,
-	queue: WGPUQueue,
-	preferred_texture_format: WGPUTextureFormat
-) {
-	if USE_IMGUI_DEBUG return;
 
-	#if WASM==true {
-		context = call_from_wasm_context;
-		wgpu_context.device = device;
-		wgpu_context.queue = queue;
-		wgpu_context.surface = canvas;
-		wgpu_context.preferred_texture_format = preferred_texture_format;
-	}
-
-	init_scene_data(*SCENE_DATA, 1.);
-}
 
 //
 //
 //
 //
 //
-init_draw_data :: (){
-	#if WASM==true context = call_from_wasm_context;
-	device := wgpu_context.device;
-	#if WASM==true {
-		queue := wgpu_context.queue;
-	}
-	#if WASM==false {
-		queue := wgpuDeviceGetQueue(wgpu_context.device);
-		assert(queue != null, "Queue is not created correctly");
-	}
-	pipeline_controller_init(*pipeline_controller0, *wgpu_context, *SCENE_DATA.meshes0, "render meshes 0");
-	// pipeline_controller_init(*pipeline_controller1, *wgpu_context, *SCENE_DATA.meshes1, "render meshes 1");
-	// pipeline_controller_init(*pipeline_controller2, *wgpu_context, *SCENE_DATA.meshes2, "render meshes 2");
-	array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller2);
-
-	#if USE_COMPUTE_SHADER {
-		COMPUTE_CONTROLLER_COLLECTION = compute_controller_collection_create(*wgpu_context);
-		pipeline_controlller_update(*pipeline_controller2, *COMPUTE_CONTROLLER_COLLECTION);
-	}
-	// array_add(*pipeline_controller2.compute_shader_controllers, offset_controller);
-
-	#if USE_IMGUI {
-		ImGui.CreateContext(null);
-
-		#if WASM {
-			io := ImGui.GetIO();
-			io.IniFilename = null;
-			ImGui_ImplWasm_Init();
-		}
-
-		// imgui_style := ImGui.GetStyle();
-		// imgui_style.AntiAliasedLinesUseTex = false;
-		// ImGui.StyleColorsLight();
-
-		bd.wgpuDevice = wgpu_context.device;
-		imgui_init_info := ImGui_ImplWGPU_InitInfo.{
-			// Device = wgpu_context.device,
-			NumFramesInFlight = 3,
-			RenderTargetFormat = wgpu_context.preferred_texture_format,
-			DepthStencilFormat = ifx wgpu_context.use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
-		};
-		
-		ImGui_ImplWGPU_Init(*bd, imgui_init_info);
-	}
+init_draw_data :: () {
+	renderer_init_draw_data();
 }
 
 
@@ -269,15 +205,12 @@ on_request_animation_frame :: (
 	if USE_IMGUI_DEBUG return;
 	#if WASM {
 		context = call_from_wasm_context;
-		queue := wgpu_context.queue;
 		events_data_update(*events_data);
 		time := performance_now();
 		compute_fps(time, *ui_data);
 	} else {
-		queue := wgpuDeviceGetQueue(wgpu_context.device);
-		assert(queue != null, "Queue is not created correctly");
 	}
-	device := wgpu_context.device;
+	
 
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
@@ -301,59 +234,9 @@ on_request_animation_frame :: (
 		compute_controller_collection_compute(*COMPUTE_CONTROLLER_COLLECTION);
 	}
 
-	for PIPELINE_CONTROLLERS pipeline_controller_update_uniform_buffers(*it, *SCENE_DATA);
-
-	frame := wgpu_surface_create_current_view( *wgpu_context );
-	defer wgpuTextureViewRelease(frame);
-	create_multi_sample_texture_if_needed( *wgpu_context );
-	create_depth_texture_if_needed( *wgpu_context );
-	colorAttachment := WGPURenderPassColorAttachment.{
-		loadOp = WGPULoadOp.Clear,
-		storeOp = WGPUStoreOp.Store,
-		clearValue = wgpu_color_create(SCENE_DATA.bg_color),
-	};
-
-	update_render_pass_descriptor_multisample(*wgpu_context, *colorAttachment, *frame);
-
-	cmd_encoder1 := wgpuDeviceCreateCommandEncoder(
-		wgpu_context.device,
-		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Render"}),
-	);
-	defer wgpuCommandEncoderRelease(cmd_encoder1);
-
-	render_pass_descriptor_label := to_c_string(tprint("Render Pass 3D %", FRAMES_COUNT));
-	defer free(render_pass_descriptor_label);
-	render_pass_descriptor := WGPURenderPassDescriptor.{
-		label = render_pass_descriptor_label,
-		colorAttachmentCount = 1,
-		colorAttachments = *colorAttachment,
-	};
-	update_render_pass_descriptor_depth(*wgpu_context, *render_pass_descriptor);
-	render_pass_encoder1 := wgpuCommandEncoderBeginRenderPass(cmd_encoder1, *render_pass_descriptor);
-	defer wgpuRenderPassEncoderRelease(render_pass_encoder1);
-	#if RENDER_IN_VIEWPORT wgpu_set_viewport(render_pass_encoder1, 100, 100, 500, 300);  // Render to a 500x300 area at (100, 100)
-
-	for PIPELINE_CONTROLLERS pipeline_controller_update_render_pass(*it, render_pass_encoder1, *SCENE_DATA);
-	#if USE_IMGUI gui_update(*window_context, *wgpu_context, render_pass_encoder1, *bd, *iwc, *ui_data, *SCENE_DATA, *events_data);
-	wgpuRenderPassEncoderEnd(render_pass_encoder1);
-
-	cmd_buffer1_label := to_c_string(tprint("Cmd Buffer 3D %", FRAMES_COUNT));
-	defer free(cmd_buffer1_label);
-	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder1, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
-	defer wgpuCommandBufferRelease(cmd_buffer1);
-
-	wgpuQueueSubmit(queue, 1, *cmd_buffer1);
-
-	#if WASM == false {
-		wgpuSurfacePresent(wgpu_context.surface);
-	}
-	wgpuTextureRelease(wgpu_context.surface_texture.texture);
-	multisample_release(*wgpu_context);
-	depth_release(*wgpu_context);
-	#if USE_IMGUI imgui_gui_free(*iwc);
+	render();
 
 	reset_temporary_storage();
-	for PIPELINE_CONTROLLERS pipeline_controller_destroy_scheduled_buffers(*it);
 	FRAMES_COUNT += 1;
 }
 

@@ -119,17 +119,17 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DA
 		{
 			size := cast(u64) max( 16, size_of(Object3DUniforms));
 			buffer := draw_data.uniforms.object.buffer;
-			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *mesh.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *mesh.uniforms, size);
 		}
 		{
 			size := cast(u64) max( 16, size_of(CameraUniforms));
 			buffer := draw_data.uniforms.camera.buffer;
-			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, cast(*void) *SCENE_DATA.camera.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *SCENE_DATA.camera.uniforms, size);
 		}
 		{
 			size := cast(u64) max( 16, size_of(type_of(pc.material.uniforms)));
 			buffer := draw_data.uniforms.material.buffer;
-			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, cast(*void) *pc.material.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *pc.material.uniforms, size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.object.buffer, *mesh);
 		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, SCENE_DATA);
