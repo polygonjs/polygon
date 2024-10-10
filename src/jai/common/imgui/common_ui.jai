@@ -96,7 +96,17 @@ gui_update :: (
 		ImGui.SliderFloat("offset x", *scene_data.noise.offset.x, -2, 2);
 		ImGui.SliderFloat("offset y", *scene_data.noise.offset.y, -2, 2);
 		ImGui.SliderFloat("offset z", *scene_data.noise.offset.z, -2, 2);
-		if(previous_offset != scene_data.noise.offset || previous_freq != scene_data.noise.freq){
+
+		previous_amount := scene_data.noise.amount;
+		ImGui.SliderFloat("amount x", *scene_data.noise.amount.x, -2, 2);
+		ImGui.SliderFloat("amount y", *scene_data.noise.amount.y, -2, 2);
+		ImGui.SliderFloat("amount z", *scene_data.noise.amount.z, -2, 2);
+
+		if(
+			previous_freq != scene_data.noise.freq ||
+			previous_offset != scene_data.noise.offset ||
+			previous_amount != scene_data.noise.amount
+		){
 			// geometry_add_noise(*scene_data.meshes0[0].geometry, scene_data.freq);
 			// draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
 			compute_controller_update_buffer_noise(cast(*ComputeControllerNoise)COMPUTE_CONTROLLER_COLLECTION.controllers[0], scene_data);

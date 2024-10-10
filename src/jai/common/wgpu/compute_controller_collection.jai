@@ -7,6 +7,7 @@ compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene_data:
 	print("beware the hard coded value\n");
 	points_count :u64= 99846;//6534;
 	position_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position in");
+	normal_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal in");
 	position_out := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position out");
 
 	// box_create_controller := heap_compute_controller(ComputeControllerBoxCreate);
@@ -22,7 +23,7 @@ compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene_data:
 	{
 		controller := heap_compute_controller(ComputeControllerNoise);
 		compute_controller_noise_init( controller, wgpu_context, scene_data );
-		compute_controller_noise_set_buffer( controller, *position_in, *position_out );
+		compute_controller_noise_set_buffer( controller, *position_in, *normal_in, *position_out );
 		array_add(*ccc.controllers, controller);
 	}
 
@@ -73,6 +74,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 		defer wgpuCommandEncoderRelease(command_encoder);
 
 		wgpuCommandEncoderCopyBufferToBuffer(command_encoder, pc.meshes_draw_data[0].vertex[0].buffer, 0, translate_controller.attributes.position_in.buffer, 0, translate_controller.attributes.position_in.buffer_size);
+		wgpuCommandEncoderCopyBufferToBuffer(command_encoder, pc.meshes_draw_data[0].vertex[1].buffer, 0, translate_controller.attributes.normal_in.buffer, 0, translate_controller.attributes.normal_in.buffer_size);
 		pc.meshes_draw_data[0].vertex[0] = translate_controller.attributes.position_out;
 		// wgpuRenderPassEncoderSetVertexBuffer(<<render_pass_encoder, 0, box_controller.vertex.buffer, 0, box_controller.vertex.buffer_size);
 

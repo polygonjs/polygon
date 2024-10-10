@@ -1,9 +1,8 @@
 @group(0) @binding(0) var<storage, read_write> freq: vec3<f32>;
 @group(0) @binding(1) var<storage, read_write> offset: vec3<f32>;
-@group(0) @binding(2) var<storage, read_write> amount: vec3<f32>;
+// @group(0) @binding(2) var<storage, read_write> amount: vec3<f32>;
 @group(1) @binding(0) var<storage, read_write> position_in: array<f32>;
-@group(1) @binding(1) var<storage, read_write> normal_in: array<f32>;
-@group(1) @binding(2) var<storage, read_write> position_out: array<f32>;
+@group(1) @binding(1) var<storage, read_write> position_out: array<f32>;
 
 const stride: u32 = 3;
 
@@ -22,9 +21,9 @@ fn vec3_add_noise(index: u32) {
 		(position_in[index + 1] + offset.y) * freq.y,
 		(position_in[index + 2] + offset.z) * freq.z
 	);
-	position_out[index + 0] = position_in[index + 0] + normal_in[index + 0] * noise_value * amount.x;
-	position_out[index + 1] = position_in[index + 1] + normal_in[index + 1] * noise_value * amount.y;
-	position_out[index + 2] = position_in[index + 2] + normal_in[index + 2] * noise_value * amount.z;
+	position_out[index + 0] = position_in[index + 0] + noise_value;
+	position_out[index + 1] = position_in[index + 1];
+	position_out[index + 2] = position_in[index + 2];
 }
 
 fn perlin_noise(posX: f32, posY: f32, posZ: f32) -> f32 {

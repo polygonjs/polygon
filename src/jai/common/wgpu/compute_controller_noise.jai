@@ -1,12 +1,14 @@
 ComputeControllerNoiseParams :: struct {
 	freq:BufferContainer;
 	offset:BufferContainer;
+	amount:BufferContainer;
 }
 ComputeControllerNoiseBindGroup :: struct {
 	attributes: WGPUBindGroup;
 }
 ComputeControllerNoiseAttributes :: struct {
 	position_in: BufferContainer;
+	normal_in: BufferContainer;
 	position_out: BufferContainer;
 }
 #if MAP_BUFFER {
@@ -30,8 +32,8 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 		wgpu_context = wgpu_context,
 		shader = SHADER_COMPUTE_NOISE,
 		entry_point = "noise",
-		params_bind_groups_count = 2,
-		attributes_bind_groups_count = 2,
+		params_bind_groups_count = 3,
+		attributes_bind_groups_count = 3,
 		compute_controller_label = "compute controller noise"
 	);
 
@@ -49,6 +51,8 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 	freq_buffer_size := cast(u64) size_of(Vector3);
 	offset :Vector3= .{0, 0, 0};
 	offset_buffer_size := cast(u64) size_of(Vector3);
+	amount :Vector3= .{1, 1, 1};
+	amount_buffer_size := cast(u64) size_of(Vector3);
 
 	//
 	//
@@ -70,11 +74,18 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 	}));
 	controller.params.offset = .{buffer = offset_buffer, buffer_size = offset_buffer_size};
 
+	amount_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
+		label = "amount",
+		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
+		size = amount_buffer_size
+	}));
+	controller.params.amount = .{buffer = amount_buffer, buffer_size = amount_buffer_size};
+
 
 	//
 	//
 	//
-	bind_group_params_entries :[2]WGPUBindGroupEntry;
+	bind_group_params_entries :[3]WGPUBindGroupEntry;
 	{
 		bind_group_params_entries[0] = WGPUBindGroupEntry.{
 			binding = 0,
@@ -88,8 +99,14 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 			offset = 0,
 			buffer = controller.params.offset.buffer,
 		};
+		bind_group_params_entries[2] = WGPUBindGroupEntry.{
+			binding = 2,
+			size = controller.params.amount.buffer_size,
+			offset = 0,
+			buffer = controller.params.amount.buffer,
+		};
 		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "offset params",
+			label = "noise params",
 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 0),
 			entryCount = xx bind_group_params_entries.count,
 			entries = bind_group_params_entries.data
@@ -97,20 +114,18 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	
-
-
 	compute_controller_update_buffer_noise(controller, scene_data);
 }
 
-compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, position_out: *BufferContainer) {
+compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, normal_in: *BufferContainer, position_out: *BufferContainer) {
 	controller.attributes.position_in = position_in;
+	controller.attributes.normal_in = normal_in;
 	controller.attributes.position_out = position_out;
 
 	//
 	//
 	//
-	bind_group_vertex_entries :[2]WGPUBindGroupEntry;
+	bind_group_vertex_entries :[3]WGPUBindGroupEntry;
 	{
 		bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
 			binding = 0,
@@ -121,6 +136,13 @@ compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_i
 		};
 		bind_group_vertex_entries[1] = WGPUBindGroupEntry.{
 			binding = 1,
+			size = normal_in.buffer_size,
+			offset = 0,
+			buffer = normal_in.buffer,
+			// label = "position out"
+		};
+		bind_group_vertex_entries[2] = WGPUBindGroupEntry.{
+			binding = 2,
 			size = position_out.buffer_size,
 			offset = 0,
 			buffer = position_out.buffer,
@@ -139,6 +161,7 @@ compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_i
 compute_controller_update_buffer_noise :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
 	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.freq.buffer, 0, *scene_data.noise.freq, controller.params.freq.buffer_size);
 	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.offset.buffer, 0, *scene_data.noise.offset, controller.params.offset.buffer_size);
+	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.amount.buffer, 0, *scene_data.noise.amount, controller.params.amount.buffer_size);
 };
 
 compute_controller_set_bind_group_noise :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){

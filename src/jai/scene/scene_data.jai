@@ -6,6 +6,7 @@ Matrix4x4Buffer :: [16]float;
 SceneDataNoise :: struct {
 	freq: Vector3 = .{2.0, 2.0, 2.0};
 	offset: Vector3 = .{0.0, 0.0, 0.0};
+	amount: Vector3 = .{1.0, 1.0, 1.0};
 }
 
 SceneData :: struct {
