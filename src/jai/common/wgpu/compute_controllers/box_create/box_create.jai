@@ -23,12 +23,12 @@ ComputeControllerBoxCreate :: struct {
 	}
 }
 
-compute_controller_box_create_init :: (controller: *ComputeControllerBoxCreate, wgpu_context: *WGPUContext, buffer_container:BufferContainer, scene_data: *SceneData) {
+compute_controller_box_create_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext, buffer_container:BufferContainer, scene_data: *SceneData) {
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
-		shader = SHADER_COMPUTE_BOX_CREATE,
-		entry_point = "boxCreate",
+		shader = SHADER_RAW,
+		entry_point = SHADER_ENTRY_POINT,
 		params_bind_groups_count = 2
 	);
 
@@ -120,7 +120,7 @@ compute_controller_box_create_init :: (controller: *ComputeControllerBoxCreate, 
 	compute_controller_update_buffer_box_create(controller, scene_data);
 }
 
-compute_controller_update_buffer_box_create :: (controller:*ComputeControllerBoxCreate, scene_data:*SceneData){
+compute_controller_update_buffer_box_create :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
 	{
 		// size_float: [3]float = .[scene_data.box_size.x, scene_data.box_size.y, scene_data.box_size.z];
 		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *scene_data.box_size, controller.params.size.buffer_size);
@@ -132,7 +132,7 @@ compute_controller_update_buffer_box_create :: (controller:*ComputeControllerBox
 	}
 };
 
-compute_controller_set_bind_group_box_create :: (controller: *ComputeControllerBoxCreate, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
+compute_controller_set_bind_group_box_create :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
 	wgpuComputePassEncoderSetBindGroup(<<compute_pass_encoder, 1, controller.bind_group.vertex, 0, null);
 
 	#if MAP_BUFFER {
@@ -141,7 +141,7 @@ compute_controller_set_bind_group_box_create :: (controller: *ComputeControllerB
 	}
 }
 
-compute_controller_handle_mapped_buffers_box_create :: (controller: *ComputeControllerBoxCreate) {
+compute_controller_handle_mapped_buffers_box_create :: (controller: *CONTROLLER_TYPE) {
 	#if MAP_BUFFER {
 		wgpuBufferMapAsync(controller.attributesMapped.position, xx WGPUMapMode.Read, 0, controller.attributes.position.buffer_size, wgpu_compute_buffer_map_async_callback, null);
 		wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
@@ -155,7 +155,14 @@ compute_controller_handle_mapped_buffers_box_create :: (controller: *ComputeCont
 		wgpuBufferUnmap(controller.attributesMapped.position);
 	}
 }
-compute_controller_points_count_box_create :: (controller: *ComputeControllerBoxCreate)-> u64 {
+compute_controller_points_count_box_create :: (controller: *CONTROLLER_TYPE)-> u64 {
 	print("NOT IMPLEMENTED\n");
 	return 0;
 }
+
+#scope_file
+
+CONTROLLER_TYPE :: ComputeControllerBoxCreate;
+SHADER_ENTRY_POINT :: "boxCreate";
+SHADER_RAW :: #run import_shader();
+import_shader :: () -> string { return "box_create.wgsl"; };

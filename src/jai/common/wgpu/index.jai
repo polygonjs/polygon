@@ -15,9 +15,7 @@
 #if USE_COMPUTE_SHADER {
 	#load "compute_controller.jai";
 	#load "compute_controller_collection.jai";
-	#load "compute_controller_box_create.jai";
-	#load "compute_controller_translate.jai";
-	#load "compute_controller_noise.jai";
+	#load "compute_controllers/index.jai";
 }
 
 #if WASM #load "targets/wasm.jai";

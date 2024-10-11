@@ -27,8 +27,8 @@ compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
-		shader = SHADER_COMPUTE_TRANSLATE,
-		entry_point = "translate",
+		shader = SHADER_RAW,
+		entry_point = SHADER_ENTRY_POINT,
 		attributes_bind_groups_count = 2,
 		compute_controller_label = "compute controller translate"
 	);
@@ -159,3 +159,6 @@ compute_controller_points_count_translate :: (controller: *CONTROLLER_TYPE)-> u6
 #scope_file
 
 CONTROLLER_TYPE :: ComputeControllerTranslate;
+SHADER_ENTRY_POINT :: "translate";
+SHADER_RAW :: #run import_shader();
+import_shader :: () -> string { return "translate.wgsl"; };

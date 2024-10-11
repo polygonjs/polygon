@@ -13,9 +13,6 @@ VSYNC :: false;
 #placeholder WASM;
 #placeholder SHADER_RENDER_BASIC;
 #placeholder SHADER_RENDER_RAYMARCHING;
-#placeholder SHADER_COMPUTE_BOX_CREATE;
-#placeholder SHADER_COMPUTE_TRANSLATE;
-#placeholder SHADER_COMPUTE_noise;
 
 
 #if USE_IMGUI window_context:WindowContext;
