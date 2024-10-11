@@ -4,9 +4,7 @@
 
 const stride: u32 = 3;
 
-const SCALE_FACTOR: f32 = 1000.0;
-fn floatToFixedPoint(value: f32) -> i32 { return i32(value * SCALE_FACTOR); }
-fn fixedPointToFloat(value: i32) -> f32 { return f32(value) / SCALE_FACTOR; }
+// include i32tof32
 
 @compute
 @workgroup_size(__WORK_GROUP_SIZE_X__, __WORK_GROUP_SIZE_Y__, __WORK_GROUP_SIZE_Z__)
