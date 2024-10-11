@@ -1,29 +1,29 @@
-ComputeControllerTranslateParams :: struct {
-	translate:BufferContainer;
+ComputeControllerComputeNormalsParams :: struct {
 }
-ComputeControllerTranslateBindGroup :: struct {
+ComputeControllerComputeNormalsBindGroup :: struct {
 	attributes: WGPUBindGroup;
 }
-ComputeControllerTranslateAttributes :: struct {
+ComputeControllerComputeNormalsAttributes :: struct {
 	position_in: BufferContainer;
-	position_out: BufferContainer;
+	index_in: BufferContainer;
+	normal_out: BufferContainer;
 }
 #if MAP_BUFFER {
-	ComputeControllerTranslateAttributesMapped :: struct {
+	ComputeControllerComputeNormalsAttributesMapped :: struct {
 		position: WGPUBuffer;
 	}
 }
-ComputeControllerTranslate :: struct {
+ComputeControllerComputeNormals :: struct {
 	#as using base: ComputeController;
-	params:ComputeControllerTranslateParams;
-	bind_group:ComputeControllerTranslateBindGroup;
-	attributes:ComputeControllerTranslateAttributes;
+	params:ComputeControllerComputeNormalsParams;
+	bind_group:ComputeControllerComputeNormalsBindGroup;
+	attributes:ComputeControllerComputeNormalsAttributes;
 	#if MAP_BUFFER {
-		attributesMapped: ComputeControllerTranslateAttributesMapped;
+		attributesMapped: ComputeControllerComputeNormalsAttributesMapped;
 	}
 }
 
-compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+compute_controller_compute_normals_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext, scene_data: *SceneData) {
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
@@ -35,8 +35,9 @@ compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context
 			handle_mapped_buffers = xx handle_mapped_buffers,
 			entities_count = xx entities_count,
 		},
-		attributes_bind_groups_count = 2,
-		compute_controller_label = "compute controller translate"
+		params_bind_groups_count = 0,
+		attributes_bind_groups_count = 3,
+		compute_controller_label = "compute controller compute normals"
 	);
 
 	// controller.attributes.position = buffer_container;
@@ -49,38 +50,14 @@ compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context
 		// controller.attributesMapped.position.buffer_size = controller.attributes.position.buffer_size;
 	}
 
-	translate :Vector3= .{-1, -1, 0};
-	translate_buffer_size := cast(u64) size_of(Vector3);
-
-	//
-	//
-	// create a buffer on the GPU to hold our computation
-	// input and output
-	//
-	//
-	translate_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
-		label = "translate",
-		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
-		size = translate_buffer_size
-	}));
-	controller.params.translate.buffer = translate_buffer;
-	controller.params.translate.buffer_size = translate_buffer_size;
-
 
 	//
 	//
 	//
-	bind_group_params_entries :[1]WGPUBindGroupEntry;
+	bind_group_params_entries :[0]WGPUBindGroupEntry;
 	{
-		bind_group_params_entries[0] = WGPUBindGroupEntry.{
-			binding = 0,
-			size = controller.params.translate.buffer_size,
-			offset = 0,
-			buffer = controller.params.translate.buffer,
-			// label = "translate offset"
-		};
 		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "translate params",
+			label = "compute normals params",
 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 0),
 			entryCount = xx bind_group_params_entries.count,
 			entries = bind_group_params_entries.data
@@ -91,29 +68,19 @@ compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context
 	controller.update_buffer(controller, scene_data);
 }
 
-compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, position_out: *BufferContainer) {
+compute_controller_compute_normals_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, index_in: *BufferContainer, normal_out: *BufferContainer) {
 	controller.attributes.position_in = position_in;
-	controller.attributes.position_out = position_out;
+	controller.attributes.index_in = index_in;
+	controller.attributes.normal_out = normal_out;
 
 	//
 	//
 	//
-	bind_group_vertex_entries :[2]WGPUBindGroupEntry;
+	bind_group_vertex_entries :[3]WGPUBindGroupEntry;
 	{
-		bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
-			binding = 0,
-			size = position_in.buffer_size,
-			offset = 0,
-			buffer = position_in.buffer,
-			// label = "position in"
-		};
-		bind_group_vertex_entries[1] = WGPUBindGroupEntry.{
-			binding = 1,
-			size = position_out.buffer_size,
-			offset = 0,
-			buffer = position_out.buffer,
-			// label = "position out"
-		};
+		bind_group_vertex_entries[0] = buffer_container_to_bind_group_entry(position_in, 0);
+		bind_group_vertex_entries[1] = buffer_container_to_bind_group_entry(index_in, 1);
+		bind_group_vertex_entries[2] = buffer_container_to_bind_group_entry(normal_out, 2);
 		bind_group_descriptor := WGPUBindGroupDescriptor.{
 			label = "bind_group_attributes",
 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
@@ -132,19 +99,12 @@ compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, positi
 
 #scope_file
 
-CONTROLLER_TYPE :: ComputeControllerTranslate;
-SHADER_ENTRY_POINT :: "translate";
+CONTROLLER_TYPE :: ComputeControllerComputeNormals;
+SHADER_ENTRY_POINT :: "computeNormals";
 SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "translate.wgsl"; };
+import_shader :: () -> string { return "compute_normals.wgsl"; };
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
-	{
-		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
-		// print("size_float:%\n",scene_data.translate.x);
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *scene_data.translate, controller.params.translate.buffer_size);
-	}
-};
-
+update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){};
 set_bind_group :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
 	wgpuComputePassEncoderSetBindGroup(<<compute_pass_encoder, 1, controller.bind_group.attributes, 0, null);
 

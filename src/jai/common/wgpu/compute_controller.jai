@@ -1,7 +1,17 @@
 // TODO: there are lots of wgpu things to release here
 
 
+UpdateBufferMethod :: #type (controller:*ComputeController, scene_data:*SceneData);
+SetBindGroupMethod :: #type (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder);
+HandleMappedBuffersMethod :: #type (controller:*ComputeController);
+EntitiesCountMethod :: #type (controller:*ComputeController)->u64;
 
+ComputeControllerMethods :: struct {
+	update_buffer: UpdateBufferMethod;
+	set_bind_group: SetBindGroupMethod;
+	handle_mapped_buffers: HandleMappedBuffersMethod;
+	entities_count:EntitiesCountMethod;
+}
 
 ComputeController :: struct {
 	type: Type;
@@ -24,6 +34,7 @@ ComputeController :: struct {
 	// #if MAP_BUFFER {
 	// 	vertex_buffer_map: WGPUBuffer;
 	// }
+	using methods: ComputeControllerMethods;
 }
 
 heap_compute_controller :: ($T: Type) -> *T {  // Return a pointer to a heap-allocated Document of the appropriate type.
@@ -85,7 +96,7 @@ build_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
 // InputType :: [3]float;
 // ResultType :: [64]float;
 
-compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUContext, shader: string, entry_point:string, work_group_size:Vector3=.{256,1,1}, params_bind_groups_count:u32=1, attributes_bind_groups_count:u32=1, compute_controller_label:string="unnamed compute controller") {
+compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUContext, shader: string, entry_point:string, methods: ComputeControllerMethods, work_group_size:Vector3=.{256,1,1}, params_bind_groups_count:u32=1, attributes_bind_groups_count:u32=1, compute_controller_label:string="unnamed compute controller") {
 	// controller: ComputeController = .{
 	// 	wgpu_context = wgpu_context,
 	// 	// queue = queue,
@@ -95,6 +106,10 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 	// device := wgpu_context.device;
 	controller.wgpu_context = wgpu_context;
 	controller.work_group_size = work_group_size;
+	controller.update_buffer = methods.update_buffer;
+	controller.set_bind_group = methods.set_bind_group;
+	controller.handle_mapped_buffers = methods.handle_mapped_buffers;
+	controller.entities_count = methods.entities_count;
 
 	// print("entry_point:%\n", entry_point);
 	// print("shader_compute_raw:%\n", shader_compute_raw);
@@ -266,59 +281,7 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 // 	}
 // }
 
-compute_controller_update_buffer :: (controller:*ComputeController, scene_data:*SceneData){
-	if controller.type == {
-		case ComputeControllerBoxCreate; {
-			compute_controller_update_buffer_box_create(cast(*ComputeControllerBoxCreate)controller, scene_data);
-		}
-		case ComputeControllerTranslate; {
-			compute_controller_update_buffer_translate(cast(*ComputeControllerTranslate)controller, scene_data);
-		}
-		case ComputeControllerNoise; {
-			compute_controller_update_buffer_noise(cast(*ComputeControllerNoise)controller, scene_data);
-		}
-	}
-};
-compute_controller_set_bind_group :: (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
-	if controller.type == {
-		case ComputeControllerBoxCreate; {
-			compute_controller_set_bind_group_box_create(cast(*ComputeControllerBoxCreate)controller, compute_pass_encoder, command_encoder);
-		}
-		case ComputeControllerTranslate; {
-			compute_controller_set_bind_group_translate(cast(*ComputeControllerTranslate)controller, compute_pass_encoder, command_encoder);
-		}
-		case ComputeControllerNoise; {
-			compute_controller_set_bind_group_noise(cast(*ComputeControllerNoise)controller, compute_pass_encoder, command_encoder);
-		}
-	}
-};
-compute_controller_handle_mapped_buffers :: (controller:*ComputeController){
-	if controller.type == {
-		case ComputeControllerBoxCreate; {
-			compute_controller_handle_mapped_buffers_box_create(cast(*ComputeControllerBoxCreate)controller);
-		}
-		case ComputeControllerTranslate; {
-			compute_controller_handle_mapped_buffers_translate(cast(*ComputeControllerTranslate)controller);
-		}
-		case ComputeControllerNoise; {
-			compute_controller_handle_mapped_buffers_noise(cast(*ComputeControllerNoise)controller);
-		}
-	}
-};
-compute_controller_points_count :: (controller:*ComputeController)->u64{
-	if controller.type == {
-		case ComputeControllerBoxCreate; {
-			return compute_controller_points_count_box_create(cast(*ComputeControllerBoxCreate)controller);
-		}
-		case ComputeControllerTranslate; {
-			return compute_controller_points_count_translate(cast(*ComputeControllerTranslate)controller);
-		}
-		case ComputeControllerNoise; {
-			return compute_controller_points_count_noise(cast(*ComputeControllerNoise)controller);
-		}
-	}
-	return 0;
-};
+
 compute_controller_compute :: (controller:*ComputeController) {
 	compute_pass_encoder: WGPUComputePassEncoder;
 	commands_count :u64= 1;
@@ -336,10 +299,10 @@ compute_controller_compute :: (controller:*ComputeController) {
 		compute_pass_encoder = wgpuCommandEncoderBeginComputePass(command_encoder, *compute_pass_descriptor);
 		wgpuComputePassEncoderSetPipeline(compute_pass_encoder, controller.pipeline);
 		wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 0, controller.data_bind_group_size, 0, null);
-		compute_controller_set_bind_group(controller, *compute_pass_encoder, *command_encoder);
-		points_count := compute_controller_points_count(controller);
+		controller.set_bind_group(controller, *compute_pass_encoder, *command_encoder);
+		entities_count := controller.entities_count(controller);
 		workgroup_size_x := controller.work_group_size.x;
-		workgroups_x :u32= xx ((points_count + workgroup_size_x - 1) / workgroup_size_x);
+		workgroups_x :u32= xx ((entities_count + workgroup_size_x - 1) / workgroup_size_x);
 		wgpuComputePassEncoderDispatchWorkgroups(compute_pass_encoder, workgroups_x,1,1);
 		wgpuComputePassEncoderEnd(compute_pass_encoder);
 	}
@@ -350,7 +313,7 @@ compute_controller_compute :: (controller:*ComputeController) {
 	defer wgpuCommandBufferRelease(command_buffer);
 	wgpuQueueSubmit(controller.wgpu_context.queue, commands_count, *command_buffer);
 
-	#if MAP_BUFFER compute_controller_handle_mapped_buffers(controller);
+	#if MAP_BUFFER controller.handle_mapped_buffers(controller);
 };
 
 wgpu_compute_buffer_map_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {

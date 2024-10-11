@@ -61,3 +61,13 @@ wgpu_buffer_for_compute :: (wgpu_context: *WGPUContext, size: u64, label: string
 	container :BufferContainer= .{buffer, size, label};
 	return container;
 }
+
+buffer_container_to_bind_group_entry :: (buffer_container: BufferContainer, binding:u32)-> WGPUBindGroupEntry {
+	return WGPUBindGroupEntry.{
+		binding = binding,
+		size = buffer_container.buffer_size,
+		offset = 0,
+		buffer = buffer_container.buffer,
+		// label = "position out"
+	};
+}
