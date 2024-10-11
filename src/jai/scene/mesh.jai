@@ -22,6 +22,8 @@ mesh_create :: () -> Mesh {
 	translate(*mesh.matrix, .{x = 0.0, y = 0.0, z = 0.0});
 	mesh_uniforms_update(*mesh);
 
+	// geometry_box_update(*mesh.geometry, .{4,4,4});
+	// geometry_box_update(*mesh.geometry, .{8,8,8});
 	geometry_box_update(*mesh.geometry, .{128, 128, 128});
 
 	// TODO: this cast may seem like it gives the expected result,

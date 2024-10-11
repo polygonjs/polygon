@@ -11,9 +11,11 @@ const stride: u32 = 3;
 @workgroup_size(__WORK_GROUP_SIZE_X__, __WORK_GROUP_SIZE_Y__, __WORK_GROUP_SIZE_Z__)
 fn noise(@builtin(global_invocation_id) global_id: vec3<u32>) {
 	let index = global_id.x;
-	if (index < arrayLength(&position_in)) {
+	if (index < (arrayLength(&position_in)/stride)) {
 		vec3_add_noise(stride * index);
 	}
+	// storageBarrier();
+	// workgroupBarrier();
 }
 
 fn vec3_add_noise(index: u32) {

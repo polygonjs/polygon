@@ -91,6 +91,7 @@ import { wgpuBufferGetMappedRange } from "./WebGPU/FromJs/wgpuBufferGetMappedRan
 import { wgpuBufferMapAsync } from "./WebGPU/FromJs/wgpuBufferMapAsync";
 import { wgpuBufferUnmap } from "./WebGPU/FromJs/wgpuBufferUnmap";
 import { wgpuDevicePoll } from "./WebGPU/FromJs/wgpuDevicePoll";
+import { wgpuCommandEncoderInsertDebugMarker } from "./WebGPU/FromJs/wgpuCommandEncoderInsertDebugMarker";
 
 export function loadWasm(): Promise<void> {
 	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
@@ -151,6 +152,7 @@ export function loadWasm(): Promise<void> {
 		wgpuBufferMapAsync,
 		wgpuBufferUnmap,
 		wgpuDevicePoll,
+		wgpuCommandEncoderInsertDebugMarker,
 		wgpuSurfaceGetCurrentTexture,
 		wgpuDeviceCreateRenderPipeline,
 		wgpuDeviceCreateBindGroup,

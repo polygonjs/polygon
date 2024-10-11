@@ -1,28 +1,27 @@
-ComputeControllerComputeNormalsParams :: struct {
+ComputeControllerAttributeNormalizeParams :: struct {
 }
-ComputeControllerComputeNormalsBindGroup :: struct {
+ComputeControllerAttributeNormalizeBindGroup :: struct {
 	attributes: WGPUBindGroup;
 }
-ComputeControllerComputeNormalsAttributes :: struct {
-	position_in: BufferContainer;
-	index_in: BufferContainer;
-	normal_out: BufferContainer;
+ComputeControllerAttributeNormalizeAttributes :: struct {
+	attribute_in: BufferContainer;
+	attribute_out: BufferContainer;
 }
 #if MAP_BUFFER {
-	ComputeControllerComputeNormalsAttributesMapped :: struct {
+	ComputeControllerAttributeNormalizeAttributesMapped :: struct {
 		position: WGPUBuffer;
 	}
 }
-ComputeControllerComputeNormals :: struct {
+ComputeControllerAttributeNormalize :: struct {
 	#as using base: ComputeController;
-	params:ComputeControllerComputeNormalsParams;
-	bind_group:ComputeControllerComputeNormalsBindGroup;
-	attributes:ComputeControllerComputeNormalsAttributes;
+	params:ComputeControllerAttributeNormalizeParams;
+	bind_group:ComputeControllerAttributeNormalizeBindGroup;
+	attributes:ComputeControllerAttributeNormalizeAttributes;
 	#if MAP_BUFFER {
-		attributesMapped: ComputeControllerComputeNormalsAttributesMapped;
+		attributesMapped: ComputeControllerAttributeNormalizeAttributesMapped;
 	}
-	init :ComputeControllerInitMethod= compute_normals_init;
-	set_buffers: SetBufferMethod = compute_normals_set_buffer;
+	init :ComputeControllerInitMethod= attribute_normalize_init;
+	set_buffers: SetBufferMethod = attribute_normalize_set_buffer;
 }
 
 
@@ -36,14 +35,14 @@ ComputeControllerComputeNormals :: struct {
 
 #scope_file
 
-CONTROLLER_TYPE :: ComputeControllerComputeNormals;
-SHADER_ENTRY_POINT :: "computeNormals";
+CONTROLLER_TYPE :: ComputeControllerAttributeNormalize;
+SHADER_ENTRY_POINT :: "attributeNormalize";
 SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "compute_normals.wgsl"; };
+import_shader :: () -> string { return "attribute_normalize.wgsl"; };
 
-SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, index_in: *BufferContainer, normal_out: *BufferContainer);
+SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, attribute_in: *BufferContainer, attribute_out: *BufferContainer);
 
-compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+attribute_normalize_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
 	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
@@ -57,10 +56,10 @@ compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUCon
 			entities_count = xx entities_count,
 		},
 		params_bind_groups_count = 0,
-		attributes_bind_groups_count = 3,
-		compute_controller_label = "compute controller compute normals"
+		attributes_bind_groups_count = 2,
+		compute_controller_label = "compute controller attribute set"
 	);
-	controller.set_buffers = compute_normals_set_buffer;
+	controller.set_buffers = attribute_normalize_set_buffer;
 
 	// controller.attributes.position = buffer_container;
 	#if MAP_BUFFER {
@@ -79,7 +78,7 @@ compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUCon
 	bind_group_params_entries :[0]WGPUBindGroupEntry;
 	{
 		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "compute normals params",
+			label = "attribute normalize params",
 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 0),
 			entryCount = xx bind_group_params_entries.count,
 			entries = bind_group_params_entries.data
@@ -90,21 +89,20 @@ compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUCon
 	controller.update_buffer(controller, scene_data);
 }
 
-compute_normals_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, index_in: *BufferContainer, normal_out: *BufferContainer) {
-	controller.attributes.position_in = position_in;
-	controller.attributes.index_in = index_in;
-	controller.attributes.normal_out = normal_out;
+attribute_normalize_set_buffer :: (controller: *CONTROLLER_TYPE, attribute_in: *BufferContainer, attribute_out: *BufferContainer) {
+
+	controller.attributes.attribute_in = attribute_in;
+	controller.attributes.attribute_out = attribute_out;
 
 	//
 	//
 	//
-	bind_group_vertex_entries :[3]WGPUBindGroupEntry;
+	bind_group_vertex_entries :[2]WGPUBindGroupEntry;
 	{
-		bind_group_vertex_entries[0] = buffer_container_to_bind_group_entry(position_in, 0);
-		bind_group_vertex_entries[1] = buffer_container_to_bind_group_entry(index_in, 1);
-		bind_group_vertex_entries[2] = buffer_container_to_bind_group_entry(normal_out, 2);
+		bind_group_vertex_entries[0] = buffer_container_to_bind_group_entry(attribute_in, 0);
+		bind_group_vertex_entries[1] = buffer_container_to_bind_group_entry(attribute_out, 1);
 		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "bind_group_attributes compute normals",
+			label = "bind_group_attributes attribute normalize",
 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
 			entryCount = xx bind_group_vertex_entries.count,
 			entries = bind_group_vertex_entries.data
@@ -138,6 +136,5 @@ handle_mapped_buffers :: (controller: *CONTROLLER_TYPE) {
 	}
 }
 entities_count :: (controller: *CONTROLLER_TYPE)-> u64 {
-	faces_count := (controller.attributes.index_in.buffer_size / size_of(VertexIndex)) / 3;
-	return faces_count;
+	return controller.attributes.attribute_out.buffer_size / size_of(Vector3);
 }

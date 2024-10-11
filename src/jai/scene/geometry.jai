@@ -1,3 +1,5 @@
+VertexIndex :: u32;
+
 GeometryAttribute :: struct($T: Type, $F: WGPUVertexFormat) {
 	values: [..]T;
 	format:WGPUVertexFormat = F;

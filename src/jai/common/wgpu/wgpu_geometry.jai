@@ -46,18 +46,3 @@ geometry_attributes_to_vertex_buffer_layouts :: (pc : *PipelineController, geome
 
 
 
-wgpu_index_array_to_buffer :: (wgpu_context: *WGPUContext, indices: []VertexIndex) -> WGPUBuffer, u64 {
-	size := cast(u64) indices.count * size_of(VertexIndex);
-
-	buffer_desc:WGPUBufferDescriptor= .{
-		usage = xx (WGPUBufferUsage.Index | WGPUBufferUsage.CopyDst),
-		size=size,
-		label = "index buffer",
-	};
-	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
-	assert(buffer != null, "Buffer is not created correctly");
-
-	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, indices.data, size);
-
-	return buffer, size;
-}

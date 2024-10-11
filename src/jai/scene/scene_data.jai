@@ -1,6 +1,5 @@
 Time :: float32;
-VertexIndex :: u32;
-VertexLayoutBuffer :: u8;
+
 Matrix4x4Buffer :: [16]float;
 
 SceneDataNoise :: struct {

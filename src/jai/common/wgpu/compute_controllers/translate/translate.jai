@@ -21,9 +21,59 @@ ComputeControllerTranslate :: struct {
 	#if MAP_BUFFER {
 		attributesMapped: ComputeControllerTranslateAttributesMapped;
 	}
+	init :ComputeControllerInitMethod= init_translate;
 }
 
-compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+
+compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, position_out: *BufferContainer) {
+	controller.attributes.position_in = position_in;
+	controller.attributes.position_out = position_out;
+
+	//
+	//
+	//
+	bind_group_vertex_entries :[2]WGPUBindGroupEntry;
+	{
+		bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
+			binding = 0,
+			size = position_in.buffer_size,
+			offset = 0,
+			buffer = position_in.buffer,
+			// label = "position in"
+		};
+		bind_group_vertex_entries[1] = WGPUBindGroupEntry.{
+			binding = 1,
+			size = position_out.buffer_size,
+			offset = 0,
+			buffer = position_out.buffer,
+			// label = "position out"
+		};
+		bind_group_descriptor := WGPUBindGroupDescriptor.{
+			label = "bind_group_attributes",
+			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
+			entryCount = xx bind_group_vertex_entries.count,
+			entries = bind_group_vertex_entries.data
+		};
+		controller.bind_group.attributes = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
+	}
+}
+
+
+
+
+
+
+
+#scope_file
+
+CONTROLLER_TYPE :: ComputeControllerTranslate;
+SHADER_ENTRY_POINT :: "translate";
+SHADER_RAW :: #run import_shader();
+import_shader :: () -> string { return "translate.wgsl"; };
+
+
+init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
@@ -90,52 +140,6 @@ compute_controller_translate_init :: (controller: *CONTROLLER_TYPE, wgpu_context
 
 	controller.update_buffer(controller, scene_data);
 }
-
-compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, position_out: *BufferContainer) {
-	controller.attributes.position_in = position_in;
-	controller.attributes.position_out = position_out;
-
-	//
-	//
-	//
-	bind_group_vertex_entries :[2]WGPUBindGroupEntry;
-	{
-		bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
-			binding = 0,
-			size = position_in.buffer_size,
-			offset = 0,
-			buffer = position_in.buffer,
-			// label = "position in"
-		};
-		bind_group_vertex_entries[1] = WGPUBindGroupEntry.{
-			binding = 1,
-			size = position_out.buffer_size,
-			offset = 0,
-			buffer = position_out.buffer,
-			// label = "position out"
-		};
-		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "bind_group_attributes",
-			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
-			entryCount = xx bind_group_vertex_entries.count,
-			entries = bind_group_vertex_entries.data
-		};
-		controller.bind_group.attributes = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
-	}
-}
-
-
-
-
-
-
-
-#scope_file
-
-CONTROLLER_TYPE :: ComputeControllerTranslate;
-SHADER_ENTRY_POINT :: "translate";
-SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "translate.wgsl"; };
 
 update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
 	{

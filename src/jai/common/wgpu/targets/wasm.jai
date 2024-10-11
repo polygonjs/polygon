@@ -54,6 +54,7 @@ wgpuComputePassEncoderEnd :: (computePassEncoder: WGPUComputePassEncoder) -> voi
 wgpuComputePassEncoderSetBindGroup :: (computePassEncoder: WGPUComputePassEncoder, groupIndex: u32, group: WGPUBindGroup, dynamicOffsetCount: u64, dynamicOffsets: *u32) -> void #foreign;
 wgpuComputePassEncoderRelease :: (computePassEncoder: WGPUComputePassEncoder) -> void #foreign;
 wgpuComputePassEncoderSetPipeline :: (computePassEncoder: WGPUComputePassEncoder, pipeline: WGPUComputePipeline) -> void #foreign;
+wgpuCommandEncoderInsertDebugMarker :: (commandEncoder: WGPUCommandEncoder, markerLabel: *u8) -> void #foreign;
 
 
 // Methods of ComputePipeline

@@ -21,9 +21,30 @@ ComputeControllerBoxCreate :: struct {
 	#if MAP_BUFFER {
 		attributesMapped: ComputeControllerBoxCreateAttributesMapped;
 	}
+	init :ComputeControllerInitMethod= box_create_init;
+	set_buffers:SetBufferMethod = box_create_set_buffers;
 }
 
-compute_controller_box_create_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext, buffer_container:BufferContainer, scene_data: *SceneData) {
+
+
+
+
+
+
+
+
+
+#scope_file
+
+CONTROLLER_TYPE :: ComputeControllerBoxCreate;
+SHADER_ENTRY_POINT :: "boxCreate";
+SHADER_RAW :: #run import_shader();
+import_shader :: () -> string { return "box_create.wgsl"; };
+
+SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, buffer_container: *BufferContainer);
+
+box_create_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
@@ -38,7 +59,7 @@ compute_controller_box_create_init :: (controller: *CONTROLLER_TYPE, wgpu_contex
 		params_bind_groups_count = 2
 	);
 
-	controller.attributes.position = buffer_container;
+	// controller.attributes.position = buffer_container;
 	#if MAP_BUFFER {
 		controller.attributesMapped.position = wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
 			label = "vertex buffer",
@@ -102,9 +123,9 @@ compute_controller_box_create_init :: (controller: *CONTROLLER_TYPE, wgpu_contex
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
 	}
 
-	//
-	//
-	//
+	controller.update_buffer(controller, scene_data);
+}
+box_create_set_buffers :: (controller: *CONTROLLER_TYPE, buffer_container: *BufferContainer) {
 	bind_group_vertex_entries :[1]WGPUBindGroupEntry;
 	{
 		bind_group_vertex_entries[0] = WGPUBindGroupEntry.{
@@ -122,23 +143,7 @@ compute_controller_box_create_init :: (controller: *CONTROLLER_TYPE, wgpu_contex
 		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
 	}
 
-
-	controller.update_buffer(controller, scene_data);
 }
-
-
-
-
-
-
-
-
-#scope_file
-
-CONTROLLER_TYPE :: ComputeControllerBoxCreate;
-SHADER_ENTRY_POINT :: "boxCreate";
-SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "box_create.wgsl"; };
 
 update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
 	{

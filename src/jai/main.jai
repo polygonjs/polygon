@@ -247,6 +247,7 @@ on_request_animation_frame :: (
 
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
+	// if FRAMES_COUNT > 2 {do_exit = true;};
 }
 
 // scope_file does not yet prevent unwanted functions to be in the wasm export

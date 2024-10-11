@@ -1,6 +1,7 @@
 // TODO: there are lots of wgpu things to release here
 
 
+ComputeControllerInitMethod :: #type (controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData);
 UpdateBufferMethod :: #type (controller:*ComputeController, scene_data:*SceneData);
 SetBindGroupMethod :: #type (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder);
 HandleMappedBuffersMethod :: #type (controller:*ComputeController);
@@ -38,11 +39,13 @@ ComputeController :: struct {
 }
 
 heap_compute_controller :: ($T: Type) -> *T {  // Return a pointer to a heap-allocated Document of the appropriate type.
-	doc: *T = alloc(size_of(T));  // alloc returns us a pointer to a series of contiguous bytes allocated on the heap.
-	doc.type     = T;
-	// doc.filename = name;
+	compute_controller: *T = alloc(size_of(T));  // alloc returns us a pointer to a series of contiguous bytes allocated on the heap.
+	compute_controller.type = T;
+	// we need to create a ComputeController on the stack in order to know its init method.
+	tmp :T;
+	compute_controller.init = tmp.init;
 
-	return doc;
+	return compute_controller;
 }
 
 // this is an alternative version to replace() from the String module,
@@ -106,6 +109,7 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 	// device := wgpu_context.device;
 	controller.wgpu_context = wgpu_context;
 	controller.work_group_size = work_group_size;
+
 	controller.update_buffer = methods.update_buffer;
 	controller.set_bind_group = methods.set_bind_group;
 	controller.handle_mapped_buffers = methods.handle_mapped_buffers;
@@ -145,12 +149,14 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 	bind_group_layout_entries0 := NewArray(params_bind_groups_count, WGPUBindGroupLayoutEntry);
 	#if FREE_MEMORY defer array_reset(*bind_group_layout_entries0);
 	{
-		for 0..(params_bind_groups_count-1){
-			bind_group_layout_entries0[it] = WGPUBindGroupLayoutEntry.{
-				binding = it,
-				visibility = xx WGPUShaderStage.Compute,
-				buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
-			};
+		if(params_bind_groups_count>0){
+			for 0..(params_bind_groups_count-1){
+				bind_group_layout_entries0[it] = WGPUBindGroupLayoutEntry.{
+					binding = it,
+					visibility = xx WGPUShaderStage.Compute,
+					buffer = .{ type = WGPUBufferBindingType.Storage }, // should be storage, not uniform like in render pipeline
+				};
+			}
 		}
 		// bind_group_layout_entries0[1] = WGPUBindGroupLayoutEntry.{
 		// 	binding = 1,
@@ -282,38 +288,20 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 // }
 
 
-compute_controller_compute :: (controller:*ComputeController) {
-	compute_pass_encoder: WGPUComputePassEncoder;
-	commands_count :u64= 1;
-	command_encoder := wgpuDeviceCreateCommandEncoder(
-		controller.wgpu_context.device,
-		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Compute"}),
-	);
-	defer wgpuComputePassEncoderRelease(compute_pass_encoder);
-	defer wgpuCommandEncoderRelease(command_encoder);
+compute_controller_compute :: (controller:*ComputeController, command_encoder : WGPUCommandEncoder, compute_pass_encoder:WGPUComputePassEncoder) {
 
-	compute_pass_descriptor := WGPUComputePassDescriptor.{
-		label = "Compute Pass",
-	};
-	{
-		compute_pass_encoder = wgpuCommandEncoderBeginComputePass(command_encoder, *compute_pass_descriptor);
-		wgpuComputePassEncoderSetPipeline(compute_pass_encoder, controller.pipeline);
-		wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 0, controller.data_bind_group_size, 0, null);
-		controller.set_bind_group(controller, *compute_pass_encoder, *command_encoder);
-		entities_count := controller.entities_count(controller);
-		workgroup_size_x := controller.work_group_size.x;
-		workgroups_x :u32= xx ((entities_count + workgroup_size_x - 1) / workgroup_size_x);
-		wgpuComputePassEncoderDispatchWorkgroups(compute_pass_encoder, workgroups_x,1,1);
-		wgpuComputePassEncoderEnd(compute_pass_encoder);
-	}
-
+	wgpuComputePassEncoderSetPipeline(compute_pass_encoder, controller.pipeline);
+	wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 0, controller.data_bind_group_size, 0, null);
+	controller.set_bind_group(controller, *compute_pass_encoder, *command_encoder);
+	entities_count := controller.entities_count(controller);
+	workgroup_size_x := controller.work_group_size.x;
+	workgroups_x :u32= xx ((entities_count + workgroup_size_x - 1) / workgroup_size_x);
+	// print("%:%,%,%\n", controller.type, entities_count, workgroups_x, workgroups_x*workgroup_size_x);
+	wgpuComputePassEncoderDispatchWorkgroups(compute_pass_encoder, workgroups_x, 1, 1);
 	
 
-	command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer Compute"}));
-	defer wgpuCommandBufferRelease(command_buffer);
-	wgpuQueueSubmit(controller.wgpu_context.queue, commands_count, *command_buffer);
 
-	#if MAP_BUFFER controller.handle_mapped_buffers(controller);
+	// #if MAP_BUFFER controller.handle_mapped_buffers(controller);
 };
 
 wgpu_compute_buffer_map_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {

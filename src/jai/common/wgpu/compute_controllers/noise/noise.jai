@@ -16,6 +16,7 @@ ComputeControllerNoiseAttributes :: struct {
 		position: WGPUBuffer;
 	}
 }
+
 ComputeControllerNoise :: struct {
 	#as using base: ComputeController;
 	params:ComputeControllerNoiseParams;
@@ -24,10 +25,29 @@ ComputeControllerNoise :: struct {
 	#if MAP_BUFFER {
 		attributesMapped: ComputeControllerNoiseAttributesMapped;
 	}
-	
+	init :ComputeControllerInitMethod= noise_init;
+	set_buffers: SetBufferMethod = noise_set_buffer;
 }
 
-compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+
+
+
+
+
+
+
+
+CONTROLLER_TYPE :: ComputeControllerNoise;
+SHADER_ENTRY_POINT :: "noise";
+SHADER_RAW :: #run import_shader();
+import_shader :: () -> string { return "noise.wgsl"; };
+
+SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, normal_in: *BufferContainer, position_out: *BufferContainer);
+
+
+
+noise_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
@@ -43,6 +63,7 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 		attributes_bind_groups_count = 3,
 		compute_controller_label = "compute controller noise"
 	);
+	controller.set_buffers = noise_set_buffer;
 
 	// controller.attributes.position = buffer_container;
 	#if MAP_BUFFER {
@@ -109,7 +130,7 @@ compute_controller_noise_init :: (controller: *CONTROLLER_TYPE, wgpu_context: *W
 	controller.update_buffer(controller, scene_data);
 }
 
-compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, normal_in: *BufferContainer, position_out: *BufferContainer) {
+noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, normal_in: *BufferContainer, position_out: *BufferContainer) {
 	controller.attributes.position_in = position_in;
 	controller.attributes.normal_in = normal_in;
 	controller.attributes.position_out = position_out;
@@ -123,7 +144,7 @@ compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_i
 		bind_group_vertex_entries[1] = buffer_container_to_bind_group_entry(normal_in, 1);
 		bind_group_vertex_entries[2] = buffer_container_to_bind_group_entry(position_out, 2);
 		bind_group_descriptor := WGPUBindGroupDescriptor.{
-			label = "bind_group_attributes",
+			label = "bind_group_attributes noise",
 			layout = wgpuComputePipelineGetBindGroupLayout(controller.pipeline, 1),
 			entryCount = xx bind_group_vertex_entries.count,
 			entries = bind_group_vertex_entries.data
@@ -131,19 +152,6 @@ compute_controller_noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_i
 		controller.bind_group.attributes = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
 	}
 }
-
-
-
-
-
-
-#scope_file
-
-CONTROLLER_TYPE :: ComputeControllerNoise;
-SHADER_ENTRY_POINT :: "noise";
-SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "noise.wgsl"; };
-
 
 update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
 	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.freq.buffer, 0, *scene_data.noise.freq, controller.params.freq.buffer_size);

@@ -34,6 +34,22 @@ wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *
 	return container;
 }
 
+wgpu_index_array_to_buffer :: (wgpu_context: *WGPUContext, indices: []VertexIndex) -> WGPUBuffer, u64 {
+	size := cast(u64) indices.count * size_of(VertexIndex);
+
+	buffer_desc:WGPUBufferDescriptor= .{
+		usage = xx (WGPUBufferUsage.Index | WGPUBufferUsage.CopyDst | WGPUBufferUsage.CopySrc),
+		size=size,
+		label = "index buffer",
+	};
+	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
+	assert(buffer != null, "Buffer is not created correctly");
+
+	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, indices.data, size);
+
+	return buffer, size;
+}
+
 
 wgpu_buffer_for_compute :: (wgpu_context: *WGPUContext, size: u64, label: string) -> BufferContainer {
 	assert(size > 0, "size is 0");
