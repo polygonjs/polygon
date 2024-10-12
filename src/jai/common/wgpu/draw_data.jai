@@ -33,7 +33,7 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh)-> MeshDrawData {
 			array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *position, Vector3, "position"));
 		// }
 		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *normal, Vector3, "normal"));
-		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *color, Vector3, "color"));
+		// array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *color, Vector3, "color"));
 		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *uv, Vector2, "uv"));
 	}
 
@@ -74,14 +74,22 @@ draw_data_update :: (pc: *PipelineController, draw_data: *MeshDrawData, mesh: *M
 	// TODO: this is a duplication with the create function, refactor
 	{
 		using mesh.geometry.attributes;
-		container := draw_data.vertex[0];
-		wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, position.values.data, container.buffer_size);
-		container = draw_data.vertex[1];
-		wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, normal.values.data, container.buffer_size);
-		container = draw_data.vertex[2];
-		wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, color.values.data, container.buffer_size);
-		container = draw_data.vertex[3];
-		wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, uv.values.data, container.buffer_size);
+		{
+			container := draw_data.vertex[0];
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, position.values.data, container.buffer_size);
+		}
+		{
+			container := draw_data.vertex[1];
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, normal.values.data, container.buffer_size);
+		}
+		{
+			// container := draw_data.vertex[2];
+			// wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, color.values.data, container.buffer_size);
+		}
+		{
+			container := draw_data.vertex[2];
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, uv.values.data, container.buffer_size);
+		}
 	}
 
 	{

@@ -1,14 +1,14 @@
 struct VertexInput {
 	@location(0) position: vec3<f32>,
-	@location(1) color: vec3<f32>,
-	@location(2) uv: vec2<f32>,
+	// @location(1) color: vec3<f32>,
+	@location(1) uv: vec2<f32>,
 };
 
 struct VertexOutput {
 	@builtin(position) clip_position: vec4<f32>,
 	@location(0) worldPos: vec3<f32>,
-	@location(1) color: vec3<f32>,
-	@location(2) uv: vec2<f32>,
+	// @location(1) color: vec3<f32>,
+	@location(1) uv: vec2<f32>,
 };
 
 struct ObjectUniforms {
@@ -45,7 +45,7 @@ fn vertex(model: VertexInput) -> VertexOutput {
 	out.clip_position = finalMatrix * mvPosition;
 
 	out.worldPos = (object.transformMatrix * mvPosition).xyz;
-	out.color = model.color;
+	// out.color = model.color;
 	out.uv = model.uv;
 	return out;
 }

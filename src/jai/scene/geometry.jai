@@ -8,7 +8,7 @@ GeometryAttribute :: struct($T: Type, $F: WGPUVertexFormat) {
 GeometryAttributes :: struct {
 	position: GeometryAttribute(Vector3, .Float32x3);
 	normal: GeometryAttribute(Vector3, .Float32x3);
-	color: GeometryAttribute(Vector3, .Float32x3);
+	// color: GeometryAttribute(Vector3, .Float32x3);
 	uv: GeometryAttribute(Vector2, .Float32x2);
 }
 Geometry :: struct {
@@ -19,6 +19,11 @@ Geometry :: struct {
 
 geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt) {
 	geometry_box_attributes_set(geometry, .{segments = segments});
+	geometry_attributes_validate(geometry);
+	normals_compute(geometry);
+}
+geometry_sphere_update :: (geometry: *Geometry, segments: Vector2UInt) {
+	geometry_sphere_attributes_set(geometry, .{widthSegments = segments.x, heightSegments = segments.y});
 	geometry_attributes_validate(geometry);
 	normals_compute(geometry);
 }

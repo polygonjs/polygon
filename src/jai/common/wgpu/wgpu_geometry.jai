@@ -30,11 +30,11 @@ geometry_attributes_to_vertex_buffer_layouts :: (pc : *PipelineController, geome
 	array_add(*pc.vertex_attributes, attribute);
 	pc.vertex_buffer_layouts[i].attributes = *pc.vertex_attributes[i];
 
-	i+=1;
-	layout, attribute = geometry_attribute_to_vertex_buffer_layout(*geometry_attributes.color, xx size_of(Vector3), i);
-	array_add(*pc.vertex_buffer_layouts, layout);
-	array_add(*pc.vertex_attributes, attribute);
-	pc.vertex_buffer_layouts[i].attributes = *pc.vertex_attributes[i];
+	// i+=1;
+	// layout, attribute = geometry_attribute_to_vertex_buffer_layout(*geometry_attributes.color, xx size_of(Vector3), i);
+	// array_add(*pc.vertex_buffer_layouts, layout);
+	// array_add(*pc.vertex_attributes, attribute);
+	// pc.vertex_buffer_layouts[i].attributes = *pc.vertex_attributes[i];
 
 	i+=1;
 	layout, attribute = geometry_attribute_to_vertex_buffer_layout(*geometry_attributes.uv, xx size_of(Vector2), i);

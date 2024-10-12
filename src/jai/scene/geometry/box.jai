@@ -17,7 +17,7 @@ geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) 
 
 	array_resize(*geometry.attributes.position.values, points_count, false);
 	array_resize(*geometry.attributes.normal.values, points_count, false);
-	array_resize(*geometry.attributes.color.values, points_count, false);
+	// array_resize(*geometry.attributes.color.values, points_count, false);
 	array_resize(*geometry.attributes.uv.values, points_count, false);
 	array_resize(*geometry.indices, indices_count, false);
 
