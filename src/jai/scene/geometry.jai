@@ -42,3 +42,12 @@ geometry_add_noise :: (geometry: *Geometry, freq: Vector3) {
 	}
 	normals_compute(geometry);
 }
+
+geometry_attributes_validate :: (geometry: *Geometry) {
+	using geometry.attributes;
+	points_count := position.values.count;
+	assert(points_count > 0, "points count is 0");
+	assert(points_count == normal.values.count, tprint("geometry_attributes_validate: position count (%) and normal count (%) mismatch\n", points_count, normal.values.count));
+	// assert(points_count == geometry.attributes.color.values.count, "geometry_attributes_validate: position and color count mismatch");
+	assert(points_count == uv.values.count, tprint("geometry_attributes_validate: position count (%) and uv count (%) mismatch\n", points_count, uv.values.count));
+}

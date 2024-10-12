@@ -26,7 +26,7 @@ mesh_create :: () -> Mesh {
 	// geometry_box_update(*mesh.geometry, .{8,8,8});
 	// geometry_box_update(*mesh.geometry, .{128, 128, 128});
 	// geometry_sphere_update(*mesh.geometry, .{128,128});
-	geometry_icosahedron_update(*mesh.geometry, 5);
+	geometry_icosahedron_update(*mesh.geometry, 2);
 
 	// TODO: this cast may seem like it gives the expected result,
 	// but it may be because we create a wgpu buffer of at least 16 bytes,
@@ -55,10 +55,3 @@ mesh_uniforms_update :: (mesh: *Mesh) {
 }
 
 
-geometry_attributes_validate :: (geometry: *Geometry) {
-	points_count := geometry.attributes.position.values.count;
-	assert(points_count > 0, "points count is 0");
-	assert(points_count == geometry.attributes.normal.values.count, "geometry_attributes_validate: position and normal count mismatch");
-	// assert(points_count == geometry.attributes.color.values.count, "geometry_attributes_validate: position and color count mismatch");
-	assert(points_count == geometry.attributes.uv.values.count, "geometry_attributes_validate: position and uv count mismatch");
-}

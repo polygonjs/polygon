@@ -1,4 +1,4 @@
-OPTIMIZED :: true;
+OPTIMIZED :: false;
 BUILD_WASM :: true;
 BUILD_NATIVE :: false;
 

@@ -1,7 +1,7 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: true;
+USE_COMPUTE_SHADER :: false;
 MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
@@ -255,6 +255,7 @@ on_request_animation_frame :: (
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
 else #import "Basic";
+#import "Hash_Table";
 #import "Math";
 #import "String";
 #if WASM == true  #import "wgpu_wasm";
