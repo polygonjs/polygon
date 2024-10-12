@@ -15,10 +15,12 @@ compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene_data:
 	// index_count:u64=98304;
 	// points_count:u64=2562;
 	// index_count:u32=15360;
-	points_count:u64=10242;
-	index_count:u32=61440;
+	// points_count:u64=10242;
+	// index_count:u32=61440;
 	// points_count:u64=40962;
 	// index_count:u32=245760;
+	points_count:u64=3612;
+	index_count:u64=21660;
 	position_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position_in");
 	normal_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_in");
 	index_in := wgpu_buffer_for_compute(wgpu_context, index_count * size_of(VertexIndex), "index_in");

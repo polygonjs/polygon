@@ -1,7 +1,7 @@
 
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: false;
+USE_COMPUTE_SHADER :: true;
 MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;

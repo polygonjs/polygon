@@ -10,6 +10,8 @@ geometry_polyhedron_attributes_set :: (geometry: *Geometry, params: PolyhedronGe
 	array_reset(*geometry.indices);
 
 	subdivide(geometry, params);
+	generate_indices(geometry);
+
 	points_count := geometry.attributes.position.values.count;
 	array_resize(*geometry.attributes.normal.values, points_count);
 	array_resize(*geometry.attributes.uv.values, points_count);
@@ -17,7 +19,6 @@ geometry_polyhedron_attributes_set :: (geometry: *Geometry, params: PolyhedronGe
 	apply_radius(geometry, params.radius);
 	normalize_normals(geometry);
 	generate_uvs(geometry);
-	generate_indices(geometry);
 
 	indices_count := geometry.indices.count;
 	print("points_count:u64=%;\n", points_count);
@@ -122,13 +123,58 @@ normalize_normals :: (geometry: *Geometry) {
 }
 
 generate_indices :: (geometry: *Geometry) {
-	points_count := geometry.attributes.position.values.count;
-	array_resize(*geometry.indices, points_count);
-	i:VertexIndex=0;
-	for 0..points_count-1 {
-		geometry.indices[i] = i;
-		i+=1;
+	using geometry.attributes;
+	points_count := position.values.count;
+
+	index_by_position: Table(Vector3, VertexIndex, normalized_vector3_hash, vector3_equals);
+	init(*index_by_position, points_count);
+	defer deinit(*index_by_position);
+
+	i: VertexIndex=0;
+	for position: position.values {
+		if !table_contains(*index_by_position, position) {
+			table_set(*index_by_position, position, i);
+			i+=1;
+		}
 	}
+
+	array_resize(*geometry.indices, points_count);
+
+	index := 0;
+	for position: position.values {
+		unique_index, found := table_find(*index_by_position, position);
+		if found {
+			geometry.indices[index] = xx unique_index;
+			index += 1;
+		}
+	}
+	array_resize(*position.values, index_by_position.count);
+
+	for index,pos:index_by_position {
+		position.values[index] = pos;
+	}
+}
+
+normalized_vector3_hash :: (position: Vector3)->u32 {
+	normalized := normalize(position);
+	x := cast(u32) (normalized.x * 1023.0); // 10 bits
+	y := cast(u32) (normalized.y * 1023.0);
+	z := cast(u32) (normalized.z * 1023.0);
+	hash :u32= (x << 20) | (y << 10) | z;
+	// Use the sign bits for the last 2 bits of the hash
+	zero :u32 = 0;
+	one :u32 = 1;
+	sign_bits :u32= ((ifx normalized.x < 0 then one else zero) << 1) |
+				 (ifx normalized.y < 0 then one else zero);
+	
+	hash = (hash << 2) | sign_bits;
+	return hash;
+}
+EPSILON :: 0.0001;
+vector3_equals :: (v0:Vector3, v1: Vector3)->bool {
+	return 	abs(v0.x - v1.x) < EPSILON &&
+			abs(v0.y - v1.y) < EPSILON &&
+			abs(v0.z - v1.z) < EPSILON;
 }
 
 
