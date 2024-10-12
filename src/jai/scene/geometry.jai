@@ -27,6 +27,11 @@ geometry_sphere_update :: (geometry: *Geometry, segments: Vector2UInt) {
 	geometry_attributes_validate(geometry);
 	normals_compute(geometry);
 }
+geometry_icosahedron_update :: (geometry: *Geometry, detail: u8) {
+	geometry_icosahedron_attributes_set(geometry, .{detail = detail});
+	geometry_attributes_validate(geometry);
+	normals_compute(geometry);
+}
 
 geometry_add_noise :: (geometry: *Geometry, freq: Vector3) {
 	{

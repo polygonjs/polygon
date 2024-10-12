@@ -10,9 +10,6 @@
 
 #load "camera_controls/orbit_controls.jai";
 
-#load "geometry/box.jai";
-#load "geometry/sphere.jai";
-#load "geometry/normals_compute.jai";
-#load "geometry/perlin_noise.jai";
+#load "geometry/index.jai";
 
 #load "shaders/raymarching/sdf_data.jai";

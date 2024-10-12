@@ -109,8 +109,10 @@ gui_update :: (
 		){
 			// geometry_add_noise(*scene_data.meshes0[0].geometry, scene_data.freq);
 			// draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
-			controller := COMPUTE_CONTROLLER_COLLECTION.controllers[0];
-			controller.update_buffer(controller, scene_data);
+			#if USE_COMPUTE_SHADER {
+				controller := COMPUTE_CONTROLLER_COLLECTION.controllers[0];
+				controller.update_buffer(controller, scene_data);
+			}
 		}
 
 		// if(scene_data.meshes0.count>=1){

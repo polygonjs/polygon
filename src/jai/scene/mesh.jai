@@ -25,7 +25,8 @@ mesh_create :: () -> Mesh {
 	// geometry_box_update(*mesh.geometry, .{4,4,4});
 	// geometry_box_update(*mesh.geometry, .{8,8,8});
 	// geometry_box_update(*mesh.geometry, .{128, 128, 128});
-	geometry_sphere_update(*mesh.geometry, .{128,128});
+	// geometry_sphere_update(*mesh.geometry, .{128,128});
+	geometry_icosahedron_update(*mesh.geometry, 5);
 
 	// TODO: this cast may seem like it gives the expected result,
 	// but it may be because we create a wgpu buffer of at least 16 bytes,

@@ -261,12 +261,9 @@ else #import "Basic";
 else              #import "wgpu";
 
 #load "scene/index.jai";
-#load "common/fps.jai";
-#load "common/math_helper.jai";
-#load "common/type_utils.jai";
 #load "common/events/index.jai";
 #load "common/wgpu/index.jai";
-#load "common/print_utils.jai";
+#load "common/utils/index.jai";
 
 
 #if WASM == false {
