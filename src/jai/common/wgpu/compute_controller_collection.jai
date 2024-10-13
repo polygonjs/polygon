@@ -2,7 +2,7 @@ ComputeControllerCollection :: struct {
 	controllers: [..]*ComputeController;
 }
 
-compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene_data:*SceneData) -> ComputeControllerCollection {
+compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene:*Scene) -> ComputeControllerCollection {
 	ccc :ComputeControllerCollection;
 	print("beware the hard coded value\n");
 	// points_count :u64= 150;//6534;
@@ -39,25 +39,25 @@ compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene_data:
 	// }
 
 	{
-		controller := heap_compute_controller(ComputeControllerNoise);
+		controller := newComputeController(ComputeControllerNoise);
 		controller.init( controller, wgpu_context, scene_data );
 		controller.set_buffers( controller, *position_in, *normal_in, *position_out );
 		array_add(*ccc.controllers, controller);
 	}
 	{
-		controller := heap_compute_controller(ComputeControllerAttributeSet);
+		controller := newComputeController(ComputeControllerAttributeSet);
 		controller.init( controller, wgpu_context, scene_data );
 		controller.set_buffers( controller, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
-		controller := heap_compute_controller(ComputeControllerComputeNormals);
+		controller := newComputeController(ComputeControllerComputeNormals);
 		controller.init( controller, wgpu_context, scene_data );
 		controller.set_buffers( controller, *position_out, *index_in, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
-		controller := heap_compute_controller(ComputeControllerAttributeNormalize);
+		controller := newComputeController(ComputeControllerAttributeNormalize);
 		controller.init( controller, wgpu_context, scene_data );
 		controller.set_buffers( controller, *normal_tmp, *normal_out );
 		array_add(*ccc.controllers, controller);
@@ -168,7 +168,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 
 }
 
-compute_controller_collection_compute :: (ccc: *ComputeControllerCollection, scene_data: *SceneData) {
+compute_controller_collection_compute :: (ccc: *ComputeControllerCollection, scene: *Scene) {
 	// compute_controller_update_buffer(ccc.controllers[0], scene_data);
 	// compute_controller_update_buffer(*ccc.controllers[1], *SCENE_DATA.offset);
 	if(ccc.controllers.count == 0)return;

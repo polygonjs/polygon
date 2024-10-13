@@ -91,7 +91,3 @@ wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureV
 	}
 }
 
-wgpu_set_viewport :: (encoder: WGPURenderPassEncoder, x: float, y: float, width: float, height: float, min_depth: float = 0.0, max_depth: float = 1.0) {
-	wgpuRenderPassEncoderSetViewport(encoder, x, y, width, height, min_depth, max_depth);
-	wgpuRenderPassEncoderSetScissorRect(encoder, xx x, xx y, xx width, xx height);
-}

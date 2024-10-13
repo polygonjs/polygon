@@ -13,6 +13,7 @@ PipelineDataUniform :: struct {
 
 
 PipelineController :: struct {
+	type: Type;
 	wgpu_context: *WGPUContext;
 	shader_module: WGPUShaderModule;
 	vertex_buffer_layouts:[..]WGPUVertexBufferLayout;
@@ -31,7 +32,7 @@ PipelineController :: struct {
 };
 
 
-pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext, meshes: *[..]Mesh, label: string)-> PipelineController {
+pipeline_controller_init :: (pc: *PipelineController, wgpu_context: *WGPUContext, scene:*Scene, meshes: *[..]Mesh, label: string)-> PipelineController {
 	assert(meshes.count > 0, "meshes is empty");
 
 	pc.wgpu_context = wgpu_context;
@@ -85,7 +86,7 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 
 	array_reset(*pc.meshes_draw_data);
 	for (<<pc.meshes) {
-		draw_data := draw_data_create(pc, *it);
+		draw_data := draw_data_create(pc, *it, scene);
 
 		array_add(*pc.meshes_draw_data, draw_data);
 	}
@@ -94,17 +95,17 @@ pipeline_controller_init :: (pc: *PipelineController,wgpu_context: *WGPUContext,
 	return pc;
 }
 
-pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh) {
+pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene) {
 	// TODO: release old draw data buffers, using this [0] is not good, we should look up which index matches this mesh
 	draw_data_buffers_schedule_destroy(pc, *pc.meshes_draw_data[0]);
 
-	draw_data := draw_data_create(pc, mesh);
+	draw_data := draw_data_create(pc, mesh, scene);
 	pc.meshes_draw_data[0] = draw_data;
 }
 
 
 
-pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DATA:*SceneData) {
+pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, scene:*Scene) {
 	// using the dirty flag may need a bit more work:
 	// - ensure mesh uniforms trigger it
 	// - ensure camera uniforms is shared and triggers it
@@ -122,7 +123,7 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DA
 		{
 			size := cast(u64) max( 16, size_of(CameraUniforms));
 			buffer := draw_data.uniforms.camera.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *SCENE_DATA.camera.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *scene.camera.uniforms, size);
 		}
 		{
 			size := cast(u64) max( 16, size_of(type_of(pc.material.uniforms)));
@@ -130,12 +131,12 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, SCENE_DA
 			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *pc.material.uniforms, size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.object.buffer, *mesh);
-		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, SCENE_DATA);
-		// update_sdf_uniforms_to_buffer(wgpu_context, draw_data.uniforms.material.buffer, SCENE_DATA);
+		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, scene_data);
+		// update_sdf_uniforms_to_buffer(wgpu_context, draw_data.uniforms.material.buffer, scene_data);
 	}
 }
 
-pipeline_controller_update_render_pass :: (pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder, SCENE_DATA:*SceneData) {
+pipeline_controller_update_render_pass :: (pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder, scene:*Scene) {
 	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pc.pipeline);
 	for draw_data: pc.meshes_draw_data {
 		{
@@ -163,6 +164,12 @@ pipeline_controller_destroy_scheduled_buffers :: (pc: *PipelineController) {
 	array_reset(*pc.buffers_to_destroy);
 }
 
+newPipelineController :: ($T: Type) -> *T {
+	pipeline_controller: *T = alloc(size_of(T));
+	pipeline_controller.type = T;
+
+	return pipeline_controller;
+}
 
 #scope_file
 

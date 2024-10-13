@@ -40,8 +40,9 @@ ImGui_ImplWGPU_Shutdown :: () {
 	// free(bd); // IM_DELETE(bd);
 }
 
-imgui_gui_free :: (iwc: *ImGui_WGPU_Common){
+imgui_gui_free :: (){
 	#if FREE_MEMORY {
+		iwc:*ImGui_WGPU_Common= *IWC;
 		array_reset(*iwc.draw.vertices);
 		array_reset(*iwc.draw.indices);
 	}

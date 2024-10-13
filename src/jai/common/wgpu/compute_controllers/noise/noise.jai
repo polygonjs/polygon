@@ -46,7 +46,7 @@ SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, position_in: *BufferCont
 
 
 
-noise_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+noise_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene) {
 	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
@@ -153,10 +153,10 @@ noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer
 	}
 }
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
-	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.freq.buffer, 0, *scene_data.noise.freq, controller.params.freq.buffer_size);
-	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.offset.buffer, 0, *scene_data.noise.offset, controller.params.offset.buffer_size);
-	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.amount.buffer, 0, *scene_data.noise.amount, controller.params.amount.buffer_size);
+update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
+	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.freq.buffer, 0, *scene.noise.freq, controller.params.freq.buffer_size);
+	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.offset.buffer, 0, *scene.noise.offset, controller.params.offset.buffer_size);
+	wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.amount.buffer, 0, *scene.noise.amount, controller.params.amount.buffer_size);
 };
 
 set_bind_group :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){

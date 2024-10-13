@@ -1,6 +1,6 @@
 OPTIMIZED :: false;
-BUILD_WASM :: false;
-BUILD_NATIVE :: true;
+BUILD_WASM :: true;
+BUILD_NATIVE :: false;
 
 WASM_INSERTION_STRING :: #string DONE
 

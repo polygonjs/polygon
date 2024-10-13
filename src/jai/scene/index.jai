@@ -4,7 +4,7 @@
 #load "material.jai";
 #load "math.jai";
 #load "mesh.jai";
-#load "scene_data.jai";
+#load "scene.jai";
 
 
 

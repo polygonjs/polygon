@@ -1,11 +1,11 @@
 COLOR_SPACE_LINEAR :: true; // needs to manually match same variable in WebGPURequest.ts
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: true;
+USE_COMPUTE_SHADER :: false;
 MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
-RENDER_IN_VIEWPORT :: false;
+RENDER_IN_VIEWPORT :: true;
 RENDER_SCENE :: true;
 RUN_TESTS :: false;
 VSYNC :: false;
@@ -15,24 +15,13 @@ VSYNC :: false;
 #placeholder SHADER_RENDER_RAYMARCHING;
 
 
-#if USE_IMGUI window_context:WindowContext;
-SCENE_DATA:SceneData;
-pipeline_controller0: PipelineController;
-pipeline_controller1: PipelineController;
-pipeline_controller2: PipelineController;
-PIPELINE_CONTROLLERS:[..]PipelineController;
-orbit_controls:OrbitControls;
-events_data:EventsData;
-ui_data:UiData;
+WGPU_CONTEXT:WGPUContext;
 #if USE_IMGUI {
-	bd:ImGui_ImplWGPU_Data;
-	iwc:ImGui_WGPU_Common;
+	BD:ImGui_ImplWGPU_Data;
+	IWC:ImGui_WGPU_Common;
 }
-#if USE_COMPUTE_SHADER {
-	COMPUTE_CONTROLLER_COLLECTION:ComputeControllerCollection;
-}
-
-
+EVENTS_DATA:EventsData;
+UI_DATA:UiData;
 
 do_exit := false;
 #if WASM==true {
@@ -68,13 +57,13 @@ main :: () {
 	#if RUN_TESTS run_tests();
 
 	node_name_size := 128;
-	SCENE_DATA.node_name.data  = alloc(node_name_size);
-	SCENE_DATA.node_name.count = node_name_size;
+	SCENE.node_name.data  = alloc(node_name_size);
+	SCENE.node_name.count = node_name_size;
 	test_string := "Hello World!";
-	memcpy(SCENE_DATA.node_name.data, test_string.data, test_string.count);
+	memcpy(SCENE.node_name.data, test_string.data, test_string.count);
 
 
-	init_scene_data(*SCENE_DATA, 1.);
+	init_scene_data(*SCENE, 1.);
 
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
@@ -104,7 +93,7 @@ main :: () {
 		// 	SDL_SetWindowFullscreen(*window, xx SDL_WINDOW_RESIZABLE);
 		// }
 		#if USE_IMGUI {
-			window_context.window = window;
+			WINDOW_CONTEXT.window = window;
 
 			imgui_context := ImGui.CreateContext();
 			sdl_init_success := ImGui_ImplSdl_Init(window);
@@ -123,19 +112,19 @@ main :: () {
 		while !do_exit {
 			
 			time := current_time_monotonic();
-			compute_fps(time, *ui_data);
+			compute_fps(time, *UI_DATA);
 			sdl_event: SDL_Event;
-			events_data_reset(*events_data);
+			events_data_reset(*EVENTS_DATA);
 			
 			while SDL_PollEvent(*sdl_event) {
-				events_data_update(*events_data, *sdl_event);
+				events_data_update(*EVENTS_DATA, *sdl_event);
 				#if USE_IMGUI {
 					ImGui_ImplSdl_ProcessEvent(*sdl_event);
 					if(io.WantCaptureMouse == false){
-						orbit_controls_process_event(*orbit_controls, *events_data);
+						orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
 					}
 				} else {
-					orbit_controls_process_event(*orbit_controls, *events_data);
+					orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
 				}
 
 				if sdl_event.type == {
@@ -167,10 +156,10 @@ main :: () {
 			}
 			#if USE_IMGUI {
 				if(io.WantCaptureMouse == false){
-					orbit_controls_process_event(*orbit_controls, *events_data);
+					orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
 				}
 			} else {
-				orbit_controls_process_event(*orbit_controls, *events_data);
+				orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
 			}
 
 			// do_exit = true;
@@ -197,7 +186,12 @@ main :: () {
 //
 //
 init_draw_data :: () {
-	renderer_init_draw_data();
+	#if WASM==true context = call_from_wasm_context;
+
+	renderer_init_ui();
+	renderer_init_pipelines_scene_data(*SCENE_RENDERER, *SCENE);
+	renderer_init_pipelines_nodes(*NODES_RENDERER, *SCENE);
+
 }
 
 
@@ -214,36 +208,42 @@ on_request_animation_frame :: (
 	if USE_IMGUI_DEBUG return;
 	#if WASM {
 		context = call_from_wasm_context;
-		events_data_update(*events_data);
+		events_data_update(*EVENTS_DATA);
 		time := performance_now();
-		compute_fps(time, *ui_data);
+		compute_fps(time, *UI_DATA);
 	} else {
 	}
-	
 
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
-	if(new_aspect != SCENE_DATA.camera.aspect){
-		SCENE_DATA.camera.aspect = new_aspect;
-		camera_data_projection_update(*SCENE_DATA.camera);
+	if(new_aspect != SCENE.camera.aspect){
+		if(SCENE_RENDERER.full_screen == true) {
+			SCENE.camera.aspect = new_aspect;
+		} else {
+			SCENE.camera.aspect = SCENE_RENDERER.viewport.size.x / SCENE_RENDERER.viewport.size.y;
+		}
+		camera_data_projection_update(*SCENE.camera);
 	}
-	SCENE_DATA.time = new_time / 1000.0;
+	SCENE.time = new_time / 1000.0;
 	#if USE_IMGUI {
 		io := ImGui.GetIO();
 		if(io.WantCaptureMouse == false){
-			orbit_controls_process_event(*orbit_controls, *events_data);
+			orbit_controls_process_event(*SCENE.orbit_controls, *EVENTS_DATA);
 		}
 	} else {
-		orbit_controls_process_event(*orbit_controls, *events_data);
+		orbit_controls_process_event(*SCENE.orbit_controls, *EVENTS_DATA);
 	}
-	orbit_controls_update_camera(*orbit_controls, *SCENE_DATA.camera);
-	update_scene_data_uniforms(*SCENE_DATA);
+	orbit_controls_update_camera(*SCENE.orbit_controls, *SCENE.camera);
+	update_scene_data_uniforms(*SCENE);
 
-	#if USE_COMPUTE_SHADER {
-		compute_controller_collection_compute(*COMPUTE_CONTROLLER_COLLECTION, *SCENE_DATA);
-	}
+	window_size :Vector2UInt= .{xx width, xx height};
+	data := renderer_collection_start(*WGPU_CONTEXT);
+	render(*data, *SCENE_RENDERER, *SCENE, window_size, render_ui=true, clear=true);
+	render(*data, *NODES_RENDERER, *SCENE, window_size, render_ui=false, clear=false);
+	renderer_collection_end(*WGPU_CONTEXT, data);
 
-	render();
+	renderer_destroy_buffers(*SCENE_RENDERER);
+	renderer_destroy_buffers(*NODES_RENDERER);
 
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
@@ -252,6 +252,27 @@ on_request_animation_frame :: (
 
 // scope_file does not yet prevent unwanted functions to be in the wasm export
 #scope_file
+
+
+#if USE_IMGUI WINDOW_CONTEXT:WindowContext;
+SCENE:Scene;
+SCENE_RENDERER: Renderer = .{
+	full_screen = false,
+	viewport = .{
+		start = .{0,0},
+		size = .{500,700}
+	},
+	bg_color = .{0.1, 0.3, 0.72, 1.0},
+};
+NODES_RENDERER: Renderer = .{
+	full_screen = false,
+	viewport = .{
+		start = .{600,0},
+		size = .{500,900}
+	},
+	bg_color = .{0,0,0,1},
+};
+
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
 else #import "Basic";

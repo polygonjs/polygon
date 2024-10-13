@@ -12,7 +12,7 @@ WGPUContext :: struct {
 		surface_texture :WGPUSurfaceTexture;
 	}
 	//
-	use_msaa: bool=true;
+	use_msaa: bool=false;
 	use_depth_buffer: bool=true;
 	//
 	multisample_texture_descriptor : WGPUTextureDescriptor;

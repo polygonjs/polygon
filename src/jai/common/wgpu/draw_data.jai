@@ -4,7 +4,7 @@ MeshDrawData :: struct {
 	uniforms:PipelineDataUniform;
 }
 
-draw_data_create :: (pc: *PipelineController, mesh: *Mesh)-> MeshDrawData {
+draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshDrawData {
 	wgpu_context := pc.wgpu_context;
 	draw_data :MeshDrawData;
 
@@ -55,7 +55,7 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh)-> MeshDrawData {
 			using camera;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 1, SCENE_DATA.camera.uniforms, "camera");
+			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 1, scene.camera.uniforms, "camera");
 		}
 		{
 			using material;

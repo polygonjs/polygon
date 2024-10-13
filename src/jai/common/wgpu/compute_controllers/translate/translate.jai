@@ -72,7 +72,7 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "translate.wgsl"; };
 
 
-init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene) {
 	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
@@ -141,7 +141,7 @@ init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, 
 	controller.update_buffer(controller, scene_data);
 }
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
+update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
 	{
 		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
 		// print("size_float:%\n",scene_data.translate.x);

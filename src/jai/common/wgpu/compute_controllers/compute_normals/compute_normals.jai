@@ -43,7 +43,7 @@ import_shader :: () -> string { return "compute_normals.wgsl"; };
 
 SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, index_in: *BufferContainer, normal_out: *BufferContainer);
 
-compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene) {
 	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
@@ -114,7 +114,7 @@ compute_normals_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *Buffe
 }
 
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){};
+update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){};
 set_bind_group :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
 	wgpuComputePassEncoderSetBindGroup(<<compute_pass_encoder, 1, controller.bind_group.attributes, 0, null);
 

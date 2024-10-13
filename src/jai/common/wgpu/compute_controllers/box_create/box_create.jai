@@ -43,7 +43,7 @@ import_shader :: () -> string { return "box_create.wgsl"; };
 
 SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, buffer_container: *BufferContainer);
 
-box_create_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+box_create_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene) {
 	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
@@ -145,7 +145,7 @@ box_create_set_buffers :: (controller: *CONTROLLER_TYPE, buffer_container: *Buff
 
 }
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){
+update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
 	{
 		// size_float: [3]float = .[scene_data.box_size.x, scene_data.box_size.y, scene_data.box_size.z];
 		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *scene_data.box_size, controller.params.size.buffer_size);

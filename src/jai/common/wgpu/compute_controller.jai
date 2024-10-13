@@ -1,8 +1,8 @@
 // TODO: there are lots of wgpu things to release here
 
 
-ComputeControllerInitMethod :: #type (controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData);
-UpdateBufferMethod :: #type (controller:*ComputeController, scene_data:*SceneData);
+ComputeControllerInitMethod :: #type (controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene);
+UpdateBufferMethod :: #type (controller:*ComputeController, scene:*Scene);
 SetBindGroupMethod :: #type (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder);
 HandleMappedBuffersMethod :: #type (controller:*ComputeController);
 EntitiesCountMethod :: #type (controller:*ComputeController)->u64;
@@ -38,7 +38,7 @@ ComputeController :: struct {
 	using methods: ComputeControllerMethods;
 }
 
-heap_compute_controller :: ($T: Type) -> *T {  // Return a pointer to a heap-allocated Document of the appropriate type.
+newComputeController :: ($T: Type) -> *T {  // Return a pointer to a heap-allocated Document of the appropriate type.
 	compute_controller: *T = alloc(size_of(T));  // alloc returns us a pointer to a series of contiguous bytes allocated on the heap.
 	compute_controller.type = T;
 	// we need to create a ComputeController on the stack in order to know its init method.

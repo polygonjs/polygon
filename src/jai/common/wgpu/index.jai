@@ -10,7 +10,9 @@
 
 #load "draw_data.jai";
 #load "pipeline_controller.jai";
+#load "pipeline_controller_collection.jai";
 #load "renderer.jai";
+#load "renderer_collection.jai";
 
 #if USE_COMPUTE_SHADER {
 	#load "compute_controller.jai";

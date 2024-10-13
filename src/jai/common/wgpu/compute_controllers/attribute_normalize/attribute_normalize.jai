@@ -42,7 +42,7 @@ import_shader :: () -> string { return "attribute_normalize.wgsl"; };
 
 SetBufferMethod :: #type (controller: *CONTROLLER_TYPE, attribute_in: *BufferContainer, attribute_out: *BufferContainer);
 
-attribute_normalize_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene_data: *SceneData) {
+attribute_normalize_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene) {
 	controller := cast(*CONTROLLER_TYPE) _controller;
 	compute_controller_init(
 		controller = controller,
@@ -112,7 +112,7 @@ attribute_normalize_set_buffer :: (controller: *CONTROLLER_TYPE, attribute_in: *
 }
 
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene_data:*SceneData){};
+update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){};
 set_bind_group :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
 	wgpuComputePassEncoderSetBindGroup(<<compute_pass_encoder, 1, controller.bind_group.attributes, 0, null);
 

@@ -38,7 +38,7 @@ orbit_controls_process_event :: (orbit_controls:*OrbitControls, events_data:*Eve
 
 
 
-orbit_controls_update_camera:: (orbit_controls: *OrbitControls, camera_data: *CameraData){
+orbit_controls_update_camera :: (orbit_controls: *OrbitControls, camera_data: *CameraData){
 	using orbit_controls;
 
 	// Clamp phi to avoid flipping at the poles

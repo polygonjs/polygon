@@ -1,16 +1,12 @@
 
 
 
-gui_update :: (
-	window_context: *WindowContext,
-	wgpu_context: *WGPUContext,
-	render_pass: WGPURenderPassEncoder,
-	bd: *ImGui_ImplWGPU_Data,
-	iwc: *ImGui_WGPU_Common,
-	ui_data: *UiData,
-	scene_data: *SceneData,
-	events_data: *EventsData
-){
+gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEncoder, wgpu_context: *WGPUContext ){
+	bd := *BD;
+	iwc := *IWC;
+	ui_data: *UiData = *UI_DATA;
+	events_data: *EventsData = *EVENTS_DATA;
+
 	width := wgpu_texture_get_width_surface(wgpu_context);
 	height := wgpu_texture_get_height_surface(wgpu_context);
 	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipeline==null) {
@@ -25,7 +21,7 @@ gui_update :: (
 	#if WASM {
 		ImGui_ImplWasm_NewFrame(events_data);
 	} else {
-		ImGui_ImplSdl_NewFrame(window_context.window, events_data);
+		ImGui_ImplSdl_NewFrame(WINDOW_CONTEXT.window, events_data);
 	}
 	ImGui.NewFrame();
 	{
@@ -52,9 +48,9 @@ gui_update :: (
 
 
 		ImGui.Text_CFormat("Box Size");
-		ImGui.SliderFloat("sx", *scene_data.box_size.x, 0.1, 5.0);
-		ImGui.SliderFloat("sy", *scene_data.box_size.y, 0.1, 5.0);
-		ImGui.SliderFloat("sz", *scene_data.box_size.z, 0.1, 5.0);
+		ImGui.SliderFloat("sx", *scene.box_size.x, 0.1, 5.0);
+		ImGui.SliderFloat("sy", *scene.box_size.y, 0.1, 5.0);
+		ImGui.SliderFloat("sz", *scene.box_size.z, 0.1, 5.0);
 
 		// ImGui.Text_CFormat("Raymarching");
 		// ImGui.SliderFloat("sdf x", *MATERIAL_RAYMARCHING.uniforms.offset.x, -1.0, 1.0);
@@ -71,42 +67,42 @@ gui_update :: (
 		// }
 
 		ImGui.Text_CFormat("Segments");
-		previous_segments := scene_data.segments;
-		ImGui.SliderInt("segments x", *scene_data.segments.x, 1, 128);
-		ImGui.SliderInt("segments y", *scene_data.segments.y, 1, 128);
-		ImGui.SliderInt("segments z", *scene_data.segments.z, 1, 128);
-		if( previous_segments != scene_data.segments ){
+		previous_segments := scene.segments;
+		ImGui.SliderInt("segments x", *scene.segments.x, 1, 128);
+		ImGui.SliderInt("segments y", *scene.segments.y, 1, 128);
+		ImGui.SliderInt("segments z", *scene.segments.z, 1, 128);
+		if( previous_segments != scene.segments ){
 			// print("updated: %x%x% = %\n", scene_data.segments.x, scene_data.segments.y, scene_data.segments.z, scene_data.segments.x*scene_data.segments.y*scene_data.segments.z);
 			// geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
 			// pipeline_controller_mesh_update_draw_data(*PIPELINE_CONTROLLERS[0], *scene_data.meshes0[0]);
 		}
 
 		ImGui.Text_CFormat("Noise");
-		previous_freq := scene_data.noise.freq;
-		ImGui.SliderFloat("freq x", *scene_data.noise.freq.x, 0.01, 20);
-		ImGui.SliderFloat("freq y", *scene_data.noise.freq.y, 0.01, 20);
-		ImGui.SliderFloat("freq z", *scene_data.noise.freq.z, 0.01, 20);
+		previous_freq := scene.noise.freq;
+		ImGui.SliderFloat("freq x", *scene.noise.freq.x, 0.01, 20);
+		ImGui.SliderFloat("freq y", *scene.noise.freq.y, 0.01, 20);
+		ImGui.SliderFloat("freq z", *scene.noise.freq.z, 0.01, 20);
 
-		previous_offset := scene_data.noise.offset;
-		ImGui.SliderFloat("offset x", *scene_data.noise.offset.x, -2, 2);
-		ImGui.SliderFloat("offset y", *scene_data.noise.offset.y, -2, 2);
-		ImGui.SliderFloat("offset z", *scene_data.noise.offset.z, -2, 2);
+		previous_offset := scene.noise.offset;
+		ImGui.SliderFloat("offset x", *scene.noise.offset.x, -2, 2);
+		ImGui.SliderFloat("offset y", *scene.noise.offset.y, -2, 2);
+		ImGui.SliderFloat("offset z", *scene.noise.offset.z, -2, 2);
 
-		previous_amount := scene_data.noise.amount;
-		ImGui.SliderFloat("amount x", *scene_data.noise.amount.x, -2, 2);
-		ImGui.SliderFloat("amount y", *scene_data.noise.amount.y, -2, 2);
-		ImGui.SliderFloat("amount z", *scene_data.noise.amount.z, -2, 2);
+		previous_amount := scene.noise.amount;
+		ImGui.SliderFloat("amount x", *scene.noise.amount.x, -2, 2);
+		ImGui.SliderFloat("amount y", *scene.noise.amount.y, -2, 2);
+		ImGui.SliderFloat("amount z", *scene.noise.amount.z, -2, 2);
 
 		if(
-			previous_freq != scene_data.noise.freq ||
-			previous_offset != scene_data.noise.offset ||
-			previous_amount != scene_data.noise.amount
+			previous_freq != scene.noise.freq ||
+			previous_offset != scene.noise.offset ||
+			previous_amount != scene.noise.amount
 		){
 			// geometry_add_noise(*scene_data.meshes0[0].geometry, scene_data.freq);
 			// draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
 			#if USE_COMPUTE_SHADER {
-				controller := COMPUTE_CONTROLLER_COLLECTION.controllers[0];
-				controller.update_buffer(controller, scene_data);
+				controller := renderer.computes.controllers[0];
+				controller.update_buffer(controller, scene);
 			}
 		}
 
@@ -153,14 +149,14 @@ gui_update :: (
 		// }
 
 		if (ImGui.Button("Reset")) {
-			scene_data.box_size.x = 1;
-			scene_data.box_size.y = 1;
-			scene_data.box_size.z = 1;
+			scene.box_size.x = 1;
+			scene.box_size.y = 1;
+			scene.box_size.z = 1;
 			// scene_data.sdf_data[0].offset.x = 0;
 			// scene_data.sdf_data[0].offset.y = 0;
 			// scene_data.sdf_data[0].offset.z = 0;
 		}
-		ImGui.InputText("input text", scene_data.node_name.data, xx scene_data.node_name.count);
+		ImGui.InputText("input text", scene.node_name.data, xx scene.node_name.count);
 		// ImGui.ColorEdit3("clear color", clear_color); // Edit 3 floats representing a color
 
 		// if (ImGui.Button("Button")==true){
