@@ -11,8 +11,8 @@ OrbitControls :: struct {
 
 lastPointer: Vector2Int;
 
-orbit_controls_process_event :: (orbit_controls:*OrbitControls, events_data:*EventsData){
-	using orbit_controls;
+orbit_controls_process_event :: (scene:*Scene, events_data:*EventsData){
+	using scene.orbit_controls;
 
 	if (events_data.mouseButton.left) {
 		dx:int = cast(int)events_data.cursor.x - lastPointer.x;
@@ -38,8 +38,8 @@ orbit_controls_process_event :: (orbit_controls:*OrbitControls, events_data:*Eve
 
 
 
-orbit_controls_update_camera :: (orbit_controls: *OrbitControls, camera_data: *CameraData){
-	using orbit_controls;
+orbit_controls_update_camera :: (scene:*Scene){
+	using scene.orbit_controls;
 
 	// Clamp phi to avoid flipping at the poles
 	if (phi < PHI_MIN) phi = PHI_MIN;
@@ -57,7 +57,7 @@ orbit_controls_update_camera :: (orbit_controls: *OrbitControls, camera_data: *C
 	transformMatrix = rotate(transformMatrix, quaternionY);
 	transformMatrix = rotate(transformMatrix, quaternionX);
 	translate(*transformMatrix, .{x=0.0, y=0.0, z=radius});
-	camera_data.matrices.transformMatrix = transformMatrix;
+	scene.camera.matrices.transformMatrix = transformMatrix;
 }
 
 

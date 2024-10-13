@@ -14,7 +14,7 @@ VSYNC :: false;
 #placeholder SHADER_RENDER_BASIC;
 #placeholder SHADER_RENDER_RAYMARCHING;
 
-
+#if USE_IMGUI WINDOW_CONTEXT:WindowContext;
 WGPU_CONTEXT:WGPUContext;
 #if USE_IMGUI {
 	BD:ImGui_ImplWGPU_Data;
@@ -57,13 +57,14 @@ main :: () {
 	#if RUN_TESTS run_tests();
 
 	node_name_size := 128;
-	SCENE.node_name.data  = alloc(node_name_size);
-	SCENE.node_name.count = node_name_size;
+	SCENE_WORLD.node_name.data  = alloc(node_name_size);
+	SCENE_WORLD.node_name.count = node_name_size;
 	test_string := "Hello World!";
-	memcpy(SCENE.node_name.data, test_string.data, test_string.count);
+	memcpy(SCENE_WORLD.node_name.data, test_string.data, test_string.count);
 
 
-	init_scene_data(*SCENE, 1.);
+	init_scene_world(*SCENE_WORLD, 1.);
+	init_scene_nodes(*SCENE_NODES, 1.);
 
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
@@ -118,14 +119,7 @@ main :: () {
 			
 			while SDL_PollEvent(*sdl_event) {
 				events_data_update(*EVENTS_DATA, *sdl_event);
-				#if USE_IMGUI {
-					ImGui_ImplSdl_ProcessEvent(*sdl_event);
-					if(io.WantCaptureMouse == false){
-						orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
-					}
-				} else {
-					orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
-				}
+				orbit_controls_process_event();
 
 				if sdl_event.type == {
 					case SDL_QUIT; {do_exit = true;}
@@ -154,13 +148,7 @@ main :: () {
 					}
 				}
 			}
-			#if USE_IMGUI {
-				if(io.WantCaptureMouse == false){
-					orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
-				}
-			} else {
-				orbit_controls_process_event(*SCENE_DATA.orbit_controls, *EVENTS_DATA);
-			}
+			orbit_controls_process_event();
 
 			// do_exit = true;
 			on_request_animation_frame(xx to_microseconds(time), current_window_size.x, current_window_size.y);
@@ -189,8 +177,8 @@ init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
 	renderer_init_ui();
-	renderer_init_pipelines_scene_data(*SCENE_RENDERER, *SCENE);
-	renderer_init_pipelines_nodes(*NODES_RENDERER, *SCENE);
+	renderer_init_pipelines_scene_data(*WORLD_RENDERER, *SCENE_WORLD);
+	renderer_init_pipelines_nodes(*NODES_RENDERER, *SCENE_NODES);
 
 }
 
@@ -216,33 +204,30 @@ on_request_animation_frame :: (
 
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
-	if(new_aspect != SCENE.camera.aspect){
-		if(SCENE_RENDERER.full_screen == true) {
-			SCENE.camera.aspect = new_aspect;
+	if(new_aspect != SCENE_WORLD.camera.aspect){
+		if(WORLD_RENDERER.full_screen == true) {
+			SCENE_WORLD.camera.aspect = new_aspect;
+			SCENE_NODES.camera.aspect = new_aspect;
 		} else {
-			SCENE.camera.aspect = SCENE_RENDERER.viewport.size.x / SCENE_RENDERER.viewport.size.y;
+			SCENE_WORLD.camera.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
+			SCENE_NODES.camera.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
 		}
-		camera_data_projection_update(*SCENE.camera);
+		camera_data_projection_update(*SCENE_WORLD.camera);
+		camera_data_projection_update(*SCENE_NODES.camera);
 	}
-	SCENE.time = new_time / 1000.0;
-	#if USE_IMGUI {
-		io := ImGui.GetIO();
-		if(io.WantCaptureMouse == false){
-			orbit_controls_process_event(*SCENE.orbit_controls, *EVENTS_DATA);
-		}
-	} else {
-		orbit_controls_process_event(*SCENE.orbit_controls, *EVENTS_DATA);
-	}
-	orbit_controls_update_camera(*SCENE.orbit_controls, *SCENE.camera);
-	update_scene_data_uniforms(*SCENE);
+	SCENE_WORLD.time = new_time / 1000.0;
+	orbit_controls_process_event();
+	orbit_controls_update_camera(*SCENE_WORLD);
+	orbit_controls_update_camera(*SCENE_NODES);
+	update_scene_data_uniforms(*SCENE_WORLD);
 
 	window_size :Vector2UInt= .{xx width, xx height};
 	data := renderer_collection_start(*WGPU_CONTEXT);
-	render(*data, *SCENE_RENDERER, *SCENE, window_size, render_ui=true, clear=true);
-	render(*data, *NODES_RENDERER, *SCENE, window_size, render_ui=false, clear=false);
+	render(*data, *WORLD_RENDERER, *SCENE_WORLD, window_size, render_ui=true, clear=true);
+	render(*data, *NODES_RENDERER, *SCENE_NODES, window_size, render_ui=false, clear=false);
 	renderer_collection_end(*WGPU_CONTEXT, data);
 
-	renderer_destroy_buffers(*SCENE_RENDERER);
+	renderer_destroy_buffers(*WORLD_RENDERER);
 	renderer_destroy_buffers(*NODES_RENDERER);
 
 	reset_temporary_storage();
@@ -253,10 +238,24 @@ on_request_animation_frame :: (
 // scope_file does not yet prevent unwanted functions to be in the wasm export
 #scope_file
 
+orbit_controls_process_event :: (){
+	#if USE_IMGUI {
+		io := ImGui.GetIO();
+		if(io.WantCaptureMouse == false){
+			orbit_controls_process_event(*SCENE_WORLD, *EVENTS_DATA);
+			orbit_controls_process_event(*SCENE_NODES, *EVENTS_DATA);
+		}
+	} else {
+		orbit_controls_process_event(*SCENE_WORLD, *EVENTS_DATA);
+		orbit_controls_process_event(*SCENE_NODES, *EVENTS_DATA);
+	}
+}
 
-#if USE_IMGUI WINDOW_CONTEXT:WindowContext;
-SCENE:Scene;
-SCENE_RENDERER: Renderer = .{
+
+
+SCENE_WORLD:Scene;
+SCENE_NODES:Scene;
+WORLD_RENDERER: Renderer = .{
 	full_screen = false,
 	viewport = .{
 		start = .{0,0},
