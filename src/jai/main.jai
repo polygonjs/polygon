@@ -1,4 +1,4 @@
-
+COLOR_SPACE_LINEAR :: true; // needs to manually match same variable in WebGPURequest.ts
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
 USE_COMPUTE_SHADER :: true;
@@ -23,10 +23,10 @@ pipeline_controller2: PipelineController;
 PIPELINE_CONTROLLERS:[..]PipelineController;
 orbit_controls:OrbitControls;
 events_data:EventsData;
+ui_data:UiData;
 #if USE_IMGUI {
-	ui_data:UiData= .{};
-	bd:ImGui_ImplWGPU_Data = .{};
-	iwc:ImGui_WGPU_Common = .{};
+	bd:ImGui_ImplWGPU_Data;
+	iwc:ImGui_WGPU_Common;
 }
 #if USE_COMPUTE_SHADER {
 	COMPUTE_CONTROLLER_COLLECTION:ComputeControllerCollection;
@@ -264,6 +264,7 @@ else              #import "wgpu";
 #load "scene/index.jai";
 #load "common/events/index.jai";
 #load "common/wgpu/index.jai";
+#load "common/ui/index.jai";
 #load "common/utils/index.jai";
 
 

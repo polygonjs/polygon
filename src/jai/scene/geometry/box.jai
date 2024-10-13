@@ -1,4 +1,4 @@
-
+// inspired by threejs box ( https://github.com/mrdoob/three.js/blob/dev/src/geometries/BoxGeometry.js )
 
 BoxGeometryParams :: struct {
 	size:Vector3 = .{1,1,1};

@@ -1,3 +1,5 @@
+// inspired from threejs's icosahedron.js ( https://github.com/mrdoob/three.js/blob/dev/src/geometries/IcosahedronGeometry.js )
+
 IcosahedronGeometryParams :: struct {
 	radius: float = 1.0;
 	detail: u32 = 0;  // 0 for basic icosahedron, higher for more detail

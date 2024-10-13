@@ -50,8 +50,8 @@ export function webGPURenderControllerCreate(
 		const contextConfigurationOptions: GPUCanvasConfiguration = {
 			device: webGPURequestResponse.device,
 			format: webGPURequestResponse.presentationFormat,
-			usage: GPUTextureUsage.RENDER_ATTACHMENT,
-			// viewFormats: ["bgra8unorm"], //["bgra8unorm", "bgra8unorm-srgb"],
+			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+			// viewFormats: ["bgra8unorm-srgb"],
 			// colorSpace: "srgb", //"display-p3",
 			alphaMode: "opaque", //"premultiplied",
 		};
@@ -109,7 +109,7 @@ export function webGPURenderControllerCreate(
 		);
 		eventsDataReset();
 		framesCount++;
-		// if (framesCount > 3) animateAllowed = false;
+		// if (framesCount > 1) animateAllowed = false;
 		// if (currentTexture) {
 		// 	heapDeleteByItem(currentTexture);
 		// }

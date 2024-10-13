@@ -123,7 +123,7 @@ update_render_pass_descriptor_depth :: (
 }
 
 depth_release :: (wgpu_context: *WGPUContext) {
-	if( wgpu_context.depth_texture_view !=null ) {
+	if( wgpu_context.depth_texture_view != null ) {
 		wgpuTextureViewRelease(<<wgpu_context.depth_texture_view);
 	}
 }

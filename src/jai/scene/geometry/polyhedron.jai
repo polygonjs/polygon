@@ -1,3 +1,4 @@
+// inspired from threejs's polyhedron.js ( https://github.com/mrdoob/three.js/blob/dev/src/geometries/PolyhedronGeometry.js )
 PolyhedronGeometryParams :: struct {
 	positions: []Vector3;
 	indices: []VertexIndex;

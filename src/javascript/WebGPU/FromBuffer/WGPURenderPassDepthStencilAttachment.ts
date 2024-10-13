@@ -7,12 +7,15 @@ import { _big, _num } from "../utils/WebGPUUtils";
 import { WGPURenderPassDepthStencilAttachment } from "../utils/WGPUStructInfos";
 export function WGPURenderPassDepthStencilAttachmentFromBuffer(
 	p: bigint
-): GPURenderPassDepthStencilAttachment {
+): GPURenderPassDepthStencilAttachment | undefined {
 	const m = WGPURenderPassDepthStencilAttachment.members;
 
 	//
 	const viewHeapIndex = _big(p, m.view);
-	const view: GPUTextureView = heapGet<GPUTextureView>(viewHeapIndex)!;
+	const view = heapGet<GPUTextureView>(viewHeapIndex);
+	if (view == null) {
+		return;
+	}
 	//
 
 	const depthLoadOp = loadOpIntToGPULoadOp(_num(p, m.depthLoadOp));

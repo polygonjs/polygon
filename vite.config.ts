@@ -2,14 +2,11 @@ import { ViteHotReloadEvent } from "./src/javascript/config/ViteHotReloadEvent";
 import { defineConfig, PluginOption, Plugin, ViteDevServer } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
 import checker from "vite-plugin-checker";
-import { exec, ExecException, spawn, SpawnOptions } from "child_process";
-// import * as fs from "fs";
-// import * as path from "path";
+import { exec, ExecException } from "child_process";
 
 const BUILD_ON_FILE_CHANGE: boolean = true;
 const RUN_NATIVE_ON_FILE_CHANGE: boolean = false;
-// const CMD_JAI = "jai";
-// const CMD_JAI_ARGS = ["src/jai/build.jai"];
+
 const CMD_BUILD = "jai src/jai/build.jai";
 
 function logRedBg(message: string) {

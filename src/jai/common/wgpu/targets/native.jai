@@ -111,7 +111,9 @@ request_device :: (adapter: WGPUAdapter, width:int, height:int) -> WGPUDevice {
 	return device;
 }
 webgpu_handle_resize :: (wgpu_context: *WGPUContext, size: Vector2UInt){
-	surface_configure(wgpu_context, size);
+	wgpu_context.config.width = size.x;
+	wgpu_context.config.height = size.y;
+	wgpuSurfaceConfigure(wgpu_context.surface, *wgpu_context.config);
 }
 
 wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vector2UInt)-> WGPUSurfaceCapabilities {
@@ -126,7 +128,25 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 	wgpu_context.adapter = request_adapter(wgpu_context.instance, wgpu_context.surface, powerPreference = .HighPerformance);
 	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
 
-	wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+	surface_capabilities :WGPUSurfaceCapabilities;
+	wgpuSurfaceGetCapabilities(wgpu_context.surface, wgpu_context.adapter, *surface_capabilities);
+
+	#if COLOR_SPACE_LINEAR {
+		linearFormatIfAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, wgpu_context:*WGPUContext)->WGPUTextureFormat {
+			for 0..(surface_capabilities.formatCount-1) {
+				if( surface_capabilities.formats[it] == .BGRA8Unorm){
+					return surface_capabilities.formats[it];
+				}
+				
+			}
+			preferred_format := wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+			print("linear format not available, using device preferred format: %\n", preferred_format);
+			return wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+		}
+		wgpu_context.preferred_texture_format = linearFormatIfAvailable(*surface_capabilities, wgpu_context);
+	} else {
+		wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+	}
 
 	wgpu_context.device = request_device(wgpu_context.adapter, size.x, size.y);
 	assert(wgpu_context.device != null, "Device is not created correctly");
@@ -134,17 +154,6 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 	wgpu_context.queue = wgpuDeviceGetQueue(wgpu_context.device);
 	assert(wgpu_context.queue != null, "Queue is not created correctly");
 
-	// surface_configure(*wgpu_context, width, height);
-	surface_capabilities :WGPUSurfaceCapabilities;
-	wgpuSurfaceGetCapabilities(wgpu_context.surface, wgpu_context.adapter, *surface_capabilities);
-	presentModeAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, mode: WGPUPresentMode) -> bool {
-		for 0..(surface_capabilities.presentModeCount-1) {
-			if surface_capabilities.presentModes[it] == mode {
-				return true;
-			}
-		}
-		return false;
-	}
 	// printFormats :: (surface_capabilities :*WGPUSurfaceCapabilities) {
 	// 	for 0..(surface_capabilities.formatCount-1) {
 	// 		print("format: %\n", surface_capabilities.formats[it]);
@@ -158,24 +167,36 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 	// printFormats(*surface_capabilities);
 	// printAlphaModes(*surface_capabilities);
 
-	fifoPresentMode := ifx presentModeAvailable(*surface_capabilities, WGPUPresentMode.FifoRelaxed) then
-		WGPUPresentMode.FifoRelaxed
-		else
-		WGPUPresentMode.Fifo;
-	#if WASM || VSYNC {
-		presentMode := fifoPresentMode;
-	} else {
-		presentMode := ifx presentModeAvailable(*surface_capabilities, WGPUPresentMode.Mailbox) then
-			WGPUPresentMode.Mailbox
+	get_present_mode :: (surface_capabilities :*WGPUSurfaceCapabilities)-> WGPUPresentMode {
+		presentModeAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, mode: WGPUPresentMode) -> bool {
+			for 0..(surface_capabilities.presentModeCount-1) {
+				if surface_capabilities.presentModes[it] == mode {
+					return true;
+				}
+			}
+			return false;
+		}
+		fifoPresentMode := ifx presentModeAvailable(surface_capabilities, WGPUPresentMode.FifoRelaxed) then
+			WGPUPresentMode.FifoRelaxed
 			else
-			WGPUPresentMode.Immediate;
-	}
+			WGPUPresentMode.Fifo;
 
+		#if WASM || VSYNC {
+			return fifoPresentMode;
+		} else {
+			if presentModeAvailable(surface_capabilities, WGPUPresentMode.Mailbox)
+				return WGPUPresentMode.Mailbox;
+			else
+				return WGPUPresentMode.Immediate;
+		}
+	}
+	
+	present_mode := get_present_mode(*surface_capabilities);
 	wgpu_context.config = WGPUSurfaceConfiguration.{
 		device = wgpu_context.device,
-		usage = xx WGPUTextureUsage.RenderAttachment,
-		format = surface_capabilities.formats[0],
-		presentMode = presentMode,
+		usage = xx WGPUTextureUsage.RenderAttachment|WGPUTextureUsage.CopySrc,
+		format = wgpu_context.preferred_texture_format,
+		presentMode = present_mode,
 		alphaMode = surface_capabilities.alphaModes[0],
 		width = size.x,
 		height = size.y,
@@ -188,12 +209,6 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 
 	return surface_capabilities;
 }
-surface_configure :: (wgpu_context: *WGPUContext, size: Vector2UInt){
-	(<<wgpu_context).config.width = size.x;
-	(<<wgpu_context).config.height = size.y;
-	wgpuSurfaceConfigure((<<wgpu_context).surface, *((<<wgpu_context).config));
-}
-
 
 
 

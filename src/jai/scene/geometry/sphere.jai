@@ -1,3 +1,5 @@
+// inspired by threejs sphere.js ( https://github.com/mrdoob/three.js/blob/dev/src/geometries/SphereGeometry.js )
+
 SphereGeometryParams :: struct {
 	radius: float = 1.0;
 	widthSegments: u32 = 32;

@@ -1,9 +1,4 @@
-WGPUColor32 :: struct {
-	r: float;
-	g: float;
-	b: float;
-	a: float;
-}
+
 
 
 gui_update :: (
