@@ -2,7 +2,6 @@
 #load "geometry.jai";
 #load "material.jai";
 #load "math.jai";
-#load "mesh.jai";
 #load "scene.jai";
 
 #load "objects/index.jai";

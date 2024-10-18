@@ -116,7 +116,7 @@ update_render_pass_descriptor_depth :: (
 			// stencilReadOnly = xx true,
 		};
 		render_pass_descriptor.depthStencilAttachment = *depth_texture_stencil_attachment;
-		wgpu_context.depth_texture_view = *texture_view;
+		wgpu_context.depth_texture_view = texture_view;
 	} else {
 		render_pass_descriptor.depthStencilAttachment = null;
 	}
@@ -124,7 +124,7 @@ update_render_pass_descriptor_depth :: (
 
 depth_release :: (wgpu_context: *WGPUContext) {
 	if( wgpu_context.depth_texture_view != null ) {
-		wgpuTextureViewRelease(<<wgpu_context.depth_texture_view);
+		wgpuTextureViewRelease(wgpu_context.depth_texture_view);
 	}
 }
 

@@ -12,13 +12,13 @@ WGPUContext :: struct {
 		surface_texture :WGPUSurfaceTexture;
 	}
 	//
-	use_msaa: bool=false;
+	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
 	//
 	multisample_texture_descriptor : WGPUTextureDescriptor;
 	multisample_texture: WGPUTexture;
-	multisample_texture_view: *WGPUTextureView;
+	multisample_texture_view: WGPUTextureView=null;
 	//
 	depth_texture: WGPUTexture;
-	depth_texture_view: *WGPUTextureView;
+	depth_texture_view: WGPUTextureView=null;
 };

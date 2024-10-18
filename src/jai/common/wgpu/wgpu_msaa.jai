@@ -56,7 +56,7 @@ multisample_texture_view_descriptor := WGPUTextureViewDescriptor.{
 
 multisample_release :: (wgpu_context: *WGPUContext) {
 	if( wgpu_context.use_msaa && wgpu_context.multisample_texture_view != null ) {
-		wgpuTextureViewRelease(<<(wgpu_context.multisample_texture_view));
+		wgpuTextureViewRelease(wgpu_context.multisample_texture_view);
 	}
 }
 
@@ -77,7 +77,7 @@ update_render_pass_descriptor_multisample :: (
 		} else {
 			colorAttachment.resolveTarget = <<current_texture_view;
 		}
-		wgpu_context.multisample_texture_view = *texture_view;
+		wgpu_context.multisample_texture_view = texture_view;
 	} else {
 		#if WASM {
 			colorAttachment.view = <<current_texture_view;
