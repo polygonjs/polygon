@@ -49,19 +49,19 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshD
 			using object;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 0, mesh.uniforms, "object");
+			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformable_uniforms, "object");
 		}
-		{
-			using camera;
-			buffer,
-			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 1, scene.camera.uniforms, "camera");
-		}
+		// {
+		// 	using camera;
+		// 	buffer,
+		// 	bind_group,
+		// 	bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, xx UniformBindingIndex.CAMERA, scene.orbit_controls.camera.uniforms, "camera");
+		// }
 		{
 			using material;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, 2, pc.material.uniforms, "material");
+			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, xx UniformBindingIndex.MATERIAL, pc.material.uniforms, "material");
 		}
 	}
 

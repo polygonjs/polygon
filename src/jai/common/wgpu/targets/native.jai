@@ -253,35 +253,3 @@ pipeline_descriptor_print :: (pipeline_descriptor: *WGPURenderPipelineDescriptor
 
 
 
-
-
-// update_vertex_array_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, vertices: []Vertex) {
-// 	size := cast(u64) vertices.count * size_of(Vertex);
-// 	wgpuQueueWriteBuffer(queue, buffer, 0, vertices.data, size);
-// }
-// update_vertex_array_to_buffer :: (buffer:WGPUBuffer, queue: WGPUQueue, scene_data: *SceneData) {
-// 	size := cast(u64) scene_data.vertices.count * size_of(Vertex);
-// 	wgpuQueueWriteBuffer(queue, buffer, 0, scene_data.vertices.data, size);
-// }
-
-// Wasm_VertexBufferLayout_to_wgpu :: (layout: Wasm_VertexBufferLayout)-> WGPUVertexBufferLayout, []WGPUVertexAttribute {
-// 	vertex_buffer_layout := WGPUVertexBufferLayout.{
-// 		arrayStride=xx layout.arrayStride,
-// 		stepMode=xx layout.stepMode,
-// 		attributeCount=xx layout.attributeCount,
-// 		// attributes=NewArray(layout.attributeCount, WGPUVertexAttribute);
-// 	};
-
-// 	attributes := NewArray(xx layout.attributeCount, WGPUVertexAttribute);
-// 	for 0..(layout.attributeCount-1) {
-// 		src_attribute := layout.attributes[it];
-// 		attributes[it] = WGPUVertexAttribute.{
-// 			format=xx src_attribute.format,
-// 			offset=xx src_attribute.offset,
-// 			shaderLocation=xx src_attribute.shaderLocation,
-// 		};
-// 	}
-// 	vertex_buffer_layout.attributes = attributes.data;
-
-// 	return vertex_buffer_layout, attributes;
-// }

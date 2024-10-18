@@ -1,11 +1,12 @@
 
 
 OrbitControls :: struct {
-	theta:float  = -PI/4; // Angle around the Y-axis
-	phi:float  = -PI/4;  // Angle around the X-axis
-	radius:float  = 5.0; // Distance from the target
-	target :Vector3 = .{x=0.0,y=0.0,z=0.0}; // Target point the camera looks at
-	sensitivity: float = 0.0025;
+	theta:float = -PI/4; // Angle around the Y-axis
+	phi:float = -PI/4;  // Angle around the X-axis
+	radius:float = 5.0; // Distance from the target
+	target:Vector3 = .{x=0.0,y=0.0,z=0.0}; // Target point the camera looks at
+	sensitivity:float = 0.0025;
+	camera:*Camera=null;
 }
 
 
@@ -57,7 +58,12 @@ orbit_controls_update_camera :: (scene:*Scene){
 	transformMatrix = rotate(transformMatrix, quaternionY);
 	transformMatrix = rotate(transformMatrix, quaternionX);
 	translate(*transformMatrix, .{x=0.0, y=0.0, z=radius});
-	scene.camera.matrices.transformMatrix = transformMatrix;
+	assert(camera != null, "camera is null\n");
+	camera.camera_matrices.transformMatrix = transformMatrix;
+
+	if(camera.type == PerspectiveCamera){
+		camera_uniforms_update(xx camera, scene.time);
+	}
 }
 
 

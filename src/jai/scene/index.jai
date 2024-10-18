@@ -1,4 +1,3 @@
-#load "camera.jai";
 #load "color.jai";
 #load "geometry.jai";
 #load "material.jai";

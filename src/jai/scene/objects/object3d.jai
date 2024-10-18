@@ -13,7 +13,7 @@ Object3D :: struct {
 	scale: Vector3 = .{1.0, 1.0, 1.0};
 	matrix: Matrix4;
 
-	uniforms: TransformableUniforms;
+	transformable_uniforms: TransformableUniforms;
 	//
 	init :Object3DInitMethod= init_object3d;
 }
@@ -55,11 +55,10 @@ transformable_update_matrix :: (object: *Object3D) {
 	translate(*object.matrix, object.position);
 	object.matrix = rotate(object.matrix, object.quaternion);
 	scale(*object.matrix, object.scale);
-	print("scale: %\n", object.scale);
 	transformable_uniforms_update(object);
 }
 
 transformable_uniforms_update :: (object: *Object3D) {
 	transposedMatrix := transpose(object.matrix);
-	matrix4x4_to_buffer(*transposedMatrix, *object.uniforms.transformMatrix);
+	matrix4x4_to_buffer(*transposedMatrix, *object.transformable_uniforms.transformMatrix);
 }

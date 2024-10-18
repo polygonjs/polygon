@@ -7,7 +7,6 @@ PipelineUniformData :: struct {
 }
 PipelineDataUniform :: struct {
 	object: PipelineUniformData;
-	camera: PipelineUniformData;
 	material: PipelineUniformData;
 }
 
@@ -32,13 +31,13 @@ PipelineController :: struct {
 };
 
 
-pipeline_controller_init :: (pc: *PipelineController, wgpu_context: *WGPUContext, scene:*Scene, meshes: *[..]*Mesh, label: string)-> PipelineController {
+pipeline_controller_init :: (renderer:*Renderer, pc: *PipelineController, wgpu_context: *WGPUContext, scene:*Scene, meshes: *[..]*Mesh, label: string)-> PipelineController {
 	assert(meshes.count > 0, "meshes is empty");
 
 	pc.wgpu_context = wgpu_context;
-	array_reset(*pc.meshes);
-	for mesh: <<meshes {
-		array_add(*pc.meshes, mesh);
+	array_resize(*pc.meshes, meshes.count, false);
+	for mesh, i: <<meshes {
+		pc.meshes[i] = mesh;
 	}
 	first_mesh := (<<meshes)[0];
 	pc.material = first_mesh.material;
@@ -93,7 +92,7 @@ pipeline_controller_init :: (pc: *PipelineController, wgpu_context: *WGPUContext
 
 		array_add(*pc.meshes_draw_data, draw_data);
 	}
-
+	renderer_camera_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.CAMERA);
 
 	return pc;
 }
@@ -121,13 +120,13 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, scene:*S
 		{
 			size := cast(u64) max( 16, size_of(TransformableUniforms));
 			buffer := draw_data.uniforms.object.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *mesh.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *mesh.transformable_uniforms, size);
 		}
-		{
-			size := cast(u64) max( 16, size_of(CameraUniforms));
-			buffer := draw_data.uniforms.camera.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *scene.camera.uniforms, size);
-		}
+		// {
+		// 	size := cast(u64) max( 16, size_of(CameraUniforms));
+		// 	buffer := draw_data.uniforms.camera.buffer;
+		// 	wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
+		// }
 		{
 			size := cast(u64) max( 16, size_of(type_of(pc.material.uniforms)));
 			buffer := draw_data.uniforms.material.buffer;
@@ -139,14 +138,15 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, scene:*S
 	}
 }
 
-pipeline_controller_update_render_pass :: (pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder, scene:*Scene) {
+pipeline_controller_update_render_pass :: (renderer:*Renderer, pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder, scene:*Scene) {
 	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pc.pipeline);
 	for draw_data: pc.meshes_draw_data {
 		{
 			using draw_data.uniforms;
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 0, object.bind_group, 0, null);
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 1, camera.bind_group, 0, null);
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 2, material.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.OBJECT, object.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.CAMERA, renderer.camera_data.bind_group, 0, null);
+			// renderer_camera_uniform_buffer_assign(pc.wgpu_context, pc.pipeline, 1);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.MATERIAL, material.bind_group, 0, null);
 		}
 		//
 		for v, vi: draw_data.vertex {
@@ -168,10 +168,23 @@ pipeline_controller_destroy_scheduled_buffers :: (pc: *PipelineController) {
 }
 
 newPipelineController :: ($T: Type) -> *T {
-	pipeline_controller: *T = alloc(size_of(T));
-	pipeline_controller.type = T;
+	pc: *T = alloc(size_of(T));
+	pc.type = T;
 
-	return pipeline_controller;
+	_init_array :: (array: *[..] $T) {
+		array.count = 0;
+		array.allocated = 0;
+		array.data = null;
+		tmp_array:[..]u8;
+		array.allocator = tmp_array.allocator;
+	}
+	_init_array(*pc.vertex_buffer_layouts);
+	_init_array(*pc.vertex_attributes);
+	_init_array(*pc.meshes);
+	_init_array(*pc.meshes_draw_data);
+	_init_array(*pc.buffers_to_destroy);
+	
+	return pc;
 }
 
 #scope_file

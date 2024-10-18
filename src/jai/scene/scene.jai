@@ -14,8 +14,6 @@ Scene :: struct {
 	box_size: Vector3=.{3.0, 1.0, 1.0};
 	translate: Vector3;
 	//
-	camera: CameraData;
-	//
 	meshes0: [..]*Mesh;
 	meshes1: [..]*Mesh;
 	meshes2: [..]*Mesh;
@@ -36,8 +34,6 @@ matrix4x4_to_buffer :: (matrix: *Matrix4, buffer: *Matrix4x4Buffer) #expand {
 
 
 init_scene_world :: (scene: *Scene, aspect:float32) {
-	scene.camera.aspect = aspect;
-	scene.camera = camera_data_create();
 
 	// {
 	// 	mesh0 := mesh_create();
@@ -79,8 +75,6 @@ init_scene_world :: (scene: *Scene, aspect:float32) {
 	}
 }
 init_scene_nodes :: (scene: *Scene, aspect:float32) {
-	scene.camera.aspect = aspect;
-	scene.camera = camera_data_create();
 
 	{
 		mesh0 := newObject3D(Mesh);
@@ -111,7 +105,6 @@ update_scene_data_uniforms :: (scene: *Scene) {
 		transformable_uniforms_update(it);
 	}
 	// update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
-	camera_data_uniforms_update(*scene.camera, scene.time);
 	// update_sdf_uniforms(*scene_data.sdf_data, *scene_data.sdf_uniforms, scene_data.time);
 }
 

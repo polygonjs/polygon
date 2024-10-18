@@ -64,7 +64,11 @@ main :: () {
 
 
 	init_scene_world(*SCENE_WORLD, 1.);
+	CAMERA_WORLD = newObject3D(PerspectiveCamera);
+	SCENE_WORLD.orbit_controls.camera = xx CAMERA_WORLD;
 	init_scene_nodes(*SCENE_NODES, 1.);
+	CAMERA_NODES = newObject3D(PerspectiveCamera);
+	SCENE_NODES.orbit_controls.camera = xx CAMERA_NODES;
 
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
@@ -204,16 +208,16 @@ on_request_animation_frame :: (
 
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
-	if(new_aspect != SCENE_WORLD.camera.aspect){
+	if(new_aspect != CAMERA_WORLD.aspect){
 		if(WORLD_RENDERER.full_screen == true) {
-			SCENE_WORLD.camera.aspect = new_aspect;
-			SCENE_NODES.camera.aspect = new_aspect;
+			CAMERA_WORLD.aspect = new_aspect;
+			CAMERA_NODES.aspect = new_aspect;
 		} else {
-			SCENE_WORLD.camera.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
-			SCENE_NODES.camera.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
+			CAMERA_WORLD.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
+			CAMERA_NODES.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
 		}
-		camera_data_projection_update(*SCENE_WORLD.camera);
-		camera_data_projection_update(*SCENE_NODES.camera);
+		camera_projection_update(CAMERA_WORLD);
+		camera_projection_update(CAMERA_NODES);
 	}
 	SCENE_WORLD.time = new_time / 1000.0;
 	orbit_controls_process_event();
@@ -238,7 +242,7 @@ on_request_animation_frame :: (
 // scope_file does not yet prevent unwanted functions to be in the wasm export
 #scope_file
 
-orbit_controls_process_event :: (){
+orbit_controls_process_event :: () {
 	#if USE_IMGUI {
 		io := ImGui.GetIO();
 		if(io.WantCaptureMouse == false){
@@ -254,7 +258,9 @@ orbit_controls_process_event :: (){
 
 
 SCENE_WORLD:Scene;
+CAMERA_WORLD:*PerspectiveCamera;
 SCENE_NODES:Scene;
+CAMERA_NODES:*PerspectiveCamera;
 WORLD_RENDERER: Renderer = .{
 	full_screen = false,
 	viewport = .{
