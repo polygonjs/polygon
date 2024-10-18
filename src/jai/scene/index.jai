@@ -6,7 +6,7 @@
 #load "mesh.jai";
 #load "scene.jai";
 
-
+#load "objects/index.jai";
 
 #load "camera_controls/orbit_controls.jai";
 

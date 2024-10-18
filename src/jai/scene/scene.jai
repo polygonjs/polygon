@@ -16,9 +16,9 @@ Scene :: struct {
 	//
 	camera: CameraData;
 	//
-	meshes0: [..]Mesh;
-	meshes1: [..]Mesh;
-	meshes2: [..]Mesh;
+	meshes0: [..]*Mesh;
+	meshes1: [..]*Mesh;
+	meshes2: [..]*Mesh;
 	// string tests
 	node_name: string;
 	//
@@ -64,15 +64,16 @@ init_scene_world :: (scene: *Scene, aspect:float32) {
 	// 	array_add(*scene_data.meshes1, mesh1);
 	// }
 	{
-		mesh0 := mesh_create();
-		geometry_icosahedron_update(*mesh0.geometry, 18);
+		mesh0 := newObject3D(Mesh);
+		
+		geometry_icosahedron_update(mesh0.geometry, 18);
 		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
 		// mesh1 := mesh_create();
 		mesh0.material = cast(*Material(Any)) *MATERIAL_BASIC;
 		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
 		mesh0.position = .{x = 0.0, y = 0.0, z = 0.0};
 		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
-		mesh_update_matrix(*mesh0);
+		transformable_update_matrix(mesh0);
 		array_add(*scene.meshes2, mesh0);
 		// array_add(*scene_data.meshes2, mesh1);
 	}
@@ -82,18 +83,18 @@ init_scene_nodes :: (scene: *Scene, aspect:float32) {
 	scene.camera = camera_data_create();
 
 	{
-		mesh0 := mesh_create();
-		geometry_box_update(*mesh0.geometry, .{4,4,4});
-		// mesh1 := mesh_create();
-		// geometry_box_update(*mesh1.geometry, .{4,4,4});
+		mesh0 := newObject3D(Mesh);
+		geometry_box_update(mesh0.geometry, .{4,4,4});
+		mesh1 := newObject3D(Mesh);
+		geometry_box_update(mesh1.geometry, .{4,4,4});
 		mesh0.position = .{x = -3.0, y = -1.0, z = -4.0};
-		// mesh1.position = .{x = 3.0, y = 1.0, z = -3.0};
+		mesh1.position = .{x = 3.0, y = 1.0, z = -3.0};
 		// mesh_update_matrix(*mesh0);
 		// mesh_update_matrix(*mesh1);
-		mesh_update_matrix(*mesh0);
-		// mesh_update_matrix(*mesh1);
+		transformable_update_matrix(mesh0);
+		transformable_update_matrix(mesh1);
 		array_add(*scene.meshes0, mesh0);
-		// array_add(*scene.meshes0, mesh1);
+		array_add(*scene.meshes0, mesh1);
 	}
 	
 }
@@ -103,11 +104,11 @@ init_scene_nodes :: (scene: *Scene, aspect:float32) {
 update_scene_data_uniforms :: (scene: *Scene) {
 	for scene.meshes0 {
 		// mesh_update_matrix(*it);
-		mesh_uniforms_update(*it);
+		transformable_uniforms_update(it);
 	}
 	for scene.meshes1 {
 		// mesh_update_matrix(*it);
-		mesh_uniforms_update(*it);
+		transformable_uniforms_update(it);
 	}
 	// update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
 	camera_data_uniforms_update(*scene.camera, scene.time);

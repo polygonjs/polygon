@@ -23,7 +23,7 @@ PipelineController :: struct {
 	fragment_state: WGPUFragmentState;
 	color_target_state: WGPUColorTargetState;
 	//
-	meshes: *[..]Mesh;
+	meshes: [..]*Mesh;
 	material: *Material(Any);
 	meshes_draw_data:[..]MeshDrawData;
 	//
@@ -32,11 +32,14 @@ PipelineController :: struct {
 };
 
 
-pipeline_controller_init :: (pc: *PipelineController, wgpu_context: *WGPUContext, scene:*Scene, meshes: *[..]Mesh, label: string)-> PipelineController {
+pipeline_controller_init :: (pc: *PipelineController, wgpu_context: *WGPUContext, scene:*Scene, meshes: *[..]*Mesh, label: string)-> PipelineController {
 	assert(meshes.count > 0, "meshes is empty");
 
 	pc.wgpu_context = wgpu_context;
-	pc.meshes = meshes;
+	array_reset(*pc.meshes);
+	for mesh: <<meshes {
+		array_add(*pc.meshes, mesh);
+	}
 	first_mesh := (<<meshes)[0];
 	pc.material = first_mesh.material;
 	pc.shader_module = material_create_module(wgpu_context, first_mesh.material);
@@ -85,8 +88,8 @@ pipeline_controller_init :: (pc: *PipelineController, wgpu_context: *WGPUContext
 	assert(pc.pipeline != null, "Pipeline is not created correctly");
 
 	array_reset(*pc.meshes_draw_data);
-	for (<<pc.meshes) {
-		draw_data := draw_data_create(pc, *it, scene);
+	for pc.meshes {
+		draw_data := draw_data_create(pc, it, scene);
 
 		array_add(*pc.meshes_draw_data, draw_data);
 	}
@@ -112,11 +115,11 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, scene:*S
 	// - ensure material uniforms is shared and triggers it
 	// if(!pc.uniforms_dirty) return;
 	// defer pc.uniforms_dirty = false;
-	for (<<pc.meshes) {
+	for pc.meshes {
 		mesh := it;
 		draw_data := pc.meshes_draw_data[it_index];
 		{
-			size := cast(u64) max( 16, size_of(Object3DUniforms));
+			size := cast(u64) max( 16, size_of(TransformableUniforms));
 			buffer := draw_data.uniforms.object.buffer;
 			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *mesh.uniforms, size);
 		}
@@ -152,7 +155,7 @@ pipeline_controller_update_render_pass :: (pc: *PipelineController, render_pass_
 		}
 		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
 
-		mesh := (<<pc.meshes)[it_index];
+		mesh :*Mesh= pc.meshes[it_index];
 		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(render_pass_encoder, xx (mesh.geometry.indices.count), 1, 0, 0, 0);
 	}
 }

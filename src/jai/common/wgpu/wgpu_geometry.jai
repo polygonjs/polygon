@@ -1,5 +1,6 @@
 
 geometry_attribute_to_vertex_buffer_layout :: (geometry_attribute: *GeometryAttribute, stride: u64, location: u32) -> WGPUVertexBufferLayout, WGPUVertexAttribute {
+	assert(geometry_attribute.format != WGPUVertexFormat.Undefined, "geometry_attribute.format is Undefined\n");
 	attribute:WGPUVertexAttribute= .{
 		format=geometry_attribute.format,
 		offset=0,
