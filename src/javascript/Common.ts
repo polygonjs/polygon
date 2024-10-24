@@ -19,6 +19,19 @@ export type OnRequestAnimationFrameFunction = (
 	width: bigint,
 	height: bigint
 ) => void;
+export type QSortFunction = (
+	uselessArg0: bigint,
+	basePointer: bigint,
+	nitems: number,
+	size: number,
+	comparePointer: bigint
+) => void;
+export type QSortFunctionWrapper = (
+	basePointer: bigint,
+	nitems: number,
+	size: number,
+	comparePointer: bigint
+) => void;
 
 export interface Vector2 {
 	x: number;
@@ -34,6 +47,8 @@ interface WasmFunctions {
 	onWebGPUReady: OnWebGPUReadyFunction;
 	initDrawData: InitDrawDataFunction;
 	onRequestAnimationFrame: OnRequestAnimationFrameFunction;
+	qsort: QSortFunction;
+	qsortWrapper: QSortFunctionWrapper;
 }
 declare global {
 	interface Window {

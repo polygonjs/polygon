@@ -53,3 +53,6 @@ ImGui_ImplWasm_NewFrame :: (events_data: *EventsData) {
 	}
 }
 
+qsort :: (basePointer: *void, nitems: u32, size: u32, comparePointer: *void) {
+	// print("qsort native %,%,%,%\n", basePointer, nitems, size, comparePointer);
+};

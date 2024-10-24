@@ -3,6 +3,8 @@ import {
 	InitDrawDataFunction,
 	OnRequestAnimationFrameFunction,
 	OnWebGPUReadyFunction,
+	QSortFunction,
+	USELESS_ARG0,
 } from "./Common";
 import {
 	jsStringFromJaiString,
@@ -72,7 +74,6 @@ import { wgpuShaderModuleRelease } from "./WebGPU/FromJs/wgpuShaderModuleRelease
 import { WASM_MATH } from "./wasm/WasmMath";
 import { __assert_fail } from "./wasm/WasmImgui";
 import { mapFunctionName } from "./wasm/WasmFunctionMapper";
-import { qsort } from "./wasm/WasmQSort";
 import { wgpuCommandEncoderBeginComputePass } from "./WebGPU/FromJs/wgpuCommandEncoderBeginComputePass";
 import { wgpuComputePassEncoderDispatchWorkgroups } from "./WebGPU/FromJs/wgpuComputePassEncoderDispatchWorkgroups";
 import { wgpuComputePassEncoderEnd } from "./WebGPU/FromJs/wgpuComputePassEncoderEnd";
@@ -130,7 +131,6 @@ export function loadWasm(): Promise<void> {
 		sprintf,
 		strstr,
 		toupper,
-		qsort,
 		__assert_fail,
 		...WASM_MATH,
 		...NOT_IMPLEMENTED,
@@ -203,6 +203,19 @@ export function loadWasm(): Promise<void> {
 		onWebGPUReady: () => {},
 		initDrawData: () => {},
 		onRequestAnimationFrame: () => {},
+		qsort: () => {},
+		qsortWrapper: (a, b, c, d) => {
+			window.wasmFunctions.qsort(
+				USELESS_ARG0,
+				a,
+				Number(b),
+				Number(c),
+				d
+			);
+		},
+	};
+	const WRAPPERS_BY_NAMES: Record<string | symbol, Function> = {
+		qsort: window.wasmFunctions.qsortWrapper,
 	};
 	window.ALLOCATED_MEMORY_CONTAINER = {
 		dataView: new DataView(new ArrayBuffer(0)),
@@ -214,6 +227,10 @@ export function loadWasm(): Promise<void> {
 	const imports = {
 		env: new Proxy(EXPORTED_JS_FUNCTIONS, {
 			get(target, prop) {
+				const wrapper = WRAPPERS_BY_NAMES[prop];
+				if (wrapper) {
+					return wrapper;
+				}
 				if (target.hasOwnProperty(prop)) {
 					return (target as any)[prop];
 				}
@@ -231,6 +248,7 @@ export function loadWasm(): Promise<void> {
 			fetch("/polygon-next.wasm"),
 			imports
 		).then((obj) => {
+			console.log(obj);
 			if (unassignedFunctionNames.length > 0) {
 				unassignedFunctionNames.sort();
 				console.error("unassignedFunctionNames:");
@@ -328,6 +346,10 @@ export function loadWasm(): Promise<void> {
 						) {
 							window.wasmFunctions.onRequestAnimationFrame =
 								method as OnRequestAnimationFrameFunction;
+						}
+						if (methodName.startsWith("qsort")) {
+							window.wasmFunctions.qsort =
+								method as QSortFunction;
 						}
 					}
 				}
