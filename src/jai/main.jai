@@ -11,8 +11,6 @@ RUN_TESTS :: false;
 VSYNC :: false;
 
 #placeholder WASM;
-#placeholder SHADER_RENDER_BASIC;
-#placeholder SHADER_RENDER_RAYMARCHING;
 
 #if USE_IMGUI WINDOW_CONTEXT:WindowContext;
 WGPU_CONTEXT:WGPUContext;
@@ -224,6 +222,11 @@ on_request_animation_frame :: (
 	update_scene_data_uniforms(*SCENE_WORLD);
 	camera_uniforms_update(CAMERA_WORLD, SCENE_WORLD.time);
 	camera_uniforms_update(CAMERA_NODES, SCENE_NODES.time);
+
+	mesh := SCENE_WORLD.meshes2[0];
+	material := cast(*RaymarchingMeshMaterial)mesh.material;
+	uniforms := cast(*SDFUniforms)material.uniforms;
+	uniforms.offset.y = sin(SCENE_WORLD.time);
 
 	window_size :Vector2UInt= .{xx width, xx height};
 	data := renderer_collection_start(*WGPU_CONTEXT);

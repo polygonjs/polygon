@@ -5,8 +5,20 @@ wgpu_uniform_to_buffer :: (
 	uniforms: $UniformType,
 	label: string
 ) -> WGPUBuffer, WGPUBindGroup, []WGPUBindGroupEntry {
+	buffer, bind_group, entries := wgpu_uniform_to_buffer_with_size(wgpu_context, pipeline, bind_group_layout_index, *uniforms, size_of(UniformType), label);
+	return buffer, bind_group, entries;
+}
+
+wgpu_uniform_to_buffer_with_size :: (
+	wgpu_context: *WGPUContext,
+	pipeline: WGPURenderPipeline,
+	bind_group_layout_index: u32,
+	uniforms: *void,
+	uniformTypeSize: u32,
+	label: string
+) -> WGPUBuffer, WGPUBindGroup, []WGPUBindGroupEntry {
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	size := cast(u64) max( 16, size_of(UniformType));
+	size := cast(u64) max( 16, uniformTypeSize);
 
 	buffer_label := to_c_string(label);
 	defer free(buffer_label);
@@ -18,7 +30,7 @@ wgpu_uniform_to_buffer :: (
 	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *uniforms, size);
+	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, uniforms, size);
 
 	entries := NewArray(1, WGPUBindGroupEntry);
 	entries[0] = WGPUBindGroupEntry.{

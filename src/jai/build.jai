@@ -16,9 +16,6 @@ DONE
 
 
 
-#load "scene/shaders/shaders.jai";
-
-
 
 #run {
 	checkbox_wasm   := ifx BUILD_WASM then "x" else " ";
@@ -28,15 +25,6 @@ DONE
 	print("NATIVE:  [%]\n", checkbox_native);
 	print("\n");
 	set_build_options_dc(.{do_output = false});
-
-	add_shaders :: (w: *Workspace) {
-		SHADER :: #run create_shaders();
-		build_string := sprint(WASM_INSERTION_STRING,
-			SHADER.render_basic,
-			SHADER.render_raymarching,
-		);
-		add_build_string(build_string, <<w);
-	}
 
 	if ( BUILD_WASM ) {
 		w := compiler_create_workspace("Wasm Common");
@@ -109,7 +97,6 @@ DONE
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
 
-							add_shaders(*w);
 							add_build_string("WASM :: true;", w);
 							generated_code = true;
 						}
@@ -160,7 +147,6 @@ DONE
 					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
 						if !generated_code {
 
-							add_shaders(*w);
 							add_build_string("WASM :: false;", w);
 							generated_code = true;
 						}

@@ -23,7 +23,7 @@ PipelineController :: struct {
 	color_target_state: WGPUColorTargetState;
 	//
 	meshes: [..]*Mesh;
-	material: *Material(Any);
+	material: *Material;
 	meshes_draw_data:[..]MeshDrawData;
 	//
 	uniforms_dirty: bool=true;
@@ -37,6 +37,7 @@ pipeline_controller_init :: (renderer:*Renderer, pc: *PipelineController, wgpu_c
 	pc.wgpu_context = wgpu_context;
 	array_resize(*pc.meshes, meshes.count, false);
 	for mesh, i: <<meshes {
+		assert(mesh.material != null, "mesh.material is null");
 		pc.meshes[i] = mesh;
 	}
 	first_mesh := (<<meshes)[0];
@@ -128,9 +129,9 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
 		// 	wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
 		// }
 		{
-			size := cast(u64) max( 16, size_of(type_of(pc.material.uniforms)));
+			size := cast(u64) max( 16, pc.material.uniformTypeSize);
 			buffer := draw_data.uniforms.material.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *pc.material.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, pc.material.uniforms, size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.object.buffer, *mesh);
 		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, scene_data);

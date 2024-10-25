@@ -3,7 +3,7 @@ Mesh :: struct {
 	object3D.init = init_mesh;
 
 	geometry: *Geometry;
-	material: *Material(Any);
+	material: *Material;
 };
 
 init_mesh :: (object: *Object3D) {
@@ -12,7 +12,7 @@ init_mesh :: (object: *Object3D) {
 	mesh.geometry = New(Geometry);
 
 	// geometry_box_update(mesh.geometry, .{2,2,2});
-	mesh.material = cast(*Material(Any))	*MATERIAL_BASIC;
+	// mesh.material = cast(*Material(Any))	*MATERIAL_BASIC;
 
 	assert(mesh.geometry.attributes.position.format != WGPUVertexFormat.Undefined, "mesh.geometry.attributes.position.format is Undefined\n");
 }
