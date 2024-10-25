@@ -248,7 +248,6 @@ export function loadWasm(): Promise<void> {
 			fetch("/polygon-next.wasm"),
 			imports
 		).then((obj) => {
-			console.log(obj);
 			if (unassignedFunctionNames.length > 0) {
 				unassignedFunctionNames.sort();
 				console.error("unassignedFunctionNames:");

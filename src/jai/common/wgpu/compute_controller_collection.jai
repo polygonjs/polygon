@@ -168,7 +168,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 
 }
 
-compute_controller_collection_compute :: (ccc: *ComputeControllerCollection, scene: *Scene) {
+compute_controller_collection_compute :: (ccc: *ComputeControllerCollection) {
 	// compute_controller_update_buffer(ccc.controllers[0], scene_data);
 	// compute_controller_update_buffer(*ccc.controllers[1], *SCENE_DATA.offset);
 	if(ccc.controllers.count == 0)return;

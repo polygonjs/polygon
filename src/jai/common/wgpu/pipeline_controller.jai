@@ -107,7 +107,7 @@ pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Me
 
 
 
-pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, scene:*Scene) {
+pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
 	// using the dirty flag may need a bit more work:
 	// - ensure mesh uniforms trigger it
 	// - ensure camera uniforms is shared and triggers it
@@ -138,7 +138,7 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController, scene:*S
 	}
 }
 
-pipeline_controller_update_render_pass :: (renderer:*Renderer, pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder, scene:*Scene) {
+pipeline_controller_update_render_pass :: (renderer:*Renderer, pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder) {
 	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pc.pipeline);
 	for draw_data: pc.meshes_draw_data {
 		{

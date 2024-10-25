@@ -63,7 +63,7 @@ renderer_init_ui :: (){
 	}
 }
 
-renderer_init_pipelines_scene_data :: (renderer:*Renderer, scene:*Scene){
+renderer_init_pipelines_scene_data :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -72,7 +72,7 @@ renderer_init_pipelines_scene_data :: (renderer:*Renderer, scene:*Scene){
 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
-	renderer_camera_uniform_buffer_create(renderer, scene, scene.orbit_controls.camera.camera_uniforms, "camera");
+	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
 	
 	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
 	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
@@ -88,7 +88,7 @@ renderer_init_pipelines_scene_data :: (renderer:*Renderer, scene:*Scene){
 		pipeline_controller_update(pipeline_controller, *renderer.computes);
 	}
 }
-renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene){
+renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -97,7 +97,7 @@ renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene){
 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
-	renderer_camera_uniform_buffer_create(renderer, scene, scene.orbit_controls.camera.camera_uniforms, "camera");
+	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
 	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
 	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
 	// pipeline_controller_init(*pipeline_controller1, *WGPU_CONTEXT, *SCENE_DATA.meshes1, "render meshes 1");
@@ -108,7 +108,7 @@ renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene){
 }
 
 
-render :: (data:*RenderCollectionData, renderer: *Renderer, scene: *Scene, window_size:Vector2UInt, render_ui:bool, clear:bool){
+render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera, window_size:Vector2UInt, render_ui:bool, clear:bool){
 	
 	device := WGPU_CONTEXT.device;
 
@@ -136,11 +136,11 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene: *Scene, windo
 	update_render_pass_descriptor_depth(*WGPU_CONTEXT, *render_pass_descriptor);
 
 	#if USE_COMPUTE_SHADER {
-		compute_controller_collection_compute(*renderer.computes, scene);
+		compute_controller_collection_compute(*renderer.computes);
 	}
 
-	renderer_camera_uniform_buffer_update(renderer, scene, scene.orbit_controls.camera.camera_uniforms);
-	for renderer.pipelines.pipelines pipeline_controller_update_uniform_buffers(it, scene);
+	renderer_camera_uniform_buffer_update(renderer, camera, camera.camera_uniforms);
+	for renderer.pipelines.pipelines pipeline_controller_update_uniform_buffers(it);
 	
 	// if(renderer.full_screen == false) {
 	// 	using renderer.viewport;
@@ -174,7 +174,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene: *Scene, windo
 	}
 
 
-	for renderer.pipelines.pipelines pipeline_controller_update_render_pass(renderer, it, render_pass_encoder, scene);
+	for renderer.pipelines.pipelines pipeline_controller_update_render_pass(renderer, it, render_pass_encoder);
 	#if USE_IMGUI {
 		if render_ui {
 			gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
@@ -252,6 +252,6 @@ renderer_camera_uniform_buffer_create :: (renderer: *Renderer, scene:*Scene, uni
 	renderer.camera_data.buffer_container = .{buffer=buffer, buffer_size=size};
 }
 
-renderer_camera_uniform_buffer_update :: (renderer: *Renderer, scene:*Scene, uniforms: $UniformType){
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.camera_data.buffer_container.buffer, 0, *scene.orbit_controls.camera.camera_uniforms, size_of(UniformType));
+renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*Camera, uniforms: $UniformType){
+	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.camera_data.buffer_container.buffer, 0, *camera.camera_uniforms, size_of(UniformType));
 }

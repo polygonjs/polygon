@@ -16,6 +16,7 @@ Camera :: struct {
 
 	near: float32 = 0.1;
 	far: float32 = 100.0;
+	aspect: float32;
 	camera_matrices: CameraMatrices;
 	camera_uniforms: CameraUniforms;
 }
@@ -23,4 +24,24 @@ Camera :: struct {
 init_camera :: (object: *Object3D) {
 	camera := cast(*Camera)object;
 	init_transformable(camera);
+
+	tmp:Camera;
+	camera.near = tmp.near;
+	camera.far = tmp.far;
+	camera.aspect = tmp.aspect;
+
+	identity(*camera.camera_matrices.transformMatrix);
+	translate(*camera.camera_matrices.transformMatrix, .{x = 0.0, y = 0.0, z = 5.0});
+}
+
+camera_uniforms_update :: (camera: *Camera, time: Time) {
+	camera.camera_uniforms.time.x = time;
+	camera.camera_uniforms.worldPos.x = camera.camera_matrices.transformMatrix._14;
+	camera.camera_uniforms.worldPos.y = camera.camera_matrices.transformMatrix._24;
+	camera.camera_uniforms.worldPos.z = camera.camera_matrices.transformMatrix._34;
+
+	transformMatrixInverse := inverse(transpose(camera.camera_matrices.transformMatrix));
+	projectionMatrix := transpose(camera.camera_matrices.projectionMatrix);
+	matrix4x4_to_buffer(*transformMatrixInverse, *camera.camera_uniforms.transformMatrixInverse);
+	matrix4x4_to_buffer(*projectionMatrix, *camera.camera_uniforms.projectionMatrix);
 }

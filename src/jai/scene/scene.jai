@@ -22,8 +22,6 @@ Scene :: struct {
 	//
 	segments: Vector3Int = .{128, 128, 128};
 	noise:SceneDataNoise;
-	//
-	orbit_controls:OrbitControls;
 };
 
 

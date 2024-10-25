@@ -65,10 +65,10 @@ main :: () {
 
 	init_scene_world(*SCENE_WORLD, 1.);
 	CAMERA_WORLD = newObject3D(PerspectiveCamera);
-	SCENE_WORLD.orbit_controls.camera = xx CAMERA_WORLD;
+	CAMERA_CONTROLS_WORLD.camera = CAMERA_WORLD;
 	init_scene_nodes(*SCENE_NODES, 1.);
-	CAMERA_NODES = newObject3D(PerspectiveCamera);
-	SCENE_NODES.orbit_controls.camera = xx CAMERA_NODES;
+	CAMERA_NODES = newObject3D(OrthographicCamera);
+	CAMERA_CONTROLS_NODES.camera = CAMERA_NODES;
 
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
@@ -181,8 +181,8 @@ init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
 	renderer_init_ui();
-	renderer_init_pipelines_scene_data(*WORLD_RENDERER, *SCENE_WORLD);
-	renderer_init_pipelines_nodes(*NODES_RENDERER, *SCENE_NODES);
+	renderer_init_pipelines_scene_data(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD);
+	renderer_init_pipelines_nodes(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES);
 
 }
 
@@ -221,14 +221,14 @@ on_request_animation_frame :: (
 	}
 	SCENE_WORLD.time = new_time / 1000.0;
 	orbit_controls_process_event();
-	orbit_controls_update_camera(*SCENE_WORLD);
-	orbit_controls_update_camera(*SCENE_NODES);
 	update_scene_data_uniforms(*SCENE_WORLD);
+	camera_uniforms_update(CAMERA_WORLD, SCENE_WORLD.time);
+	camera_uniforms_update(CAMERA_NODES, SCENE_NODES.time);
 
 	window_size :Vector2UInt= .{xx width, xx height};
 	data := renderer_collection_start(*WGPU_CONTEXT);
-	render(*data, *WORLD_RENDERER, *SCENE_WORLD, window_size, render_ui=true, clear=true);
-	render(*data, *NODES_RENDERER, *SCENE_NODES, window_size, render_ui=false, clear=false);
+	render(*data, *WORLD_RENDERER, *SCENE_WORLD, CAMERA_WORLD, window_size, render_ui=true, clear=true);
+	render(*data, *NODES_RENDERER, *SCENE_NODES, CAMERA_NODES, window_size, render_ui=false, clear=false);
 	renderer_collection_end(*WGPU_CONTEXT, data);
 
 	renderer_destroy_buffers(*WORLD_RENDERER);
@@ -246,12 +246,12 @@ orbit_controls_process_event :: () {
 	#if USE_IMGUI {
 		io := ImGui.GetIO();
 		if(io.WantCaptureMouse == false){
-			orbit_controls_process_event(*SCENE_WORLD, *EVENTS_DATA);
-			orbit_controls_process_event(*SCENE_NODES, *EVENTS_DATA);
+			camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA);
+			camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA);
 		}
 	} else {
-		orbit_controls_process_event(*SCENE_WORLD, *EVENTS_DATA);
-		orbit_controls_process_event(*SCENE_NODES, *EVENTS_DATA);
+		camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA);
+		camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA);
 	}
 }
 
@@ -259,8 +259,10 @@ orbit_controls_process_event :: () {
 
 SCENE_WORLD:Scene;
 CAMERA_WORLD:*PerspectiveCamera;
+CAMERA_CONTROLS_WORLD:OrbitControls;
 SCENE_NODES:Scene;
-CAMERA_NODES:*PerspectiveCamera;
+CAMERA_NODES:*OrthographicCamera;
+CAMERA_CONTROLS_NODES:PanControls;
 WORLD_RENDERER: Renderer = .{
 	full_screen = false,
 	viewport = .{
