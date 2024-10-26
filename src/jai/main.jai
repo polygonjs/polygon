@@ -226,7 +226,7 @@ on_request_animation_frame :: (
 
 	mesh := SCENE_WORLD.children[0];
 	material := cast(*RaymarchingMeshMaterial)mesh.material;
-	uniforms := cast(*SDFUniforms)material.uniforms;
+	uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
 	uniforms.offset.y = sin(SCENE_WORLD.time);
 
 	window_size :Vector2UInt= .{xx width, xx height};

@@ -122,7 +122,4 @@ build_plane :: ( geometry: *Geometry, params: BuildPlaneParams ) {
 		}
 	}
 
-		
-
-	
 }

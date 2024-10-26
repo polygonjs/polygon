@@ -1,5 +1,6 @@
 #load "box.jai";
 #load "icosahedron.jai";
+#load "plane.jai";
 #load "polyhedron.jai";
 #load "sphere.jai";
 

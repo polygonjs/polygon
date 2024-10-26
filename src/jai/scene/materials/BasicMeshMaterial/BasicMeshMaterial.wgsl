@@ -12,9 +12,14 @@ struct VertexOutput {
 	@builtin(position) clip_position: vec4<f32>,
 	@location(0) normal: vec3<f32>,
 	@location(1) worldPos: vec3<f32>,
-	// @location(2) color: vec3<f32>,
 	@location(2) uv: vec2<f32>,
+	// @location(3) color: vec4<f32>,
 };
+
+struct MaterialUniforms {
+	color: vec4<f32>,
+};
+@group(3) @binding(0) var<uniform> material: MaterialUniforms;
 
 
 @vertex
@@ -37,6 +42,7 @@ fn vertex(model: VertexInput) -> VertexOutput {
 	out.normal = (object.transformMatrix * vec4<f32>(model.normal, 0.0)).xyz;
 	// out.color = model.color;
 	out.uv = model.uv;
+	// out.color = material.color;
 	return out;
 }
 
@@ -44,6 +50,6 @@ fn vertex(model: VertexInput) -> VertexOutput {
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 	// return vec4<f32>(in.uv.x, in.uv.y, 1.0, 1.0);
 	// return vec4<f32>(in.color, 1.0);
-	return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+	return material.color;
 	// return vec4<f32>(abs(in.worldPos - camera.worldPos.xyz), 1.0);
 }
