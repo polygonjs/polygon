@@ -38,18 +38,11 @@ newPipelineController :: ($T: Type, material: *Material) -> *T {
 	// pc.id = NEXT_PIPELINE_CONTROLLER_ID;
 	// NEXT_PIPELINE_CONTROLLER_ID+=1;
 
-	_init_array :: (array: *[..] $T) {
-		array.count = 0;
-		array.allocated = 0;
-		array.data = null;
-		tmp_array:[..]u8;
-		array.allocator = tmp_array.allocator;
-	}
-	_init_array(*pc.vertex_buffer_layouts);
-	_init_array(*pc.vertex_attributes);
-	_init_array(*pc.meshes);
-	_init_array(*pc.meshes_draw_data);
-	_init_array(*pc.buffers_to_destroy);
+	init_array(*pc.vertex_buffer_layouts);
+	init_array(*pc.vertex_attributes);
+	init_array(*pc.meshes);
+	init_array(*pc.meshes_draw_data);
+	init_array(*pc.buffers_to_destroy);
 
 	pc.material = material;
 	
@@ -119,6 +112,7 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 
 		array_add(*pc.meshes_draw_data, draw_data);
 	}
+	renderer_scene_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.SCENE);
 	renderer_camera_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.CAMERA);
 
 	return pc;
@@ -170,9 +164,9 @@ pipeline_controller_update_render_pass :: (renderer:*Renderer, pc: *PipelineCont
 	for draw_data: pc.meshes_draw_data {
 		{
 			using draw_data.uniforms;
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.OBJECT, object.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.SCENE, renderer.scene_data.bind_group, 0, null);
 			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.CAMERA, renderer.camera_data.bind_group, 0, null);
-			// renderer_camera_uniform_buffer_assign(pc.wgpu_context, pc.pipeline, 1);
+			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.OBJECT, object.bind_group, 0, null);
 			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.MATERIAL, material.bind_group, 0, null);
 		}
 		//

@@ -4,7 +4,6 @@ CameraMatrices :: struct {
 	projectionMatrix: Matrix4;
 };
 CameraUniforms :: struct {
-	time:Vector4;
 	worldPos: Vector4; // if I give a Vector3, there seems some padding or alignment issue, as this crashes
 	transformMatrixInverse: Matrix4x4Buffer;
 	projectionMatrix: Matrix4x4Buffer;
@@ -34,8 +33,7 @@ init_camera :: (object: *Object3D) {
 	translate(*camera.camera_matrices.transformMatrix, .{x = 0.0, y = 0.0, z = 5.0});
 }
 
-camera_uniforms_update :: (camera: *Camera, time: Time) {
-	camera.camera_uniforms.time.x = time;
+camera_uniforms_update :: (camera: *Camera) {
 	camera.camera_uniforms.worldPos.x = camera.camera_matrices.transformMatrix._14;
 	camera.camera_uniforms.worldPos.y = camera.camera_matrices.transformMatrix._24;
 	camera.camera_uniforms.worldPos.z = camera.camera_matrices.transformMatrix._34;

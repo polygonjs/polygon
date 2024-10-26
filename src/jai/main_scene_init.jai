@@ -56,6 +56,21 @@ init_scene_world :: (scene: *Scene, aspect:float32) {
 		array_add(*scene.children, mesh);
 		// array_add(*scene_data.meshes2, mesh1);
 	}
+	{
+		basicMat := newMaterial(BasicMeshMaterial);
+		mesh := newObject3D(Mesh);
+		
+		geometry_box_update(mesh.geometry, segments=.{1,1,1});
+		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
+		// mesh1 := mesh_create();
+		mesh.material = basicMat;
+		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
+		mesh.position = .{x = +2.0, y = -1.0, z = 0.0};
+		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
+		transformable_update_matrix(mesh);
+		array_add(*scene.children, mesh);
+		// array_add(*scene_data.meshes2, mesh1);
+	}
 }
 init_scene_nodes :: (scene: *Scene, aspect:float32) {
 

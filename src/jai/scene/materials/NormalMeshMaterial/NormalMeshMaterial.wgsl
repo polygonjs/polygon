@@ -1,3 +1,5 @@
+// include uniforms
+
 struct VertexInput {
 	@location(0) position: vec3<f32>,
 	@location(1) normal: vec3<f32>,
@@ -13,19 +15,6 @@ struct VertexOutput {
 	@location(2) uv: vec2<f32>,
 };
 
-struct ObjectUniforms {
-	transformMatrix: mat4x4f,
-};
-struct CameraUniforms {
-	time: vec4<f32>,
-	worldPos: vec4<f32>,
-	transformMatrixInverse: mat4x4f,
-	projectionMatrix: mat4x4f,
-};
-
-
-@group(0) @binding(0) var<uniform> object: ObjectUniforms;
-@group(1) @binding(0) var<uniform> camera: CameraUniforms;
 
 @vertex
 fn vertex(model: VertexInput) -> VertexOutput {

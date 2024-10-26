@@ -51,12 +51,6 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshD
 			bind_group,
 			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformable_uniforms, "object");
 		}
-		// {
-		// 	using camera;
-		// 	buffer,
-		// 	bind_group,
-		// 	bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, xx UniformBindingIndex.CAMERA, scene.orbit_controls.camera.uniforms, "camera");
-		// }
 		{
 			using material;
 			buffer,

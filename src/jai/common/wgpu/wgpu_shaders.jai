@@ -5,9 +5,10 @@ ShadersContainer :: struct {
 	compute_offset: string;
 }
 UniformBindingIndex :: enum u8 {
-	OBJECT :: 0;
+	SCENE :: 0;
 	CAMERA :: 1;
-	MATERIAL :: 2;
+	OBJECT :: 2;
+	MATERIAL :: 3;
 };
 
 wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureView {

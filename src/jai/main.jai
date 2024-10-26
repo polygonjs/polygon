@@ -219,9 +219,10 @@ on_request_animation_frame :: (
 	}
 	SCENE_WORLD.time = new_time / 1000.0;
 	orbit_controls_process_event();
-	update_scene_data_uniforms(*SCENE_WORLD);
-	camera_uniforms_update(CAMERA_WORLD, SCENE_WORLD.time);
-	camera_uniforms_update(CAMERA_NODES, SCENE_NODES.time);
+	scene_uniforms_update(*SCENE_WORLD);
+	scene_uniforms_update(*SCENE_NODES);
+	camera_uniforms_update(CAMERA_WORLD);
+	camera_uniforms_update(CAMERA_NODES);
 
 	mesh := SCENE_WORLD.children[0];
 	material := cast(*RaymarchingMeshMaterial)mesh.material;

@@ -1,7 +1,5 @@
 #load "color.jai";
 #load "geometry.jai";
-#load "math.jai";
-#load "scene.jai";
 
 #load "objects/index.jai";
 #load "geometry/index.jai";
