@@ -12,7 +12,6 @@ camera_projection_update :: (camera:*PerspectiveCamera) {
 		camera.near,
 		camera.far
 	);
-	// print("perspective projectionMatrix: %\n", camera.camera_matrices.projectionMatrix);
 }
 
 
@@ -25,6 +24,6 @@ init_perspective_camera :: (object: *Object3D) {
 	camera.fov_in_degrees = tmp.fov_in_degrees;
 
 	camera_projection_update(camera);
-	camera_uniforms_update(camera, 0.0);
+	camera_uniforms_update(camera, time=0.0);
 }
 

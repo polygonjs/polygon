@@ -13,6 +13,7 @@ PipelineDataUniform :: struct {
 
 PipelineController :: struct {
 	type: Type;
+	// id: u32;
 	wgpu_context: *WGPUContext;
 	shader_module: WGPUShaderModule;
 	vertex_buffer_layouts:[..]WGPUVertexBufferLayout;
@@ -30,19 +31,44 @@ PipelineController :: struct {
 	buffers_to_destroy: [..]BufferContainer;
 };
 
+newPipelineController :: ($T: Type, material: *Material) -> *T {
+	pc: *T = alloc(size_of(T));
+	pc.type = T;
 
-pipeline_controller_init :: (renderer:*Renderer, pc: *PipelineController, wgpu_context: *WGPUContext, scene:*Scene, meshes: *[..]*Mesh, label: string)-> PipelineController {
-	assert(meshes.count > 0, "meshes is empty");
+	// pc.id = NEXT_PIPELINE_CONTROLLER_ID;
+	// NEXT_PIPELINE_CONTROLLER_ID+=1;
+
+	_init_array :: (array: *[..] $T) {
+		array.count = 0;
+		array.allocated = 0;
+		array.data = null;
+		tmp_array:[..]u8;
+		array.allocator = tmp_array.allocator;
+	}
+	_init_array(*pc.vertex_buffer_layouts);
+	_init_array(*pc.vertex_attributes);
+	_init_array(*pc.meshes);
+	_init_array(*pc.meshes_draw_data);
+	_init_array(*pc.buffers_to_destroy);
+
+	pc.material = material;
+	
+	return pc;
+}
+
+pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_context: *WGPUContext, scene:*Scene, label: string)-> PipelineController {
+	assert(pc.meshes.count > 0, "meshes is empty");
+	assert(pc.material != null, "pc.material is null");
 
 	pc.wgpu_context = wgpu_context;
-	array_resize(*pc.meshes, meshes.count, false);
-	for mesh, i: <<meshes {
-		assert(mesh.material != null, "mesh.material is null");
-		pc.meshes[i] = mesh;
-	}
-	first_mesh := (<<meshes)[0];
-	pc.material = first_mesh.material;
-	pc.shader_module = material_create_module(wgpu_context, first_mesh.material);
+	// array_resize(*pc.meshes, meshes.count, false);
+	// for mesh, i: <<meshes {
+	// 	assert(mesh.material != null, "mesh.material is null");
+	// 	pc.meshes[i] = mesh;
+	// }
+	first_mesh := (pc.meshes)[0];
+	// pc.material = first_mesh.material;
+	pc.shader_module = material_create_module(wgpu_context, pc.material);
 	geometry_attributes_to_vertex_buffer_layouts(pc, *first_mesh.geometry.attributes);
 	defer array_reset(*pc.vertex_buffer_layouts);
 	defer array_reset(*pc.vertex_attributes);
@@ -168,27 +194,11 @@ pipeline_controller_destroy_scheduled_buffers :: (pc: *PipelineController) {
 	array_reset(*pc.buffers_to_destroy);
 }
 
-newPipelineController :: ($T: Type) -> *T {
-	pc: *T = alloc(size_of(T));
-	pc.type = T;
 
-	_init_array :: (array: *[..] $T) {
-		array.count = 0;
-		array.allocated = 0;
-		array.data = null;
-		tmp_array:[..]u8;
-		array.allocator = tmp_array.allocator;
-	}
-	_init_array(*pc.vertex_buffer_layouts);
-	_init_array(*pc.vertex_attributes);
-	_init_array(*pc.meshes);
-	_init_array(*pc.meshes_draw_data);
-	_init_array(*pc.buffers_to_destroy);
-	
-	return pc;
-}
 
 #scope_file
+
+// NEXT_PIPELINE_CONTROLLER_ID :u32= 0;
 
 pipeline_controller_create_fragment_state_init :: (fragment_state: *WGPUFragmentState, color_target_state: *WGPUColorTargetState, shader: WGPUShaderModule, preferred_texture_format:WGPUTextureFormat ){
 

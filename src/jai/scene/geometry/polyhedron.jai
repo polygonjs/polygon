@@ -156,7 +156,7 @@ generate_indices :: (geometry: *Geometry) {
 	}
 }
 
-normalized_vector3_hash :: (position: Vector3)->u32 {
+normalized_vector3_hash :: (position: Vector3) -> u32 {
 	normalized := normalize(position);
 	x := cast(u32) (normalized.x * 1023.0); // 10 bits
 	y := cast(u32) (normalized.y * 1023.0);

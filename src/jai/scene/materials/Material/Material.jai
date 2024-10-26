@@ -22,6 +22,7 @@ newMaterial :: ($T: Type) -> *T {
 	material.type = T;
 
 	material.id = NEXT_MATERIAL_ID;
+	print("new material id: % (%)\n", material.id, T);
 	NEXT_MATERIAL_ID+=1;
 
 	tmp :T;

@@ -179,8 +179,8 @@ init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
 	renderer_init_ui();
-	renderer_init_pipelines_scene_data(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD);
-	renderer_init_pipelines_nodes(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES);
+	renderer_init_pipelines(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD);
+	renderer_init_pipelines(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES);
 
 }
 
@@ -223,7 +223,7 @@ on_request_animation_frame :: (
 	camera_uniforms_update(CAMERA_WORLD, SCENE_WORLD.time);
 	camera_uniforms_update(CAMERA_NODES, SCENE_NODES.time);
 
-	mesh := SCENE_WORLD.meshes2[0];
+	mesh := SCENE_WORLD.children[0];
 	material := cast(*RaymarchingMeshMaterial)mesh.material;
 	uniforms := cast(*SDFUniforms)material.uniforms;
 	uniforms.offset.y = sin(SCENE_WORLD.time);
@@ -292,6 +292,7 @@ else #import "Basic";
 #if WASM == true  #import "wgpu_wasm";
 else              #import "wgpu";
 
+#load "main_scene_init.jai";
 #load "scene/index.jai";
 #load "common/events/index.jai";
 #load "common/wgpu/index.jai";

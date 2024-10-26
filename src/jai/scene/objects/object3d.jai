@@ -7,6 +7,7 @@ Object3DInitMethod :: #type (object3d: *Object3D);
 
 Object3D :: struct {
 	type: Type;
+	id: u64;
 	//
 	position: Vector3;
 	quaternion: Quaternion;
@@ -22,6 +23,9 @@ Object3D :: struct {
 newObject3D :: ($T: Type) -> *T {
 	object: *T = alloc(size_of(T));
 	object.type = T;
+
+	object.id = NEXT_OBJECT3D_ID;
+	NEXT_OBJECT3D_ID+=1;
 
 	init_transformable(object);
 
@@ -62,3 +66,7 @@ transformable_uniforms_update :: (object: *Object3D) {
 	transposedMatrix := transpose(object.matrix);
 	matrix4x4_to_buffer(*transposedMatrix, *object.transformable_uniforms.transformMatrix);
 }
+
+#scope_file
+
+NEXT_OBJECT3D_ID :u64= 0;

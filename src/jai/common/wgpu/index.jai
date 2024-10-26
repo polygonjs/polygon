@@ -10,7 +10,6 @@
 
 #load "draw_data.jai";
 #load "pipeline_controller.jai";
-#load "pipeline_controller_collection.jai";
 #load "renderer.jai";
 #load "renderer_collection.jai";
 

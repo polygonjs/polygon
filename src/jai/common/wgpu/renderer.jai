@@ -10,7 +10,8 @@ Renderer :: struct {
 		size: Vector2;
 	}
 	viewport:ViewportRect;
-	pipelines: PipelineControllerCollection;
+	// pipelines: PipelineControllerCollection;
+	pipelines_by_mat_type: Table(u64, *PipelineController);
 	#if USE_COMPUTE_SHADER {
 		computes: ComputeControllerCollection;
 	}
@@ -63,7 +64,7 @@ renderer_init_ui :: (){
 	}
 }
 
-renderer_init_pipelines_scene_data :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
+renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -72,40 +73,49 @@ renderer_init_pipelines_scene_data :: (renderer:*Renderer, scene:*Scene, camera:
 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
+	init(*renderer.pipelines_by_mat_type, 1);
 	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
 	
-	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
-	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
-	// pipeline_controller_init(*pipeline_controller1, *WGPU_CONTEXT, *SCENE_DATA.meshes1, "render meshes 1");
-	pipeline_controller_init(renderer, pipeline_controller, *WGPU_CONTEXT, scene, *scene.meshes2, "render meshes 2");
-	
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
-	array_add(*renderer.pipelines.pipelines, pipeline_controller);
+	for mesh: scene.children {
+		mat_id := mesh.material.id;
+		if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
+			pc :*PipelineController= newPipelineController(PipelineController, mesh.material);
+			array_add(*pc.meshes, mesh);
+			table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
+		} else {
+			pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
+			assert(found, "pipeline controller not found");
+			array_add(*pc.meshes, mesh);
+		}
+	}
+	for renderer.pipelines_by_mat_type {
+		pipeline_controller_init(it, renderer, *WGPU_CONTEXT, scene, "render meshes 2");
+	}
+
 
 	#if USE_COMPUTE_SHADER {
 		renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
-		pipeline_controller_update(pipeline_controller, *renderer.computes);
+		pipeline_controller_update(pc, *renderer.computes);
 	}
 }
-renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
-	// #if WASM==true context = call_from_wasm_context;
-	// device := WGPU_CONTEXT.device;
-	// #if WASM==true {
-	// 	queue := WGPU_CONTEXT.queue;
-	// } else {
-	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
-	// 	assert(queue != null, "Queue is not created correctly");
-	// }
-	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
-	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
-	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
-	// pipeline_controller_init(*pipeline_controller1, *WGPU_CONTEXT, *SCENE_DATA.meshes1, "render meshes 1");
-	pipeline_controller_init(renderer, pipeline_controller, *WGPU_CONTEXT, scene, *scene.meshes0, "render meshes 0");
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
-	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
-	array_add(*renderer.pipelines.pipelines, pipeline_controller);
-}
+// renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
+// 	// #if WASM==true context = call_from_wasm_context;
+// 	// device := WGPU_CONTEXT.device;
+// 	// #if WASM==true {
+// 	// 	queue := WGPU_CONTEXT.queue;
+// 	// } else {
+// 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
+// 	// 	assert(queue != null, "Queue is not created correctly");
+// 	// }
+// 	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
+// 	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
+// 	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
+// 	// pipeline_controller_init(*pipeline_controller1, *WGPU_CONTEXT, *SCENE_DATA.meshes1, "render meshes 1");
+// 	pipeline_controller_init(pipeline_controller, renderer, *WGPU_CONTEXT, scene, *scene.children, "render meshes 0");
+// 	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
+// 	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
+// 	array_add(*renderer.pipelines.pipelines, pipeline_controller);
+// }
 
 
 render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera, window_size:Vector2UInt, render_ui:bool, clear:bool){
@@ -140,7 +150,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	}
 
 	renderer_camera_uniform_buffer_update(renderer, camera, camera.camera_uniforms);
-	for renderer.pipelines.pipelines pipeline_controller_update_uniform_buffers(it);
+	for renderer.pipelines_by_mat_type pipeline_controller_update_uniform_buffers(it);
 	
 	// if(renderer.full_screen == false) {
 	// 	using renderer.viewport;
@@ -174,7 +184,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	}
 
 
-	for renderer.pipelines.pipelines pipeline_controller_update_render_pass(renderer, it, render_pass_encoder);
+	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(renderer, it, render_pass_encoder);
 	#if USE_IMGUI {
 		if render_ui {
 			gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
@@ -192,7 +202,9 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 }
 
 renderer_destroy_buffers :: (renderer:*Renderer){
-	for renderer.pipelines.pipelines pipeline_controller_destroy_scheduled_buffers(it);
+	for renderer.pipelines_by_mat_type {
+		pipeline_controller_destroy_scheduled_buffers(it);
+	}
 }
 
 renderer_camera_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, bind_group_layout_index: u32) {
@@ -217,6 +229,10 @@ renderer_camera_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURen
 }
 
 #scope_file
+
+// material_hash :: (pc: *PipelineController) -> u32 {
+// 	return pc.id;
+// }
 
 // renderer_set_viewport :: (encoder: WGPURenderPassEncoder, x: float, y: float, width: float, height: float, min_depth: float = 0.0, max_depth: float = 1.0) {
 // 	wgpuRenderPassEncoderSetViewport(encoder, x, y, width, height, min_depth, max_depth);

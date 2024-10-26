@@ -29,5 +29,5 @@ init_orthographic_camera :: (object: *Object3D) {
 	camera.size = tmp.size;
 
 	camera_projection_update(camera);
-	camera_uniforms_update(camera, 0.0);
+	camera_uniforms_update(camera, time=0.0);
 }

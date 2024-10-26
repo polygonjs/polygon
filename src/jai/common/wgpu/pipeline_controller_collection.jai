@@ -1,3 +1,0 @@
-PipelineControllerCollection :: struct {
-	pipelines: [..]*PipelineController;
-}
