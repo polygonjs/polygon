@@ -27,8 +27,8 @@ geometry_icosahedron_update :: (geometry: *Geometry, detail: u8) {
 	geometry_attributes_validate(geometry);
 	normals_compute(geometry);
 }
-geometry_plane_update :: (geometry: *Geometry, segments: Vector2UInt) {
-	geometry_plane_attributes_set(geometry, .{segments = segments});
+geometry_plane_update :: (geometry: *Geometry, size: Vector2=.{1,1}, segments: Vector2UInt=.{1,1}) {
+	geometry_plane_attributes_set(geometry, .{size = size, segments = segments});
 	geometry_attributes_validate(geometry);
 	normals_compute(geometry);
 }

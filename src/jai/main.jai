@@ -224,10 +224,14 @@ on_request_animation_frame :: (
 	camera_uniforms_update(CAMERA_WORLD);
 	camera_uniforms_update(CAMERA_NODES);
 
-	mesh := SCENE_WORLD.children[0];
-	material := cast(*RaymarchingMeshMaterial)mesh.material;
-	uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
-	uniforms.offset.y = sin(SCENE_WORLD.time);
+	for SCENE_WORLD.children {
+		mesh := SCENE_WORLD.children[0];
+		if mesh.material.type == RaymarchingMeshMaterial {
+			material := cast(*RaymarchingMeshMaterial)mesh.material;
+			uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
+			uniforms.offset.y = sin(SCENE_WORLD.time);
+		}
+	}
 
 	window_size :Vector2UInt= .{xx width, xx height};
 	data := renderer_collection_start(*WGPU_CONTEXT);
