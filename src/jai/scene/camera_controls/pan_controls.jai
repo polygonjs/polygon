@@ -16,16 +16,20 @@ camera_controls_process_event :: (controls:*PanControls, events_data:*EventsData
 	using controls;
 
 	if (events_data.mouseButton.middle) {
+		cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
 		if(middleButtonPressed == false){
 			startCameraPos.x = controls.camera.position.x;
 			startCameraPos.y = controls.camera.position.y;
-			startPointer.x = cast(s32)events_data.cursor.x;
-			startPointer.y = cast(s32)events_data.cursor.y;
+			startPointer.x = cursor.x;
+			startPointer.y = cursor.y;
+			delta = .{0,0};
 		} else {
-			delta.x = cast(s32)events_data.cursor.x - startPointer.x;
-			delta.y = cast(s32)events_data.cursor.y - startPointer.y;
+			delta.x = cursor.x - startPointer.x;
+			delta.y = cursor.y - startPointer.y;
 		}
 		middleButtonPressed = true;
+	} else {
+		middleButtonPressed = false;
 	}
 
 	if(events_data.wheel != 0){
@@ -57,8 +61,8 @@ camera_controls_update_camera :: (controls:*PanControls){
 		y=startCameraPos.y + xx delta.y * sensitivity,
 		z=DEPTH
 	};
+	camera.position = newCameraPos;
 	translate(*transformMatrix, newCameraPos);
-	assert(camera != null, "camera is null\n");
 	camera.camera_matrices.transformMatrix = transformMatrix;
 
 	
