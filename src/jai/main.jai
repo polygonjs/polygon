@@ -61,10 +61,10 @@ main :: () {
 	memcpy(SCENE_WORLD.node_name.data, test_string.data, test_string.count);
 
 
-	init_scene_world(*SCENE_WORLD, 1.);
+	scene_init_world(*SCENE_WORLD, 1.);
 	CAMERA_WORLD = newObject3D(PerspectiveCamera);
 	CAMERA_CONTROLS_WORLD.camera = CAMERA_WORLD;
-	init_scene_nodes(*SCENE_NODES, 1.);
+	scene_init_nodes(*SCENE_NODES, 1.);
 	CAMERA_NODES = newObject3D(OrthographicCamera);
 	CAMERA_CONTROLS_NODES.camera = CAMERA_NODES;
 
@@ -224,14 +224,7 @@ on_request_animation_frame :: (
 	camera_uniforms_update(CAMERA_WORLD);
 	camera_uniforms_update(CAMERA_NODES);
 
-	for SCENE_WORLD.children {
-		mesh := SCENE_WORLD.children[0];
-		if mesh.material.type == RaymarchingMeshMaterial {
-			material := cast(*RaymarchingMeshMaterial)mesh.material;
-			uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
-			uniforms.offset.y = sin(SCENE_WORLD.time);
-		}
-	}
+	scene_on_tick_world(*SCENE_WORLD);
 
 	window_size :Vector2UInt= .{xx width, xx height};
 	data := renderer_collection_start(*WGPU_CONTEXT);

@@ -1,5 +1,5 @@
 
-init_scene_world :: (scene: *Scene, aspect:float32) {
+scene_init_world :: (scene: *Scene, aspect:float32) {
 
 	{
 		mat := newMaterial(BackgroundMeshMaterial);
@@ -73,7 +73,9 @@ init_scene_world :: (scene: *Scene, aspect:float32) {
 		// array_add(*scene_data.meshes2, mesh1);
 	}
 }
-init_scene_nodes :: (scene: *Scene, aspect:float32) {
+
+
+scene_init_nodes :: (scene: *Scene, aspect:float32) {
 
 	{
 		mat := newMaterial(BackgroundMeshMaterial);
@@ -102,4 +104,15 @@ init_scene_nodes :: (scene: *Scene, aspect:float32) {
 		array_add(*scene.children, mesh1);
 	}
 	
+}
+
+
+scene_on_tick_world :: (scene: *Scene) {
+	for mesh: scene.children {
+		if mesh.material.type == RaymarchingMeshMaterial {
+			material := cast(*RaymarchingMeshMaterial)mesh.material;
+			uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
+			uniforms.offset.y = sin(scene.time);
+		}
+	}
 }
