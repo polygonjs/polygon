@@ -123,7 +123,7 @@ box_create_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext,
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene_data);
+	controller.update_buffer(controller, scene);
 }
 box_create_set_buffers :: (controller: *CONTROLLER_TYPE, buffer_container: *BufferContainer) {
 	bind_group_vertex_entries :[1]WGPUBindGroupEntry;
@@ -148,12 +148,12 @@ box_create_set_buffers :: (controller: *CONTROLLER_TYPE, buffer_container: *Buff
 update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
 	{
 		// size_float: [3]float = .[scene_data.box_size.x, scene_data.box_size.y, scene_data.box_size.z];
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *scene_data.box_size, controller.params.size.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *scene.box_size, controller.params.size.buffer_size);
 	}
 
 	{
 		// segments_float: [3]float = .[xx scene_data.segments.x, xx scene_data.segments.y, xx scene_data.segments.z];
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.segments.buffer, 0, *scene_data.segments, controller.params.segments.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.segments.buffer, 0, *scene.segments, controller.params.segments.buffer_size);
 	}
 };
 

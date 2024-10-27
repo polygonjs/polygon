@@ -40,25 +40,25 @@ compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene:*Scen
 
 	{
 		controller := newComputeController(ComputeControllerNoise);
-		controller.init( controller, wgpu_context, scene_data );
+		controller.init( controller, wgpu_context, scene );
 		controller.set_buffers( controller, *position_in, *normal_in, *position_out );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerAttributeSet);
-		controller.init( controller, wgpu_context, scene_data );
+		controller.init( controller, wgpu_context, scene );
 		controller.set_buffers( controller, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerComputeNormals);
-		controller.init( controller, wgpu_context, scene_data );
+		controller.init( controller, wgpu_context, scene );
 		controller.set_buffers( controller, *position_out, *index_in, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerAttributeNormalize);
-		controller.init( controller, wgpu_context, scene_data );
+		controller.init( controller, wgpu_context, scene );
 		controller.set_buffers( controller, *normal_tmp, *normal_out );
 		array_add(*ccc.controllers, controller);
 	}
@@ -120,6 +120,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 	// }
 
 	{
+		assert(ccc.controllers.count >= 4, "controllers not initialized\n");
 		if (ccc.controllers[0].type != ComputeControllerNoise) return;
 		if (ccc.controllers[1].type != ComputeControllerAttributeSet) return;
 		if (ccc.controllers[2].type != ComputeControllerComputeNormals) return;
@@ -140,8 +141,10 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 		defer wgpuCommandEncoderRelease(command_encoder);
 
 		{
+			assert(pc.meshes_draw_data.count > 0, "pc.meshes_draw_data not initialized\n");
 			using controller_noise.attributes;
 			draw_data := *pc.meshes_draw_data[0];
+			assert(draw_data.vertex.count > 0, "draw data not initialized\n");
 			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, draw_data.vertex[0].buffer, 0, position_in.buffer, 0, position_in.buffer_size);
 			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, draw_data.vertex[1].buffer, 0, normal_in.buffer, 0, normal_in.buffer_size);
 			draw_data.vertex[0] = position_out;

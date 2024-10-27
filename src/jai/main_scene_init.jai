@@ -10,67 +10,59 @@ scene_init_world :: (scene: *Scene, aspect:float32) {
 		transformable_update_matrix(mesh0);
 		array_add(*scene.children, mesh0);
 	}
-	{
-		raymarchingMat := newMaterial(RaymarchingMeshMaterial);
-		mesh := newObject3D(Mesh);
+	// {
+	// 	raymarchingMat := newMaterial(RaymarchingMeshMaterial);
+	// 	mesh := newObject3D(Mesh);
 		
+	// 	geometry_icosahedron_update(mesh.geometry, 18);
+	// 	// geometry_add_noise(*mesh0.geometry, scene_data.freq);
+	// 	// mesh1 := mesh_create();
+	// 	mesh.material = raymarchingMat;
+	// 	// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
+	// 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
+	// 	// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
+	// 	transformable_update_matrix(mesh);
+	// 	array_add(*scene.children, mesh);
+	// 	// array_add(*scene_data.meshes2, mesh1);
+	// }
+	{
+		mat := newMaterial(NormalMeshMaterial);
+		mesh := newObject3D(Mesh);
+		mesh.use_compute = true;
 		geometry_icosahedron_update(mesh.geometry, 18);
-		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
-		// mesh1 := mesh_create();
-		mesh.material = raymarchingMat;
-		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
+		mesh.material = mat;
 		mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
-		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
 		transformable_update_matrix(mesh);
 		array_add(*scene.children, mesh);
-		// array_add(*scene_data.meshes2, mesh1);
 	}
 	{
 		normalMat := newMaterial(NormalMeshMaterial);
 		mesh := newObject3D(Mesh);
-		
 		geometry_box_update(mesh.geometry, segments=.{2,2,2});
-		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
-		// mesh1 := mesh_create();
 		mesh.material = normalMat;
-		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
 		mesh.position = .{x = 0.0, y = -2.0, z = 0.0};
-		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
 		transformable_update_matrix(mesh);
 		array_add(*scene.children, mesh);
-		// array_add(*scene_data.meshes2, mesh1);
 	}
 	{
 		basicMat := newMaterial(BasicMeshMaterial);
 		setColor(basicMat, .{1.0, 0.0, 0.0, 1.0});
 		mesh := newObject3D(Mesh);
-		
 		geometry_box_update(mesh.geometry, segments=.{1,1,1});
-		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
-		// mesh1 := mesh_create();
 		mesh.material = basicMat;
-		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
 		mesh.position = .{x = +2.0, y = -1.0, z = 0.0};
-		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
 		transformable_update_matrix(mesh);
 		array_add(*scene.children, mesh);
-		// array_add(*scene_data.meshes2, mesh1);
 	}
 	{
 		basicMat := newMaterial(BasicMeshMaterial);
 		setColor(basicMat, .{0.0, 0.0, 1.0, 1.0});
 		mesh := newObject3D(Mesh);
-		
 		geometry_box_update(mesh.geometry, segments=.{1,1,1});
-		// geometry_add_noise(*mesh0.geometry, scene_data.freq);
-		// mesh1 := mesh_create();
 		mesh.material = basicMat;
-		// mesh1.material = cast(*Material(Any)) *MATERIAL_BASIC;
 		mesh.position = .{x = -2.0, y = -1.0, z = 0.0};
-		// mesh1.position = .{x = -1.0, y = -1.0, z = 1.0};
 		transformable_update_matrix(mesh);
 		array_add(*scene.children, mesh);
-		// array_add(*scene_data.meshes2, mesh1);
 	}
 }
 

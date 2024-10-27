@@ -138,14 +138,14 @@ init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, 
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene_data);
+	controller.update_buffer(controller, scene);
 }
 
 update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
 	{
 		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
 		// print("size_float:%\n",scene_data.translate.x);
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *scene_data.translate, controller.params.translate.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *scene.translate, controller.params.translate.buffer_size);
 	}
 };
 

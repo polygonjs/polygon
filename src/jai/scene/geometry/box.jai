@@ -11,9 +11,9 @@ geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) 
 	count1 := plane_points_and_indices_count(params.segments.x, params.segments.z);
 	count2 := plane_points_and_indices_count(params.segments.y, params.segments.z);
 	points_count := (count0.points_count + count1.points_count + count2.points_count) * 2;
-	print("points_count:u64=%;\n", points_count);
+	// print("box points_count:u64=%;\n", points_count);
 	indices_count := (count0.indices_count + count1.indices_count + count2.indices_count) * 2;
-	print("index_count:u64=%;\n", indices_count);
+	// print("index_count:u64=%;\n", indices_count);
 
 	array_resize(*geometry.attributes.position.values, points_count, false);
 	array_resize(*geometry.attributes.normal.values, points_count, false);

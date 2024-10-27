@@ -22,8 +22,8 @@ geometry_polyhedron_attributes_set :: (geometry: *Geometry, params: PolyhedronGe
 	generate_uvs(geometry);
 
 	indices_count := geometry.indices.count;
-	print("points_count:u64=%;\n", points_count);
-	print("index_count:u64=%;\n", indices_count);
+	print("polyhedron points_count:u64=%;\n", points_count);
+	print("polyhedron index_count:u64=%;\n", indices_count);
 }
 
 #scope_file

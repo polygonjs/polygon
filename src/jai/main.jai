@@ -1,7 +1,7 @@
 COLOR_SPACE_LINEAR :: true; // needs to manually match same variable in WebGPURequest.ts
 USE_IMGUI :: true;
 USE_IMGUI_DEBUG :: false;
-USE_COMPUTE_SHADER :: false;
+USE_COMPUTE_SHADER :: true;
 MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
@@ -179,8 +179,8 @@ init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
 	renderer_init_ui();
-	renderer_init_pipelines(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD);
-	renderer_init_pipelines(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES);
+	renderer_init_pipelines(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD, use_compute=true);
+	renderer_init_pipelines(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES, use_compute=false);
 
 }
 

@@ -85,7 +85,7 @@ attribute_set_init :: (_controller: *ComputeController, wgpu_context: *WGPUConte
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene_data);
+	controller.update_buffer(controller, scene);
 }
 
 attribute_set_set_buffer :: (controller: *CONTROLLER_TYPE, attribute_out: *BufferContainer) {

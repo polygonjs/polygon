@@ -4,6 +4,7 @@ Mesh :: struct {
 
 	geometry: *Geometry;
 	material: *Material;
+	use_compute: bool=false;
 };
 
 init_mesh :: (object: *Object3D) {

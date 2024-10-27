@@ -65,7 +65,7 @@ renderer_init_ui :: (){
 	}
 }
 
-renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
+renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera, use_compute:bool){
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -84,21 +84,29 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 			pc :*PipelineController= newPipelineController(PipelineController, mesh.material);
 			array_add(*pc.meshes, mesh);
 			table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
+
+			
 		} else {
 			pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
 			assert(found, "pipeline controller not found");
 			array_add(*pc.meshes, mesh);
 		}
 	}
-	for renderer.pipelines_by_mat_type {
-		pipeline_controller_init(it, renderer, *WGPU_CONTEXT, scene, "render meshes 2");
+	for pc: renderer.pipelines_by_mat_type {
+		pipeline_controller_init(pc, renderer, *WGPU_CONTEXT, scene, "render meshes 2");
+
+		compute_initialized := false;
+		for mesh: pc.meshes {
+			if compute_initialized==false && use_compute && mesh.use_compute {
+				compute_initialized=true;
+				renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
+				pipeline_controller_update(pc, *renderer.computes);
+			}
+		}
 	}
 
 
-	#if USE_COMPUTE_SHADER {
-		renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
-		pipeline_controller_update(pc, *renderer.computes);
-	}
+	
 }
 // renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 // 	// #if WASM==true context = call_from_wasm_context;

@@ -127,7 +127,7 @@ noise_init :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scen
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene_data);
+	controller.update_buffer(controller, scene);
 }
 
 noise_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, normal_in: *BufferContainer, position_out: *BufferContainer) {

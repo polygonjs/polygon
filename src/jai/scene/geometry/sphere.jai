@@ -14,8 +14,8 @@ geometry_sphere_attributes_set :: (geometry: *Geometry, params: SphereGeometryPa
 	// Calculate the number of vertices and indices
 	points_count := (params.widthSegments + 1) * (params.heightSegments + 1);
 	indices_count := params.widthSegments * params.heightSegments * 6;
-	print("points_count:u64=%;\n", points_count);
-	print("index_count:u64=%;\n", indices_count);
+	// print("points_count:u64=%;\n", points_count);
+	// print("index_count:u64=%;\n", indices_count);
 
 	// Resize geometry arrays
 	array_resize(*geometry.attributes.position.values, points_count, false);

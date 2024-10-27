@@ -86,7 +86,7 @@ attribute_normalize_init :: (_controller: *ComputeController, wgpu_context: *WGP
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene_data);
+	controller.update_buffer(controller, scene);
 }
 
 attribute_normalize_set_buffer :: (controller: *CONTROLLER_TYPE, attribute_in: *BufferContainer, attribute_out: *BufferContainer) {

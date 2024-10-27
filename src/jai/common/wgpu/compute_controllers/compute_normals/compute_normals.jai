@@ -87,7 +87,7 @@ compute_normals_init :: (_controller: *ComputeController, wgpu_context: *WGPUCon
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene_data);
+	controller.update_buffer(controller, scene);
 }
 
 compute_normals_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, index_in: *BufferContainer, normal_out: *BufferContainer) {
