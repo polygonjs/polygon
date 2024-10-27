@@ -8,25 +8,37 @@ OrbitControls :: struct {
 	sensitivity:float = 0.0025;
 	camera:*Camera=null;
 
+	actionStarted: bool = false;
+	leftButtonPressed: bool = false;
 	lastPointer: Vector2Int;
 }
 
 
 
 
-camera_controls_process_event :: (controls:*OrbitControls, events_data:*EventsData){
+camera_controls_process_event :: (controls:*OrbitControls, events_data:*EventsData, element_focused:bool){
 	using controls;
 
-	if (events_data.mouseButton.left) {
+	if(actionStarted == false && element_focused==true){
+		if (events_data.mouseButtonPressed.left) {
+			actionStarted = true;
+			lastPointer.x = cast(s32)events_data.cursor.x;
+		lastPointer.y = cast(s32)events_data.cursor.y;
+		}
+	}
+	if(actionStarted==true){
 		dx:int = cast(int)events_data.cursor.x - lastPointer.x;
 		dy:int = cast(int)events_data.cursor.y - lastPointer.y;
 
 		theta += dx * sensitivity;
 		phi -= dy * sensitivity;
 
+		if (events_data.mouseButton.left==false) {
+			actionStarted = false;
+		}
+		lastPointer.x = cast(s32)events_data.cursor.x;
+		lastPointer.y = cast(s32)events_data.cursor.y;
 	}
-	lastPointer.x = xx events_data.cursor.x;
-	lastPointer.y = xx events_data.cursor.y;
 
 	if(events_data.wheel != 0){
 		radius -= events_data.wheel * 0.1;
@@ -36,21 +48,8 @@ camera_controls_process_event :: (controls:*OrbitControls, events_data:*EventsDa
 	camera_controls_update_camera(controls);
 }
 
-
-
-
-#scope_file
-
-
-PHI_MIN :: -PI/2;
-PHI_MAX :: +PI/2;
-AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
-AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
-// UP		::Vector3.{x=0.0, y=1.0, z=0.0};
-
-camera_controls_update_camera :: (controls:*OrbitControls){
+camera_controls_apply :: (controls:*OrbitControls){
 	using controls;
-	
 
 	// Clamp phi to avoid flipping at the poles
 	if (phi < PHI_MIN) phi = PHI_MIN;
@@ -71,4 +70,20 @@ camera_controls_update_camera :: (controls:*OrbitControls){
 
 	assert(camera != null, "camera is null\n");
 	camera.camera_matrices.transformMatrix = transformMatrix;
+}
+
+
+#scope_file
+
+
+PHI_MIN :: -PI/2;
+PHI_MAX :: +PI/2;
+AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
+AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
+// UP		::Vector3.{x=0.0, y=1.0, z=0.0};
+
+camera_controls_update_camera :: (controls:*OrbitControls){
+	if(controls.actionStarted == false)return;
+
+	camera_controls_apply(controls);
 }

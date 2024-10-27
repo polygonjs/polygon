@@ -64,6 +64,7 @@ main :: () {
 	scene_init_world(*SCENE_WORLD, 1.);
 	CAMERA_WORLD = newObject3D(PerspectiveCamera);
 	CAMERA_CONTROLS_WORLD.camera = CAMERA_WORLD;
+	camera_controls_apply(*CAMERA_CONTROLS_WORLD);
 	scene_init_nodes(*SCENE_NODES, 1.);
 	CAMERA_NODES = newObject3D(OrthographicCamera);
 	CAMERA_CONTROLS_NODES.camera = CAMERA_NODES;
@@ -121,7 +122,7 @@ main :: () {
 			
 			while SDL_PollEvent(*sdl_event) {
 				events_data_update(*EVENTS_DATA, *sdl_event);
-				orbit_controls_process_event();
+				camera_controls_process_event();
 
 				if sdl_event.type == {
 					case SDL_QUIT; {do_exit = true;}
@@ -150,7 +151,6 @@ main :: () {
 					}
 				}
 			}
-			orbit_controls_process_event();
 
 			// do_exit = true;
 			on_request_animation_frame(xx to_microseconds(time), current_window_size.x, current_window_size.y);
@@ -218,7 +218,9 @@ on_request_animation_frame :: (
 		camera_projection_update(CAMERA_NODES);
 	}
 	SCENE_WORLD.time = new_time / 1000.0;
-	orbit_controls_process_event();
+	#if WASM {
+		camera_controls_process_event();
+	}
 	scene_uniforms_update(*SCENE_WORLD);
 	scene_uniforms_update(*SCENE_NODES);
 	camera_uniforms_update(CAMERA_WORLD);
@@ -243,16 +245,18 @@ on_request_animation_frame :: (
 // scope_file does not yet prevent unwanted functions to be in the wasm export
 #scope_file
 
-orbit_controls_process_event :: () {
+camera_controls_process_event :: () {
+	_process_event :: () {
+		camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA, element_focused(*WORLD_RENDERER, *EVENTS_DATA));
+		camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA, element_focused(*NODES_RENDERER, *EVENTS_DATA));
+	}
 	#if USE_IMGUI {
 		io := ImGui.GetIO();
 		if(io.WantCaptureMouse == false){
-			camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA);
-			camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA);
+			_process_event();
 		}
 	} else {
-		camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA);
-		camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA);
+		_process_event();
 	}
 }
 

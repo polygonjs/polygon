@@ -26,6 +26,7 @@ EventsData :: struct {
 	windowSize :EventsDataWindowSize;
 	cursor :EventsDataCursor;
 	mouseButton :EventsDataMouseButtons;
+	mouseButtonPressed :EventsDataMouseButtons;
 	wheel :float;
 	text: [TEXTINPUTEVENT_TEXT_SIZE] s8;
 	modifiers: EventsDataModifiers;
@@ -33,8 +34,13 @@ EventsData :: struct {
 };
 
 events_data_reset :: (events_data :*EventsData){
-	events_data.wheel = 0;
-	events_data.modifiers = .{};
+	using events_data;
+	wheel = 0;
+	modifiers = .{};
+	mouseButtonPressed.left = false;
+	mouseButtonPressed.middle = false;
+	mouseButtonPressed.right = false;
+
 	// events_data.modifiers.alt = false;
 	// events_data.modifiers.ctrl = false;
 	// events_data.modifiers.shift = false;

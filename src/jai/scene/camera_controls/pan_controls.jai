@@ -4,6 +4,7 @@ PanControls :: struct {
 	sensitivity:float = 0.025;
 	camera:*Camera=null;
 
+	actionStarted: bool = false;
 	middleButtonPressed: bool = false;
 	startCameraPos: Vector2;
 	startPointer: Vector2Int;
@@ -12,24 +13,27 @@ PanControls :: struct {
 
 
 
-camera_controls_process_event :: (controls:*PanControls, events_data:*EventsData){
+camera_controls_process_event :: (controls:*PanControls, events_data:*EventsData, element_focused:bool){
 	using controls;
 
-	if (events_data.mouseButton.middle) {
-		cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
-		if(middleButtonPressed == false){
+	if(actionStarted == false && element_focused==true){
+		if (events_data.mouseButtonPressed.middle) {
+			cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
+			actionStarted = true;
 			startCameraPos.x = controls.camera.position.x;
 			startCameraPos.y = controls.camera.position.y;
 			startPointer.x = cursor.x;
 			startPointer.y = cursor.y;
 			delta = .{0,0};
-		} else {
-			delta.x = cursor.x - startPointer.x;
-			delta.y = cursor.y - startPointer.y;
 		}
-		middleButtonPressed = true;
-	} else {
-		middleButtonPressed = false;
+	}
+	if(actionStarted==true){
+		cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
+		delta.x = cursor.x - startPointer.x;
+		delta.y = cursor.y - startPointer.y;
+		if (events_data.mouseButton.middle==false) {
+			actionStarted = false;
+		}
 	}
 
 	if(events_data.wheel != 0){
@@ -52,6 +56,8 @@ DEPTH:float:5;
 
 camera_controls_update_camera :: (controls:*PanControls){
 	using controls;
+
+	if(actionStarted == false)return;
 
 	// translate
 	transformMatrix :Matrix4;

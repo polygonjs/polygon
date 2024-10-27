@@ -86,14 +86,15 @@ const KEY_INDEX_BY_KEY_NAME: Record<Key, number> = {
 for (let i = 0; i < KEYS_COUNT; i++) {
 	KEY_INDEX_BY_KEY_NAME[KEYS[i]] = i;
 }
-
+interface MouseButtons {
+	left: boolean;
+	middle: boolean;
+	right: boolean;
+}
 interface EventsData {
 	cursor: { x: number; y: number };
-	mouseButton: {
-		left: boolean;
-		middle: boolean;
-		right: boolean;
-	};
+	mouseButton: MouseButtons;
+	mouseButtonPressed: MouseButtons;
 	wheel: number;
 	textCharCodes: number[];
 	modifiers: {
@@ -107,6 +108,11 @@ interface EventsData {
 export const EVENTS_DATA: EventsData = {
 	cursor: { x: 0, y: 0 },
 	mouseButton: {
+		left: false,
+		middle: false,
+		right: false,
+	},
+	mouseButtonPressed: {
 		left: false,
 		middle: false,
 		right: false,
@@ -130,12 +136,15 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		if (event.shiftKey) EVENTS_DATA.modifiers.shift = true;
 		if (event.button === 0) {
 			EVENTS_DATA.mouseButton.left = true;
+			EVENTS_DATA.mouseButtonPressed.left = true;
 		}
 		if (event.button === 1) {
 			EVENTS_DATA.mouseButton.middle = true;
+			EVENTS_DATA.mouseButtonPressed.middle = true;
 		}
 		if (event.button === 2) {
 			EVENTS_DATA.mouseButton.right = true;
+			EVENTS_DATA.mouseButtonPressed.right = true;
 		}
 	}
 	function onPointermove(event: PointerEvent) {
@@ -201,6 +210,9 @@ export function addEvents(canvas: HTMLCanvasElement) {
 export function eventsDataReset() {
 	EVENTS_DATA.wheel = 0;
 	EVENTS_DATA.textCharCodes.length = 0;
+	EVENTS_DATA.mouseButtonPressed.left = false;
+	EVENTS_DATA.mouseButtonPressed.middle = false;
+	EVENTS_DATA.mouseButtonPressed.right = false;
 	// EVENTS_DATA.modifiers.alt = false;
 	// EVENTS_DATA.modifiers.ctrl = false;
 	// EVENTS_DATA.modifiers.meta = false;
@@ -213,6 +225,9 @@ export function eventsDataUpdate(
 	windowHeightPointer: bigint,
 	mxPointer: bigint,
 	myPointer: bigint,
+	lmbPointer: bigint,
+	mmbPointer: bigint,
+	rmbPointer: bigint,
 	lmbPressedPointer: bigint,
 	mmbPressedPointer: bigint,
 	rmbPressedPointer: bigint,
@@ -234,9 +249,15 @@ export function eventsDataUpdate(
 	// mouse
 	setU32(Number(mxPointer), EVENTS_DATA.cursor.x);
 	setU32(Number(myPointer), EVENTS_DATA.cursor.y);
-	setBoolean(Number(lmbPressedPointer), EVENTS_DATA.mouseButton.left);
-	setBoolean(Number(mmbPressedPointer), EVENTS_DATA.mouseButton.middle);
-	setBoolean(Number(rmbPressedPointer), EVENTS_DATA.mouseButton.right);
+	setBoolean(Number(lmbPointer), EVENTS_DATA.mouseButton.left);
+	setBoolean(Number(mmbPointer), EVENTS_DATA.mouseButton.middle);
+	setBoolean(Number(rmbPointer), EVENTS_DATA.mouseButton.right);
+	setBoolean(Number(lmbPressedPointer), EVENTS_DATA.mouseButtonPressed.left);
+	setBoolean(
+		Number(mmbPressedPointer),
+		EVENTS_DATA.mouseButtonPressed.middle
+	);
+	setBoolean(Number(rmbPressedPointer), EVENTS_DATA.mouseButtonPressed.right);
 	// wheel
 	const wheel = EVENTS_DATA.wheel == 0 ? 0 : EVENTS_DATA.wheel > 0 ? -1 : 1;
 	setFLOAT32(Number(wheelPointer), wheel);
