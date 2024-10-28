@@ -4,7 +4,6 @@ USE_IMGUI_DEBUG :: false;
 MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
-RENDER_IN_VIEWPORT :: true;
 RENDER_SCENE :: true;
 RUN_TESTS :: false;
 VSYNC :: false;
