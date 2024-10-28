@@ -13,11 +13,9 @@
 #load "renderer.jai";
 #load "renderer_collection.jai";
 
-#if USE_COMPUTE_SHADER {
-	#load "compute_controller.jai";
-	#load "compute_controller_collection.jai";
-	#load "compute_controllers/index.jai";
-}
+#load "compute_controller.jai";
+#load "compute_controller_collection.jai";
+#load "compute_controllers/index.jai";
 
 #if WASM #load "targets/wasm.jai";
 else     #load "targets/native.jai";

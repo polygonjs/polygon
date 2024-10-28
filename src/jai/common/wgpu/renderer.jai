@@ -10,11 +10,8 @@ Renderer :: struct {
 		size: Vector2;
 	}
 	viewport:ViewportRect;
-	// pipelines: PipelineControllerCollection;
 	pipelines_by_mat_type: Table(u64, *PipelineController);
-	#if USE_COMPUTE_SHADER {
-		computes: ComputeControllerCollection;
-	}
+	computes: ComputeControllerCollection;
 	bg_color :Color =.{0.1, 0.3, 0.72, 1.0};
 	scene_data: RendererBufferData;
 	camera_data: RendererBufferData;
@@ -155,9 +152,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	};
 	update_render_pass_descriptor_depth(*WGPU_CONTEXT, *render_pass_descriptor);
 
-	#if USE_COMPUTE_SHADER {
-		compute_controller_collection_compute(*renderer.computes);
-	}
+	compute_controller_collection_compute(*renderer.computes);
 
 	renderer_scene_uniform_buffer_update(renderer, scene, scene.scene_uniforms);
 	renderer_camera_uniform_buffer_update(renderer, camera, camera.camera_uniforms);

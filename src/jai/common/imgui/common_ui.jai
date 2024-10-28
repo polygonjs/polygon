@@ -100,7 +100,7 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 		){
 			// geometry_add_noise(*scene_data.meshes0[0].geometry, scene_data.freq);
 			// draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
-			#if USE_COMPUTE_SHADER {
+			if renderer.computes.controllers.count > 0 {
 				controller := renderer.computes.controllers[0];
 				controller.update_buffer(controller, scene);
 			}
