@@ -63,8 +63,8 @@ export function heapAdd(item: HeapObject): bigint {
 }
 export function heapStatus() {
 	return {
-		itemByIndex: HEAP.itemByIndex.size,
-		indexByItem: HEAP.indexByItem.size,
+		itemByIndexSize: HEAP.itemByIndex.size,
+		indexByItemSize: HEAP.indexByItem.size,
 		nextValue: HEAP.nextValue,
 	};
 }

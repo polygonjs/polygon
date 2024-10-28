@@ -12,7 +12,7 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipeline==null) {
 		// print_yellow(tprint("invalidate and create START: %x% -> %x%\n", bd.resolution.width, bd.resolution.height, width, height));
 		ImGui_ImplWGPU_InvalidateDeviceObjects();
-		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, wgpu_context);
+		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, renderer);
 		// print_yellow("invalidate and create DONE");
 		bd.resolution.width = width;
 		bd.resolution.height = height;

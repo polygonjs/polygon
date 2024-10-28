@@ -30,8 +30,8 @@ depth_stencil_state_set_default :: (depth_stencil_state: *WGPUDepthStencilState)
 
 
 
-wgpu_update_pipeline_descriptor_depth :: (wgpu_context:*WGPUContext, pipeline_descriptor: *WGPURenderPipelineDescriptor, depth_stencil_state: *WGPUDepthStencilState) {
-	if(wgpu_context.use_depth_buffer){
+wgpu_update_pipeline_descriptor_depth :: (renderer:*Renderer, pipeline_descriptor: *WGPURenderPipelineDescriptor, depth_stencil_state: *WGPUDepthStencilState) {
+	if(renderer.use_depth_buffer){
 		depth_stencil_state_prepare(depth_stencil_state);
 		pipeline_descriptor.depthStencil = depth_stencil_state;
 	}else{
@@ -40,28 +40,29 @@ wgpu_update_pipeline_descriptor_depth :: (wgpu_context:*WGPUContext, pipeline_de
 }
 
 
-create_depth_texture_if_needed :: ( wgpu_context: *WGPUContext ) {
-
-	width := wgpu_texture_get_width_surface(wgpu_context);
-	height := wgpu_texture_get_height_surface(wgpu_context);
+create_depth_texture_if_needed :: ( renderer: *Renderer ) {
+	assert(renderer.wgpu_context!=null, "renderer.wgpu_context is null\n");
+	width := wgpu_texture_get_width_surface(renderer.wgpu_context);
+	height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+	// size := renderer_size(renderer);
 
 	// texture_create_required := (<<wgpu_context).depth_texture == null;
-	if( wgpu_context.depth_texture != null) {
+	if( renderer.depth_texture != null) {
 		if(
-			wgpuTextureGetWidth(wgpu_context.depth_texture) == width &&
-			wgpuTextureGetHeight(wgpu_context.depth_texture) == height
+			wgpuTextureGetWidth(renderer.depth_texture) == width &&
+			wgpuTextureGetHeight(renderer.depth_texture) == height
 		){
 			return;
 		}
-		wgpuTextureRelease(wgpu_context.depth_texture);
+		wgpuTextureRelease(renderer.depth_texture);
 		// texture_create_required = true;
 	}
 
-	if( wgpu_context.use_depth_buffer == false ){
+	if( renderer.use_depth_buffer == false ){
 		return;
 	}
 
-	sampleCount :u32= xx (ifx wgpu_context.use_msaa then MULTISAMPLE_SAMPLES_COUNT else 1);
+	sampleCount :u32= xx (ifx renderer.use_msaa then MULTISAMPLE_SAMPLES_COUNT else 1);
 	viewFormats :[1]WGPUTextureFormat = .[DEPTH_TEXTURE_FORMAT];
 	texture_descriptor := WGPUTextureDescriptor.{
 		label = "Depth Texture",
@@ -78,7 +79,25 @@ create_depth_texture_if_needed :: ( wgpu_context: *WGPUContext ) {
 		viewFormatCount = viewFormats.count,
 		viewFormats = viewFormats.data,
 	};
-	wgpu_context.depth_texture = wgpuDeviceCreateTexture(wgpu_context.device, *texture_descriptor);
+	renderer.depth_texture = wgpuDeviceCreateTexture(renderer.wgpu_context.device, *texture_descriptor);
+
+	renderer.depth_texture_view = wgpuTextureCreateView(renderer.depth_texture, *depth_texture_view_descriptor);
+	renderer.depth_texture_stencil_attachment = WGPURenderPassDepthStencilAttachment.{
+		view = renderer.depth_texture_view,
+		depthClearValue = 1.0,
+		depthLoadOp = WGPULoadOp.Clear,
+		depthStoreOp = WGPUStoreOp.Store,
+		depthReadOnly = xx false,
+		// In js, the stencil are required to be not set
+		// for the depth pass to work.
+		// And even though setting them works in native,
+		// we keep them unset for both native and wasm for now,
+		// to be consistent. 
+		// stencilClearValue = 0,
+		// stencilLoadOp = WGPULoadOp.Clear,
+		// stencilStoreOp = WGPUStoreOp.Store,
+		// stencilReadOnly = xx true,
+	};
 }
 
 depth_texture_view_descriptor :: WGPUTextureViewDescriptor.{
@@ -87,8 +106,9 @@ depth_texture_view_descriptor :: WGPUTextureViewDescriptor.{
 	arrayLayerCount = 1,
 	// format = DEPTH_TEXTURE_FORMAT,
 };
+
 update_render_pass_descriptor_depth :: (
-	wgpu_context: *WGPUContext,
+	renderer: *Renderer,
 	render_pass_descriptor: *WGPURenderPassDescriptor
 	// we need #expand here, to ensure that the pointer to depth_texture_stencil_attachment
 	// remains in the caller stack
@@ -97,36 +117,18 @@ update_render_pass_descriptor_depth :: (
 	// 	wgpuTextureViewRelease(render_pass_descriptor.depthStencilAttachment.view);
 	// }
 
-	if(wgpu_context.use_depth_buffer){
-		texture_view := wgpuTextureCreateView(wgpu_context.depth_texture, *depth_texture_view_descriptor);
-		depth_texture_stencil_attachment := WGPURenderPassDepthStencilAttachment.{
-			view = texture_view,
-			depthClearValue = 1.0,
-			depthLoadOp = WGPULoadOp.Clear,
-			depthStoreOp = WGPUStoreOp.Store,
-			depthReadOnly = xx false,
-			// In js, the stencil are required to be not set
-			// for the depth pass to work.
-			// And even though setting them works in native,
-			// we keep them unset for both native and wasm for now,
-			// to be consistent. 
-			// stencilClearValue = 0,
-			// stencilLoadOp = WGPULoadOp.Clear,
-			// stencilStoreOp = WGPUStoreOp.Store,
-			// stencilReadOnly = xx true,
-		};
-		render_pass_descriptor.depthStencilAttachment = *depth_texture_stencil_attachment;
-		wgpu_context.depth_texture_view = texture_view;
+	if(renderer.use_depth_buffer){
+		render_pass_descriptor.depthStencilAttachment = *renderer.depth_texture_stencil_attachment;
 	} else {
 		render_pass_descriptor.depthStencilAttachment = null;
 	}
 }
 
-depth_release :: (wgpu_context: *WGPUContext) {
-	if( wgpu_context.depth_texture_view != null ) {
-		wgpuTextureViewRelease(wgpu_context.depth_texture_view);
-	}
-}
+// depth_release :: (renderer: *Renderer) {
+// 	if( renderer.depth_texture_view != null ) {
+// 		wgpuTextureViewRelease(renderer.depth_texture_view);
+// 	}
+// }
 
 #scope_file
 

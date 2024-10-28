@@ -121,7 +121,7 @@ ImGui_ImplWGPU_CreateUniformBuffer :: (iwc_uniforms: *ImGui_WGPU_Common_Uniforms
 ImGui_ImplWGPU_CreateDeviceObjects :: (
 	bd: *ImGui_ImplWGPU_Data,
 	iwc:*ImGui_WGPU_Common,
-	wgpu_context: *WGPUContext
+	renderer: *Renderer
 ) -> bool {
 	if (bd.wgpuDevice == null) {
 		print("ImGui_ImplWGPU_CreateDeviceObjects:bd.wgpuDevice is null, return false\n");
@@ -140,7 +140,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.graphics_pipeline_desc.primitive.stripIndexFormat = WGPUIndexFormat.Undefined;
 	iwc.graphics_pipeline_desc.primitive.frontFace = WGPUFrontFace.CW;
 	iwc.graphics_pipeline_desc.primitive.cullMode = WGPUCullMode.None;
-	wgpu_update_pipeline_descriptor_multisample(wgpu_context,*iwc.graphics_pipeline_desc);
+	wgpu_update_pipeline_descriptor_multisample(renderer, *iwc.graphics_pipeline_desc);
 	// we don't rely entirely on update_pipeline_descriptor_multisample(),
 	// as the imgui widgets seem to look better with alphaToCoverageEnabled = false here
 	iwc.graphics_pipeline_desc.multisample.alphaToCoverageEnabled = xx false;

@@ -1,7 +1,14 @@
 import { clockInit, clockTick } from "./Clock";
 import { updateMemoryArrayViews, USELESS_ARG0 } from "./Common";
 import { addEvents, eventsDataReset } from "./EventsController";
-import { Heap, heapAdd, heapCopy, heapCreate, heapStatus } from "./WasmHeap";
+import {
+	Heap,
+	heapAdd,
+	heapCopy,
+	heapCreate,
+	heapDelta,
+	heapStatus,
+} from "./WasmHeap";
 import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { textureFormatIndex } from "./WebGPU/utils/WebGPUMap";
 import { canvasSetSize, webGPUListenToResize } from "./WebGPUResize";
@@ -88,13 +95,19 @@ export function webGPURenderControllerCreate(
 	);
 
 	let previousHeap: Heap = heapCreate();
+	let deltaHeap: Heap = heapCreate();
 	function render() {
+		if (animateAllowed == false) {
+			return;
+		}
 		if (_onRequestAnimationFrameInProgress) {
 			return;
 		}
-		if (DEBUG_HEAP && framesCount % 100 === 0) {
+		if (DEBUG_HEAP && framesCount % 1 === 0) {
 			console.log(framesCount);
 			console.log(heapStatus());
+			heapDelta(previousHeap, deltaHeap);
+			console.log("deltaHeap:", deltaHeap);
 		}
 		_onRequestAnimationFrameInProgress = true;
 
@@ -109,7 +122,7 @@ export function webGPURenderControllerCreate(
 		);
 		eventsDataReset();
 		framesCount++;
-		// if (framesCount > 1) animateAllowed = false;
+		// if (framesCount > 2) animateAllowed = false;
 		// if (currentTexture) {
 		// 	heapDeleteByItem(currentTexture);
 		// }

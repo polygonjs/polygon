@@ -88,9 +88,9 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 	};
 
 
-	wgpu_update_pipeline_descriptor_multisample(wgpu_context, *(pc.pipeline_descriptor));
+	wgpu_update_pipeline_descriptor_multisample(renderer, *pc.pipeline_descriptor);
 	depth_stencil_state: WGPUDepthStencilState;
-	wgpu_update_pipeline_descriptor_depth(wgpu_context, *(pc.pipeline_descriptor), *depth_stencil_state);
+	wgpu_update_pipeline_descriptor_depth(renderer, *pc.pipeline_descriptor, *depth_stencil_state);
 
 	#if WASM {
 		if(depth_stencil_state.depthBias != 0){

@@ -4,6 +4,8 @@ RendererBufferData :: struct {
 	bind_group_entries: []WGPUBindGroupEntry;
 }
 Renderer :: struct {
+	name :string;
+	wgpu_context: *WGPUContext;
 	full_screen:bool;
 	ViewportRect :: struct {
 		start: Vector2;
@@ -15,8 +17,31 @@ Renderer :: struct {
 	bg_color :Color =.{0.1, 0.3, 0.72, 1.0};
 	scene_data: RendererBufferData;
 	camera_data: RendererBufferData;
+
+	render_ui:bool=false;
+	clear:bool=true;
+	//
+	use_msaa: bool=true;
+	use_depth_buffer: bool=true;
+	//
+	multisample_texture_descriptor : WGPUTextureDescriptor;
+	multisample_texture: WGPUTexture;
+	multisample_texture_view: WGPUTextureView=null;
+	//
+	depth_texture_stencil_attachment: WGPURenderPassDepthStencilAttachment;
+	depth_texture: WGPUTexture;
+	depth_texture_view: WGPUTextureView=null;
 }
 
+renderer_size :: (renderer:*Renderer) -> Vector2 {
+	if renderer.full_screen {
+		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
+		height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+		return .{xx width, xx height};
+	} else {
+		return renderer.viewport.size;
+	}
+}
 
 #if WASM {
 	renderer_init_wasm :: (canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQueue, preferred_texture_format: WGPUTextureFormat){
@@ -36,7 +61,7 @@ Renderer :: struct {
 	}
 }
 
-renderer_init_ui :: (){
+renderer_init_ui :: (renderer:*Renderer){
 	#if USE_IMGUI {
 		bd := *BD;
 		ImGui.CreateContext(null);
@@ -56,13 +81,13 @@ renderer_init_ui :: (){
 			// Device = wgpu_context.device,
 			NumFramesInFlight = 3,
 			RenderTargetFormat = WGPU_CONTEXT.preferred_texture_format,
-			DepthStencilFormat = ifx WGPU_CONTEXT.use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
+			DepthStencilFormat = ifx renderer.use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
 		};
 		ImGui_ImplWGPU_Init(bd, imgui_init_info);
 	}
 }
 
-renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera, use_compute:bool){
+renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -71,6 +96,7 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera, us
 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
+	renderer.wgpu_context = *WGPU_CONTEXT;
 	init(*renderer.pipelines_by_mat_type, 1);
 	renderer_scene_uniform_buffer_create(renderer, scene);
 	renderer_camera_uniform_buffer_create(renderer, camera);
@@ -94,7 +120,7 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera, us
 
 		compute_initialized := false;
 		for mesh: pc.meshes {
-			if compute_initialized==false && use_compute && mesh.use_compute {
+			if compute_initialized==false && mesh.use_compute {
 				compute_initialized=true;
 				renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
 				pipeline_controller_update(pc, *renderer.computes);
@@ -125,17 +151,19 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera, us
 // }
 
 
-render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera, window_size:Vector2UInt, render_ui:bool, clear:bool){
+render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera, window_size:Vector2UInt){
 	
+	create_multi_sample_texture_if_needed( renderer );
+	create_depth_texture_if_needed( renderer );
 	device := WGPU_CONTEXT.device;
 
 	colorAttachment := WGPURenderPassColorAttachment.{
-		loadOp = ifx clear then WGPULoadOp.Clear else WGPULoadOp.Load,
+		loadOp = ifx renderer.clear then WGPULoadOp.Clear else WGPULoadOp.Load,
 		storeOp = WGPUStoreOp.Store,
 		clearValue = wgpu_color_create(renderer.bg_color),
 	};
 
-	update_render_pass_descriptor_multisample(*WGPU_CONTEXT, *colorAttachment, *data.frame);
+	update_render_pass_descriptor_multisample(renderer, *colorAttachment, *data.frame);
 
 	cmd_encoder := wgpuDeviceCreateCommandEncoder(
 		WGPU_CONTEXT.device,
@@ -150,7 +178,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 		colorAttachmentCount = 1,
 		colorAttachments = *colorAttachment,
 	};
-	update_render_pass_descriptor_depth(*WGPU_CONTEXT, *render_pass_descriptor);
+	update_render_pass_descriptor_depth(renderer, *render_pass_descriptor);
 
 	compute_controller_collection_compute(*renderer.computes);
 
@@ -192,13 +220,13 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 
 	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(renderer, it, render_pass_encoder);
 	#if USE_IMGUI {
-		if render_ui {
+		if renderer.render_ui {
 			gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
 		}
 	}
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 
-	cmd_buffer1_label := to_c_string(tprint("Cmd Buffer 3D %", FRAMES_COUNT));
+	cmd_buffer1_label := to_c_string(tprint("% %", renderer.name, FRAMES_COUNT));
 	defer free(cmd_buffer1_label);
 	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
 	defer wgpuCommandBufferRelease(cmd_buffer1);
@@ -211,6 +239,8 @@ renderer_destroy_buffers :: (renderer:*Renderer){
 	for renderer.pipelines_by_mat_type {
 		pipeline_controller_destroy_scheduled_buffers(it);
 	}
+	// multisample_release(renderer);
+	// depth_release(renderer);
 }
 
 renderer_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, buffer_data:*RendererBufferData, bind_group_layout_index: u32, label: string) {
@@ -239,6 +269,15 @@ renderer_scene_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURend
 renderer_camera_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, bind_group_layout_index: u32) {
 	renderer_uniform_buffer_assign(renderer, pipeline, *renderer.camera_data, bind_group_layout_index, "camera");
 }
+
+
+
+
+
+
+
+
+
 
 #scope_file
 

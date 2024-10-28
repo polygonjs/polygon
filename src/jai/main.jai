@@ -7,6 +7,8 @@ FREE_MEMORY_DEBUG :: false;
 RENDER_SCENE :: true;
 RUN_TESTS :: false;
 VSYNC :: false;
+RENDER_WORLD :: true;
+RENDER_NODES_NETWORK :: true;
 
 #placeholder WASM;
 
@@ -176,9 +178,11 @@ main :: () {
 init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
-	renderer_init_ui();
-	renderer_init_pipelines(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD, use_compute=true);
-	renderer_init_pipelines(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES, use_compute=false);
+	#if RENDER_WORLD {
+		#if USE_IMGUI { renderer_init_ui(*WORLD_RENDERER); }
+		renderer_init_pipelines(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD);
+	}
+	#if RENDER_NODES_NETWORK { renderer_init_pipelines(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES); }
 
 }
 
@@ -205,15 +209,22 @@ on_request_animation_frame :: (
 	new_aspect:float = (cast(float32) width) / (cast(float32) height);
 
 	if(new_aspect != CAMERA_WORLD.aspect){
-		if(WORLD_RENDERER.full_screen == true) {
-			CAMERA_WORLD.aspect = new_aspect;
-			CAMERA_NODES.aspect = new_aspect;
-		} else {
-			CAMERA_WORLD.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
-			CAMERA_NODES.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
+		#if RENDER_WORLD {
+			if(WORLD_RENDERER.full_screen == true) {
+				CAMERA_WORLD.aspect = new_aspect;
+			} else {
+				CAMERA_WORLD.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
+			}
+			camera_projection_update(CAMERA_WORLD);
 		}
-		camera_projection_update(CAMERA_WORLD);
-		camera_projection_update(CAMERA_NODES);
+		#if RENDER_NODES_NETWORK {
+			if(NODES_RENDERER.full_screen == true) {
+				CAMERA_NODES.aspect = new_aspect;
+			} else {
+				CAMERA_NODES.aspect = NODES_RENDERER.viewport.size.x / NODES_RENDERER.viewport.size.y;
+			}
+			camera_projection_update(CAMERA_NODES);
+		}
 	}
 	SCENE_WORLD.time = new_time / 1000.0;
 	#if WASM {
@@ -228,12 +239,12 @@ on_request_animation_frame :: (
 
 	window_size :Vector2UInt= .{xx width, xx height};
 	data := renderer_collection_start(*WGPU_CONTEXT);
-	render(*data, *WORLD_RENDERER, *SCENE_WORLD, CAMERA_WORLD, window_size, render_ui=true, clear=true);
-	render(*data, *NODES_RENDERER, *SCENE_NODES, CAMERA_NODES, window_size, render_ui=false, clear=false);
+	#if RENDER_WORLD { render(*data, *WORLD_RENDERER, *SCENE_WORLD, CAMERA_WORLD, window_size); }
+	#if RENDER_NODES_NETWORK { render(*data, *NODES_RENDERER, *SCENE_NODES, CAMERA_NODES, window_size); }
 	renderer_collection_end(*WGPU_CONTEXT, data);
 
-	renderer_destroy_buffers(*WORLD_RENDERER);
-	renderer_destroy_buffers(*NODES_RENDERER);
+	#if RENDER_WORLD { renderer_destroy_buffers(*WORLD_RENDERER); }
+	#if RENDER_NODES_NETWORK { renderer_destroy_buffers(*NODES_RENDERER); }
 
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
@@ -241,12 +252,17 @@ on_request_animation_frame :: (
 }
 
 // scope_file does not yet prevent unwanted functions to be in the wasm export
+SCENE_WORLD:Scene;
 #scope_file
 
 camera_controls_process_event :: () {
 	_process_event :: () {
-		camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA, element_focused(*WORLD_RENDERER, *EVENTS_DATA));
-		camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA, element_focused(*NODES_RENDERER, *EVENTS_DATA));
+		#if RENDER_WORLD {
+			camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA, element_focused(*WORLD_RENDERER, *EVENTS_DATA));
+		}
+		#if RENDER_NODES_NETWORK {
+			camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA, element_focused(*NODES_RENDERER, *EVENTS_DATA));
+		}
 	}
 	#if USE_IMGUI {
 		io := ImGui.GetIO();
@@ -260,28 +276,39 @@ camera_controls_process_event :: () {
 
 
 
-SCENE_WORLD:Scene;
 CAMERA_WORLD:*PerspectiveCamera;
 CAMERA_CONTROLS_WORLD:OrbitControls;
 SCENE_NODES:Scene;
 CAMERA_NODES:*OrthographicCamera;
 CAMERA_CONTROLS_NODES:PanControls;
-WORLD_RENDERER: Renderer = .{
-	full_screen = false,
-	viewport = .{
-		start = .{0,0},
-		size = .{500,700}
-	},
-	bg_color = .{0.1, 0.3, 0.72, 1.0},
-};
-NODES_RENDERER: Renderer = .{
-	full_screen = false,
-	viewport = .{
-		start = .{600,0},
-		size = .{500,900}
-	},
-	bg_color = .{0,0,0,1},
-};
+
+#if RENDER_WORLD {
+	WORLD_RENDERER: Renderer = .{
+		name = "WORLD_RENDERER",
+		full_screen = false,
+		viewport = .{
+			start = .{0,0},
+			size = .{500,700}
+		},
+		bg_color = .{0.1, 0.3, 0.72, 1.0},
+		render_ui = true,
+		clear = true,
+	};
+}
+#if RENDER_NODES_NETWORK {
+	NODES_RENDERER: Renderer = .{
+		name = "NODES_RENDERER",
+		full_screen = false,
+		viewport = .{
+			start = .{600,0},
+			size = .{500,900}
+		},
+		bg_color = .{0,0,0,1},
+		use_msaa = false,
+		render_ui = false,
+		clear = false,
+	};
+}
 
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);

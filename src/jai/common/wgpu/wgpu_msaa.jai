@@ -1,7 +1,7 @@
 MULTISAMPLE_SAMPLES_COUNT :: 4;
 
-wgpu_update_pipeline_descriptor_multisample :: (wgpu_config: *WGPUContext, pipeline_descriptor: *WGPURenderPipelineDescriptor) {
-	if( (<<wgpu_config).use_msaa ){
+wgpu_update_pipeline_descriptor_multisample :: (renderer: *Renderer, pipeline_descriptor: *WGPURenderPipelineDescriptor) {
+	if( renderer.use_msaa ){
 		pipeline_descriptor.multisample = .{
 			count = MULTISAMPLE_SAMPLES_COUNT,
 			mask = U32_MAX,
@@ -16,36 +16,41 @@ wgpu_update_pipeline_descriptor_multisample :: (wgpu_config: *WGPUContext, pipel
 	}
 }
 
-create_multi_sample_texture_if_needed :: ( wgpu_context: *WGPUContext )  {
+create_multi_sample_texture_if_needed :: ( renderer: *Renderer )  {
+	assert(renderer.wgpu_context!=null, "renderer.wgpu_context is null\n");
+	width := wgpu_texture_get_width_surface(renderer.wgpu_context);
+	height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+	// size := renderer_size(renderer);
 
-	width := wgpu_texture_get_width_surface(wgpu_context);
-	height := wgpu_texture_get_height_surface(wgpu_context);
-
-	if( (<<wgpu_context).multisample_texture != null){
+	if( renderer.multisample_texture != null){
 		if(
-			wgpuTextureGetWidth(wgpu_context.multisample_texture) == width &&
-			wgpuTextureGetHeight(wgpu_context.multisample_texture) == height
+			wgpuTextureGetWidth(renderer.multisample_texture) == width &&
+			wgpuTextureGetHeight(renderer.multisample_texture) == height
 		){
 			return;
 		}
-		wgpuTextureRelease(wgpu_context.multisample_texture);
+		wgpuTextureRelease(renderer.multisample_texture);
 	}
-	if( wgpu_context.use_msaa == false ){
+	if( renderer.use_msaa == false ){
 		return;
 	}
 
-	texture_descriptor := *(<<wgpu_context).multisample_texture_descriptor;
+	texture_descriptor := *renderer.multisample_texture_descriptor;
 	texture_descriptor.size = .{
 		width = width,
 		height = height,
 		depthOrArrayLayers = 1
 	};
 	texture_descriptor.sampleCount = MULTISAMPLE_SAMPLES_COUNT;
-	texture_descriptor.format = wgpu_context.preferred_texture_format;
+	texture_descriptor.format = renderer.wgpu_context.preferred_texture_format;
 	texture_descriptor.usage = xx WGPUTextureUsage.RenderAttachment;
 	texture_descriptor.dimension = WGPUTextureDimension._2D;
 	texture_descriptor.mipLevelCount = 1;
-	wgpu_context.multisample_texture = wgpuDeviceCreateTexture(wgpu_context.device, texture_descriptor);
+	renderer.multisample_texture = wgpuDeviceCreateTexture(renderer.wgpu_context.device, texture_descriptor);
+
+	multisample_texture_view_descriptor.format = renderer.wgpu_context.preferred_texture_format;
+	multisample_texture_view_descriptor.dimension = WGPUTextureViewDimension._2D;
+	renderer.multisample_texture_view = wgpuTextureCreateView(renderer.multisample_texture, *multisample_texture_view_descriptor);
 }
 
 multisample_texture_view_descriptor := WGPUTextureViewDescriptor.{
@@ -54,35 +59,25 @@ multisample_texture_view_descriptor := WGPUTextureViewDescriptor.{
 };
 
 
-multisample_release :: (wgpu_context: *WGPUContext) {
-	if( wgpu_context.use_msaa && wgpu_context.multisample_texture_view != null ) {
-		wgpuTextureViewRelease(wgpu_context.multisample_texture_view);
-	}
-}
+// multisample_release :: (renderer: *Renderer) {
+// 	if( renderer.use_msaa && renderer.multisample_texture_view != null ) {
+// 		wgpuTextureViewRelease(renderer.multisample_texture_view);
+// 	}
+// }
 
 update_render_pass_descriptor_multisample :: (
-	wgpu_context: *WGPUContext,
+	renderer: *Renderer,
 	colorAttachment: *WGPURenderPassColorAttachment,
-	current_texture_view: *WGPUTextureView
+	frame: *WGPUTextureView
 ) #expand {
-	if( wgpu_context.use_msaa == true){
+	if( renderer.use_msaa == true){
+		// wgpu_context := renderer.wgpu_context;
 		// if(colorAttachment.view){
 		// 	wgpuTextureViewRelease((<<colorAttachment).view);
 		// }
-		multisample_texture_view_descriptor.format = wgpu_context.preferred_texture_format;
-		texture_view := wgpuTextureCreateView(wgpu_context.multisample_texture, *multisample_texture_view_descriptor);
-		colorAttachment.view = texture_view;
-		#if WASM {
-			colorAttachment.resolveTarget = <<current_texture_view;
-		} else {
-			colorAttachment.resolveTarget = <<current_texture_view;
-		}
-		wgpu_context.multisample_texture_view = texture_view;
+		colorAttachment.view = renderer.multisample_texture_view;
+		colorAttachment.resolveTarget = <<frame;
 	} else {
-		#if WASM {
-			colorAttachment.view = <<current_texture_view;
-		} else {
-			colorAttachment.view = <<current_texture_view;
-		}
+		colorAttachment.view = <<frame;
 	}
 }
