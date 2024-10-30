@@ -320,7 +320,9 @@ else #import "Basic";
 else              #import "wgpu";
 
 #load "main_scene_init.jai";
-#load "scene/index.jai";
+#load "core/graph/_index.jai";
+#load "engine/_index.jai";
+#load "scene/_index.jai";
 #load "common/events/index.jai";
 #load "common/wgpu/index.jai";
 #load "common/ui/index.jai";

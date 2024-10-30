@@ -38,11 +38,11 @@ newPipelineController :: ($T: Type, material: *Material) -> *T {
 	// pc.id = NEXT_PIPELINE_CONTROLLER_ID;
 	// NEXT_PIPELINE_CONTROLLER_ID+=1;
 
-	init_array(*pc.vertex_buffer_layouts);
-	init_array(*pc.vertex_attributes);
-	init_array(*pc.meshes);
-	init_array(*pc.meshes_draw_data);
-	init_array(*pc.buffers_to_destroy);
+	array_init(*pc.vertex_buffer_layouts);
+	array_init(*pc.vertex_attributes);
+	array_init(*pc.meshes);
+	array_init(*pc.meshes_draw_data);
+	array_init(*pc.buffers_to_destroy);
 
 	pc.material = material;
 	

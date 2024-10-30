@@ -34,7 +34,7 @@ Scene :: struct {
 init_scene :: (object: *Object3D) {
 	scene := cast(*Scene)object;
 
-	init_array(*scene.children);
+	array_init(*scene.children);
 }
 
 
