@@ -1,7 +1,3 @@
-OPTIMIZED :: false;
-BUILD_WASM :: true;
-BUILD_NATIVE :: false;
-
 WASM_INSERTION_STRING :: #string DONE
 
 SHADER_RENDER_BASIC :: #string WGSL
@@ -18,147 +14,153 @@ DONE
 
 
 #run {
-	checkbox_wasm   := ifx BUILD_WASM then "x" else " ";
-	checkbox_native := ifx BUILD_NATIVE then "x" else " ";
+	
 	print("Building:\n");
-	print("WASM:    [%]\n", checkbox_wasm);
-	print("NATIVE:  [%]\n", checkbox_native);
-	print("\n");
+	
+	
+	
 	set_build_options_dc(.{do_output = false});
 
-	if ( BUILD_WASM ) {
-		w := compiler_create_workspace("Wasm Common");
+	{
+		w := compiler_create_workspace("Wasm");
 		options := get_build_options(w);
-		args := options.compile_time_command_line;
-		// we ensure that the jails vscode extension does not generate the same output,
-		// as this would generate an invalid build.
-		jails_diagnostics := array_find(args, "jails_diagnostics");
-		copy_commonly_propagated_fields(get_build_options(), *options);
 
-		options.output_type                         = .EXECUTABLE;
-		options.backend                             = .LLVM; // WASM only works with the LLVM backend, obviously.
-		options.os_target                           = .WASM;
-		options.cpu_target                          = .CUSTOM;
-		options.emit_debug_info                     = .DWARF;
-		options.backtrace_on_crash                  = .OFF; // Runtime_Support_Crash_Handler doesn’t support WASM (yet?)
-		options.output_path                         = "../../public/";
-		options.output_executable_name              = ifx jails_diagnostics then "jails" else "polygon-next";
-		options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
-		options.llvm_options.enable_split_modules   = false;
-		options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
-		options.dead_code_elimination				= .MODULES_ONLY;
+		buildArgs := getArgs(*options);
+		print("WASM:    [%]\n", _checkbox(buildArgs.wasm));
+		if(buildArgs.wasm){
+			copy_commonly_propagated_fields(get_build_options(), *options);
 
-		if OPTIMIZED {
-			set_optimization(*options, .VERY_OPTIMIZED);
-		} else {
-			set_optimization(*options, .VERY_DEBUG);
-		}
+			options.output_type                         = .EXECUTABLE;
+			options.backend                             = .LLVM; // WASM only works with the LLVM backend, obviously.
+			options.os_target                           = .WASM;
+			options.cpu_target                          = .CUSTOM;
+			options.emit_debug_info                     = .DWARF;
+			options.backtrace_on_crash                  = .OFF; // Runtime_Support_Crash_Handler doesn’t support WASM (yet?)
+			options.output_path                         = "../../public/";
+			options.output_executable_name              = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
+			options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
+			options.llvm_options.enable_split_modules   = false;
+			options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
+			options.dead_code_elimination				= .MODULES_ONLY;
 
-		import_paths: [..]string;
-		// Add our own modules folder first so that we can override modules with our own version, if necessary.
-		array_add(*import_paths, tprint("%modules", #filepath));
-		for options.import_path array_add(*import_paths, it);
-		options.import_path = import_paths;
-
-		// This was compiled from https://github.com/wingo/walloc via "clang -Oz --target=wasm64 -nostdlib -c -o walloc.o walloc.c".
-		// We should probably port this allocator to Jai instead…
-		//  -rluba, 2023-11-15
-		walloc_object_file_path := "modules/walloc/walloc.o";
-		EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
-
-		STACK_SIZE :: 4 * 1024 * 1024;
-		options.additional_linker_arguments = .[
-			"--stack-first",
-			"-z",
-			tprint("stack-size=%", STACK_SIZE),
-			walloc_object_file_path,
-			// tprint("-L%/upstream/lib", EMSDK_PATH)
-			tprint("-L%/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten/", EMSDK_PATH)
-		];
-
-		set_build_options(options, w);
-
-		// Replace the default allocator with Walloc (https://github.com/wingo/walloc).
-		remap_import(w, "*", "Default_Allocator", "walloc");
-
-		compiler_begin_intercept(w);
-
-		add_build_file("main.jai", w);
-
-		generated_code := false;
-		while true {
-			message := compiler_wait_for_message();
-			if message.kind == {
-				case .TYPECHECKED;
-					update_procedures(message);
-				case .PHASE;
-					phase := cast(*Message_Phase) message;
-						// print("phase:%.\n", phase.phase);
-					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
-						if !generated_code {
-
-							add_build_string("WASM :: true;", w);
-							generated_code = true;
-						}
-					}
-
-				case .COMPLETE;
-					break;
+			if buildArgs.optimized {
+				set_optimization(*options, .VERY_OPTIMIZED);
+			} else {
+				set_optimization(*options, .VERY_DEBUG);
 			}
-		}
 
-		compiler_end_intercept(w);
+			import_paths: [..]string;
+			// Add our own modules folder first so that we can override modules with our own version, if necessary.
+			array_add(*import_paths, tprint("%modules", #filepath));
+			for options.import_path array_add(*import_paths, it);
+			options.import_path = import_paths;
+
+			// This was compiled from https://github.com/wingo/walloc via "clang -Oz --target=wasm64 -nostdlib -c -o walloc.o walloc.c".
+			// We should probably port this allocator to Jai instead…
+			//  -rluba, 2023-11-15
+			walloc_object_file_path := "modules/walloc/walloc.o";
+			EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
+
+			STACK_SIZE :: 4 * 1024 * 1024;
+			options.additional_linker_arguments = .[
+				"--stack-first",
+				"-z",
+				tprint("stack-size=%", STACK_SIZE),
+				walloc_object_file_path,
+				// tprint("-L%/upstream/lib", EMSDK_PATH)
+				tprint("-L%/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten/", EMSDK_PATH)
+			];
+
+			set_build_options(options, w);
+
+			// Replace the default allocator with Walloc (https://github.com/wingo/walloc).
+			remap_import(w, "*", "Default_Allocator", "walloc");
+
+			compiler_begin_intercept(w);
+
+			add_build_file("main.jai", w);
+
+			generated_code := false;
+			while true {
+				message := compiler_wait_for_message();
+				if message.kind == {
+					case .TYPECHECKED;
+						update_procedures(message);
+					case .PHASE;
+						phase := cast(*Message_Phase) message;
+							// print("phase:%.\n", phase.phase);
+						if phase.phase == .TYPECHECKED_ALL_WE_CAN {
+							if !generated_code {
+
+								add_build_string("WASM :: true;", w);
+								add_build_string(tprint("RUN_TESTS :: %;", buildArgs.test), w);
+								generated_code = true;
+							}
+						}
+
+					case .COMPLETE;
+						break;
+				}
+			}
+
+			compiler_end_intercept(w);
+		}
 	}
-	if ( BUILD_NATIVE ) {
-		w := compiler_create_workspace("Native Common");
+	{
+		w := compiler_create_workspace("Native");
 
 		options := get_build_options(w);
-		args := options.compile_time_command_line;
-		// we ensure that the jails vscode extension does not generate the same output,
-		// as this would generate an invalid build.
-		jails_diagnostics := array_find(args, "jails_diagnostics");
-		options.output_path = "../../bin/";
-		make_directory_if_it_does_not_exist(options.output_path);
-		options.output_executable_name = ifx jails_diagnostics then "jails" else "polygon-next";
+		buildArgs := getArgs(*options);
+		print("NATIVE:  [%]\n", _checkbox(buildArgs.native));
+		if(buildArgs.native) {
+			options.output_path = "../../bin/";
+			make_directory_if_it_does_not_exist(options.output_path);
+			options.output_executable_name = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
 
-		if OPTIMIZED {
-			set_optimization(*options, .VERY_OPTIMIZED);
-		} else {
-			set_optimization(*options, .VERY_DEBUG);
-			if OS == .LINUX {
-				options.backend = .X64;
+			if buildArgs.optimized {
+				set_optimization(*options, .VERY_OPTIMIZED);
+			} else {
+				set_optimization(*options, .VERY_DEBUG);
+				if OS == .LINUX {
+					options.backend = .X64;
+				}
 			}
-		}
 
-		set_build_options(options, w);
+			set_build_options(options, w);
 
-		compiler_begin_intercept(w);
+			compiler_begin_intercept(w);
+			print("RUN_TESTS :: %\n", buildArgs.test);
 
-		add_build_file("main.jai", w);
+			add_build_file("main.jai", w);
 
-		generated_code := false;
-		while true {
-			message := compiler_wait_for_message();
-			if message.kind == {
-				case .TYPECHECKED;
-					update_procedures(message);
-				case .PHASE;
-					phase := cast(*Message_Phase) message;
-					if phase.phase == .TYPECHECKED_ALL_WE_CAN {
-						if !generated_code {
+			generated_code := false;
+			while true {
+				message := compiler_wait_for_message();
+				if message.kind == {
+					case .TYPECHECKED;
+						update_procedures(message);
+					case .PHASE;
+						phase := cast(*Message_Phase) message;
+						if phase.phase == .TYPECHECKED_ALL_WE_CAN {
+							if !generated_code {
 
-							add_build_string("WASM :: false;", w);
-							generated_code = true;
+								add_build_string("WASM :: false;", w);
+								
+								add_build_string(tprint("RUN_TESTS :: %;", buildArgs.test), w);
+								generated_code = true;
+							}
 						}
-					}
 
-				case .COMPLETE;
-					break;
+					case .COMPLETE;
+						break;
+				}
 			}
+
+			compiler_end_intercept(w);
 		}
 
-		compiler_end_intercept(w);
 	}
+	print("\n");
 }
 
 update_procedures :: (message: *Message) {
@@ -243,6 +245,32 @@ make_return_statement :: (expression: *Code_Node) -> *Code_Return {
 	return ret;
 }
 
+BuildArgs :: struct {
+	wasm:bool;
+	native:bool;
+	jailsDiagnostics: bool;
+	test:bool;
+	optimized:bool;
+}
+getArgs :: (options: *Build_Options)->BuildArgs {
+	buildArgs: BuildArgs;
+	args := options.compile_time_command_line;
+	// we ensure that the jails vscode extension does not generate the same output,
+	// as this would generate an invalid build.
+	buildArgs.jailsDiagnostics = array_find(args, "jails_diagnostics");
+	buildArgs.test = array_find(args, "test");
+	buildArgs.wasm = array_find(args, "wasm");
+	buildArgs.native = array_find(args, "native");
+	buildArgs.optimized = array_find(args, "O");
+	if( buildArgs.wasm==false && buildArgs.native==false ) {
+		buildArgs.wasm = true;
+		buildArgs.native = true;
+	}
+	return buildArgs;
+}
+_checkbox :: (status:bool)->string {
+	return ifx status then "x" else " ";
+}
 
 
 #import "Basic";

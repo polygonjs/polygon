@@ -5,12 +5,12 @@ MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CP
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 FREE_MEMORY_DEBUG :: false;
 RENDER_SCENE :: true;
-RUN_TESTS :: false;
 VSYNC :: false;
 RENDER_WORLD :: true;
 RENDER_NODES_NETWORK :: true;
 
 #placeholder WASM;
+#placeholder RUN_TESTS;
 
 #if USE_IMGUI WINDOW_CONTEXT:WindowContext;
 WGPU_CONTEXT:WGPUContext;
@@ -52,7 +52,10 @@ do_exit := false;
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
-	#if RUN_TESTS run_tests();
+	#if RUN_TESTS {
+		run_tests();
+		return;
+	}
 
 	node_name_size := 128;
 	SCENE_WORLD.node_name.data  = alloc(node_name_size);
@@ -335,8 +338,9 @@ else              #import "wgpu";
 #if USE_IMGUI {
 	#load "common/imgui/index.jai";
 }
-
-#load "test/index.jai";
+#if RUN_TESTS {
+	#load "test/_index.jai";
+}
 
 #if OS == .LINUX {
 	// in order to import gcc_s, I initially tried:

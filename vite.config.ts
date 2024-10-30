@@ -6,8 +6,22 @@ import { exec, ExecException } from "child_process";
 
 const BUILD_ON_FILE_CHANGE: boolean = true;
 const RUN_NATIVE_ON_FILE_CHANGE: boolean = false;
+interface BuildArgs {
+	wasm: boolean;
+	native: boolean;
+	test: boolean;
+}
+const BUILD_ARGS: BuildArgs = {
+	wasm: true,
+	native: false,
+	test: true,
+};
+const CMD_BUILD_ARGS: string[] = [];
+if (BUILD_ARGS.wasm) CMD_BUILD_ARGS.push("wasm");
+if (BUILD_ARGS.native) CMD_BUILD_ARGS.push("native");
+if (BUILD_ARGS.test) CMD_BUILD_ARGS.push("test");
 
-const CMD_BUILD = "jai src/jai/build.jai";
+const CMD_BUILD = `jai src/jai/build.jai - ${CMD_BUILD_ARGS.join(" ")}`;
 
 function logRedBg(message: string) {
 	logStyled(message, {
