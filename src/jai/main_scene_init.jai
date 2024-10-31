@@ -66,7 +66,7 @@ scene_init_world :: (scene: *Scene, aspect:float32) {
 	}
 }
 
-box1 :*BoxGeoNode;
+// box1 :*BoxGeoNode;
 scene_init_nodes :: (scene: *Scene, aspect:float32) {
 
 	// box0 :BoxGeoNode;
@@ -77,7 +77,7 @@ scene_init_nodes :: (scene: *Scene, aspect:float32) {
 	// print("box0.p.size.type: %\n", box0.p.size.type);
 
 	nodesScene := newNodesScene();
-	box1 = newNode(nodesScene, BoxGeoNode);
+	box1 := newNode(nodesScene, BoxGeoNode);
 	// print("box1 size: % % %\n", box1.p.size.id, box1.p.size.type, box1.p.size.value);
 	// print("box1 scale: % % %\n", box1.p.scale.id, box1.p.scale.type, box1.p.scale.value);
 	// sphere1 := newNode(nodesScene, SphereGeoNode);
@@ -91,10 +91,10 @@ scene_init_nodes :: (scene: *Scene, aspect:float32) {
 	// print("switch1:%\n", switch1.type);
 	// print("box1==sphere1:%, %\n", type_of(box1.type), type_of(sphere1.type));
 
-	onBoxDirty :CoreGraphNodeOnDirtyMethod: (node: *CoreGraphNode) {
-		nodeCompute(box1);
-	}
-	box1.onDirty = onBoxDirty;
+	// onBoxDirty :CoreGraphNodeOnDirtyMethod: (node: *CoreGraphNode) {
+	// 	nodeCompute(box1);
+	// }
+	// box1.onDirty = onBoxDirty;
 
 	paramSetValue(*box1.p.scale, 2.0);
 

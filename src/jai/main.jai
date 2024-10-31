@@ -329,7 +329,7 @@ else              #import "wgpu";
 #load "common/events/index.jai";
 #load "common/wgpu/index.jai";
 #load "common/ui/index.jai";
-#load "common/utils/index.jai";
+#load "common/utils/_index.jai";
 
 
 #if WASM == false {

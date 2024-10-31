@@ -1,12 +1,14 @@
 NodesScene :: struct {
 	nodes: [..]*GeoNodeAny;
 	graph: CoreGraph;
+	worldScene: Scene;
+	cookResultByNodeId:Table(CoreGraphNodeId, GeoNodeCookOutput);
 }
 
 newNodesScene :: () -> *NodesScene {
-	print("newNodesScene\n");
 	scene: *NodesScene = alloc(size_of(NodesScene));
 	array_init(*scene.nodes);
+	init(*scene.cookResultByNodeId, 64);
 
 	{
 		graph:CoreGraph;
@@ -20,4 +22,14 @@ newNodesScene :: () -> *NodesScene {
 	
 	return scene;
 }
+
+// sceneDebug :: (scene: *NodesScene, message:string) {
+// 	print("---- sceneDebug START (%) (%)\n", scene, message);
+// 	print("count: %\n", scene.nodes.count);
+// 	for node, i: scene.nodes {
+// 		print("% %", i, node);
+// 		print("   % % %\n", i, node.type, node.inputs);
+// 	}
+// 	print("---- sceneDebug END\n");
+// }
 

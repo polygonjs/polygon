@@ -1,5 +1,5 @@
-// FloatType :: struct {}
-FloatParam :: struct {
+// IntegerType :: struct {}
+UIntegerParam :: struct {
 	#as using baseParam: BaseParam(PARAM_TYPE);
 	value: #run paramValueByType(PARAM_TYPE);
 	// initParam:ParamInitMethod: initParam;
@@ -7,11 +7,10 @@ FloatParam :: struct {
 
 #scope_file
 
-PARAM_TYPE :: ParamType.FLOAT;
-TYPE :: FloatParam;
+PARAM_TYPE :: ParamType.UINTEGER;
+TYPE :: UIntegerParam;
 
 // initParam :: (_param: *TYPE, node: *$N) {
 // 	// print("%\n", TYPE);
 // 	// initParam(cast(*TYPE)_param);
 // }
-

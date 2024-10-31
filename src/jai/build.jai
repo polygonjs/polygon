@@ -14,11 +14,7 @@ DONE
 
 
 #run {
-	
-	print("Building:\n");
-	
-	
-	
+
 	set_build_options_dc(.{do_output = false});
 
 	{
@@ -26,7 +22,7 @@ DONE
 		options := get_build_options(w);
 
 		buildArgs := getArgs(*options);
-		print("WASM:    [%]\n", _checkbox(buildArgs.wasm));
+		print("WASM:        [%]\n", _checkbox(buildArgs.wasm));
 		if(buildArgs.wasm){
 			copy_commonly_propagated_fields(get_build_options(), *options);
 
@@ -111,7 +107,9 @@ DONE
 
 		options := get_build_options(w);
 		buildArgs := getArgs(*options);
-		print("NATIVE:  [%]\n", _checkbox(buildArgs.native));
+		print("NATIVE:      [%]\n", _checkbox(buildArgs.native));
+		print("RUN_TESTS:   [%]\n", _checkbox(buildArgs.test));
+		print("OPTIMIZED:   [%]\n\n", _checkbox(buildArgs.optimized));
 		if(buildArgs.native) {
 			options.output_path = "../../bin/";
 			make_directory_if_it_does_not_exist(options.output_path);
@@ -129,7 +127,6 @@ DONE
 			set_build_options(options, w);
 
 			compiler_begin_intercept(w);
-			print("RUN_TESTS :: %\n", buildArgs.test);
 
 			add_build_file("main.jai", w);
 

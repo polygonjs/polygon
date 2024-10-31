@@ -1,5 +1,6 @@
 CoreGraphNodeOnDirtyMethod :: #type (node: *CoreGraphNode);
 CoreGraphNode :: struct {
+	type: Type;
 	id: CoreGraphNodeId;
 	graph: *CoreGraph;
 	scene: *NodesScene;
@@ -11,7 +12,10 @@ CoreGraphNode :: struct {
 newCoreGraphNode :: (graph: *CoreGraph, $T: Type) -> *T {
 	graphNode: *T = alloc(size_of(T));
 
+	graphNode.type = T;
 	initGraphNode(graphNode, graph);
+
+	// print("graphAddNode % %\n", graphNode.id, graphNode.type);
 
 	return graphNode;
 }
@@ -20,10 +24,10 @@ initGraphNode :: (graphNode: *$T, graph: *CoreGraph) {
 	graphAddNode(graph, graphNode);
 }
 
-graphNodeSetDirty :: (graphNode: *$T) {
-	graphSetDirty(graphNode.graph, graphNode);
+setDirty :: (graphNode: *$T) {
+	setDirty(graphNode.graph, graphNode);
 }
 
 graphNodeOnDirty :: (graphNode: *CoreGraphNode) {
-	print("graphNodeOnDirty\n");
+	// print("graphNodeOnDirty:%\n", graphNode.type);
 }

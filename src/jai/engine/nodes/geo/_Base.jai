@@ -1,12 +1,16 @@
-GeoNode :: struct ($geoNodeType:string, $geoParamsType: Type) {
-	#as using baseNode: BaseNode(NodeContext.GEOMETRY, geoNodeType, geoParamsType);
+GeoNodeCookOutput :: *Object3D;
+GeoNodeCookInput  :: []GeoNodeCookOutput;
+GeoNodeCookMethod :: #type (node: *$T, inputs:GeoNodeCookInput) -> GeoNodeCookOutput;
+GeoNode :: struct ($geoParamsType: Type, $geoInitMethod:BaseTypedNodeInitMethod, $minInputs: u8=0, $maxInputs: u8=1) {
+	#as using baseNode: BaseNode(NodeContext.GEOMETRY, geoParamsType, geoInitMethod, minInputs, maxInputs);
 	// baseNode.ctx = NodeContext.GEOMETRY;
 	// baseNode.init_context_node = init_geo_node;
 
 	// p: Params;
-	baseNode.onDirty = onGeoNodeDirty;
+	// baseNode.onDirty = onGeoNodeDirty;
+	
 };
-GeoNodeAny :: GeoNode("unknown", Any);
+GeoNodeAny :: GeoNode(Any, init);
 
 
 
@@ -17,13 +21,28 @@ GeoNodeAny :: GeoNode("unknown", Any);
 // 	return null;
 // }
 
-init_geo_node :: (node: *$N) {
-	geoNode := cast(*GeoNodeAny)node;
+
+
+#scope_file
+
+TYPE :: GeoNodeAny;
+
+// onGeoNodeDirty :CoreGraphNodeOnDirtyMethod: (coreGraphNode: *CoreGraphNode) {
+// 	// node := cast(*GeoNodeAny)coreGraphNode;
+// 	// print("init_geo_node geo_node\n");
+// }
+
+init :: (node: *$N) {
+	geoNode := cast(*TYPE)node;
 	// print("init_geo_node geo_node\n");
 }
 
-#scope_file
-onGeoNodeDirty :CoreGraphNodeOnDirtyMethod: (coreGraphNode: *CoreGraphNode) {
-	node := cast(*GeoNodeAny)coreGraphNode;
-	// print("init_geo_node geo_node\n");
-}
+// cook :GeoNodeCookMethod: (node: *Any, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
+// 	mesh := newObject3D(Mesh);
+// 	assert(false, "geo cook should not be used");
+// 	return mesh;
+// }
+
+// nodeCompute :NodeComputeMethod: (node: *Any, depth:u8=0)->GeoNodeCookOutput {
+// 	return nodeCompute(cast(*TYPE)node, depth);
+// }

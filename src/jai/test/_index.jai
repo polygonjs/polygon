@@ -1,7 +1,11 @@
+#load "_testHelper.jai";
 #load "test_perlin_noise.jai";
+#load "test_nodes_basic_dependency.jai";
 
 run_tests :: () {
-	print("run_tests START\n");
-	test_perlin_noise();
-	print("run_tests END\n");
+	print("TEST START\n");
+	// test_perlin_noise();
+	test_nodes_basic_dependency();
+
+	print("TEST COMPLETED\n");
 }

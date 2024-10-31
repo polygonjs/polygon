@@ -20,6 +20,8 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	graphNode.graph = graph;
 	graphNode.scene = graph.scene;
 	graphNode.id = graph.nextId;
+	assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
+	// print("graphAddNode:%\n", graphNode,graphNode.type);
 
 	using graph;
 	nextId += 1;
@@ -48,20 +50,22 @@ graphConnect :: (graph: *CoreGraph, src: *CoreGraphNode, dest: *CoreGraphNode, $
 	return true;
 }
 
-graphSetDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, $propagate:bool = true) {
+setDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, $propagate:bool = true) {
 	using graph;
 	graphNode.dirty = true;
-
 	#if propagate {
+		// print("propagate START % %\n", graphNode.id, graphNode.type);
+		// sceneDebug(graph.scene, tprint("setDirty from graphNode %", graphNode));
 		if allSuccessorsDirty[graphNode.id] == true {
 			_graphAllSuccessorsUpdate(graph, graphNode.id);
 		}
 		for successorId: allSuccessors[graphNode.id] {
-			graphSetDirty(graph, nodes[successorId], false);
+			setDirty(graph, nodes[successorId], false);
 		}
 		for successorId: allSuccessors[graphNode.id] {
 			nodes[successorId].onDirty(nodes[successorId]);
 		}
+		// print("propagate END\n");
 	}
 }
 

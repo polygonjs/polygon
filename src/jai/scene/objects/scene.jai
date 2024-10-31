@@ -15,7 +15,7 @@ Scene :: struct {
 	#as using object3D: Object3D;
 	object3D.init = init_scene;
 
-	time: Time;
+	time: Time=0;
 	children: [..]*Mesh;
 
 	scene_uniforms: SceneUniforms;
