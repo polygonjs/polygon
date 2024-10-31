@@ -5,6 +5,7 @@ CoreGraph :: struct {
 	scene: *NodesScene;
 	nodes: [..]*CoreGraphNode;
 	dirty: [..]bool; // TODO: use Bit_Array
+	onDirty:[..]CoreGraphNodeOnDirtyMethod;
 	predecessors: [..][..]CoreGraphNodeId;
 	successors: [..][..]CoreGraphNodeId;
 	allPredecessors: [..][..]CoreGraphNodeId;
@@ -32,6 +33,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	if predecessors.count < nextId {
 		array_resize(*nodes, nextId);
 		array_resize(*dirty, nextId);
+		array_resize(*onDirty, nextId);
 		array_resize(*predecessors, nextId);
 		array_resize(*successors, nextId);
 		array_resize(*allPredecessors, nextId);
@@ -43,6 +45,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	// table_set(*nodeById, graphNode.id, graphNode);
 	nodes[graphNode.id] = graphNode;
 	dirty[graphNode.id] = true;
+	onDirty[graphNode.id] = null;
 	allPredecessorsDirty[graphNode.id] = true;
 	allSuccessorsDirty[graphNode.id] = true;
 }
@@ -55,6 +58,9 @@ graphConnect :: (graph: *CoreGraph, src: *CoreGraphNode, dest: *CoreGraphNode, $
 	return true;
 }
 
+setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, onDirty:CoreGraphNodeOnDirtyMethod) {
+	graph.onDirty[graphNode.id] = onDirty;
+}
 dirty :: (node: *CoreGraphNode) -> bool {
 	return node.graph.dirty[node.id];
 }
@@ -74,7 +80,10 @@ setDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, $propagate:bool = tru
 			setDirty(graph, nodes[successorId], false);
 		}
 		for successorId: allSuccessors[graphNode.id] {
-			nodes[successorId].onDirty(nodes[successorId]);
+			onDirty := graph.onDirty[successorId];
+			if onDirty != null {
+				onDirty(nodes[successorId]);
+			}
 		}
 		// print("propagate END\n");
 	}

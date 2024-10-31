@@ -67,7 +67,6 @@ initParam :: (param: *$P, node: *$N) {
 
 	param.type = P;
 	tmp:P;
-	param.onDirty = tmp.onDirty;
 
 	initGraphNode(param, node.graph);
 

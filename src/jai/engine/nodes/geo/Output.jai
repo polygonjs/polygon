@@ -4,8 +4,6 @@ OutputGeoParams :: struct {
 }
 OutputGeoNode :: struct {
 	#as using geoNode: GeoNode(OutputGeoParams, init, maxInputs=10);
-	// geoNode.initTypedNode = initOutputGeoNode;
-	geoNode.onDirty = onOutputDirty;
 };
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
@@ -29,6 +27,7 @@ TYPE :: OutputGeoNode;
 
 init :: (_node: *BaseNodeAny) {
 	node := cast(*TYPE)_node;
+	setOnDirty(cast(*CoreGraphNode)node, onOutputDirty);
 	// print("init_box_geo_node\n");
 	// print("node.params.count 2: %, %\n", node.params.count, node.params);
 	// init_geo_node(node);

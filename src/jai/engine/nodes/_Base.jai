@@ -41,7 +41,7 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	// node.type = T;//tmp.type;
 	node.ctx = tmp.ctx;
 	node.p = tmp.p;
-	node.onDirty = tmp.onDirty;
+	// node.onDirty = tmp.onDirty;
 	// node.cook = tmp.cook;
 	// node.nodeCompute = tmp.nodeCompute;
 	// node.name = tprint("%-name1",T);
