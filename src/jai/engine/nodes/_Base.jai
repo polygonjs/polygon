@@ -34,7 +34,7 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	node: *T = newCoreGraphNode(*scene.graph, T);
 	// node.type = T;
 
-	node.scene = scene;
+	// node.scene = scene;
 	array_add(*scene.nodes, xx node);
 
 	tmp :T;
@@ -84,7 +84,7 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0)
 	assert(node.ctx == inputNode.ctx, "nodes have different contexts");
 	node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
-	graphConnect(*node.scene.graph, inputNode, node);
+	graphConnect(node.graph, inputNode, node);
 	setDirty(node);
 }
 setInput :: (node: *$N0, inputNode: *$N1) {
@@ -97,7 +97,7 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	// print("% 2.nodeCompute %\n", indent(depth), <<node);
 	// sceneDebug(node.scene, tprint("%nodeCompute %", indent(depth), node.name));
 	if node.dirty == false {
-		result, found := table_find(*node.scene.cookResultByNodeId, node.id);
+		result, found := table_find(*graphNodeScene(node).cookResultByNodeId, node.id);
 		if found {
 			return result;
 		}
@@ -127,7 +127,7 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	result := cook(node, inputResults);
 	node.dirty = false;
 	// TODO: dispose previous result
-	table_set(*node.scene.cookResultByNodeId, node.id, result);
+	table_set(*graphNodeScene(node).cookResultByNodeId, node.id, result);
 	return result;
 }
 

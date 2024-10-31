@@ -11,12 +11,13 @@ OutputGeoNode :: struct {
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	selectedIndex := ifx node.p.input.value < inputs.count then node.p.input.value else inputs.count - 1;
 	input := inputs[selectedIndex];
+	scene := graphNodeScene(node);
 
 	if input != null {
-		array_resize(*node.scene.worldScene.children, 1);
-		node.scene.worldScene.children[0] = xx input;
+		array_resize(*scene.worldScene.children, 1);
+		scene.worldScene.children[0] = xx input;
 	} else {
-		array_resize(*node.scene.worldScene.children, 0);
+		array_resize(*scene.worldScene.children, 0);
 	}
 
 	return input;

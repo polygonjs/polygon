@@ -69,10 +69,10 @@ initParam :: (param: *$P, node: *$N) {
 	tmp:P;
 	param.onDirty = tmp.onDirty;
 
-	initGraphNode(param, *node.scene.graph);
+	initGraphNode(param, node.graph);
 
 	array_add(*node.params, xx param);
-	graphConnect(*node.scene.graph, param, node);
+	graphConnect(node.graph, param, node);
 
 	// initBaseParam(param);
 	// param.initParam(param, node);

@@ -18,7 +18,7 @@ initGraph :: (graph: *CoreGraph) {
 
 graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	graphNode.graph = graph;
-	graphNode.scene = graph.scene;
+	// graphNode.scene = graph.scene;
 	graphNode.id = graph.nextId;
 	assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
 	// print("graphAddNode:%\n", graphNode,graphNode.type);

@@ -3,7 +3,6 @@ CoreGraphNode :: struct {
 	type: Type;
 	id: CoreGraphNodeId;
 	graph: *CoreGraph;
-	scene: *NodesScene;
 	dirty: bool;
 	onDirty:CoreGraphNodeOnDirtyMethod = graphNodeOnDirty;
 }
@@ -30,4 +29,7 @@ setDirty :: (graphNode: *$T) {
 
 graphNodeOnDirty :: (graphNode: *CoreGraphNode) {
 	// print("graphNodeOnDirty:%\n", graphNode.type);
+}
+graphNodeScene :: (graphNode: *CoreGraphNode) -> *NodesScene {
+	return graphNode.graph.scene;
 }
