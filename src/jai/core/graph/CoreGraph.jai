@@ -4,6 +4,7 @@ CoreGraph :: struct {
 	nextId :CoreGraphNodeId= 1; // TODO: recycle ids when a node is removed
 	scene: *NodesScene;
 	nodes: [..]*CoreGraphNode;
+	dirty: [..]bool; // TODO: use Bit_Array
 	predecessors: [..][..]CoreGraphNodeId;
 	successors: [..][..]CoreGraphNodeId;
 	allPredecessors: [..][..]CoreGraphNodeId;
@@ -15,6 +16,8 @@ CoreGraph :: struct {
 initGraph :: (graph: *CoreGraph) {
 	// init(*graph.nodeById, 512);
 }
+
+
 
 graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	graphNode.graph = graph;
@@ -28,6 +31,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 
 	if predecessors.count < nextId {
 		array_resize(*nodes, nextId);
+		array_resize(*dirty, nextId);
 		array_resize(*predecessors, nextId);
 		array_resize(*successors, nextId);
 		array_resize(*allPredecessors, nextId);
@@ -38,6 +42,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 
 	// table_set(*nodeById, graphNode.id, graphNode);
 	nodes[graphNode.id] = graphNode;
+	dirty[graphNode.id] = true;
 	allPredecessorsDirty[graphNode.id] = true;
 	allSuccessorsDirty[graphNode.id] = true;
 }
@@ -50,9 +55,15 @@ graphConnect :: (graph: *CoreGraph, src: *CoreGraphNode, dest: *CoreGraphNode, $
 	return true;
 }
 
+dirty :: (node: *CoreGraphNode) -> bool {
+	return node.graph.dirty[node.id];
+}
+unSetDirty :: (node: *CoreGraphNode) {
+	node.graph.dirty[node.id] = false;
+}
 setDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, $propagate:bool = true) {
 	using graph;
-	graphNode.dirty = true;
+	dirty[graphNode.id] = true;
 	#if propagate {
 		// print("propagate START % %\n", graphNode.id, graphNode.type);
 		// sceneDebug(graph.scene, tprint("setDirty from graphNode %", graphNode));

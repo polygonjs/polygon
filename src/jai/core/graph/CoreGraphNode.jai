@@ -3,7 +3,6 @@ CoreGraphNode :: struct {
 	type: Type;
 	id: CoreGraphNodeId;
 	graph: *CoreGraph;
-	dirty: bool;
 	onDirty:CoreGraphNodeOnDirtyMethod = graphNodeOnDirty;
 }
 
