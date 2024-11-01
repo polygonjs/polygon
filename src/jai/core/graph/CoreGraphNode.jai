@@ -15,14 +15,14 @@ newCoreGraphNode :: (graph: *CoreGraph, $T: Type) -> *T {
 	// assert(tmp.type == graphNode.type, "types are not the same");
 
 	graphNode.type = T;
-	initGraphNode(graphNode, graph);
+	graphNodeInit(graphNode, graph);
 
 	// print("graphAddNode % %\n", graphNode.id, graphNode.type);
 
 	return graphNode;
 }
 
-initGraphNode :: (graphNode: *$T, graph: *CoreGraph) {
+graphNodeInit :: (graphNode: *$T, graph: *CoreGraph) {
 	graphAddNode(graph, graphNode);
 }
 
@@ -33,9 +33,9 @@ setOnDirty :: (graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod)
 	setOnDirty(graphNode.graph, graphNode, onDirty);
 }
 
-graphNodeOnDirty :: (graphNode: *CoreGraphNodeAny) {
-	// print("graphNodeOnDirty:%\n", graphNode.type);
-}
+// graphNodeOnDirty :: (graphNode: *CoreGraphNodeAny) {
+// 	// print("graphNodeOnDirty:%\n", graphNode.type);
+// }
 graphNodeScene :: (graphNode: *$T) -> *NodesScene {
 	return graphNode.graph.scene;
 }

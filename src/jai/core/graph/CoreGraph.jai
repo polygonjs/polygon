@@ -1,21 +1,22 @@
 CoreGraphNodeId :: u32;
 CoreGraph :: struct {
-	// we start from 1, so that we know 0 is nothing (maybe)
+	// we start from 1, so that we know 0 is nothing
 	nextId :CoreGraphNodeId= 1; // TODO: recycle ids when a node is removed
 	scene: *NodesScene;
 	nodes: [..]*CoreGraphNodeAny;
-	dirty: [..]bool; // TODO: use Bit_Array
+	dirty: Bit_Array;
 	onDirty:[..]CoreGraphNodeOnDirtyMethod;
 	predecessors: [..][..]CoreGraphNodeId;
 	successors: [..][..]CoreGraphNodeId;
 	allPredecessors: [..][..]CoreGraphNodeId;
-	allPredecessorsDirty: [..]bool;
+	allPredecessorsDirty: Bit_Array;
 	allSuccessors: [..][..]CoreGraphNodeId;
-	allSuccessorsDirty: [..]bool;
+	allSuccessorsDirty: Bit_Array;
 }
 
-initGraph :: (graph: *CoreGraph) {
+graphInit :: (graph: *CoreGraph) {
 	// init(*graph.nodeById, 512);
+	init_bit_array(*graph.dirty, 1);
 }
 
 
@@ -32,14 +33,16 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 
 	if predecessors.count < nextId {
 		array_resize(*nodes, nextId);
-		array_resize(*dirty, nextId);
+		// array_resize(*dirty, nextId);
 		array_resize(*onDirty, nextId);
 		array_resize(*predecessors, nextId);
 		array_resize(*successors, nextId);
 		array_resize(*allPredecessors, nextId);
-		array_resize(*allPredecessorsDirty, nextId);
 		array_resize(*allSuccessors, nextId);
-		array_resize(*allSuccessorsDirty, nextId);
+
+		bit_array_resize(*allPredecessorsDirty, nextId);
+		bit_array_resize(*allSuccessorsDirty, nextId);
+		bit_array_resize(*dirty, nextId);
 	}
 
 	// table_set(*nodeById, graphNode.id, graphNode);

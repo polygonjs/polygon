@@ -18,7 +18,7 @@ newNodesScene :: () -> *NodesScene {
 		target_ptr := cast(*u8)scene + graph_member.offset_in_bytes;
 		memcpy(target_ptr, src_ptr, size_of(CoreGraph));
 	}
-	initGraph(*scene.graph);
+	graphInit(*scene.graph);
 	
 	return scene;
 }

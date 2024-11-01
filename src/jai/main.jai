@@ -54,7 +54,9 @@ main :: () {
 
 	#if RUN_TESTS {
 		run_tests();
-		return;
+		#if WASM==false {
+			return;
+		}
 	}
 
 	node_name_size := 128;
@@ -316,6 +318,7 @@ CAMERA_CONTROLS_NODES:PanControls;
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
 else #import "Basic";
+#import "Bit_Array";
 #import "Hash_Table";
 #import "Math";
 #import "String";
