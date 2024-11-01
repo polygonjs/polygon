@@ -3,7 +3,7 @@ CoreGraph :: struct {
 	// we start from 1, so that we know 0 is nothing (maybe)
 	nextId :CoreGraphNodeId= 1; // TODO: recycle ids when a node is removed
 	scene: *NodesScene;
-	nodes: [..]*CoreGraphNode;
+	nodes: [..]*CoreGraphNodeAny;
 	dirty: [..]bool; // TODO: use Bit_Array
 	onDirty:[..]CoreGraphNodeOnDirtyMethod;
 	predecessors: [..][..]CoreGraphNodeId;
@@ -43,14 +43,14 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	}
 
 	// table_set(*nodeById, graphNode.id, graphNode);
-	nodes[graphNode.id] = graphNode;
+	nodes[graphNode.id] = xx graphNode;
 	dirty[graphNode.id] = true;
 	onDirty[graphNode.id] = null;
 	allPredecessorsDirty[graphNode.id] = true;
 	allSuccessorsDirty[graphNode.id] = true;
 }
 
-graphConnect :: (graph: *CoreGraph, src: *CoreGraphNode, dest: *CoreGraphNode, $checkCycle:bool = true)-> bool {
+graphConnect :: (graph: *CoreGraph, src: *$T0, dest: *$T1, $checkCycle:bool = true)-> bool {
 
 	// TODO: check for cycles
 	_graphCreateConnection(graph, src.id, dest.id);
@@ -58,16 +58,16 @@ graphConnect :: (graph: *CoreGraph, src: *CoreGraphNode, dest: *CoreGraphNode, $
 	return true;
 }
 
-setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, onDirty:CoreGraphNodeOnDirtyMethod) {
+setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod) {
 	graph.onDirty[graphNode.id] = onDirty;
 }
-dirty :: (node: *CoreGraphNode) -> bool {
+dirty :: (node: *$T) -> bool {
 	return node.graph.dirty[node.id];
 }
-unSetDirty :: (node: *CoreGraphNode) {
+unSetDirty :: (node: *$T) {
 	node.graph.dirty[node.id] = false;
 }
-setDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNode, $propagate:bool = true) {
+setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 	using graph;
 	dirty[graphNode.id] = true;
 	#if propagate {

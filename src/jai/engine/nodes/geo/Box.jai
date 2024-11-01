@@ -1,5 +1,5 @@
 // BoxGeoType :: struct {
-// 	type::"box";
+// 	// type::"box";
 // }
 // BoxGeoType :string: "box";
 BoxGeoParams :: struct {
@@ -8,9 +8,10 @@ BoxGeoParams :: struct {
 	segments: Vector3UIntParam = .{value=.{1,1,1}};
 }
 BoxGeoNode :: struct {
-	#as using geoNode: GeoNode(BoxGeoParams, init);
+	#as using geoNode: GeoNode(BoxGeoNode, BoxGeoParams, init);
 	// geoNode.initTypedNode = initBoxGeoNode;
 };
+
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	mat := newMaterial(NormalMeshMaterial);

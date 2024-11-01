@@ -1,10 +1,13 @@
-
+// OutputGeoType :: struct {
+// 	// type::"box";
+// }
 OutputGeoParams :: struct {
 	input: UIntegerParam = .{value=0};
 }
 OutputGeoNode :: struct {
-	#as using geoNode: GeoNode(OutputGeoParams, init, maxInputs=10);
+	#as using geoNode: GeoNode(OutputGeoNode, OutputGeoParams, init, maxInputs=10);
 };
+
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	selectedIndex := ifx node.p.input.value < inputs.count then node.p.input.value else inputs.count - 1;
@@ -27,13 +30,17 @@ TYPE :: OutputGeoNode;
 
 init :: (_node: *BaseNodeAny) {
 	node := cast(*TYPE)_node;
-	setOnDirty(cast(*CoreGraphNode)node, onOutputDirty);
+	// nodeCastRegister(TYPE, nodeCast);
+	setOnDirty(cast(*CoreGraphNodeAny)node, onOutputDirty);
 	// print("init_box_geo_node\n");
 	// print("node.params.count 2: %, %\n", node.params.count, node.params);
 	// init_geo_node(node);
 }
+nodeCast :: (node: *CoreGraphNodeAny)->*TYPE {
+	return cast(*TYPE)node;
+}
 
-onOutputDirty :: (coreGraphNode: *CoreGraphNode) {
+onOutputDirty :: (coreGraphNode: *CoreGraphNodeAny) {
 	// print("onOutputDirty: %\n", (cast(*TYPE)coreGraphNode).type);
 	// print("cast: %\n", <<(cast(*TYPE) coreGraphNode));
 	nodeCompute(cast(*TYPE) coreGraphNode);

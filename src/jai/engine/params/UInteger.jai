@@ -1,9 +1,10 @@
 // IntegerType :: struct {}
 UIntegerParam :: struct {
-	#as using baseParam: BaseParam(PARAM_TYPE);
+	#as using baseParam: BaseParam(UIntegerParam, PARAM_TYPE);
 	value: #run paramValueByType(PARAM_TYPE);
 	// initParam:ParamInitMethod: initParam;
 };
+
 
 #scope_file
 

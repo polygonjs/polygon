@@ -1,9 +1,10 @@
 // Vector3Type :: struct {}
 Vector3Param :: struct {
-	#as using baseParam: BaseParam(PARAM_TYPE);
+	#as using baseParam: BaseParam(Vector3Param, PARAM_TYPE);
 	value: #run paramValueByType(PARAM_TYPE);
 	// initParam:ParamInitMethod: initParam;
 };
+
 
 #scope_file
 

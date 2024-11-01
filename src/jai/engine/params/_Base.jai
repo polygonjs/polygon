@@ -40,15 +40,15 @@ initParamByType :: (param: *$P, node: *$N) {
 	assert(false, tprint("initParamByType unknown type: %\n", param.paramType));
 }
 
-BaseParam :: struct ($ParamTypeValue:ParamType) {
-	#as using coreGraphNode: CoreGraphNode;
+BaseParam :: struct ($baseParamT: Type, $ParamTypeValue:ParamType) {
+	#as using coreGraphNode: CoreGraphNode(baseParamT);
 	// type: ParamType= paramType;
 	paramType:ParamType=ParamTypeValue;
 	node: *BaseNodeAny;
 	// initParam :ParamInitMethod:initMethod;
 	
 }
-BaseParamAny :: BaseParam(ParamType.ANY);
+BaseParamAny :: BaseParam(Any, ParamType.ANY);
 
 // newParam :: (node: *BaseNode, $T: Type) -> *T {
 // 	param: *T = alloc(size_of(T));
@@ -65,8 +65,8 @@ initParam :: (param: *$P, node: *$N) {
 	// print("initParam START %\n", <<param);
 	param.node = xx node;
 
-	param.type = P;
-	tmp:P;
+	// param.type = P;
+	// tmp:P;
 
 	initGraphNode(param, node.graph);
 

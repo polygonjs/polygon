@@ -9,8 +9,8 @@ NodeContext :: enum u8 {
 	MATERIAL :: 2;
 };
 
-BaseNode :: struct ($nodeCtx: NodeContext, $ParamsType: Type, $initMethod:BaseTypedNodeInitMethod, $baseMinInputs: u8=0, $baseMaxInputs: u8=1) {
-	#as using coreGraphNode: CoreGraphNode;
+BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, $initMethod:BaseTypedNodeInitMethod, $baseMinInputs: u8=0, $baseMaxInputs: u8=1) {
+	#as using coreGraphNode: CoreGraphNode(baseNodeT);
 	ctx: NodeContext=nodeCtx;
 	// type: string=nodeType;
 	// name: string;
@@ -25,9 +25,9 @@ BaseNode :: struct ($nodeCtx: NodeContext, $ParamsType: Type, $initMethod:BaseTy
 	// let's have the structs whose size can change at the end of the struct,
 	// to make it easier to cast and not have read/write issues.
 	p:ParamsType;
-	inputs: [baseMaxInputs]*BaseNode(nodeCtx, Any, initTypedNodeDummy);
+	inputs: [baseMaxInputs]*BaseNode(Any, nodeCtx, Any, initTypedNodeDummy);
 }
-BaseNodeAny :: BaseNode(NodeContext.ANY, Any, initTypedNodeDummy);
+BaseNodeAny :: BaseNode(Any, NodeContext.ANY, Any, initTypedNodeDummy);
 
 newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	// node: *T = alloc(size_of(T));
@@ -92,44 +92,6 @@ setInput :: (node: *$N0, inputNode: *$N1) {
 }
 
 
-nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
-	assert(node != null, "nodeCompute: node name is null");
-	// print("% 2.nodeCompute %\n", indent(depth), <<node);
-	// sceneDebug(node.scene, tprint("%nodeCompute %", indent(depth), node.name));
-	if dirty(node) == false {
-		result, found := table_find(*graphNodeScene(node).cookResultByNodeId, node.id);
-		if found {
-			return result;
-		}
-	}
-
-	inputResults:GeoNodeCookInput=.[];
-	// using node;
-	array_resize(*inputResults, node.inputs.count);
-	// print("%inputResults PRE: %\n", indent(depth), inputResults);
-
-	for inputNode, i: node.inputs {
-		// print("%nodeCompute %input: %=%\n", indent(depth), node.name, i, inputNode);
-		if inputNode != null {
-			// print("%not in cache, computing\n", indent(depth));
-			inputResult:GeoNodeCookOutput;
-			if inputNode.type == {
-				case BoxGeoNode; inputResult = nodeCompute(cast(*BoxGeoNode) inputNode, depth+1);
-				case OutputGeoNode; inputResult = nodeCompute(cast(*OutputGeoNode) inputNode, depth+1);
-			}
-			// print("%inputResult: %\n", indent(depth), inputResult);
-			// print("%set % % %\n", indent(depth), i, inputResults, inputResult);
-			inputResults[i] = inputResult;
-		}
-	}
-	
-	// print("%inputResults POST: %\n", indent(depth), inputResults);
-	result := cook(node, inputResults);
-	unSetDirty(node);
-	// TODO: dispose previous result
-	table_set(*graphNodeScene(node).cookResultByNodeId, node.id, result);
-	return result;
-}
 
 // nodeCompute :: (node: *GeoNodeAny) -> GeoNodeCookOutput {
 // 	if node.type == {
