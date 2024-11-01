@@ -34,7 +34,7 @@ generateNodeComputes :: ()->string {
 	// for nodeType: NOTE_TYPES {
 	// 	print_to_builder(*builder, tprint("if (inputNode.runtimeType == %) {return nodeCompute(cast(*%) inputNode, depth);}\n", nodeType, nodeType));
 	// }
-	print_to_builder(*builder, "if inputNode.runtimeType == {\n");
+	print_to_builder(*builder, "if inputNode.type == {\n");
 	for nodeType: NOTE_TYPES {
 		print_to_builder(*builder, tprint("\tcase %; return nodeCompute(cast(*%) inputNode, depth);\n", nodeType, nodeType));
 	}

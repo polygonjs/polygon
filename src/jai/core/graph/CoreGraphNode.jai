@@ -1,7 +1,7 @@
 CoreGraphNodeOnDirtyMethod :: #type (node: *CoreGraphNodeAny);
 CoreGraphNode :: struct ($T: Type) {
-	type: Type:T;
-	runtimeType: Type;
+	// type: Type:T;
+	type: Type;
 	// type: T;
 	id: CoreGraphNodeId;
 	graph: *CoreGraph;
@@ -14,7 +14,7 @@ newCoreGraphNode :: (graph: *CoreGraph, $T: Type) -> *T {
 	// tmp: T;
 	// assert(tmp.type == graphNode.type, "types are not the same");
 
-	graphNode.runtimeType = T;
+	graphNode.type = T;
 	initGraphNode(graphNode, graph);
 
 	// print("graphAddNode % %\n", graphNode.id, graphNode.type);

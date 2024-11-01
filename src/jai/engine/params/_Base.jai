@@ -65,7 +65,7 @@ initParam :: (param: *$P, node: *$N) {
 	// print("initParam START %\n", <<param);
 	param.node = xx node;
 
-	// param.type = P;
+	param.type = P;
 	// tmp:P;
 
 	initGraphNode(param, node.graph);

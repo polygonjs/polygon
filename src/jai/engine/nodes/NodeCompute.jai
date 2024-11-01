@@ -37,7 +37,7 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 
 nodeComputeInputNode :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 	#insert GENERATED_CODE_NODE_COMPUTE;
-	assert(false, tprint("nodeComputeResult: node type % % is not implemented", inputNode.type, inputNode.runtimeType));
+	assert(false, tprint("nodeComputeResult: node type % is not implemented", inputNode.type));
 	return newObject3D(Mesh);
 }
 
