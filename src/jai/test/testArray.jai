@@ -1,4 +1,4 @@
-test_array :: () {
+testArray :: () {
 	print("ok\n");
 
 	arr :[..]Vector2Int;

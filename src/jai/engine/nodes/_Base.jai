@@ -19,6 +19,7 @@ NodeContext :: enum u8 {
 BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, $initMethod:BaseTypedNodeInitMethod, $baseMinInputs: u8=0, $baseMaxInputs: u8=1) {
 	#as using coreGraphNode: CoreGraphNode(baseNodeT);
 	ctx: NodeContext=nodeCtx;
+	nodeId: NodeId;
 	// type: string=nodeType;
 	// name: string;
 	// init_context_node :BaseContextNodeInitMethod;//= dummy_init_context_node;
@@ -47,6 +48,8 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	tmp :T;
 	// node.type = T;//tmp.type;
 	node.ctx = tmp.ctx;
+	node.nodeId = NEXT_NODE_ID;
+	NEXT_NODE_ID += 1;
 	node.p = tmp.p;
 	// node.onDirty = tmp.onDirty;
 	// node.cook = tmp.cook;
@@ -123,6 +126,8 @@ setInput :: (node: *$N0, inputNode: *$N1) {
 #scope_file
 
 TYPE :: BaseNodeAny;
+NodeId :: u32;
+NEXT_NODE_ID :NodeId= 1;
 
 initBaseNode :: (node: *$T) {
 	array_init(*node.params);

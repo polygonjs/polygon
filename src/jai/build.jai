@@ -90,6 +90,7 @@ DONE
 
 								add_build_string("WASM :: true;", w);
 								add_build_string(tprint("RUN_TESTS :: %;", buildArgs.test), w);
+								// add_build_string(tprint("COMPILE_TIME_ARGS :[%]string: .[\"%\"];", buildArgs.all.count, join(..buildArgs.all, "\", \"")), w);
 								generated_code = true;
 							}
 						}
@@ -248,6 +249,7 @@ BuildArgs :: struct {
 	jailsDiagnostics: bool;
 	test:bool;
 	optimized:bool;
+	// all:[..]string;
 }
 getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs: BuildArgs;
@@ -263,6 +265,12 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 		buildArgs.wasm = true;
 		buildArgs.native = true;
 	}
+
+	// array_resize(*COMPILE_TIME_ARGS, args.count);
+	// for arg, i: args {
+	// 	COMPILE_TIME_ARGS[i] = arg;
+	// }
+
 	return buildArgs;
 }
 _checkbox :: (status:bool)->string {

@@ -53,7 +53,7 @@ main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
 	#if RUN_TESTS {
-		run_tests();
+		runTests();
 		#if WASM==false {
 			return;
 		}
@@ -327,6 +327,7 @@ else              #import "wgpu";
 
 #load "main_scene_init.jai";
 #load "core/graph/_index.jai";
+#load "editor/_index.jai";
 #load "engine/_index.jai";
 #load "scene/_index.jai";
 #load "common/events/index.jai";

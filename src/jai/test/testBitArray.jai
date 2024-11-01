@@ -1,5 +1,5 @@
 
-test_bit_array :: () {
+testBitArray :: () {
 	dirty: Bit_Array;
 
 	assertEqual(bits_count(2), 1);

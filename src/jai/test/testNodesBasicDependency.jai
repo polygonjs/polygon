@@ -1,4 +1,4 @@
-test_nodes_basic_dependency :: () {
+testNodesBasicDependency :: () {
 	nodesScene := newNodesScene();
 	box1 := newNode(nodesScene, BoxGeoNode);
 	box2 := newNode(nodesScene, BoxGeoNode);

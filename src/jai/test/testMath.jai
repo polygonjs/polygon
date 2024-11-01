@@ -1,5 +1,5 @@
 
-test_math :: () {
+testMath :: () {
 	test_nextPowerOf2();
 }
 

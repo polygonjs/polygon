@@ -1,4 +1,4 @@
-test_perlin_noise :: () {
+testPerlinNoise :: () {
 	tests := Vector3.[
 		.{-0.5, -0.395161, -0.5},
 		.{1.2, 0, 0},
