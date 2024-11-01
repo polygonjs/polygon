@@ -84,7 +84,7 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0)
 	assert(node.ctx == inputNode.ctx, "nodes have different contexts");
 	node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
-	graphConnect(node.graph, inputNode, node);
+	graphConnect(inputNode, node);
 	setDirty(node);
 }
 setInput :: (node: *$N0, inputNode: *$N1) {

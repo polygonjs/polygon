@@ -4,7 +4,7 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	// print("% 2.nodeCompute %\n", indent(depth), <<node);
 	// sceneDebug(node.scene, tprint("%nodeCompute %", indent(depth), node.name));
 	if dirty(node) == false {
-		result, found := table_find(*graphNodeScene(node).cookResultByNodeId, node.id);
+		result, found := table_find(*graphNodeScene(node).cookResultByNodeId, node.graphNodeId);
 		if found {
 			return result;
 		}
@@ -31,7 +31,7 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	result := cook(node, inputResults);
 	unSetDirty(node);
 	// TODO: dispose previous result
-	table_set(*graphNodeScene(node).cookResultByNodeId, node.id, result);
+	table_set(*graphNodeScene(node).cookResultByNodeId, node.graphNodeId, result);
 	return result;
 }
 

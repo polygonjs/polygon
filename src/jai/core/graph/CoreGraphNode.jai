@@ -3,8 +3,8 @@ CoreGraphNode :: struct ($T: Type) {
 	// type: Type:T;
 	type: Type;
 	// type: T;
-	id: CoreGraphNodeId;
-	graph: *CoreGraph;
+	graphNodeId: CoreGraphNodeId;
+	graphId: CoreGraphId;
 }
 CoreGraphNodeAny :: CoreGraphNode(Any);
 
@@ -27,15 +27,15 @@ graphNodeInit :: (graphNode: *$T, graph: *CoreGraph) {
 }
 
 setDirty :: (graphNode: *$T) {
-	setDirty(graphNode.graph, graphNode);
+	setDirty(graph(graphNode.graphId), graphNode);
 }
 setOnDirty :: (graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod) {
-	setOnDirty(graphNode.graph, graphNode, onDirty);
+	setOnDirty(graph(graphNode.graphId), graphNode, onDirty);
 }
 
 // graphNodeOnDirty :: (graphNode: *CoreGraphNodeAny) {
 // 	// print("graphNodeOnDirty:%\n", graphNode.type);
 // }
 graphNodeScene :: (graphNode: *$T) -> *NodesScene {
-	return graphNode.graph.scene;
+	return graph(graphNode.graphId).scene;
 }

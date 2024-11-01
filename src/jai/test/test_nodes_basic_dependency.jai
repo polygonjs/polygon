@@ -5,12 +5,12 @@ test_nodes_basic_dependency :: () {
 
 	// assertEqual(box1.cook, box2.cook, "cook methods point to same method");
 	assertNotNull(graphNodeScene(box1), "box1.scene not null");
-	assertNotNull(box1.graph, "box1.graph not null");
+	assertNotNull(graph(box1.graphId), "box1.graph not null");
 	assertNotNull(*graphNodeScene(box1).graph, "box1.scene.graph not null");
 	assertNotNull(graphNodeScene(box1).graph.scene, "box1.scene.graph.scene not null");
 	assertNotNull(box1.p.scale.node, "box1.scene.scale.node not null");
 	assertNotNull(graphNodeScene(*box1.p.scale), "box1.scene.scale.node.scene not null");
-	assertNotNull(box1.p.scale.graph, "box1.scene.scale.graph not null");
+	assertNotNull(graph(box1.p.scale.graphId), "box1.scene.scale.graph not null");
 	
 	output1 := newNode(nodesScene, OutputGeoNode);
 	// assertNotEqual(cast(*void)box1.cook, cast(*void)output1.cook, "cook methods do not point to same method");

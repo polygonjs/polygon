@@ -1,5 +1,7 @@
+CoreGraphId :: u8;
 CoreGraphNodeId :: u32;
 CoreGraph :: struct {
+	graphId: CoreGraphId;
 	// we start from 1, so that we know 0 is nothing
 	nextId :CoreGraphNodeId= 1; // TODO: recycle ids when a node is removed
 	scene: *NodesScene;
@@ -15,16 +17,26 @@ CoreGraph :: struct {
 }
 
 graphInit :: (graph: *CoreGraph) {
+	graph.graphId = NEXT_CORE_GRAPH_ID;
+	array_resize(*CORE_GRAPHS, max(graph.graphId + 1, xx CORE_GRAPHS.count));
+	CORE_GRAPHS[graph.graphId] = graph;
+	NEXT_CORE_GRAPH_ID += 1;
 	// init(*graph.nodeById, 512);
 	init_bit_array(*graph.dirty, 1);
+}
+graph :: (graphNode: *CoreGraphNodeAny) -> *CoreGraph {
+	return CORE_GRAPHS[graphNode.graphId];
+}
+graph :: (graphId: CoreGraphId) -> *CoreGraph {
+	return CORE_GRAPHS[graphId];
 }
 
 
 
 graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
-	graphNode.graph = graph;
+	graphNode.graphId = graph.graphId;
 	// graphNode.scene = graph.scene;
-	graphNode.id = graph.nextId;
+	graphNode.graphNodeId = graph.nextId;
 	assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
 	// print("graphAddNode:%\n", graphNode,graphNode.type);
 
@@ -45,44 +57,45 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 		bit_array_resize(*dirty, nextId);
 	}
 
-	// table_set(*nodeById, graphNode.id, graphNode);
-	nodes[graphNode.id] = xx graphNode;
-	dirty[graphNode.id] = true;
-	onDirty[graphNode.id] = null;
-	allPredecessorsDirty[graphNode.id] = true;
-	allSuccessorsDirty[graphNode.id] = true;
+	// table_set(*nodeById, graphNode.graphNodeId, graphNode);
+	nodes[graphNode.graphNodeId] = xx graphNode;
+	dirty[graphNode.graphNodeId] = true;
+	onDirty[graphNode.graphNodeId] = null;
+	allPredecessorsDirty[graphNode.graphNodeId] = true;
+	allSuccessorsDirty[graphNode.graphNodeId] = true;
 }
 
-graphConnect :: (graph: *CoreGraph, src: *$T0, dest: *$T1, $checkCycle:bool = true)-> bool {
+graphConnect :: (src: *$T0, dest: *$T1, $checkCycle:bool = true)-> bool {
+	assert(src.graphId == dest.graphId, "src and dest must be in the same graph");
 
 	// TODO: check for cycles
-	_graphCreateConnection(graph, src.id, dest.id);
+	_graphCreateConnection(graph(src.graphId), src.graphNodeId, dest.graphNodeId);
 
 	return true;
 }
 
 setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod) {
-	graph.onDirty[graphNode.id] = onDirty;
+	graph.onDirty[graphNode.graphNodeId] = onDirty;
 }
 dirty :: (node: *$T) -> bool {
-	return node.graph.dirty[node.id];
+	return graph(node.graphId).dirty[node.graphNodeId];
 }
 unSetDirty :: (node: *$T) {
-	node.graph.dirty[node.id] = false;
+	graph(node.graphId).dirty[node.graphNodeId] = false;
 }
 setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 	using graph;
-	dirty[graphNode.id] = true;
+	dirty[graphNode.graphNodeId] = true;
 	#if propagate {
 		// print("propagate START % %\n", graphNode.id, graphNode.type);
 		// sceneDebug(graph.scene, tprint("setDirty from graphNode %", graphNode));
-		if allSuccessorsDirty[graphNode.id] == true {
-			_graphAllSuccessorsUpdate(graph, graphNode.id);
+		if allSuccessorsDirty[graphNode.graphNodeId] == true {
+			_graphAllSuccessorsUpdate(graph, graphNode.graphNodeId);
 		}
-		for successorId: allSuccessors[graphNode.id] {
+		for successorId: allSuccessors[graphNode.graphNodeId] {
 			setDirty(graph, nodes[successorId], false);
 		}
-		for successorId: allSuccessors[graphNode.id] {
+		for successorId: allSuccessors[graphNode.graphNodeId] {
 			onDirty := graph.onDirty[successorId];
 			if onDirty != null {
 				onDirty(nodes[successorId]);
@@ -93,6 +106,9 @@ setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 }
 
 #scope_file
+
+NEXT_CORE_GRAPH_ID:CoreGraphId=0;
+CORE_GRAPHS:[..]*CoreGraph;
 
 _graphCreateConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
 	using graph;
