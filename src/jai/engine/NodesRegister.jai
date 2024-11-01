@@ -16,18 +16,18 @@ GENERATED_CODE_NODE_COMPUTE :: #run registerAll();
 
 
 NOTE_TYPES :[..]Type;
-PARAM_TYPES :[..]Type;
+// PARAM_TYPES :[..]Type;
 
 nodeRegister :: ($nodeType:Type) {
 	// print(">> nodeRegister: %\n", nodeType);
 	array_add(*NOTE_TYPES, nodeType);
 	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
 }
-paramRegister :: ($paramType:Type) {
-	// print("> paramRegister: %\n", paramType);
-	array_add(*PARAM_TYPES, paramType);
-	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
-}
+// paramRegister :: ($paramType:Type) {
+// 	// print("> paramRegister: %\n", paramType);
+// 	array_add(*PARAM_TYPES, paramType);
+// 	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
+// }
 
 generateNodeComputes :: ()->string {
 	builder: String_Builder;
@@ -46,10 +46,10 @@ generateNodeComputes :: ()->string {
 }
 
 registerAll :: ()->nodeCompute:string, nodeCompute2:string {
-	paramRegister(FloatParam);
-	paramRegister(UIntegerParam);
-	paramRegister(Vector3Param);
-	paramRegister(Vector3UIntParam);
+	// paramRegister(FloatParam);
+	// paramRegister(UIntegerParam);
+	// paramRegister(Vector3Param);
+	// paramRegister(Vector3UIntParam);
 
 	nodeRegister(BoxGeoNode);
 	nodeRegister(OutputGeoNode);

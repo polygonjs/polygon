@@ -1,14 +1,14 @@
 // FloatType :: struct {}
 FloatParam :: struct {
-	#as using baseParam: BaseParam(FloatParam, PARAM_TYPE);
-	value: #run paramValueByType(PARAM_TYPE);
+	#as using baseParam: BaseParam(FloatParam, float32);
+	// value: #run paramValueByType(TYPE);
 	// initParam:ParamInitMethod: initParam;
 };
 
 
 #scope_file
 
-PARAM_TYPE :: ParamType.FLOAT;
+// PARAM_TYPE :: ParamType.FLOAT;
 TYPE :: FloatParam;
 
 // initParam :: (_param: *TYPE, node: *$N) {

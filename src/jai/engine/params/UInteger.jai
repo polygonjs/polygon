@@ -1,14 +1,14 @@
 // IntegerType :: struct {}
 UIntegerParam :: struct {
-	#as using baseParam: BaseParam(UIntegerParam, PARAM_TYPE);
-	value: #run paramValueByType(PARAM_TYPE);
+	#as using baseParam: BaseParam(UIntegerParam, u32);
+	// value: #run paramValueByType(TYPE);
 	// initParam:ParamInitMethod: initParam;
 };
 
 
 #scope_file
 
-PARAM_TYPE :: ParamType.UINTEGER;
+// PARAM_TYPE :: ParamType.UINTEGER;
 TYPE :: UIntegerParam;
 
 // initParam :: (_param: *TYPE, node: *$N) {

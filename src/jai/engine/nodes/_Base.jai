@@ -4,9 +4,16 @@ NodeCookMethod :: #type (node: *$T, inputResults:GeoNodeCookInput) -> GeoNodeCoo
 NodeComputeMethod :: #type (node: *$T, depth:u8=0) -> GeoNodeCookOutput;
 
 NodeContext :: enum u8 {
-	ANY :: 0;
-	GEOMETRY :: 1;
-	MATERIAL :: 2;
+	ANY		:: 0;
+	ROOT	:: 1;
+	GEOMETRY:: 2;
+	MATERIAL:: 3;
+	TEXTURE	:: 4;
+	CPU		:: 5;
+	WGSL	:: 6;
+	ACTOR	:: 7;
+	AUDIO	:: 8;
+	RENDER	:: 9;
 };
 
 BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, $initMethod:BaseTypedNodeInitMethod, $baseMinInputs: u8=0, $baseMaxInputs: u8=1) {
@@ -151,8 +158,13 @@ nodeInitParams :: (node: *$N) {
 	params_tis := cast(*Type_Info_Struct)params_info;
 	for member: params_tis.members {
 		paramField := get_field(params_info, member.name);
+		// print("paramField: % % % %\n", member.name, paramField, <<paramField.type);
+		member_tis := cast(*Type_Info_Struct)paramField.type;
 		paramPtr := (cast(*u8)node) + paramsField.offset_in_bytes + paramField.offset_in_bytes;
 		param := cast(*BaseParamAny)paramPtr;
+		if cast(*void)param.type == null {
+			param.type = paramType(member_tis.name);
+		}
 		initParamByType(param, node);
 		// nodeInitParam(node, paramPtr);
 	}

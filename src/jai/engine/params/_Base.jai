@@ -1,54 +1,68 @@
-ParamInitMethod :: #type (param: *$P, node: *$N);
+// ParamInitMethod :: #type (param: *$P, node: *$N);
 
-ParamType :: enum u8 {
-	ANY :: 0;
-	FLOAT :: 1;
-	UINTEGER :: 2;
-	VECTOR3 :: 3;
-	VECTOR3UINT :: 4;
-};
-paramValueByType :: (T:ParamType)->Type {
-	// if T == {
-	// 	case FloatParam; return float32;
-	// 	case UIntegerParam; return u32;
-	// 	case Vector3Param; return Vector3;
-	// 	case Vector3UIntParam; return Vector3UInt;
-	// }
-	// print("paramValueByType unknown type: %\n", T);
-	// // #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
-	// assert(false, tprint("paramValueByType unknown type: %\n", T));
-	// return u8;
-	if T == {
-		case ParamType.ANY; return u8;
-		case ParamType.FLOAT; return float32;
-		case ParamType.UINTEGER; return u32;
-		case ParamType.VECTOR3; return Vector3;
-		case ParamType.VECTOR3UINT; return Vector3UInt;
+// ParamType :: enum u8 {
+// 	ANY :: 0;
+// 	FLOAT :: 1;
+// 	UINTEGER :: 2;
+// 	VECTOR3 :: 3;
+// 	VECTOR3UINT :: 4;
+// };
+// paramValueByType :: ($T:Type, $doAssert:bool=true)->Type {
+// 	// if T == {
+// 	// 	case FloatParam; return float32;
+// 	// 	case UIntegerParam; return u32;
+// 	// 	case Vector3Param; return Vector3;
+// 	// 	case Vector3UIntParam; return Vector3UInt;
+// 	// }
+// 	// print("paramValueByType unknown type: %\n", T);
+// 	// // #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
+// 	// assert(false, tprint("paramValueByType unknown type: %\n", T));
+// 	// return u8;
+// 	if T == {
+// 		// case ParamType.ANY; return u8;
+// 		case FloatParam; return float32;
+// 		case UIntegerParam; return u32;
+// 		case Vector3Param; return Vector3;
+// 		case Vector3UIntParam; return Vector3UInt;
+// 	}
+// 	// print("paramValueByType unknown type: %\n", T);
+// 	// #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
+// 	if doAssert {
+// 		assert(false, tprint("paramValueByType unknown type: %\n", T));
+// 	}
+// 	return u8;
+// }
+paramType :: (typeName:string)->Type {
+	if typeName == {
+		case "FloatParam"; return FloatParam;
+		case "UIntegerParam"; return UIntegerParam;
+		case "Vector3Param"; return Vector3Param;
+		case "Vector3UIntParam"; return Vector3UIntParam;
 	}
-	// print("paramValueByType unknown type: %\n", T);
-	// #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
-	assert(false, tprint("paramValueByType unknown type: %\n", T));
-	return u8;
+	assert(false, tprint("paramType unknown typeName: %\n", typeName));
+	return BaseParamAny;
 }
 initParamByType :: (param: *$P, node: *$N) {
-	if param.paramType == {
-		case ParamType.FLOAT; {initParam(cast(*FloatParam)param, node);return;}
-		case ParamType.UINTEGER; {initParam(cast(*UIntegerParam)param, node);return;}
-		case ParamType.VECTOR3; {initParam(cast(*Vector3Param)param, node);return;}
-		case ParamType.VECTOR3UINT; {initParam(cast(*Vector3UIntParam)param, node);return;}
+	if param.type == {
+		case FloatParam; {initParam(cast(*FloatParam)param, node);return;}
+		case UIntegerParam; {initParam(cast(*UIntegerParam)param, node);return;}
+		case Vector3Param; {initParam(cast(*Vector3Param)param, node);return;}
+		case Vector3UIntParam; {initParam(cast(*Vector3UIntParam)param, node);return;}
 	}
-	assert(false, tprint("initParamByType unknown type: %\n", param.paramType));
+	assert(false, tprint("initParamByType unknown type: %\n", param.type));
 }
 
-BaseParam :: struct ($baseParamT: Type, $ParamTypeValue:ParamType) {
-	#as using coreGraphNode: CoreGraphNode(baseParamT);
+BaseParam :: struct ($paramType: Type, $valueType: Type) {
+	#as using coreGraphNode: CoreGraphNode(paramType);
 	// type: ParamType= paramType;
-	paramType:ParamType=ParamTypeValue;
+	// paramType:ParamType=ParamTypeValue;
 	node: *BaseNodeAny;
+	value: valueType;
+	defaultValue: valueType;
 	// initParam :ParamInitMethod:initMethod;
 	
 }
-BaseParamAny :: BaseParam(Any, ParamType.ANY);
+BaseParamAny :: BaseParam(Any, u8);
 
 // newParam :: (node: *BaseNode, $T: Type) -> *T {
 // 	param: *T = alloc(size_of(T));
