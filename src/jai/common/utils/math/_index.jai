@@ -1,3 +1,4 @@
+#load "Box3.jai";
 #load "Matrix.jai";
 #load "Radian.jai";
 #load "Vector.jai";

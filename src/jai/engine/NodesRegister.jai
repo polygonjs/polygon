@@ -52,6 +52,7 @@ registerAll :: ()->nodeCompute:string, nodeCompute2:string {
 	// paramRegister(Vector3UIntParam);
 
 	nodeRegister(BoxGeoNode);
+	nodeRegister(IcosahedronGeoNode);
 	nodeRegister(OutputGeoNode);
 
 	nodeComputeDummy := generateNodeComputes();

@@ -1,18 +1,14 @@
-// Vector3Type :: struct {}
 Vector3Param :: struct {
-	#as using baseParam: BaseParam(Vector3Param, Vector3);
-	// value: #run paramValueByType(TYPE);
-	// initParam:ParamInitMethod: initParam;
+	#as using baseParam: BaseParam(Vector3Param, VALUE_TYPE);
 };
 
+paramSetValue :: (param: *TYPE, value: VALUE_TYPE) {
+	paramSetValueGeneric(param, value);
+}
 
 #scope_file
 
-// PARAM_TYPE :: ParamType.VECTOR3;
 TYPE :: Vector3Param;
+VALUE_TYPE :: Vector3;
 
-// initParam :: (_param: *TYPE, node: *$N) {
-// 	// print("%\n", TYPE);
-// 	// initParam(cast(*TYPE)_param);
-// }
 

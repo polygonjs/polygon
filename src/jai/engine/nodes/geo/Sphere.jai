@@ -1,24 +1,9 @@
-// // SphereGeoType :: struct {}
 // SphereGeoParams :: struct {
 // 	radius: FloatParam;
 // }
 // SphereGeoNode :: struct {
 // 	#as using geoNode: GeoNode(SphereGeoParams, init, cook, nodeCompute);
-// 	// geoNode.initTypedNode = initSphereGeoNode;
 // };
-
-// #scope_file
-
-// NODE_TYPE :: SphereGeoNode;
-
-// init :: (_node: *BaseNodeAny) {
-// 	node := cast(*SphereGeoNode)_node;
-// 	// print("init_sphere_geo_node\n");
-// 	// init_geo_node(node);
-// }
-// nodeCompute :NodeComputeMethod: (node: *$T, depth:u8=0)->GeoNodeCookOutput {
-// 	return nodeCompute(cast(*TYPE)node, depth);
-// }
 
 // cook :GeoNodeCookMethod: (node: *NODE_TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 // 	// mat := newMaterial(NormalMeshMaterial);
@@ -38,3 +23,14 @@
 	
 // 	return mesh;
 // }
+
+// #scope_file
+
+// NODE_TYPE :: SphereGeoNode;
+
+// init :: (_node: *BaseNodeAny) {
+// 	node := cast(*SphereGeoNode)_node;
+// }
+
+
+

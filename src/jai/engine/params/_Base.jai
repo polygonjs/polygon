@@ -7,31 +7,31 @@
 // 	VECTOR3 :: 3;
 // 	VECTOR3UINT :: 4;
 // };
-// paramValueByType :: ($T:Type, $doAssert:bool=true)->Type {
-// 	// if T == {
-// 	// 	case FloatParam; return float32;
-// 	// 	case UIntegerParam; return u32;
-// 	// 	case Vector3Param; return Vector3;
-// 	// 	case Vector3UIntParam; return Vector3UInt;
-// 	// }
-// 	// print("paramValueByType unknown type: %\n", T);
-// 	// // #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
-// 	// assert(false, tprint("paramValueByType unknown type: %\n", T));
-// 	// return u8;
-// 	if T == {
-// 		// case ParamType.ANY; return u8;
-// 		case FloatParam; return float32;
-// 		case UIntegerParam; return u32;
-// 		case Vector3Param; return Vector3;
-// 		case Vector3UIntParam; return Vector3UInt;
-// 	}
-// 	// print("paramValueByType unknown type: %\n", T);
-// 	// #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
-// 	if doAssert {
-// 		assert(false, tprint("paramValueByType unknown type: %\n", T));
-// 	}
-// 	return u8;
-// }
+paramValueByType :: (T:Type, $doAssert:bool=true)->Type {
+	// if T == {
+	// 	case FloatParam; return float32;
+	// 	case UIntegerParam; return u32;
+	// 	case Vector3Param; return Vector3;
+	// 	case Vector3UIntParam; return Vector3UInt;
+	// }
+	// print("paramValueByType unknown type: %\n", T);
+	// // #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
+	// assert(false, tprint("paramValueByType unknown type: %\n", T));
+	// return u8;
+	if T == {
+		// case ParamType.ANY; return u8;
+		case FloatParam; return float32;
+		case UIntegerParam; return u32;
+		case Vector3Param; return Vector3;
+		case Vector3UIntParam; return Vector3UInt;
+	}
+	// print("paramValueByType unknown type: %\n", T);
+	// #assert(false);//, tprint("paramValueByType unknown type: %\n", T));
+	if doAssert {
+		assert(false, tprint("paramValueByType unknown type: %\n", T));
+	}
+	return u8;
+}
 paramType :: (typeName:string)->Type {
 	if typeName == {
 		case "FloatParam"; return FloatParam;
@@ -100,7 +100,13 @@ initParam :: (param: *$P, node: *$N) {
 dummyInitParam :: (param: *$P, node: *$N) {
 }
 
-paramSetValue :: (param: *$P, value: $ValueType) {
+paramSetValueGeneric :: (param: *$P, value: $ValueType)
+#modify {
+	ValueType = paramValueByType(P);
+	// print("paramSetValue %->%\n", P, ValueType);
+	return true;
+}
+{
 	param.value = value;
 	setDirty(param);
 }

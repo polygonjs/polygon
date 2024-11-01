@@ -1,17 +1,12 @@
-// IntegerType :: struct {}
 UIntegerParam :: struct {
-	#as using baseParam: BaseParam(UIntegerParam, u32);
-	// value: #run paramValueByType(TYPE);
-	// initParam:ParamInitMethod: initParam;
+	#as using baseParam: BaseParam(UIntegerParam, VALUE_TYPE);
 };
 
+paramSetValue :: (param: *TYPE, value: VALUE_TYPE) {
+	paramSetValueGeneric(param, value);
+}
 
 #scope_file
 
-// PARAM_TYPE :: ParamType.UINTEGER;
 TYPE :: UIntegerParam;
-
-// initParam :: (_param: *TYPE, node: *$N) {
-// 	// print("%\n", TYPE);
-// 	// initParam(cast(*TYPE)_param);
-// }
+VALUE_TYPE :: u32;
