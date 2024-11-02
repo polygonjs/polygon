@@ -23,6 +23,15 @@ newNodesScene :: () -> *NodesScene {
 	return scene;
 }
 
+sceneDeleteNode :: (scene: *NodesScene, node: *$T) {
+	for :params param: node {
+		graphNodeDelete(param);
+	}
+	graphNodeDelete(node);
+
+	free(node);
+}
+
 // sceneDebug :: (scene: *NodesScene, message:string) {
 // 	print("---- sceneDebug START (%) (%)\n", scene, message);
 // 	print("count: %\n", scene.nodes.count);

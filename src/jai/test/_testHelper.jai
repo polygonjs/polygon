@@ -19,14 +19,14 @@ assertNotEqual ::  (actual: $T, expected: T, name: string="assertNotEqual") {
 	ASSERTIONS_COUNT += 1;
 }
 
-assertTrue ::  (actual: $T, name: string) {
+assertTrue :: (actual: $T, name: string="assertTrue") {
 	if(actual != true) {
 		print("% is not true\n", actual);
 		assert(false, name);
 	}
 	ASSERTIONS_COUNT += 1;
 }
-assertFalse ::  (actual: $T, name: string) {
+assertFalse :: (actual: $T, name: string="assertFalse") {
 	if(actual != false) {
 		print("% is not false\n", actual);
 		assert(false, name);
@@ -34,10 +34,10 @@ assertFalse ::  (actual: $T, name: string) {
 	ASSERTIONS_COUNT += 1;
 }
 EPS :: 0.00001;
-assertInDelta ::  (actual: $T, expected: T, name: string) {
+assertInDelta :: (actual: $T, expected: T, name: string="assertInDelta") {
 	assertInDelta(actual, expected, EPS, name);
 }
-assertInDelta ::  (actual: $T, expected: T, eps:float, name: string) {
+assertInDelta :: (actual: $T, expected: T, eps:float, name: string="assertInDelta") {
 	delta := actual - expected;
 	if(delta < -eps || delta > eps) {
 		print("actual: %\n", actual);

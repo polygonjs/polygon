@@ -25,6 +25,13 @@ newCoreGraphNode :: (graph: *CoreGraph, $T: Type) -> *T {
 graphNodeInit :: (graphNode: *$T, graph: *CoreGraph) {
 	graphAddNode(graph, graphNode);
 }
+graphNodeDelete :: (graphNode: *$T) {
+	graphRemoveNode(graph(graphNode.graphId), graphNode);
+}
+graphNodeConnect :: (src: *$T0, dest: *$T1, $checkCycle:bool = true)-> bool {
+	assert(src.graphId == dest.graphId, "src and dest must be in the same graph");
+	return graphNodeConnect(graph(src.graphId), src.graphNodeId, dest.graphNodeId, checkCycle);
+}
 
 setDirty :: (graphNode: *$T) {
 	setDirty(graph(graphNode.graphId), graphNode);

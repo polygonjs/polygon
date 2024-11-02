@@ -85,7 +85,7 @@ initParam :: (param: *$P, node: *$N) {
 	graphNodeInit(param, graph(node.graphId));
 
 	array_add(*node.params, xx param);
-	graphConnect(param, node);
+	graphNodeConnect(src=param, dest=node, false);
 
 	// initBaseParam(param);
 	// param.initParam(param, node);

@@ -22,7 +22,7 @@ graphInit :: (graph: *CoreGraph) {
 	CORE_GRAPHS[graph.graphId] = graph;
 	NEXT_CORE_GRAPH_ID += 1;
 	// init(*graph.nodeById, 512);
-	init_bit_array(*graph.dirty, 1);
+	// init_bit_array(*graph.dirty, 1);
 }
 graph :: (graphNode: *CoreGraphNodeAny) -> *CoreGraph {
 	return CORE_GRAPHS[graphNode.graphId];
@@ -34,16 +34,17 @@ graph :: (graphId: CoreGraphId) -> *CoreGraph {
 
 
 graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
-	graphNode.graphId = graph.graphId;
-	// graphNode.scene = graph.scene;
-	graphNode.graphNodeId = graph.nextId;
-	assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
-	// print("graphAddNode:%\n", graphNode,graphNode.type);
-
 	using graph;
-	nextId += 1;
+	graphNode.graphId = graphId;
+	graphNode.graphNodeId = nextId;
+	assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
 
-	if predecessors.count < nextId {
+	nextId += 1;
+	while nextId < nodes.count && nodes[nextId] != null {
+		nextId += 1;
+	}
+
+	if nodes.count < nextId {
 		array_resize(*nodes, nextId);
 		// array_resize(*dirty, nextId);
 		array_resize(*onDirty, nextId);
@@ -64,13 +65,34 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	allPredecessorsDirty[graphNode.graphNodeId] = true;
 	allSuccessorsDirty[graphNode.graphNodeId] = true;
 }
+graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
+	using graph;
 
-graphConnect :: (src: *$T0, dest: *$T1, $checkCycle:bool = true)-> bool {
-	assert(src.graphId == dest.graphId, "src and dest must be in the same graph");
+	nodes[graphNode.graphNodeId] = null;
+	onDirty[graphNode.graphNodeId] = null;
+	array_resize(*predecessors[graphNode.graphNodeId], 0);
+	array_resize(*successors[graphNode.graphNodeId], 0);
+	array_resize(*allPredecessors[graphNode.graphNodeId], 0);
+	array_resize(*allSuccessors[graphNode.graphNodeId], 0);
 
-	// TODO: check for cycles
-	_graphCreateConnection(graph(src.graphId), src.graphNodeId, dest.graphNodeId);
+	if nextId > graphNode.graphNodeId {
+		nextId = graphNode.graphNodeId;
+	}
+}
 
+graphNodeConnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId, $checkCycle:bool)-> bool {
+	if checkCycle {
+		using graph;
+		if allPredecessorsDirty[srcId] == true {
+			_graphAllPredecessorsUpdate(graph, srcId);
+		}
+		cycleDetected := array_find(allPredecessors[srcId], destId);
+		if cycleDetected {
+			return false;
+		}
+	}
+
+	_graphCreateConnection(graph, srcId, destId);
 	return true;
 }
 
@@ -87,8 +109,6 @@ setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 	using graph;
 	dirty[graphNode.graphNodeId] = true;
 	#if propagate {
-		// print("propagate START % %\n", graphNode.id, graphNode.type);
-		// sceneDebug(graph.scene, tprint("setDirty from graphNode %", graphNode));
 		if allSuccessorsDirty[graphNode.graphNodeId] == true {
 			_graphAllSuccessorsUpdate(graph, graphNode.graphNodeId);
 		}
@@ -101,7 +121,6 @@ setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 				onDirty(nodes[successorId]);
 			}
 		}
-		// print("propagate END\n");
 	}
 }
 
@@ -115,14 +134,24 @@ _graphCreateConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: Co
 	array_add(*predecessors[destId], srcId);
 	array_add(*successors[srcId], destId);
 
+	// update successors
+	if allSuccessorsDirty[destId] == true {
+		_graphAllSuccessorsUpdate(graph, destId);
+	}
+	for successorId: allSuccessors[destId] {
+		allPredecessorsDirty[successorId] = true;
+	}
+	// update predecessors
 	if allPredecessorsDirty[srcId] == true {
 		_graphAllPredecessorsUpdate(graph, srcId);
 	}
 	for predecessorId: allPredecessors[srcId] {
 		allSuccessorsDirty[predecessorId] = true;
 	}
+	// update newly connected
 	allSuccessorsDirty[srcId] = true;
 	allPredecessorsDirty[destId] = true;
+
 }
 _graphAllPredecessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 	using graph;
@@ -142,7 +171,6 @@ _graphAllPredecessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 			array_add(*allPredecessors[nodeId], predecessorId);
 		}
 	}
-
 	allPredecessorsDirty[nodeId] = false;
 }
 _graphAllSuccessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {

@@ -77,9 +77,13 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	return node;
 }
 
+deleteNode :: (node: *$T) {
+	sceneDeleteNode(graphNodeScene(node), node);
+}
 
 
-setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0)
+
+setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0) -> bool
 // #modify {
 // 	ti0 := cast(*Type_Info) N0;
 // 	tis0 := cast(*Type_Info_Struct)ti0;
@@ -94,8 +98,11 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0)
 	assert(node.ctx == inputNode.ctx, "nodes have different contexts");
 	node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
-	graphConnect(inputNode, node);
-	setDirty(node);
+	connectionCreated := graphNodeConnect(src=inputNode, dest=node);
+	if connectionCreated == true {
+		setDirty(node);
+	}
+	return connectionCreated;
 }
 setInput :: (node: *$N0, inputNode: *$N1) {
 	setInput(node, 0, inputNode, 0);
@@ -121,7 +128,33 @@ setInput :: (node: *$N0, inputNode: *$N1) {
 // 	assert(false, tprint("cook: node type % is not implemented", node.type));
 // 	return newObject3D(Mesh);
 // }
+params :: (node: *$T, body: Code, flags: For_Flags) #expand {
+	node_info := type_info(type_of(<<node));
+	node_tis := cast(*Type_Info_Struct)node_info;
+	paramsField := get_field(node_tis, "p");
+	params_info := type_info(type_of(node.p));
+	assert(params_info.type == .STRUCT, "*** handle_params: not a struct\n");
 
+	params_tis := cast(*Type_Info_Struct)params_info;
+
+	for member, i: params_tis.members {
+		paramField := get_field(params_info, member.name);
+		// print("paramField: % (%/%)\n", member.name, i, params_tis.members.count);
+		member_tis := cast(*Type_Info_Struct)paramField.type;
+		paramPtr := (cast(*u8)node) + paramsField.offset_in_bytes + paramField.offset_in_bytes;
+		`it := cast(*BaseParamAny)paramPtr;
+		`it_index := i;
+		`type := paramType(member_tis.name);
+		#insert body;
+	}
+}
+paramsCount :: (node: *$T) -> u8 {
+	count :u8= 0;
+	for param: node.params {
+		count += 1;
+	}
+	return count;
+}
 
 #scope_file
 
@@ -151,35 +184,44 @@ nodeInitParams :: (node: *$N) {
 	// print("nodeInitParams:%\n", type_of(node), <<node);
 	// node := cast(*nodeType)_node;
 
-	node_info := type_info(type_of(<<node));
-	node_tis := cast(*Type_Info_Struct)node_info;
-	paramsField := get_field(node_tis, "p");
-	params_info := type_info(type_of(node.p));
-	if params_info.type != .STRUCT {
-		print("*** handle_params: not a struct\n");
-		return;
-	}
+	// node_info := type_info(type_of(<<node));
+	// node_tis := cast(*Type_Info_Struct)node_info;
+	// paramsField := get_field(node_tis, "p");
+	// params_info := type_info(type_of(node.p));
+	// if params_info.type != .STRUCT {
+	// 	print("*** handle_params: not a struct\n");
+	// 	return;
+	// }
 
-	params_tis := cast(*Type_Info_Struct)params_info;
-	for member: params_tis.members {
-		paramField := get_field(params_info, member.name);
-		// print("paramField: % % % %\n", member.name, paramField, <<paramField.type);
-		member_tis := cast(*Type_Info_Struct)paramField.type;
-		paramPtr := (cast(*u8)node) + paramsField.offset_in_bytes + paramField.offset_in_bytes;
-		param := cast(*BaseParamAny)paramPtr;
+	// params_tis := cast(*Type_Info_Struct)params_info;
+	// for member: params_tis.members {
+	// 	paramField := get_field(params_info, member.name);
+	// 	// print("paramField: % % % %\n", member.name, paramField, <<paramField.type);
+	// 	member_tis := cast(*Type_Info_Struct)paramField.type;
+	// 	paramPtr := (cast(*u8)node) + paramsField.offset_in_bytes + paramField.offset_in_bytes;
+	// 	param := cast(*BaseParamAny)paramPtr;
+	// 	if cast(*void)param.type == null {
+	// 		param.type = paramType(member_tis.name);
+	// 	}
+	// 	initParamByType(param, node);
+	// 	// nodeInitParam(node, paramPtr);
+	// }
+
+	for :params param: node {
 		if cast(*void)param.type == null {
-			param.type = paramType(member_tis.name);
+			param.type = type;
 		}
 		initParamByType(param, node);
-		// nodeInitParam(node, paramPtr);
 	}
 }
-// nodeInitParam :: (node: *$N, paramPtr: *u8) {
-// 	if (cast(*BaseParamAny)paramPtr).type == {
-// 		case ParamType.FLOAT;		{ initParam(cast(*FloatParam)		paramPtr, node); return; }
-// 		case ParamType.INTEGER; 	{ initParam(cast(*IntegerParam)		paramPtr, node); return; }
-// 		case ParamType.VECTOR3; 	{ initParam(cast(*Vector3Param)		paramPtr, node); return; }
-// 		case ParamType.VECTOR3UINT; { initParam(cast(*Vector3UIntParam)	paramPtr, node); return; }
+
+
+// for_expansion :: (vector: ImVector, body: Code, flags: For_Flags) #expand {
+// 	for i: 0..(vector.Size - 1) {
+// 		`it_index := i;
+// 		`it := vector.Data[i];
+		
+// 		#insert body;
 // 	}
-// 	assert(false, tprint("nodeInitParam: param type % is not implemented", (cast(*BaseParamAny)paramPtr).type));
 // }
+

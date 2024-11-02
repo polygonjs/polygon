@@ -1,6 +1,7 @@
 #load "_testHelper.jai";
 #load "testArray.jai";
 #load "testBitArray.jai";
+#load "testCoreGraph.jai";
 #load "testMath.jai";
 #load "testPerlinNoise.jai";
 #load "testNodesBasicDependency.jai";
@@ -8,7 +9,7 @@
 SimpleProcedure :: #type () -> ();
 
 runTests :: () {
-	print("TEST START\n");
+	print("--------- TEST START\n");
 
 	args := get_command_line_arguments();
 	testNames :[..]string;
@@ -25,10 +26,12 @@ runTests :: () {
 			print("TEST: %\n", test.name);
 			test.proc();
 			testsCount += 1;
+		} else {
+			print("TEST SKIPPED: %\n", test.name);
 		}
 	}
 
-	print("TEST COMPLETED: (%)\n", testsCount);
+	print("---------TEST COMPLETED: (%)\n", testsCount);
 }
 
 #scope_file
@@ -48,9 +51,10 @@ getNamedProcedures :: ()->[..]NamedProcedure {
 	}
 	addTest(testArray);
 	addTest(testBitArray);
+	addTest(testCoreGraph);
 	addTest(testMath);
-	addTest(testPerlinNoise);
 	addTest(testNodesBasicDependency);
+	addTest(testPerlinNoise);
 	return list;
 }
 

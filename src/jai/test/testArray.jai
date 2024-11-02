@@ -6,21 +6,16 @@ testArray :: () {
 	array_add(*arr, .{3,4});
 	array_add(*arr, .{5,6});
 
-	e := *arr[1];
+	value0 := arr[1];
+	value0.x =17;
+	assertEqual(arr[1].x, 3);
 
-	print("arr:%\n", arr);
-	print("e:%\n", e);
-
-	e.x = 17;
-
-	print("e:%\n", e);
-
-	e2 := arr[1];
-	print("e2:%\n", e2);
+	ptr1 := *arr[1];
+	ptr1.x = 17;
+	assertEqual(arr[1].x, 17);
 
 	nums:[3]u32;
-	print("nums:%\n", nums);
 	nums[1]=12;
-	print("nums:%\n", nums);
+	assertEqual(nums[1], 12);
 }
 

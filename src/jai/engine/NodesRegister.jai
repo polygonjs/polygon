@@ -53,6 +53,8 @@ registerAll :: ()->nodeCompute:string, nodeCompute2:string {
 
 	nodeRegister(BoxGeoNode);
 	nodeRegister(IcosahedronGeoNode);
+	nodeRegister(MergeGeoNode);
+	nodeRegister(NullGeoNode);
 	nodeRegister(OutputGeoNode);
 
 	nodeComputeDummy := generateNodeComputes();
