@@ -18,7 +18,7 @@ generatedNodeCompute :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 	return newObject3D(Mesh);
 }
 
-generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T) {
+generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
 	assert(false, tprint("generatedSceneNodeDelete: node type % is not implemented", node.type));
 	return;
@@ -56,7 +56,7 @@ generateSceneNodeDelete :: ()->string {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeType: NOTE_TYPES {
-		print_to_builder(*builder, tprint("\tcase %; sceneDeleteNode(scene, cast(*%) node);return;\n", nodeType, nodeType));
+		print_to_builder(*builder, tprint("\tcase %; sceneDeleteNode(scene, cast(*%) node, removeFromGraph);return;\n", nodeType, nodeType));
 	}
 	print_to_builder(*builder, "}");
 

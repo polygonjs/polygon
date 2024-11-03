@@ -1,5 +1,6 @@
 testNodesBasicDependency :: () {
 	nodesScene := newNodesScene();
+	defer sceneDelete(nodesScene);
 	box1 := newNode(nodesScene, BoxGeoNode);
 	box2 := newNode(nodesScene, BoxGeoNode);
 	icosahedron1 := newNode(nodesScene, IcosahedronGeoNode);

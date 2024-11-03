@@ -23,6 +23,20 @@ graphInit :: (graph: *CoreGraph) {
 	NEXT_CORE_GRAPH_ID += 1;
 	// init(*graph.nodeById, 512);
 	// init_bit_array(*graph.dirty, 1);
+
+	{
+		using graph;
+		// allocator := scene.allocator;
+		// nodes.allocator = allocator;
+		// dirty.allocator = allocator;
+		// onDirty.allocator = allocator;
+		// predecessors.allocator = allocator;
+		// successors.allocator = allocator;
+		// allPredecessors.allocator = allocator;
+		// allPredecessorsDirty.allocator = allocator;
+		// allSuccessors.allocator = allocator;
+		// allSuccessorsDirty.allocator = allocator;
+	}
 }
 graph :: (graphNode: *CoreGraphNodeAny) -> *CoreGraph {
 	return CORE_GRAPHS[graphNode.graphId];
@@ -31,7 +45,24 @@ graph :: (graphId: CoreGraphId) -> *CoreGraph {
 	return CORE_GRAPHS[graphId];
 }
 
+graphDelete :: (graph: *CoreGraph) {
+	using graph;
+	array_reset(*nodes);
+	array_reset(*onDirty);
+	
+	for subArray: predecessors { array_reset(*subArray); }
+	for subArray: successors { array_reset(*subArray); }
+	for subArray: allPredecessors { array_reset(*subArray); }
+	for subArray: allSuccessors { array_reset(*subArray); }
+	array_reset(*predecessors);
+	array_reset(*successors);
+	array_reset(*allPredecessors);
+	array_reset(*allSuccessors);
 
+	deinit(*allPredecessorsDirty);
+	deinit(*allSuccessorsDirty);
+	deinit(*dirty);
+}
 
 graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 	using graph;
@@ -46,7 +77,6 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
 
 	if nodes.count < nextId {
 		array_resize(*nodes, nextId);
-		// array_resize(*dirty, nextId);
 		array_resize(*onDirty, nextId);
 		array_resize(*predecessors, nextId);
 		array_resize(*successors, nextId);
@@ -70,6 +100,10 @@ graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
 
 	nodes[graphNode.graphNodeId] = null;
 	onDirty[graphNode.graphNodeId] = null;
+	// array_reset_keeping_memory(*predecessors[graphNode.graphNodeId]);
+	// array_reset_keeping_memory(*successors[graphNode.graphNodeId]);
+	// array_reset_keeping_memory(*allPredecessors[graphNode.graphNodeId]);
+	// array_reset_keeping_memory(*allSuccessors[graphNode.graphNodeId]);
 	array_resize(*predecessors[graphNode.graphNodeId], 0);
 	array_resize(*successors[graphNode.graphNodeId], 0);
 	array_resize(*allPredecessors[graphNode.graphNodeId], 0);
@@ -157,6 +191,7 @@ _graphAllPredecessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 	using graph;
 
 	tmp: [..]CoreGraphNodeId;
+	tmp.allocator = temp;
 	array_resize(*tmp, predecessors[nodeId].count);
 	array_resize(*allPredecessors[nodeId], predecessors[nodeId].count);
 	for predecessorId, i: predecessors[nodeId] {
@@ -177,6 +212,7 @@ _graphAllSuccessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 	using graph;
 
 	tmp: [..]CoreGraphNodeId;
+	tmp.allocator = temp;
 	array_resize(*tmp, successors[nodeId].count);
 	array_resize(*allSuccessors[nodeId], successors[nodeId].count);
 	for successorId, i: successors[nodeId] {

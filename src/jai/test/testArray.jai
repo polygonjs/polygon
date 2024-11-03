@@ -15,5 +15,7 @@ testArray :: () {
 	nums:[3]u32;
 	nums[1]=12;
 	assertEqual(nums[1], 12);
+
+	array_reset(*arr);
 }
 

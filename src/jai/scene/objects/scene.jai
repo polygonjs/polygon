@@ -31,13 +31,6 @@ Scene :: struct {
 	noise:SceneDataNoise;
 };
 
-init_scene :: (object: *Object3D) {
-	scene := cast(*Scene)object;
-
-	array_init(*scene.children);
-}
-
-
 scene_uniforms_update :: (scene: *Scene) {
 	scene.scene_uniforms.time.x = scene.time;
 
@@ -52,3 +45,14 @@ scene_uniforms_update :: (scene: *Scene) {
 	// update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
 	// update_sdf_uniforms(*scene_data.sdf_data, *scene_data.sdf_uniforms, scene_data.time);
 }
+
+#scope_file
+
+init_scene :: (object: *Object3D) {
+	scene := cast(*Scene)object;
+
+	array_init(*scene.children, temp);
+}
+
+
+

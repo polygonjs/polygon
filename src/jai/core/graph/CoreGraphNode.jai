@@ -9,7 +9,11 @@ CoreGraphNode :: struct ($T: Type) {
 CoreGraphNodeAny :: CoreGraphNode(Any);
 
 newCoreGraphNode :: (graph: *CoreGraph, $T: Type) -> *T {
-	graphNode: *T = alloc(size_of(T));
+	graphNode: *T;
+	// newContext: Context =.{temporary_storage = *graph.scene.temporary_storage};
+	// push_context newContext {
+		graphNode = alloc(size_of(T));
+	// }
 
 	// tmp: T;
 	// assert(tmp.type == graphNode.type, "types are not the same");

@@ -36,6 +36,10 @@ newObject3D :: ($T: Type) -> *T {
 	return object;
 }
 
+object3DDelete :: (object: *$T/Object3D) {
+	free(object);
+}
+
 init_transformable :: (object: *Object3D) {
 	// object.position = .{x = 0.0, y = 0.0, z = 0.0};
 	object.quaternion = .{x = 0.0, y = 0.0, z = 0.0, w = 1.0};

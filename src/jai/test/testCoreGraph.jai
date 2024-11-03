@@ -22,25 +22,54 @@ leaksCount :: ()->s64 {
 }
 
 testCoreGraphMemoryCleared :: () {
-	{	
+	{
+
 		// empty scene
 		nodesScene := newNodesScene();
 		sceneDelete(nodesScene);
+		// report_memory_leaks();
 		assertEqual(leaksCount(), 0, "no leak when deleting an empty scene");
 	}
-	{	
+	{
 		// scene with 1 node
 		nodesScene := newNodesScene();
 		box1 := newNode(nodesScene, BoxGeoNode);
 		// sceneDeleteNode(nodesScene, box1);
 		sceneDelete(nodesScene);
-		report_memory_leaks();
+		// report_memory_leaks();
+		// print("leaksCount(): %\n", leaksCount());
 		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 1 node");
+	}
+	{
+		// scene with 2 node, input of one another
+		nodesScene := newNodesScene();
+		box1 := newNode(nodesScene, BoxGeoNode);
+		output1 := newNode(nodesScene, OutputGeoNode);
+		assertTrue(setInput(output1, 0, box1));
+		// sceneDeleteNode(nodesScene, box1);
+		sceneDelete(nodesScene);
+		// report_memory_leaks();
+		// print("leaksCount(): %\n", leaksCount());
+		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 2 nodes");
+	}
+	{
+		// scene with 3 node, and we have updated a param value
+		nodesScene := newNodesScene();
+		box1 := newNode(nodesScene, BoxGeoNode);
+		null1 := newNode(nodesScene, NullGeoNode);
+		output1 := newNode(nodesScene, OutputGeoNode);
+		assertTrue(setInput(output1, 0, null1));
+		assertTrue(setInput(null1, 0, box1));
+		paramSetValue(*box1.p.scale, 1.0);
+		// sceneDeleteNode(nodesScene, box1);
+		sceneDelete(nodesScene);
+		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 3 nodes");
 	}
 }
 
 testCoreGraphPreventCycleConnections :: () {
 	nodesScene := newNodesScene();
+	defer sceneDelete(nodesScene);
 	box1 := newNode(nodesScene, BoxGeoNode);
 	box2 := newNode(nodesScene, BoxGeoNode);
 	assertTrue(setInput(box1, 0, box2));
@@ -53,6 +82,7 @@ testCoreGraphPreventCycleConnections :: () {
 
 testCoreGraphNodeIdRecycle :: () {
 	nodesScene := newNodesScene();
+	defer sceneDelete(nodesScene);
 	graph := *nodesScene.graph;
 	assertEqual(graph.nextId, 1);
 	box1 := newNode(nodesScene, BoxGeoNode);

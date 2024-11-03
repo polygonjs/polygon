@@ -10,8 +10,8 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 		}
 	}
 
-	inputResults:GeoNodeCookInput=.[];
-	// using node;
+	inputResults:GeoNodeCookInput;
+	inputResults.allocator = temp;
 	array_resize(*inputResults, node.inputs.count);
 	// print("%inputResults PRE: %\n", indent(depth), inputResults);
 
