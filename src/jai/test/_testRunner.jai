@@ -10,16 +10,18 @@ runTests :: () {
 	print("--------- TEST START\n");
 
 	args := get_command_line_arguments();
+	this_allocation_is_not_a_leak(args.data);
 	testNames :[..]string;
 	for arg,i: args {
 		if i > 0 {
 			array_add(*testNames, arg);
 		}
 	}
+	this_allocation_is_not_a_leak(testNames.data);
 
 	testsCount := 0;
 	for test,i: NAMED_PROCEDURES {
-		found :bool= testNames.count == 0 ||array_find(testNames, test.name);
+		found :bool= testNames.count == 0 || array_find(testNames, test.name);
 		if found {
 			print("TEST: %\n", test.name);
 			test.proc();

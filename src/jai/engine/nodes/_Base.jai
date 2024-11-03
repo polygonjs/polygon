@@ -77,7 +77,7 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	return node;
 }
 
-deleteNode :: (node: *$T) {
+nodeDelete :: (node: *$T) {
 	sceneDeleteNode(graphNodeScene(node), node);
 }
 
@@ -133,12 +133,12 @@ params :: (node: *$T, body: Code, flags: For_Flags) #expand {
 	node_tis := cast(*Type_Info_Struct)node_info;
 	paramsField := get_field(node_tis, "p");
 	params_info := type_info(type_of(node.p));
-	assert(params_info.type == .STRUCT, "*** handle_params: not a struct\n");
+	assert(params_info.type == .STRUCT, "*** handle_params: not a struct (%, type=%)\n", params_info.type, type_of(<<node));
 
 	params_tis := cast(*Type_Info_Struct)params_info;
 
 	for member, i: params_tis.members {
-		paramField := get_field(params_info, member.name);
+		paramField := get_field(params_tis, member.name);
 		// print("paramField: % (%/%)\n", member.name, i, params_tis.members.count);
 		member_tis := cast(*Type_Info_Struct)paramField.type;
 		paramPtr := (cast(*u8)node) + paramsField.offset_in_bytes + paramField.offset_in_bytes;

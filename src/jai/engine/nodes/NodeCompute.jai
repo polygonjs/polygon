@@ -21,7 +21,7 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 			// print("%not in cache, computing\n", indent(depth));
 			// print("%inputResult: %\n", indent(depth), inputResult);
 			// print("%set % % %\n", indent(depth), i, inputResults, inputResult);
-			inputResults[i] = nodeComputeInputNode(inputNode, depth+1);
+			inputResults[i] = generatedNodeCompute(inputNode, depth+1);
 		} else {
 			inputResults[i] = null;
 		}
@@ -35,10 +35,6 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	return result;
 }
 
-nodeComputeInputNode :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
-	#insert GENERATED_CODE_NODE_COMPUTE;
-	assert(false, tprint("nodeComputeResult: node type % is not implemented", inputNode.type));
-	return newObject3D(Mesh);
-}
+
 
 

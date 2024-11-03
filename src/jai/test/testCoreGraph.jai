@@ -6,12 +6,36 @@ testCoreGraph :: () {
 
 #scope_file
 
+leaksCount :: ()->s64 {
+	report := make_leak_report();
+	defer deinit(*report);
+	// bytes_total: s64;
+	leaks_total: s64;
+	for summary: report.sorted_summaries {
+		// bytes_total += summary.bytes;
+		leaks_total += summary.count;
+
+		// bytes_total += summary.child_bytes;
+		leaks_total += summary.child_count;
+	}
+	return leaks_total;
+}
+
 testCoreGraphMemoryCleared :: () {
-	{
+	{	
+		// empty scene
 		nodesScene := newNodesScene();
 		sceneDelete(nodesScene);
-
-		#if FREE_MEMORY_DEBUG report_memory_leaks();
+		assertEqual(leaksCount(), 0, "no leak when deleting an empty scene");
+	}
+	{	
+		// scene with 1 node
+		nodesScene := newNodesScene();
+		box1 := newNode(nodesScene, BoxGeoNode);
+		// sceneDeleteNode(nodesScene, box1);
+		sceneDelete(nodesScene);
+		report_memory_leaks();
+		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 1 node");
 	}
 }
 
@@ -42,7 +66,7 @@ testCoreGraphNodeIdRecycle :: () {
 	assertEqual(graph.nextId, 9);
 	{
 		// delete
-		deleteNode(box1);
+		nodeDelete(box1);
 		assertEqual(graph.nextId, 1);
 	}
 	{
@@ -59,7 +83,7 @@ testCoreGraphNodeIdRecycle :: () {
 		assertEqual(paramsCount(null1), 0);
 		assertEqual(null1.graphNodeId, 17);
 		assertEqual(graph.nextId, 18);
-		deleteNode(null1);
+		nodeDelete(null1);
 		assertEqual(graph.nextId, 17);
 		null1b := newNode(nodesScene, NullGeoNode);
 		assertEqual(null1b.graphNodeId, 17);
@@ -71,7 +95,7 @@ testCoreGraphNodeIdRecycle :: () {
 		null2 := newNode(nodesScene, NullGeoNode);
 		box6 := newNode(nodesScene, BoxGeoNode);
 		assertEqual(graph.nextId, 27);
-		deleteNode(null2);
+		nodeDelete(null2);
 		assertEqual(graph.nextId, 22);
 		box7 := newNode(nodesScene, BoxGeoNode);
 		assertEqual(box7.graphNodeId, 22);
