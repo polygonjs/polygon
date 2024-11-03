@@ -6,6 +6,14 @@ EventsDataCursor :: struct {
 	x: u32;
 	y: u32;
 };
+ViewportRect :: struct {
+	start: Vector2;
+	size: Vector2;
+}
+ViewportContainer :: struct {
+	full_screen:bool;
+	viewport:ViewportRect;
+}
 EventsDataMouseButtons :: struct {
 	left: bool;
 	middle: bool;

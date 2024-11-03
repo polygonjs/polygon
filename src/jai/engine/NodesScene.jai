@@ -22,6 +22,11 @@ newNodesScene :: () -> *NodesScene {
 	
 	return scene;
 }
+sceneDelete :: (scene: *NodesScene) {
+	array_reset(*scene.nodes);
+	deinit(*scene.cookResultByNodeId);
+	free(scene);
+}
 
 sceneDeleteNode :: (scene: *NodesScene, node: *$T) {
 	for :params param: node {

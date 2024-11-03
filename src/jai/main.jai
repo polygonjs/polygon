@@ -1,25 +1,7 @@
-COLOR_SPACE_LINEAR :: true; // needs to manually match same variable in WebGPURequest.ts
-USE_IMGUI :: true;
-USE_IMGUI_DEBUG :: false;
-MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CPU
-FREE_MEMORY :: true; // beware wasm memory corruption when in use
-FREE_MEMORY_DEBUG :: false;
-RENDER_SCENE :: true;
-VSYNC :: false;
-RENDER_WORLD :: true;
-RENDER_NODES_NETWORK :: true;
+#load "config.jai";
+#load "globals.jai";
 
-#placeholder WASM;
-#placeholder RUN_TESTS;
 
-#if USE_IMGUI WINDOW_CONTEXT:WindowContext;
-WGPU_CONTEXT:WGPUContext;
-#if USE_IMGUI {
-	BD:ImGui_ImplWGPU_Data;
-	IWC:ImGui_WGPU_Common;
-}
-EVENTS_DATA:EventsData;
-UI_DATA:UiData;
 
 do_exit := false;
 #if WASM==true {
@@ -35,7 +17,9 @@ do_exit := false;
 			print("\n");
 			print_red("ERROR WGPU START\n");
 		}
-		print_c("[WGPU :: %]: %\n", level, to_string(msg));
+		#if USE_WGPU {
+			print_c("[WGPU :: %]: %\n", level, to_string(msg));
+		}
 		push_context new_context {
 			print_red("ERROR WGPU END\n");
 			print("\n");
@@ -65,12 +49,13 @@ main :: () {
 	test_string := "Hello World!";
 	memcpy(SCENE_WORLD.node_name.data, test_string.data, test_string.count);
 
-
-	scene_init_world(*SCENE_WORLD, 1.);
+	#if RUN_SCENE {
+		scene_init_world(*SCENE_WORLD, 1.);
+		scene_init_nodes(*SCENE_NODES, 1.);
+	}
 	CAMERA_WORLD = newObject3D(PerspectiveCamera);
 	CAMERA_CONTROLS_WORLD.camera = CAMERA_WORLD;
 	camera_controls_apply(*CAMERA_CONTROLS_WORLD);
-	scene_init_nodes(*SCENE_NODES, 1.);
 	CAMERA_NODES = newObject3D(OrthographicCamera);
 	CAMERA_CONTROLS_NODES.camera = CAMERA_NODES;
 
@@ -114,8 +99,10 @@ main :: () {
 
 		wgpuSetLogCallback(wgpu_log_callback, null);
 		wgpuSetLogLevel(.Error); //(.Warn);
-		renderer_init_native(window, current_window_size);
-		init_draw_data();
+		#if USE_WGPU {
+			renderer_init_native(window, current_window_size);
+			init_draw_data();
+		}
 		#if USE_IMGUI io := ImGui.GetIO();
 
 		while !do_exit {
@@ -137,7 +124,9 @@ main :: () {
 							new_height := sdl_event.window.data2;
 							if(new_width > 0 && new_height > 0){
 								current_window_size = .{xx new_width, xx new_height};
-								renderer_resize_native(current_window_size);
+								#if USE_WGPU {
+									renderer_resize_native(current_window_size);
+								}
 							}
 						}
 					}
@@ -240,13 +229,17 @@ on_request_animation_frame :: (
 	camera_uniforms_update(CAMERA_WORLD);
 	camera_uniforms_update(CAMERA_NODES);
 
-	scene_on_tick_world(*SCENE_WORLD);
+	#if RUN_SCENE {
+		scene_on_tick_world(*SCENE_WORLD);
+	}
 
 	window_size :Vector2UInt= .{xx width, xx height};
-	data := renderer_collection_start(*WGPU_CONTEXT);
-	#if RENDER_WORLD { render(*data, *WORLD_RENDERER, *SCENE_WORLD, CAMERA_WORLD, window_size); }
-	#if RENDER_NODES_NETWORK { render(*data, *NODES_RENDERER, *SCENE_NODES, CAMERA_NODES, window_size); }
-	renderer_collection_end(*WGPU_CONTEXT, data);
+	#if USE_WGPU {
+		data := renderer_collection_start(*WGPU_CONTEXT);
+		#if RENDER_WORLD { render(*data, *WORLD_RENDERER, *SCENE_WORLD, CAMERA_WORLD, window_size); }
+		#if RENDER_NODES_NETWORK { render(*data, *NODES_RENDERER, *SCENE_NODES, CAMERA_NODES, window_size); }
+		renderer_collection_end(*WGPU_CONTEXT, data);
+	}
 
 	#if RENDER_WORLD { renderer_destroy_buffers(*WORLD_RENDERER); }
 	#if RENDER_NODES_NETWORK { renderer_destroy_buffers(*NODES_RENDERER); }
@@ -281,39 +274,7 @@ camera_controls_process_event :: () {
 
 
 
-CAMERA_WORLD:*PerspectiveCamera;
-CAMERA_CONTROLS_WORLD:OrbitControls;
-SCENE_NODES:Scene;
-CAMERA_NODES:*OrthographicCamera;
-CAMERA_CONTROLS_NODES:PanControls;
 
-#if RENDER_WORLD {
-	WORLD_RENDERER: Renderer = .{
-		name = "WORLD_RENDERER",
-		full_screen = false,
-		viewport = .{
-			start = .{0,0},
-			size = .{500,700}
-		},
-		bg_color = .{0.1, 0.3, 0.72, 1.0},
-		render_ui = true,
-		clear = true,
-	};
-}
-#if RENDER_NODES_NETWORK {
-	NODES_RENDERER: Renderer = .{
-		name = "NODES_RENDERER",
-		full_screen = false,
-		viewport = .{
-			start = .{600,0},
-			size = .{500,900}
-		},
-		bg_color = .{0,0,0,1},
-		use_msaa = false,
-		render_ui = false,
-		clear = false,
-	};
-}
 
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
@@ -331,7 +292,6 @@ else              #import "wgpu";
 #load "engine/_index.jai";
 #load "scene/_index.jai";
 #load "common/events/index.jai";
-#load "common/wgpu/index.jai";
 #load "common/ui/index.jai";
 #load "common/utils/_index.jai";
 
@@ -341,6 +301,9 @@ else              #import "wgpu";
 }
 #if USE_IMGUI {
 	#load "common/imgui/index.jai";
+}
+#if USE_WGPU {
+	#load "common/wgpu/index.jai";
 }
 #if RUN_TESTS {
 	#load "test/_index.jai";

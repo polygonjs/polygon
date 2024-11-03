@@ -1,6 +1,4 @@
 testArray :: () {
-	print("ok\n");
-
 	arr :[..]Vector2Int;
 	array_add(*arr, .{1,2});
 	array_add(*arr, .{3,4});

@@ -4,14 +4,10 @@ RendererBufferData :: struct {
 	bind_group_entries: []WGPUBindGroupEntry;
 }
 Renderer :: struct {
+	#as using viewportContainer: ViewportContainer;
 	name :string;
 	wgpu_context: *WGPUContext;
-	full_screen:bool;
-	ViewportRect :: struct {
-		start: Vector2;
-		size: Vector2;
-	}
-	viewport:ViewportRect;
+	
 	pipelines_by_mat_type: Table(u64, *PipelineController);
 	computes: ComputeControllerCollection;
 	bg_color :Color =.{0.1, 0.3, 0.72, 1.0};
