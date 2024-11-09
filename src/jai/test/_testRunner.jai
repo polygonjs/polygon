@@ -15,6 +15,12 @@ runTests :: () {
 	}
 	this_allocation_is_not_a_leak(testNames.data);
 
+	#if WASM {
+		#assert(FREE_MEMORY_DEBUG==false); // set FREE_MEMORY_DEBUG :: false in config.jai
+	} else {
+		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
+	}
+
 	testsCount := 0;
 	for test,i: NAMED_PROCEDURES {
 		found :bool= testNames.count == 0 || array_find(testNames, test.name);

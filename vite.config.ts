@@ -14,7 +14,7 @@ interface BuildArgs {
 const BUILD_ARGS: BuildArgs = {
 	wasm: true,
 	native: false,
-	test: true,
+	test: false,
 };
 const CMD_BUILD_ARGS: string[] = [];
 if (BUILD_ARGS.wasm) CMD_BUILD_ARGS.push("wasm");

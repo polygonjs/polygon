@@ -1,10 +1,10 @@
 Time :: float32;
 
-SceneDataNoise :: struct {
-	freq: Vector3 = .{2.0, 2.0, 2.0};
-	offset: Vector3 = .{0.0, 0.0, 0.0};
-	amount: Vector3 = .{1.0, 1.0, 1.0};
-}
+// SceneDataNoise :: struct {
+// 	freq: Vector3 = .{2.0, 2.0, 2.0};
+// 	offset: Vector3 = .{0.0, 0.0, 0.0};
+// 	amount: Vector3 = .{1.0, 1.0, 1.0};
+// }
 
 SceneUniforms :: struct {
 	time:Vector4;
@@ -21,13 +21,13 @@ Scene :: struct {
 
 	// old
 	// object
-	box_size: Vector3=.{3.0, 1.0, 1.0};
-	translate: Vector3;
+	// box_size: Vector3=.{3.0, 1.0, 1.0};
+	// translate: Vector3;
 	// string tests
-	node_name: string;
+	// node_name: string;
 	//
-	segments: Vector3Int = .{128, 128, 128};
-	noise:SceneDataNoise;
+	// segments: Vector3Int = .{128, 128, 128};
+	// noise:SceneDataNoise;
 };
 
 object3DInit :: (scene: *Scene) {

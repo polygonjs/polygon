@@ -27,7 +27,10 @@ ComputeControllerBoxCreate :: struct {
 
 
 
-
+BoxCreateComputeControllerParams :: struct {
+	size: Vector3=.{3.0, 1.0, 1.0};
+	segments: Vector3Int = .{128, 128, 128};
+}
 
 
 
@@ -145,15 +148,15 @@ box_create_set_buffers :: (controller: *CONTROLLER_TYPE, buffer_container: *Buff
 
 }
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
+update_buffer :: (controller:*CONTROLLER_TYPE, params:*BoxCreateComputeControllerParams){
 	{
 		// size_float: [3]float = .[scene_data.box_size.x, scene_data.box_size.y, scene_data.box_size.z];
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *scene.box_size, controller.params.size.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *params.size, controller.params.size.buffer_size);
 	}
 
 	{
 		// segments_float: [3]float = .[xx scene_data.segments.x, xx scene_data.segments.y, xx scene_data.segments.z];
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.segments.buffer, 0, *scene.segments, controller.params.segments.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.segments.buffer, 0, *params.segments, controller.params.segments.buffer_size);
 	}
 };
 

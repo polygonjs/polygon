@@ -44,12 +44,6 @@ generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:boo
 
 #scope_file
 
-ObserverGenerated :: struct {
-	onNodeAdded: string;
-	onNodeRemoved: string;
-	onNodeInputAdded: string;
-	onNodeInputRemoved: string;
-}
 
 GENERATED_CODE_NODE_COMPUTE,
 GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodes();
@@ -85,7 +79,14 @@ registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeRemoved:string, onN
 
 	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
 
-	generated: ObserverGenerated;
+	SceneObserverGeneratedCode :: struct {
+		onNodeAdded: string;
+		onNodeRemoved: string;
+		onNodeInputAdded: string;
+		onNodeInputRemoved: string;
+	}
+
+	generated: SceneObserverGeneratedCode;
 	{
 		builder: String_Builder;
 		print_to_builder(*builder, IF_FIRST_LINE);

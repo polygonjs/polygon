@@ -47,10 +47,10 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 
 
 
-		ImGui.Text_CFormat("Box Size");
-		ImGui.SliderFloat("sx", *scene.box_size.x, 0.1, 5.0);
-		ImGui.SliderFloat("sy", *scene.box_size.y, 0.1, 5.0);
-		ImGui.SliderFloat("sz", *scene.box_size.z, 0.1, 5.0);
+		// ImGui.Text_CFormat("Box Size");
+		// ImGui.SliderFloat("sx", *scene.box_size.x, 0.1, 5.0);
+		// ImGui.SliderFloat("sy", *scene.box_size.y, 0.1, 5.0);
+		// ImGui.SliderFloat("sz", *scene.box_size.z, 0.1, 5.0);
 
 		// ImGui.Text_CFormat("Raymarching");
 		// ImGui.SliderFloat("sdf x", *MATERIAL_RAYMARCHING.uniforms.offset.x, -1.0, 1.0);
@@ -66,45 +66,45 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 		// 	compute_controller_update_buffer_translate(cast(*ComputeControllerTranslate)COMPUTE_CONTROLLER_COLLECTION.controllers[0], scene_data);
 		// }
 
-		ImGui.Text_CFormat("Segments");
-		previous_segments := scene.segments;
-		ImGui.SliderInt("segments x", *scene.segments.x, 1, 128);
-		ImGui.SliderInt("segments y", *scene.segments.y, 1, 128);
-		ImGui.SliderInt("segments z", *scene.segments.z, 1, 128);
-		if( previous_segments != scene.segments ){
-			// print("updated: %x%x% = %\n", scene_data.segments.x, scene_data.segments.y, scene_data.segments.z, scene_data.segments.x*scene_data.segments.y*scene_data.segments.z);
-			// geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
-			// pipeline_controller_mesh_update_draw_data(*PIPELINE_CONTROLLERS[0], *scene_data.meshes0[0]);
-		}
+		// ImGui.Text_CFormat("Segments");
+		// previous_segments := scene.segments;
+		// ImGui.SliderInt("segments x", *scene.segments.x, 1, 128);
+		// ImGui.SliderInt("segments y", *scene.segments.y, 1, 128);
+		// ImGui.SliderInt("segments z", *scene.segments.z, 1, 128);
+		// if( previous_segments != scene.segments ){
+		// 	// print("updated: %x%x% = %\n", scene_data.segments.x, scene_data.segments.y, scene_data.segments.z, scene_data.segments.x*scene_data.segments.y*scene_data.segments.z);
+		// 	// geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
+		// 	// pipeline_controller_mesh_update_draw_data(*PIPELINE_CONTROLLERS[0], *scene_data.meshes0[0]);
+		// }
 
-		ImGui.Text_CFormat("Noise");
-		previous_freq := scene.noise.freq;
-		ImGui.SliderFloat("freq x", *scene.noise.freq.x, 0.01, 20);
-		ImGui.SliderFloat("freq y", *scene.noise.freq.y, 0.01, 20);
-		ImGui.SliderFloat("freq z", *scene.noise.freq.z, 0.01, 20);
+		// ImGui.Text_CFormat("Noise");
+		// previous_freq := scene.noise.freq;
+		// ImGui.SliderFloat("freq x", *scene.noise.freq.x, 0.01, 20);
+		// ImGui.SliderFloat("freq y", *scene.noise.freq.y, 0.01, 20);
+		// ImGui.SliderFloat("freq z", *scene.noise.freq.z, 0.01, 20);
 
-		previous_offset := scene.noise.offset;
-		ImGui.SliderFloat("offset x", *scene.noise.offset.x, -2, 2);
-		ImGui.SliderFloat("offset y", *scene.noise.offset.y, -2, 2);
-		ImGui.SliderFloat("offset z", *scene.noise.offset.z, -2, 2);
+		// previous_offset := scene.noise.offset;
+		// ImGui.SliderFloat("offset x", *scene.noise.offset.x, -2, 2);
+		// ImGui.SliderFloat("offset y", *scene.noise.offset.y, -2, 2);
+		// ImGui.SliderFloat("offset z", *scene.noise.offset.z, -2, 2);
 
-		previous_amount := scene.noise.amount;
-		ImGui.SliderFloat("amount x", *scene.noise.amount.x, -2, 2);
-		ImGui.SliderFloat("amount y", *scene.noise.amount.y, -2, 2);
-		ImGui.SliderFloat("amount z", *scene.noise.amount.z, -2, 2);
+		// previous_amount := scene.noise.amount;
+		// ImGui.SliderFloat("amount x", *scene.noise.amount.x, -2, 2);
+		// ImGui.SliderFloat("amount y", *scene.noise.amount.y, -2, 2);
+		// ImGui.SliderFloat("amount z", *scene.noise.amount.z, -2, 2);
 
-		if(
-			previous_freq != scene.noise.freq ||
-			previous_offset != scene.noise.offset ||
-			previous_amount != scene.noise.amount
-		){
-			// geometry_add_noise(*scene_data.meshes0[0].geometry, scene_data.freq);
-			// draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
-			if renderer.computes.controllers.count > 0 {
-				controller := renderer.computes.controllers[0];
-				controller.update_buffer(controller, scene);
-			}
-		}
+		// if(
+		// 	previous_freq != scene.noise.freq ||
+		// 	previous_offset != scene.noise.offset ||
+		// 	previous_amount != scene.noise.amount
+		// ){
+		// 	// geometry_add_noise(*scene_data.meshes0[0].geometry, scene_data.freq);
+		// 	// draw_data_update(*PIPELINE_CONTROLLERS[0], *PIPELINE_CONTROLLERS[0].meshes_draw_data[0], *scene_data.meshes0[0]);
+		// 	if renderer.computes.controllers.count > 0 {
+		// 		controller := renderer.computes.controllers[0];
+		// 		controller.update_buffer(controller, scene);
+		// 	}
+		// }
 
 		// if(scene_data.meshes0.count>=1){
 		// 	mesh00 := *scene_data.meshes0[0];
@@ -148,21 +148,21 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 		// 	mesh_update_matrix(*it);
 		// }
 
-		if (ImGui.Button("Reset")) {
-			scene.box_size.x = 1;
-			scene.box_size.y = 1;
-			scene.box_size.z = 1;
-			// scene_data.sdf_data[0].offset.x = 0;
-			// scene_data.sdf_data[0].offset.y = 0;
-			// scene_data.sdf_data[0].offset.z = 0;
-		}
-		ImGui.InputText("input text", scene.node_name.data, xx scene.node_name.count);
+		// if (ImGui.Button("Reset")) {
+		// 	scene.box_size.x = 1;
+		// 	scene.box_size.y = 1;
+		// 	scene.box_size.z = 1;
+		// 	// scene_data.sdf_data[0].offset.x = 0;
+		// 	// scene_data.sdf_data[0].offset.y = 0;
+		// 	// scene_data.sdf_data[0].offset.z = 0;
+		// }
+		// ImGui.InputText("input text", scene.node_name.data, xx scene.node_name.count);
 		// ImGui.ColorEdit3("clear color", clear_color); // Edit 3 floats representing a color
 
 		// if (ImGui.Button("Button")==true){
 		// 		ui_data.counter+=1;
 		// }
-		ImGui.SameLine();
+		// ImGui.SameLine();
 		// ImGui.Text("counter = %d", *ui_data.counter);
 
 		ImGui.End();

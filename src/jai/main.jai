@@ -43,11 +43,11 @@ main :: () {
 		}
 	}
 
-	node_name_size := 128;
-	SCENE_WORLD.node_name.data  = alloc(node_name_size);
-	SCENE_WORLD.node_name.count = node_name_size;
-	test_string := "Hello World!";
-	memcpy(SCENE_WORLD.node_name.data, test_string.data, test_string.count);
+	// node_name_size := 128;
+	// SCENE_WORLD.node_name.data  = alloc(node_name_size);
+	// SCENE_WORLD.node_name.count = node_name_size;
+	// test_string := "Hello World!";
+	// memcpy(SCENE_WORLD.node_name.data, test_string.data, test_string.count);
 
 	#if RUN_SCENE {
 		scene_init_world(*SCENE_WORLD, 1.);

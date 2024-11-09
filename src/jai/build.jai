@@ -4,6 +4,7 @@
 
 #run {
 
+	build_log_builder: String_Builder;
 	set_build_options_dc(.{do_output = false});
 
 	{
@@ -11,7 +12,7 @@
 		options := get_build_options(w);
 
 		buildArgs := getArgs(*options);
-		print("WASM:        [%]\n", _checkbox(buildArgs.wasm));
+		print_to_builder(*build_log_builder, tprint("WASM:        [%]\n", _checkbox(buildArgs.wasm)));
 		if(buildArgs.wasm){
 			copy_commonly_propagated_fields(get_build_options(), *options);
 
@@ -94,9 +95,9 @@
 
 		options := get_build_options(w);
 		buildArgs := getArgs(*options);
-		print("NATIVE:      [%]\n", _checkbox(buildArgs.native));
-		print("RUN_TESTS:   [%]\n", _checkbox(buildArgs.test));
-		print("OPTIMIZED:   [%]\n\n", _checkbox(buildArgs.optimized));
+		print_to_builder(*build_log_builder, tprint("NATIVE:      [%]\n", _checkbox(buildArgs.native)));
+		print_to_builder(*build_log_builder, tprint("RUN_TESTS:   [%]\n", _checkbox(buildArgs.test)));
+		print_to_builder(*build_log_builder, tprint("OPTIMIZED:   [%]\n\n", _checkbox(buildArgs.optimized)));
 		if(buildArgs.native) {
 			options.output_path = "../../bin/";
 			make_directory_if_it_does_not_exist(options.output_path);
@@ -137,6 +138,9 @@
 		}
 
 	}
+	build_log :string= builder_to_string(*build_log_builder);
+	print("\n");
+	print("%\n", build_log);
 	print("\n");
 }
 

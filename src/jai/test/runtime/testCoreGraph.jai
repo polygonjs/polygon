@@ -1,71 +1,76 @@
 testCoreGraph :: () {
-	testCoreGraphMemoryCleared();
+	#if FREE_MEMORY_DEBUG testCoreGraphMemoryCleared();
 	testCoreGraphPreventCycleConnections();
 	testCoreGraphNodeIdRecycle();
 }
 
 #scope_file
 
-leaksCount :: ()->s64 {
-	report := make_leak_report();
-	defer deinit(*report);
-	// bytes_total: s64;
-	leaks_total: s64;
-	for summary: report.sorted_summaries {
-		// bytes_total += summary.bytes;
-		leaks_total += summary.count;
+#if FREE_MEMORY_DEBUG {
+	leaksCount :: ()->s64 {
+		report := make_leak_report();
+		defer deinit(*report);
+		// bytes_total: s64;
+		leaks_total: s64;
+		for summary: report.sorted_summaries {
+			// bytes_total += summary.bytes;
+			leaks_total += summary.count;
 
-		// bytes_total += summary.child_bytes;
-		leaks_total += summary.child_count;
+			// bytes_total += summary.child_bytes;
+			leaks_total += summary.child_count;
+		}
+		return leaks_total;
 	}
-	return leaks_total;
+
+	testCoreGraphMemoryCleared :: () {
+		#if FREE_MEMORY_DEBUG == false return;
+		{
+
+			// empty scene
+			nodesScene := newNodesScene();
+			sceneDelete(nodesScene);
+			// report_memory_leaks();
+			assertEqual(leaksCount(), 0, "no leak when deleting an empty scene");
+		}
+		{
+			// scene with 1 node
+			nodesScene := newNodesScene();
+			box1 := newNode(nodesScene, BoxGeoNode);
+			// sceneDeleteNode(nodesScene, box1);
+			sceneDelete(nodesScene);
+			// report_memory_leaks();
+			// print("leaksCount(): %\n", leaksCount());
+			assertEqual(leaksCount(), 0, "no leak when deleting a scene with 1 node");
+		}
+		{
+			// scene with 2 node, input of one another
+			nodesScene := newNodesScene();
+			box1 := newNode(nodesScene, BoxGeoNode);
+			output1 := newNode(nodesScene, OutputGeoNode);
+			assertTrue(setInput(output1, 0, box1));
+			// sceneDeleteNode(nodesScene, box1);
+			sceneDelete(nodesScene);
+			// report_memory_leaks();
+			// print("leaksCount(): %\n", leaksCount());
+			assertEqual(leaksCount(), 0, "no leak when deleting a scene with 2 nodes");
+		}
+		{
+			// scene with 3 node, and we have updated a param value
+			nodesScene := newNodesScene();
+			box1 := newNode(nodesScene, BoxGeoNode);
+			null1 := newNode(nodesScene, NullGeoNode);
+			output1 := newNode(nodesScene, OutputGeoNode);
+			assertTrue(setInput(output1, 0, null1));
+			assertTrue(setInput(null1, 0, box1));
+			paramSetValue(*box1.p.scale, 1.0);
+			// sceneDeleteNode(nodesScene, box1);
+			sceneDelete(nodesScene);
+			assertEqual(leaksCount(), 0, "no leak when deleting a scene with 3 nodes");
+		}
+	}
 }
 
-testCoreGraphMemoryCleared :: () {
-	{
 
-		// empty scene
-		nodesScene := newNodesScene();
-		sceneDelete(nodesScene);
-		// report_memory_leaks();
-		assertEqual(leaksCount(), 0, "no leak when deleting an empty scene");
-	}
-	{
-		// scene with 1 node
-		nodesScene := newNodesScene();
-		box1 := newNode(nodesScene, BoxGeoNode);
-		// sceneDeleteNode(nodesScene, box1);
-		sceneDelete(nodesScene);
-		// report_memory_leaks();
-		// print("leaksCount(): %\n", leaksCount());
-		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 1 node");
-	}
-	{
-		// scene with 2 node, input of one another
-		nodesScene := newNodesScene();
-		box1 := newNode(nodesScene, BoxGeoNode);
-		output1 := newNode(nodesScene, OutputGeoNode);
-		assertTrue(setInput(output1, 0, box1));
-		// sceneDeleteNode(nodesScene, box1);
-		sceneDelete(nodesScene);
-		// report_memory_leaks();
-		// print("leaksCount(): %\n", leaksCount());
-		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 2 nodes");
-	}
-	{
-		// scene with 3 node, and we have updated a param value
-		nodesScene := newNodesScene();
-		box1 := newNode(nodesScene, BoxGeoNode);
-		null1 := newNode(nodesScene, NullGeoNode);
-		output1 := newNode(nodesScene, OutputGeoNode);
-		assertTrue(setInput(output1, 0, null1));
-		assertTrue(setInput(null1, 0, box1));
-		paramSetValue(*box1.p.scale, 1.0);
-		// sceneDeleteNode(nodesScene, box1);
-		sceneDelete(nodesScene);
-		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 3 nodes");
-	}
-}
 
 testCoreGraphPreventCycleConnections :: () {
 	nodesScene := newNodesScene();

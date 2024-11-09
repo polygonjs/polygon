@@ -23,7 +23,9 @@ ComputeControllerTranslate :: struct {
 	}
 	init :ComputeControllerInitMethod= init_translate;
 }
-
+TranslateComputeControllerParams :: struct {
+	translate: Vector3=.{0.0, 0.0, 0.0};
+}
 
 compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, position_out: *BufferContainer) {
 	controller.attributes.position_in = position_in;
@@ -141,11 +143,11 @@ init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, 
 	controller.update_buffer(controller, scene);
 }
 
-update_buffer :: (controller:*CONTROLLER_TYPE, scene:*Scene){
+update_buffer :: (controller:*CONTROLLER_TYPE, params:*TranslateComputeControllerParams){
 	{
 		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
 		// print("size_float:%\n",scene_data.translate.x);
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *scene.translate, controller.params.translate.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *params.translate, controller.params.translate.buffer_size);
 	}
 };
 
