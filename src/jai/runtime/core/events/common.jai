@@ -7,8 +7,8 @@ EventsDataCursor :: struct {
 	y: u32;
 };
 ViewportRect :: struct {
-	start: Vector2;
-	size: Vector2;
+	start: Vector2UInt64;
+	size: Vector2UInt64;
 }
 ViewportContainer :: struct {
 	full_screen:bool;

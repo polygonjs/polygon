@@ -9,7 +9,7 @@ ViewerPanel :: struct {
 		full_screen = false,
 		viewport = .{
 			start = .{0,0},
-			size = .{500,700}
+			size = .{200,200}
 		},
 		bgColor = DEFAULT_RENDERER_BG_COLOR,
 		render_ui = true,
@@ -40,14 +40,17 @@ cameraControlsProcessEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;
 	camera_controls_process_event(*cameraControls, eventsData, element_focused(*renderer, eventsData));
 }
-onResize :: (panel: *TYPE, size:Vector2UInt64) {
-	new_aspect:float = (cast(float32) size.x) / (cast(float32) size.y);
-
+onResize :: (panel: *TYPE) {
 	using panel;
+	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
+
+	renderer.viewport.start = .{ editor.windowSize.x*0, editor.windowSize.y*0 };
+	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.49), xx(cast(float32)editor.windowSize.y*0.49) };
+
 	if(renderer.full_screen == true) {
-		camera.aspect = new_aspect;
+		camera.aspect = newAspect;
 	} else {
-		camera.aspect = renderer.viewport.size.x / renderer.viewport.size.y;
+		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
 	}
 	cameraProjectionUpdate(*camera);
 }

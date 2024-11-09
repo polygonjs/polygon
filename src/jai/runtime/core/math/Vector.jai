@@ -22,13 +22,17 @@ Vector3UInt :: struct {
 	z: u32;
 }
 
-operator == :: (a:Vector3UInt, b:Vector3UInt) -> bool {
-	return a.x == b.x && a.y == b.y && a.z == b.z;
+Vector2All :: Type.[Vector2, Vector2UInt, Vector2UInt64];
+Vector3All :: Type.[Vector3, Vector3Int, Vector3UInt];
+VectorAll :: #run array_concat(Vector2All, Vector3All);
+
+operator == :: (a:$T/Vector2All, b:T) -> bool {
+	return a.x == b.x && a.y == b.y;
 }
-operator == :: (a:Vector3Int, b:Vector3Int) -> bool {
+operator == :: (a:$T/Vector3All, b:T) -> bool {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-mult :: inline (a: Vector3, s: float) -> Vector3 {
+mult :: inline (a: $T/Vector3All, s: float) -> Vector3 {
 	return .{a.x * s, a.y * s, a.z * s};
 }

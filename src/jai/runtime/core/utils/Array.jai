@@ -8,3 +8,9 @@ array_init :: (array: *[..] $T, allocator: Allocator=context.allocator) {
 	array.data = null;
 	array.allocator = allocator;
 }
+array_concat :: (array0: [$N] $T, array1: [$M] T)-> [..] T {
+	array:[..]T;
+	for item: array0 {array_add(*array, item);}
+	for item: array1 {array_add(*array, item);}
+	return array;
+}

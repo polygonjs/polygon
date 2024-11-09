@@ -31,7 +31,7 @@ Renderer :: struct {
 	depth_texture_view: WGPUTextureView=null;
 }
 
-renderer_size :: (renderer:*Renderer) -> Vector2 {
+rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
 	if renderer.full_screen {
 		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
 		height := wgpu_texture_get_height_surface(renderer.wgpu_context);
@@ -213,7 +213,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	if(renderer.full_screen == false) {
 		using renderer.viewport;
 		// renderer_set_viewport(render_pass_encoder, start.x, start.y, size.x, size.y);
-		set_viewport(render_pass_encoder, start.x, start.y, size.x, size.y);
+		set_viewport(render_pass_encoder, xx start.x, xx start.y, xx size.x, xx size.y);
 		// Clear only the viewport area
 		set_scissor_rect(render_pass_encoder, xx start.x, xx start.y, xx size.x, xx size.y);
 	}

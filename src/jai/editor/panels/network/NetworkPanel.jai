@@ -46,14 +46,17 @@ cameraControlsProcessEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	camera_controls_process_event(*cameraControls, eventsData, element_focused(*renderer, eventsData));
 }
 
-onResize :: (panel: *TYPE, size:Vector2UInt64) {
-	new_aspect:float = (cast(float32) size.x) / (cast(float32) size.y);
-
+onResize :: (panel: *TYPE) {
 	using panel;
+	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
+
+	renderer.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
+	renderer.viewport.size = .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 };
+
 	if(renderer.full_screen == true) {
-		camera.aspect = new_aspect;
+		camera.aspect = newAspect;
 	} else {
-		camera.aspect = renderer.viewport.size.x / renderer.viewport.size.y;
+		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
 	}
 	cameraProjectionUpdate(*camera);
 }

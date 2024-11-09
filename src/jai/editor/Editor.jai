@@ -3,6 +3,7 @@
 Editor :: struct {
 	nodesScene: *NodesScene;
 
+	windowSize: Vector2UInt64;
 	viewerPanel: *ViewerPanel;
 	networkPanel: *NetworkPanel;
 
@@ -53,8 +54,10 @@ cameraControlsProcessEvent :: (editor: *Editor, eventsData:*EventsData) {
 }
 
 onResize :: (editor: *Editor, size:Vector2UInt64) {
-	onResize(editor.viewerPanel, size);
-	onResize(editor.networkPanel, size);
+	if editor.windowSize == size {return;}
+	editor.windowSize = size;
+	onResize(editor.viewerPanel);
+	onResize(editor.networkPanel);
 }
 
 onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
