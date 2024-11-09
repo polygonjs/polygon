@@ -5,4 +5,3 @@
 #load "Time.jai";
 #load "Type.jai";
 
-#load "math/_index.jai";

@@ -239,26 +239,14 @@ else #import "Basic";
 #import "String";
 #if WASM == true  #import "wgpu_wasm";
 else              #import "wgpu";
-
-#load "app.jai";
-#load "core/graph/_index.jai";
-#load "editor/_index.jai";
-#load "engine/_index.jai";
-#load "scene/_index.jai";
-#load "common/events/index.jai";
-#load "common/ui/index.jai";
-#load "common/utils/_index.jai";
-
-
 #if WASM == false {
 	#import "SDL";
 }
-#if USE_IMGUI {
-	#load "common/imgui/index.jai";
-}
-#if USE_WGPU {
-	#load "common/wgpu/index.jai";
-}
+
+#load "app.jai";
+#load "editor/_index.jai";
+#load "runtime/_index.jai";
+
 #if RUN_TESTS {
 	#load "test/_index.jai";
 }
