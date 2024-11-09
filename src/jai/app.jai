@@ -99,7 +99,7 @@ appInit :: (nodesScene: *NodesScene) {
 	// }
 	// box1.onDirty = onBoxDirty;
 
-	paramSetValue(*box1.p.scale, 2.0);
+	paramSetValue(*box1.p.scale, 1.0);
 
 	// {
 	// 	mat := newMaterial(BackgroundMeshMaterial);

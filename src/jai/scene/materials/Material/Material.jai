@@ -11,8 +11,6 @@ Material :: struct {
 	name: string;
 	shader: string;
 	uniforms: *void;
-	//
-	init :MaterialInitMethod= init_material;
 }
 
 
@@ -22,11 +20,9 @@ newMaterial :: ($T: Type) -> *T {
 	material.type = T;
 
 	material.id = NEXT_MATERIAL_ID;
-	NEXT_MATERIAL_ID+=1;
+	NEXT_MATERIAL_ID += 1;
 
-	tmp :T;
-	material.init = tmp.init;
-	material.init(material);
+	materialInit(material);
 
 	return material;
 }
@@ -35,5 +31,5 @@ newMaterial :: ($T: Type) -> *T {
 
 NEXT_MATERIAL_ID :u64= 0;
 
-init_material :: (material: *Material) {
+materialInit :: (material: *Material) {
 }

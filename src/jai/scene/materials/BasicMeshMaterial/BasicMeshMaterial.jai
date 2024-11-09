@@ -4,8 +4,6 @@ BasicMeshMaterialUniforms :: struct {
 
 BasicMeshMaterial :: struct {
 	#as using material: Material;
-	material.init = init_basic_mesh_material;
-
 };
 
 uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
@@ -14,20 +12,11 @@ uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
 setColor :: (material: *MATERIAL_TYPE, color: Color) {
 	uniforms(material).color = color;
 }
-
-#scope_file
-
-SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "BasicMeshMaterial.wgsl"; };
-MATERIAL_TYPE :: BasicMeshMaterial;
-UNIFORM_TYPE :: BasicMeshMaterialUniforms;
-
-init_basic_mesh_material :: (base_material: *Material) {
-	material := cast(*MATERIAL_TYPE)base_material;
+materialInit :: (material: *MATERIAL_TYPE) {
 	material.uniformType = UNIFORM_TYPE;
 	material.uniformTypeSize = size_of(UNIFORM_TYPE);
 
-	material.name = "BasicMeshMaterial";
+	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 	material.uniforms = alloc(size_of(UNIFORM_TYPE));
 
@@ -38,4 +27,14 @@ init_basic_mesh_material :: (base_material: *Material) {
 
 	// assert(material.uniform_type, "uniform type is Undefined\n");
 }
+
+
+#scope_file
+
+SHADER_RAW :: #run import_shader();
+import_shader :: () -> string { return "BasicMeshMaterial.wgsl"; };
+MATERIAL_TYPE :: BasicMeshMaterial;
+UNIFORM_TYPE :: BasicMeshMaterialUniforms;
+MATERIAL_NAME :: #run tprint("%", MATERIAL_TYPE);
+
 
