@@ -75,16 +75,17 @@ networkPanelUpdateWorldScene :: (panel: *TYPE, nodesScene: *NodesScene) {
 	}
 
 	for node, i: nodesScene.nodes {
-		networkdPanelAddNode(panel, node, nodePositions[node.nodeId]);
+		networkPanelAddNode(panel, node);
 	}
 }
 
-networkdPanelAddNode :: (panel: *TYPE, node: *$T, pos: Vector2) {
+networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 	mesh := newObject3D(Mesh);
 	setColor(panel.basicMat, .{1.0, 0.0, 0.0, 1.0});
 	geometry_box_update(mesh.geometry, segments=.{2,2,2});
 	mesh.material = xx panel.basicMat;
 
+	pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
 	mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
 	transformable_update_matrix(mesh);
 	{
@@ -96,7 +97,7 @@ networkdPanelAddNode :: (panel: *TYPE, node: *$T, pos: Vector2) {
 		array_add(*worldScene.children, mesh);
 	}
 }
-networkdPanelRemoveNode :: (panel: *TYPE, node: *$T) {
+networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 	using panel;
 	meshIndex := nodesSceneObjectIndex[node.nodeId];
 	if meshIndex > 0 {
@@ -105,6 +106,26 @@ networkdPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 		worldScene.children[meshIndex] = null;
 		nodesSceneObjectIndex[node.nodeId] = 0;
 	}
+}
+networkPanelMoveNode :: (panel: *TYPE, node: *$T) {
+	using panel;
+	meshIndex := nodesSceneObjectIndex[node.nodeId];
+	if meshIndex > 0 {
+		mesh := worldScene.children[meshIndex];
+		pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
+		mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
+		transformable_update_matrix(mesh);
+	}
+}
+
+onNodeAdded :: (panel: *TYPE, node: *$T) {
+	networkPanelAddNode(panel, node);
+}
+onNodeRemoved :: (panel: *TYPE, node: *$T) {
+	networkPanelRemoveNode(panel, node);
+}
+onNodeMoved :: (panel: *TYPE, node: *$T) {
+	networkPanelMoveNode(panel, node);
 }
 
 #scope_file

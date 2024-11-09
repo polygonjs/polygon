@@ -67,7 +67,7 @@
 // }
 
 // box1 :*BoxGeoNode;
-appInit :: (nodesScene: *NodesScene) {
+appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	// box0 :BoxGeoNode;
 	// handle_params(*box0);
@@ -81,6 +81,8 @@ appInit :: (nodesScene: *NodesScene) {
 	assert(graphNodeScene(box1)!=null, "scene can be found from node");
 	output1 := newNode(nodesScene, OutputGeoNode);
 	setInput(output1, 0, box1);
+
+	nodeSetPosition(editor, box1, .{2,1});
 	// print("box1 size: % % %\n", box1.p.size.id, box1.p.size.type, box1.p.size.value);
 	// print("box1 scale: % % %\n", box1.p.scale.id, box1.p.scale.type, box1.p.scale.value);
 	// sphere1 := newNode(nodesScene, SphereGeoNode);

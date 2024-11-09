@@ -60,19 +60,24 @@ onResize :: (editor: *Editor, size:Vector2UInt64) {
 	onResize(editor.networkPanel);
 }
 
+nodeSetPosition :: (editor: *Editor, node: *$T, position: Vector2) {
+	editor.sceneUiData.nodePositions[node.nodeId] = position;
+	editorEmitEvent(editor, EditorEvent.NODE_MOVED, node);
+}
+
 onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	using editor.sceneUiData;
 	if nodePositions.count <= node.nodeId {
 		array_resize(*nodePositions, node.nodeId + 1);
 	}
-	nodePositions[node.nodeId] = .{0,0};
+	nodePositions[node.nodeId] = .{0, 0};
 
-	networkdPanelAddNode(editor.networkPanel, node, nodePositions[node.nodeId]);
+	networkPanelAddNode(editor.networkPanel, node);
 }
 onNodeRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	editor.sceneUiData.nodePositions[node.nodeId] = .{-1000000,-1000000};
 
-	networkdPanelRemoveNode(editor.networkPanel, node);
+	networkPanelRemoveNode(editor.networkPanel, node);
 }
 onNodeInputAdded :: (editor: *Editor, scene: *NodesScene, node: *$T, inputIndex: u8) {
 	print("onNodeInputAdded % %\n", node, inputIndex);
@@ -83,3 +88,21 @@ onNodeInputRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T, inputInde
 
 
 #scope_file
+
+EditorEvent :: enum u8 {
+	NODE_ADDED :: 0;
+	NODE_REMOVED;
+	NODE_MOVED;
+	NODE_INPUT_ADDED;
+	NODE_INPUT_REMOVED;
+}
+
+
+editorEmitEvent :: (editor: *Editor, $event: EditorEvent, node: *$T) {
+	p := editor.networkPanel;
+	if event == {
+		case EditorEvent.NODE_ADDED; 	{ onNodeAdded(p, node); return;}
+		case EditorEvent.NODE_REMOVED; 	{ onNodeRemoved(p, node); return;}
+		case EditorEvent.NODE_MOVED; 	{ onNodeMoved(p, node); return;}
+	}
+}

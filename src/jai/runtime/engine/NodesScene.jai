@@ -18,7 +18,7 @@ NodesScene :: struct {
 
 NodesSceneEvent :: enum u8 {
 	NODE_ADDED :: 0;
-	NODE_REMOVED ;
+	NODE_REMOVED;
 	NODE_INPUT_ADDED;
 	NODE_INPUT_REMOVED;
 }
@@ -97,14 +97,12 @@ sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
 		case NodesSceneEvent.NODE_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeAdded(o, scene, node); return;}
 		case NodesSceneEvent.NODE_REMOVED; 	{for o: scene.observers nodeSceneObserverOnNodeRemoved(o, scene, node); return;}
 	}
-	print("B\n");
 }
 sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
 	if event == {
 		case NodesSceneEvent.NODE_INPUT_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeInputAdded(o, scene, node, inputIndex); return;}
 		case NodesSceneEvent.NODE_INPUT_REMOVED;{for o: scene.observers nodeSceneObserverOnNodeInputRemoved(o, scene, node, inputIndex); return;}
 	}
-	print("D\n");
 }
 
 sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {

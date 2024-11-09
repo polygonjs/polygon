@@ -44,9 +44,9 @@ main :: () {
 	}
 	sceneInit(*NODES_SCENE);
 	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (A)");
-	appInit(*NODES_SCENE);
-	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (B)");
 	editorInit(*EDITOR, *NODES_SCENE);
+	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (B)");
+	appInit(*NODES_SCENE, *EDITOR);
 	// node_name_size := 128;
 	// SCENE_WORLD.node_name.data  = alloc(node_name_size);
 	// SCENE_WORLD.node_name.count = node_name_size;
