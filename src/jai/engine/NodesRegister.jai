@@ -42,11 +42,18 @@ generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:boo
 	assert(false, tprint("generatedSceneNodeDelete: node type % is not implemented", node.type));
 }
 
+generatedCameraProjectionUpdate :: (object:*$T) {
+	#insert GENERATED_CODE_CAMERA_PROJECTION_UPDATE;
+	assert(false, tprint("generatedCameraProjectionUpdate: object type % is not implemented", object.type));
+}
+
 #scope_file
 
 
 GENERATED_CODE_NODE_COMPUTE,
 GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodes();
+
+GENERATED_CODE_CAMERA_PROJECTION_UPDATE :: #run registerCameras();
 
 NODES_SCENE_OBSERVER_ON_NODE_ADDED,
 NODES_SCENE_OBSERVER_ON_NODE_REMOVED,
@@ -55,18 +62,19 @@ NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED :: #run registerNodesSceneObserver();
 
 
 NOTE_TYPES :[..]Type;
+CAMERA_TYPES :[..]Type;
 NODES_SCENE_OBSERVER_TYPES :[..]Type;
 // PARAM_TYPES :[..]Type;
 
 nodeRegister :: ($T:Type) {
-	// print(">> nodeRegister: %\n", nodeType);
 	array_add(*NOTE_TYPES, T);
-	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
 }
+cameraRegister :: ($T:Type) {
+	array_add(*CAMERA_TYPES, T);
+}
+
 nodesSceneObserverRegister :: ($T:Type) {
-	// print(">> nodeRegister: %\n", nodeType);
 	array_add(*NODES_SCENE_OBSERVER_TYPES, T);
-	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
 }
 // paramRegister :: ($paramType:Type) {
 // 	// print("> paramRegister: %\n", paramType);
@@ -162,7 +170,7 @@ generateSceneNodeDelete :: ()->string {
 	return result;
 }
 
-registerNodes :: () -> nodeCompute:string, nodeCompute2:string {
+registerNodes :: () -> nodeCompute:string, sceneNodeDelete:string {
 	// paramRegister(FloatParam);
 	// paramRegister(UIntegerParam);
 	// paramRegister(Vector3Param);
@@ -180,5 +188,21 @@ registerNodes :: () -> nodeCompute:string, nodeCompute2:string {
 
 	return 	nodeCompute,
 			sceneNodeDelete;
+}
+registerCameras :: () -> projectionUpdate:string {
+
+	cameraRegister(PerspectiveCamera);
+	cameraRegister(OrthographicCamera);
+
+	builder: String_Builder;
+	print_to_builder(*builder, "if object.type == {\n");
+	for type: CAMERA_TYPES {
+		print_to_builder(*builder, tprint("\tcase %; cameraProjectionUpdate( cast(*%) object);return;\n", type, type));
+	}
+	print_to_builder(*builder, "}");
+
+	result := builder_to_string(*builder);
+
+	return result;
 }
 

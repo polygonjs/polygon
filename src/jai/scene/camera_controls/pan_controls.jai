@@ -13,7 +13,7 @@ PanControls :: struct {
 
 
 
-camera_controls_process_event :: (controls:*PanControls, events_data:*EventsData, element_focused:bool){
+camera_controls_process_event :: (controls:*TYPE, events_data:*EventsData, element_focused:bool){
 	using controls;
 
 	if(actionStarted == false && element_focused==true){
@@ -41,24 +41,12 @@ camera_controls_process_event :: (controls:*PanControls, events_data:*EventsData
 		// if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
 	}
 
-	camera_controls_update_camera(controls);
+	cameraControlsUpdateCamera(controls);
 }
 
-
-
-
-
-#scope_file
-
-delta:Vector2Int;
-DEPTH:float:5;
-
-
-camera_controls_update_camera :: (controls:*PanControls){
+cameraControlsCommit :: (controls:*TYPE){
 	using controls;
-
-	if(actionStarted == false)return;
-
+	
 	// translate
 	transformMatrix :Matrix4;
 	identity(*transformMatrix);
@@ -71,6 +59,23 @@ camera_controls_update_camera :: (controls:*PanControls){
 	translate(*transformMatrix, newCameraPos);
 	camera.camera_matrices.transformMatrix = transformMatrix;
 
-	
+	generatedCameraProjectionUpdate(camera);
+}
+
+
+#scope_file
+
+TYPE :: PanControls;
+
+delta:Vector2Int;
+DEPTH:float:5;
+
+
+cameraControlsUpdateCamera :: (controls:*TYPE){
+	using controls;
+
+	if(actionStarted == false)return;
+
+	cameraControlsCommit(controls);
 }
 

@@ -16,7 +16,8 @@ CoreGraph :: struct {
 	allSuccessorsDirty: Bit_Array;
 }
 
-graphInit :: (graph: *CoreGraph) {
+graphInit :: (graph: *CoreGraph, _scene: *NodesScene) {
+	graph.scene = _scene;
 	graph.graphId = NEXT_CORE_GRAPH_ID;
 	array_resize(*CORE_GRAPHS, max(graph.graphId + 1, xx CORE_GRAPHS.count));
 	CORE_GRAPHS[graph.graphId] = graph;

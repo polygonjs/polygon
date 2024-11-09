@@ -17,10 +17,10 @@ ANSI_PURPLE_BACKGROUND := "\u001B[45m";
 ANSI_CYAN_BACKGROUND := "\u001B[46m";
 ANSI_WHITE_BACKGROUND := "\u001B[47m";
 
-print_with_color :: (content:string, bg_color:string){
+print_with_color :: (content:string, bgColor:string){
 	print(
 		"% % % %\n",
-		bg_color,
+		bgColor,
 		ANSI_BLACK,
 		content,
 		ANSI_RESET

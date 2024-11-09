@@ -16,7 +16,7 @@ OrbitControls :: struct {
 
 
 
-camera_controls_process_event :: (controls:*OrbitControls, events_data:*EventsData, element_focused:bool){
+camera_controls_process_event :: (controls:*TYPE, events_data:*EventsData, element_focused:bool){
 	using controls;
 
 	if(actionStarted == false && element_focused==true){
@@ -45,10 +45,10 @@ camera_controls_process_event :: (controls:*OrbitControls, events_data:*EventsDa
 		if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
 	}
 
-	camera_controls_update_camera(controls);
+	cameraControlsUpdateCamera(controls);
 }
 
-camera_controls_apply :: (controls:*OrbitControls){
+cameraControlsCommit :: (controls:*TYPE){
 	using controls;
 
 	// Clamp phi to avoid flipping at the poles
@@ -70,10 +70,14 @@ camera_controls_apply :: (controls:*OrbitControls){
 
 	assert(camera != null, "camera is null\n");
 	camera.camera_matrices.transformMatrix = transformMatrix;
+
+	generatedCameraProjectionUpdate(camera);
 }
 
 
 #scope_file
+
+TYPE :: OrbitControls;
 
 
 PHI_MIN :: -PI/2;
@@ -82,8 +86,8 @@ AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
 AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
 // UP		::Vector3.{x=0.0, y=1.0, z=0.0};
 
-camera_controls_update_camera :: (controls:*OrbitControls){
+cameraControlsUpdateCamera :: (controls:*TYPE){
 	if(controls.actionStarted == false)return;
 
-	camera_controls_apply(controls);
+	cameraControlsCommit(controls);
 }

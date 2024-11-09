@@ -9,9 +9,8 @@ MAP_BUFFER :: false && WASM==false; // to read the buffer from the GPU to the CP
 FREE_MEMORY :: true; // beware wasm memory corruption when in use
 RENDER_SCENE :: true;
 VSYNC :: false;
-RENDER_WORLD :: true && USE_WGPU==true;
-RENDER_NODES_NETWORK :: true && USE_WGPU==true;
 RUN_SCENE :: true;
+NODES_SCENE_EMIT_EVENTS :: true;
 
 // it would be great if FREE_MEMORY_DEBUG could be set
 // depending on the value of RUN_TESTS, but since RUN_TESTS

@@ -2,6 +2,8 @@
 
 Editor :: struct {
 	nodesScene: *NodesScene;
+
+	viewerPanel: *ViewerPanel;
 	networkPanel: *NetworkPanel;
 
 	SceneUiData :: struct {
@@ -14,7 +16,6 @@ editorInit :: (editor: *Editor, nodesScene: *NodesScene) {
 	editor.nodesScene = nodesScene;
 	editorAny: Any = <<editor;
 	tis := cast(*Type_Info_Struct)editorAny.type;
-	print("editorAny: %\n", tis.name);
 	sceneAddObserver(nodesScene, editorAny);
 
 	//
@@ -29,11 +30,31 @@ editorInit :: (editor: *Editor, nodesScene: *NodesScene) {
 	for node, i: nodesScene.nodes {
 		editor.sceneUiData.nodePositions[node.nodeId] = .{0,0};
 	}
-
 	//
+	editor.viewerPanel = newViewerPanel(editor);
 	editor.networkPanel = newNetworkPanel(editor);
-	networkPanelUpdateWorldScene(editor.networkPanel, nodesScene);
 
+}
+drawDataInit :: (editor: *Editor) {
+	drawDataInit(editor.viewerPanel);
+	drawDataInit(editor.networkPanel);
+}
+render :: (editor: *Editor, renderCollectionData: *RenderCollectionData) {
+	render(editor.viewerPanel, renderCollectionData);
+	render(editor.networkPanel, renderCollectionData);
+}
+rendererDestroyBuffers :: (editor: *Editor) {
+	rendererDestroyBuffers(editor.viewerPanel);
+	rendererDestroyBuffers(editor.networkPanel);
+}
+cameraControlsProcessEvent :: (editor: *Editor, eventsData:*EventsData) {
+	cameraControlsProcessEvent(editor.viewerPanel, eventsData);
+	cameraControlsProcessEvent(editor.networkPanel, eventsData);
+}
+
+onResize :: (editor: *Editor, size:Vector2UInt64) {
+	onResize(editor.viewerPanel, size);
+	onResize(editor.networkPanel, size);
 }
 
 onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {

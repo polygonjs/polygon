@@ -29,6 +29,7 @@ newObject3D :: ($T: Type) -> *T {
 	return object;
 }
 object3DInit :: (object: *Object3D) {
+	assert(cast(*void)object.type != null, "object.type is null\n");
 	init_transformable(object);
 }
 object3DDelete :: (object: *$T/Object3D) {

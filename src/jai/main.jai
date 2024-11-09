@@ -42,22 +42,22 @@ main :: () {
 			return;
 		}
 	}
-
+	sceneInit(*NODES_SCENE);
+	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (A)");
+	appInit(*NODES_SCENE);
+	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (B)");
+	editorInit(*EDITOR, *NODES_SCENE);
 	// node_name_size := 128;
 	// SCENE_WORLD.node_name.data  = alloc(node_name_size);
 	// SCENE_WORLD.node_name.count = node_name_size;
 	// test_string := "Hello World!";
 	// memcpy(SCENE_WORLD.node_name.data, test_string.data, test_string.count);
 
-	#if RUN_SCENE {
-		scene_init_world(*SCENE_WORLD, 1.);
-		scene_init_nodes(*SCENE_NODES, 1.);
-	}
-	CAMERA_WORLD = newObject3D(PerspectiveCamera);
-	CAMERA_CONTROLS_WORLD.camera = CAMERA_WORLD;
-	camera_controls_apply(*CAMERA_CONTROLS_WORLD);
-	CAMERA_NODES = newObject3D(OrthographicCamera);
-	CAMERA_CONTROLS_NODES.camera = CAMERA_NODES;
+	// CAMERA_WORLD = newObject3D(PerspectiveCamera);
+	// CAMERA_CONTROLS_WORLD.camera = CAMERA_WORLD;
+	// camera_controls_apply(*CAMERA_CONTROLS_WORLD);
+	// CAMERA_NODES = newObject3D(OrthographicCamera);
+	// CAMERA_CONTROLS_NODES.camera = CAMERA_NODES;
 
 	#if WASM==false {
 		SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
@@ -114,7 +114,7 @@ main :: () {
 			
 			while SDL_PollEvent(*sdl_event) {
 				events_data_update(*EVENTS_DATA, *sdl_event);
-				camera_controls_process_event();
+				cameraControlsProcessEvent();
 
 				if sdl_event.type == {
 					case SDL_QUIT; {do_exit = true;}
@@ -172,11 +172,7 @@ main :: () {
 init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
-	#if RENDER_WORLD {
-		#if USE_IMGUI { renderer_init_ui(*WORLD_RENDERER); }
-		renderer_init_pipelines(*WORLD_RENDERER, *SCENE_WORLD, xx CAMERA_WORLD);
-	}
-	#if RENDER_NODES_NETWORK { renderer_init_pipelines(*NODES_RENDERER, *SCENE_NODES, xx CAMERA_NODES); }
+	drawDataInit(*EDITOR);
 
 }
 
@@ -187,7 +183,7 @@ init_draw_data :: () {
 //
 //
 on_request_animation_frame :: (
-	new_time: u64,
+	newTime: u64,
 	width: u64,
 	height: u64
 ) {
@@ -200,75 +196,33 @@ on_request_animation_frame :: (
 	} else {
 	}
 
-	new_aspect:float = (cast(float32) width) / (cast(float32) height);
-
-	if(new_aspect != CAMERA_WORLD.aspect){
-		#if RENDER_WORLD {
-			if(WORLD_RENDERER.full_screen == true) {
-				CAMERA_WORLD.aspect = new_aspect;
-			} else {
-				CAMERA_WORLD.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
-			}
-			cameraProjectionUpdate(CAMERA_WORLD);
-		}
-		#if RENDER_NODES_NETWORK {
-			if(NODES_RENDERER.full_screen == true) {
-				CAMERA_NODES.aspect = new_aspect;
-			} else {
-				CAMERA_NODES.aspect = NODES_RENDERER.viewport.size.x / NODES_RENDERER.viewport.size.y;
-			}
-			cameraProjectionUpdate(CAMERA_NODES);
-		}
-	}
-	SCENE_WORLD.time = new_time / 1000.0;
+	onResize(*EDITOR, .{width, height});
 	#if WASM {
-		camera_controls_process_event();
+		cameraControlsProcessEvent();
 	}
-	sceneUniformsUpdate(*SCENE_WORLD);
-	sceneUniformsUpdate(*SCENE_NODES);
-	cameraUniformsUpdate(CAMERA_WORLD);
-	cameraUniformsUpdate(CAMERA_NODES);
+	sceneOnTick(*NODES_SCENE, newTime / 1000.0);
 
-	#if RUN_SCENE {
-		scene_on_tick_world(*SCENE_WORLD);
-	}
-
-	window_size :Vector2UInt= .{xx width, xx height};
 	#if USE_WGPU {
-		data := renderer_collection_start(*WGPU_CONTEXT);
-		#if RENDER_WORLD { render(*data, *WORLD_RENDERER, *SCENE_WORLD, CAMERA_WORLD, window_size); }
-		#if RENDER_NODES_NETWORK { render(*data, *NODES_RENDERER, *SCENE_NODES, CAMERA_NODES, window_size); }
-		renderer_collection_end(*WGPU_CONTEXT, data);
+		data :RenderCollectionData= rendererCollectionStart(*WGPU_CONTEXT);
+		render(*EDITOR, *data);
+		rendererCollectionEnd(*WGPU_CONTEXT, data);
 	}
 
-	#if RENDER_WORLD { renderer_destroy_buffers(*WORLD_RENDERER); }
-	#if RENDER_NODES_NETWORK { renderer_destroy_buffers(*NODES_RENDERER); }
+	rendererDestroyBuffers(*EDITOR);
 
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
 	// if FRAMES_COUNT > 2 {do_exit = true;};
 }
 
-// scope_file does not yet prevent unwanted functions to be in the wasm export
-SCENE_WORLD:Scene;
+
 #scope_file
 
-camera_controls_process_event :: () {
-	_process_event :: () {
-		#if RENDER_WORLD {
-			camera_controls_process_event(*CAMERA_CONTROLS_WORLD, *EVENTS_DATA, element_focused(*WORLD_RENDERER, *EVENTS_DATA));
-		}
-		#if RENDER_NODES_NETWORK {
-			camera_controls_process_event(*CAMERA_CONTROLS_NODES, *EVENTS_DATA, element_focused(*NODES_RENDERER, *EVENTS_DATA));
-		}
-	}
+cameraControlsProcessEvent :: () {
 	#if USE_IMGUI {
-		io := ImGui.GetIO();
-		if(io.WantCaptureMouse == false){
-			_process_event();
-		}
+		if(ImGui.GetIO().WantCaptureMouse == false) cameraControlsProcessEvent(*EDITOR, *EVENTS_DATA);
 	} else {
-		_process_event();
+		cameraControlsProcessEvent(*EDITOR, *EVENTS_DATA);
 	}
 }
 
@@ -286,7 +240,7 @@ else #import "Basic";
 #if WASM == true  #import "wgpu_wasm";
 else              #import "wgpu";
 
-#load "main_scene_init.jai";
+#load "app.jai";
 #load "core/graph/_index.jai";
 #load "editor/_index.jai";
 #load "engine/_index.jai";

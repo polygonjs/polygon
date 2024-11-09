@@ -1,9 +1,9 @@
 RenderCollectionData :: struct {
-	queue:WGPUQueue;
+	queue: WGPUQueue;
 	frame: WGPUTextureView;
 }
 
-renderer_collection_start :: (wgpu_context:*WGPUContext)->RenderCollectionData {
+rendererCollectionStart :: (wgpu_context:*WGPUContext) -> RenderCollectionData {
 	frame := wgpu_surface_create_current_view( wgpu_context );
 
 	#if WASM {
@@ -18,7 +18,7 @@ renderer_collection_start :: (wgpu_context:*WGPUContext)->RenderCollectionData {
 }
 
 
-renderer_collection_end :: (wgpu_context:*WGPUContext, data: RenderCollectionData) {
+rendererCollectionEnd :: (wgpu_context:*WGPUContext, data: RenderCollectionData) {
 	defer wgpuTextureViewRelease(data.frame);
 
 	#if WASM == false {

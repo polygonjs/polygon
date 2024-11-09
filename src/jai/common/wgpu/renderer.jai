@@ -3,6 +3,7 @@ RendererBufferData :: struct {
 	bind_group: WGPUBindGroup;
 	bind_group_entries: []WGPUBindGroupEntry;
 }
+DEFAULT_RENDERER_BG_COLOR :Color: .{0.05, 0.05, 0.05, 1.0};
 Renderer :: struct {
 	#as using viewportContainer: ViewportContainer;
 	name :string;
@@ -10,7 +11,8 @@ Renderer :: struct {
 	
 	pipelines_by_mat_type: Table(u64, *PipelineController);
 	computes: ComputeControllerCollection;
-	bg_color :Color =.{0.1, 0.3, 0.72, 1.0};
+	// I still don't know how to have multiple renderers with different bg colors work together
+	bgColor :Color = DEFAULT_RENDERER_BG_COLOR;
 	scene_data: RendererBufferData;
 	camera_data: RendererBufferData;
 
@@ -150,7 +152,7 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 // }
 
 
-render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera, window_size:Vector2UInt){
+render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera){
 	
 	create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
@@ -159,7 +161,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	colorAttachment := WGPURenderPassColorAttachment.{
 		loadOp = ifx renderer.clear then WGPULoadOp.Clear else WGPULoadOp.Load,
 		storeOp = WGPUStoreOp.Store,
-		clearValue = wgpu_color_create(renderer.bg_color),
+		clearValue = wgpu_color_create(renderer.bgColor),
 	};
 
 	update_render_pass_descriptor_multisample(renderer, *colorAttachment, *data.frame);
@@ -193,7 +195,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	// 		resolveTarget = null,
 	// 		loadOp = WGPULoadOp.Clear,
 	// 		storeOp = WGPUStoreOp.Store,
-	// 		clearValue = wgpu_color_create(renderer.bg_color),
+	// 		clearValue = wgpu_color_create(renderer.bgColor),
 	// 	};
 	// 	clear_render_pass_descriptor := WGPURenderPassDescriptor.{
 	// 		label = "Clear Viewport Pass",

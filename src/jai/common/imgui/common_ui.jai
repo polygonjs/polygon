@@ -37,13 +37,13 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 		// ImGui.Checkbox("Another Window", *ui_data.show_another_window);
 
 
-		// bg_color :WGPUColor32= wgpu_color_32_create(scene_data.bg_color);
+		// bgColor :WGPUColor32= wgpu_color_32_create(scene_data.bgColor);
 		// ImGui.Text_CFormat("BG Color");
-		// ImGui.SliderFloat("r", *bg_color.r, 0.0, 1.0);
-		// ImGui.SliderFloat("g", *bg_color.g, 0.0, 1.0);
-		// ImGui.SliderFloat("b", *bg_color.b, 0.0, 1.0);
-		// ImGui.SliderFloat("a", *bg_color.a, 0.0, 1.0);
-		// color_set_from_wgpu_color_32(*scene_data.bg_color, *bg_color);
+		// ImGui.SliderFloat("r", *bgColor.r, 0.0, 1.0);
+		// ImGui.SliderFloat("g", *bgColor.g, 0.0, 1.0);
+		// ImGui.SliderFloat("b", *bgColor.b, 0.0, 1.0);
+		// ImGui.SliderFloat("a", *bgColor.a, 0.0, 1.0);
+		// color_set_from_wgpu_color_32(*scene_data.bgColor, *bgColor);
 
 
 

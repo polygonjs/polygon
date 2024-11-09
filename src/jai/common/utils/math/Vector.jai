@@ -6,6 +6,10 @@ Vector2UInt :: struct {
 	x: u32;
 	y: u32;
 }
+Vector2UInt64 :: struct {
+	x: u64;
+	y: u64;
+}
 
 Vector3Int :: struct {
 	x: s32;

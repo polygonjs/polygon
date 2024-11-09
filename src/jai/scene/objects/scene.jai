@@ -14,7 +14,6 @@ SceneUniforms :: struct {
 Scene :: struct {
 	#as using object3D: Object3D;
 
-	time: Time=0;
 	children: [..]*Object3D;
 
 	scene_uniforms: SceneUniforms;
@@ -35,6 +34,15 @@ object3DInit :: (scene: *Scene) {
 	array_init(*scene.children, temp);
 }
 
+sceneObjectAdd :: (scene: *Scene, object: *Object3D) {
+	for child, i: scene.children {
+		if child == null {
+			scene.children[i] = object;
+			return;
+		}
+	}
+	array_add(*scene.children, object);
+}
 sceneObjectRemove :: (scene: *Scene, object: *Object3D) {
 	for child, i: scene.children {
 		if child == object {
@@ -44,8 +52,8 @@ sceneObjectRemove :: (scene: *Scene, object: *Object3D) {
 	}
 }
 
-sceneUniformsUpdate :: (scene: *Scene) {
-	scene.scene_uniforms.time.x = scene.time;
+sceneUniformsUpdate :: (scene: *Scene, time:Time) {
+	scene.scene_uniforms.time.x = time;
 
 	for scene.children {
 		// mesh_update_matrix(*it);

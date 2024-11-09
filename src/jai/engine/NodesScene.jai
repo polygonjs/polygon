@@ -2,8 +2,10 @@ NodeId :: u32;
 
 NodesScene :: struct {
 	nextNodeId: NodeId = INIT_NEXT_NODE_ID;
-	nodes: [..]*GeoNodeAny;
 	graph: CoreGraph;
+	time:Time=0;
+	timeGraphNode:TimeNode;
+	nodes: [..]*GeoNodeAny;
 	worldScene: *Scene;
 	cookResultByNodeId:Table(CoreGraphNodeId, GeoNodeCookOutput);
 
@@ -20,7 +22,6 @@ NodesSceneEvent :: enum u8 {
 	NODE_INPUT_ADDED;
 	NODE_INPUT_REMOVED;
 }
-NODES_SCENE_EMIT_EVENTS :: true;
 
 
 
@@ -28,19 +29,15 @@ NODES_SCENE_EMIT_EVENTS :: true;
 // SCENE_TEMPORARY_STORAGE :Temporary_Storage = .{};
 
 newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
+	print("\n newNodesScene\n");
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
 	scene: *NodesScene = alloc(size_of(NodesScene));
-	scene.nextNodeId = INIT_NEXT_NODE_ID;
-	// scene.allocator = allocator;
-	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
-	// sceneAllocatorPush(scene);
+
 	array_init(*scene.nodes);
 	// #if NODES_SCENE_EMIT_EVENTS {
 		array_init(*scene.observers);
 	// }
-	init(*scene.cookResultByNodeId, 64);
-
 	{
 		graph:CoreGraph;
 		graph.scene = scene;
@@ -49,11 +46,23 @@ newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
 		target_ptr := cast(*u8)scene + graph_member.offset_in_bytes;
 		memcpy(target_ptr, src_ptr, size_of(CoreGraph));
 	}
-	graphInit(*scene.graph);
+	scene.time = 0;
+	sceneInit(scene);
+
+	return scene;
+}
+sceneInit :: (scene: *NodesScene) {
+	scene.nextNodeId = INIT_NEXT_NODE_ID;
+	// scene.allocator = allocator;
+	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
+	// sceneAllocatorPush(scene);
+	init(*scene.cookResultByNodeId, 64);
+
+	graphInit(*scene.graph, scene);
+	scene.timeGraphNode.type = TimeNode;
+	graphNodeInit(*scene.timeGraphNode, *scene.graph);
 
 	scene.worldScene = newObject3D(Scene);
-	
-	return scene;
 }
 sceneDelete :: (scene: *NodesScene) {
 	for node, i: scene.nodes {
@@ -86,15 +95,17 @@ sceneAddObserver :: (scene: *NodesScene, observer: Any) {
 }
 sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
 	if event == {
-		case NodesSceneEvent.NODE_ADDED; 			for o: scene.observers nodeSceneObserverOnNodeAdded(o, scene, node);
-		case NodesSceneEvent.NODE_REMOVED; 			for o: scene.observers nodeSceneObserverOnNodeRemoved(o, scene, node);
+		case NodesSceneEvent.NODE_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeAdded(o, scene, node); return;}
+		case NodesSceneEvent.NODE_REMOVED; 	{for o: scene.observers nodeSceneObserverOnNodeRemoved(o, scene, node); return;}
 	}
+	print("B\n");
 }
 sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
 	if event == {
-		case NodesSceneEvent.NODE_INPUT_ADDED; 		for o: scene.observers nodeSceneObserverOnNodeInputAdded(o, scene, node, inputIndex);
-		case NodesSceneEvent.NODE_INPUT_REMOVED; 	for o: scene.observers nodeSceneObserverOnNodeInputRemoved(o, scene, node, inputIndex);
+		case NodesSceneEvent.NODE_INPUT_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeInputAdded(o, scene, node, inputIndex); return;}
+		case NodesSceneEvent.NODE_INPUT_REMOVED;{for o: scene.observers nodeSceneObserverOnNodeInputRemoved(o, scene, node, inputIndex); return;}
 	}
+	print("D\n");
 }
 
 sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
@@ -115,6 +126,11 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 	}
 }
 
+sceneOnTick :: (scene: *NodesScene, time:Time) {
+	sceneSetTime(scene, time);
+	sceneUniformsUpdate(scene);
+}
+
 // sceneDebug :: (scene: *NodesScene, message:string) {
 // 	print("---- sceneDebug START (%) (%)\n", scene, message);
 // 	print("count: %\n", scene.nodes.count);
@@ -128,3 +144,11 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 #scope_file
 
 INIT_NEXT_NODE_ID :NodeId: 1;
+
+sceneSetTime :: (scene: *NodesScene, time:Time) {
+	scene.time = time;
+	setDirty(*scene.timeGraphNode);
+}
+sceneUniformsUpdate :: (scene: *NodesScene) {
+	sceneUniformsUpdate(scene.worldScene, scene.time);
+}
