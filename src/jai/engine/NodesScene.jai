@@ -1,12 +1,28 @@
+NodeId :: u32;
+
 NodesScene :: struct {
+	nextNodeId: NodeId = INIT_NEXT_NODE_ID;
 	nodes: [..]*GeoNodeAny;
 	graph: CoreGraph;
 	worldScene: *Scene;
 	cookResultByNodeId:Table(CoreGraphNodeId, GeoNodeCookOutput);
 
+	// #if NODES_SCENE_EMIT_EVENTS { // maybe let's keep this in the struct until we have tested serializing
+		observers:[..]Any;
+	// }
 	// allocator: Allocator;
 	// temporary_storage: Temporary_Storage;
 }
+
+NodesSceneEvent :: enum u8 {
+	NODE_ADDED :: 0;
+	NODE_REMOVED ;
+	NODE_INPUT_ADDED;
+	NODE_INPUT_REMOVED;
+}
+NODES_SCENE_EMIT_EVENTS :: true;
+
+
 
 // SCENE_ALLOCATOR :Allocator: .{temporary_allocator_proc, null};
 // SCENE_TEMPORARY_STORAGE :Temporary_Storage = .{};
@@ -15,10 +31,14 @@ newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
 	scene: *NodesScene = alloc(size_of(NodesScene));
+	scene.nextNodeId = INIT_NEXT_NODE_ID;
 	// scene.allocator = allocator;
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
 	array_init(*scene.nodes);
+	// #if NODES_SCENE_EMIT_EVENTS {
+		array_init(*scene.observers);
+	// }
 	init(*scene.cookResultByNodeId, 64);
 
 	{
@@ -61,6 +81,21 @@ sceneDelete :: (scene: *NodesScene) {
 // 	`defer context.allocator = old_allocator;
 // 	`defer context.temporary_storage = old_temporary_storage;
 // }
+sceneAddObserver :: (scene: *NodesScene, observer: Any) {
+	array_add(*scene.observers, observer);
+}
+sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
+	if event == {
+		case NodesSceneEvent.NODE_ADDED; 			for o: scene.observers nodeSceneObserverOnNodeAdded(o, scene, node);
+		case NodesSceneEvent.NODE_REMOVED; 			for o: scene.observers nodeSceneObserverOnNodeRemoved(o, scene, node);
+	}
+}
+sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
+	if event == {
+		case NodesSceneEvent.NODE_INPUT_ADDED; 		for o: scene.observers nodeSceneObserverOnNodeInputAdded(o, scene, node, inputIndex);
+		case NodesSceneEvent.NODE_INPUT_REMOVED; 	for o: scene.observers nodeSceneObserverOnNodeInputRemoved(o, scene, node, inputIndex);
+	}
+}
 
 sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	found, index := array_find(scene.nodes, cast(*GeoNodeAny)node);
@@ -74,6 +109,10 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 
 	free(node);
 	scene.nodes[index] = null;
+
+	#if NODES_SCENE_EMIT_EVENTS {
+		sceneEmitEvent(scene, NodesSceneEvent.NODE_REMOVED, node);
+	}
 }
 
 // sceneDebug :: (scene: *NodesScene, message:string) {
@@ -86,3 +125,6 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 // 	print("---- sceneDebug END\n");
 // }
 
+#scope_file
+
+INIT_NEXT_NODE_ID :NodeId: 1;

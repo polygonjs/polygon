@@ -1,5 +1,5 @@
 // BaseContextNodeInitMethod :: #type (node: *BaseNodeAny);
-BaseTypedNodeInitMethod :: #type (node: *$T);
+// BaseTypedNodeInitMethod :: #type (node: *$T);
 NodeCookMethod :: #type (node: *$T, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput;
 NodeComputeMethod :: #type (node: *$T, depth:u8=0) -> GeoNodeCookOutput;
 
@@ -16,14 +16,14 @@ NodeContext :: enum u8 {
 	RENDER	:: 9;
 };
 
-BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, $initMethod:BaseTypedNodeInitMethod, $baseMinInputs: u8=0, $baseMaxInputs: u8=1) {
+BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, $baseMinInputs: u8=0, $baseMaxInputs: u8=1) {
 	#as using coreGraphNode: CoreGraphNode(baseNodeT);
 	ctx: NodeContext=nodeCtx;
 	nodeId: NodeId;
 	// type: string=nodeType;
 	// name: string;
 	// init_context_node :BaseContextNodeInitMethod;//= dummy_init_context_node;
-	initTypedNode :BaseTypedNodeInitMethod:initMethod;
+	// initTypedNode :BaseTypedNodeInitMethod:initMethod;
 	minInputsCount: u8= baseMinInputs;
 	// maxInputsCount: u8= baseMaxInputs;
 	// cook:GeoNodeCookMethod:cookMethod;
@@ -33,9 +33,9 @@ BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, 
 	// let's have the structs whose size can change at the end of the struct,
 	// to make it easier to cast and not have read/write issues.
 	p:ParamsType;
-	inputs: [baseMaxInputs]*BaseNode(Any, nodeCtx, Any, initTypedNodeDummy);
+	inputs: [baseMaxInputs]*BaseNode(Any, nodeCtx, Any);
 }
-BaseNodeAny :: BaseNode(Any, NodeContext.ANY, Any, initTypedNodeDummy);
+BaseNodeAny :: BaseNode(Any, NodeContext.ANY, Any);
 
 newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	// node: *T = alloc(size_of(T));
@@ -48,8 +48,8 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	tmp :T;
 	// node.type = T;//tmp.type;
 	node.ctx = tmp.ctx;
-	node.nodeId = NEXT_NODE_ID;
-	NEXT_NODE_ID += 1;
+	node.nodeId = scene.nextNodeId;
+	scene.nextNodeId += 1;
 	node.p = tmp.p;
 	// node.onDirty = tmp.onDirty;
 	// node.cook = tmp.cook;
@@ -64,15 +64,11 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	// node.initTypedNode = tmp.initTypedNode;
 
 	initBaseNode(node);
-	// node.init_context_node(xx node);
-	// if node.ctx == {
-	// 	case NodeContext.GEOMETRY; init_geo_node(node);
-	// }
+	nodeInit(node);
 
-	node.initTypedNode(xx node);
-	// print("newNode % % % %\n", node.type, node.inputs, node, <<node);
-	// print("cook: % %\n", node.type, node.cook);
-	// print("nodeCompute: % %\n", node.type, node.nodeCompute);
+	#if NODES_SCENE_EMIT_EVENTS {
+		sceneEmitEvent(scene, NodesSceneEvent.NODE_ADDED, node);
+	}
 
 	return node;
 }
@@ -101,6 +97,11 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0) -> 
 	connectionCreated := graphNodeConnect(src=inputNode, dest=node);
 	if connectionCreated == true {
 		setDirty(node);
+	}
+
+
+	#if NODES_SCENE_EMIT_EVENTS {
+		sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
 	}
 	return connectionCreated;
 }
@@ -159,26 +160,14 @@ paramsCount :: (node: *$T) -> u8 {
 #scope_file
 
 TYPE :: BaseNodeAny;
-NodeId :: u32;
-NEXT_NODE_ID :NodeId= 1;
+
 
 initBaseNode :: (node: *$T) {
 	array_init(*node.params);
 	nodeInitParams(node);
 }
 
-initTypedNodeDummy :BaseTypedNodeInitMethod: (node: *$T) {
-}
 
-cookDummy :GeoNodeCookMethod: (node: *Any, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
-	mesh := newObject3D(Mesh);
-	assert(false, "geo cook should not be used");
-	return mesh;
-}
-nodeComputeDummy :NodeComputeMethod: (node: *Any, depth:u8=0) -> GeoNodeCookOutput {
-	tmp: GeoNodeCookOutput;
-	return tmp;
-}
 
 nodeInitParams :: (node: *$N) {
 	// print("nodeInitParams:%\n", type_of(node), <<node);

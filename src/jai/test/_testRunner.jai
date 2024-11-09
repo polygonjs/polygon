@@ -1,9 +1,5 @@
-#load "testArray.jai";
-#load "testBitArray.jai";
-#load "testCoreGraph.jai";
-#load "testMath.jai";
-#load "testPerlinNoise.jai";
-#load "testNodesBasicDependency.jai";
+#load "runtime/_index.jai";
+#load "editor/_index.jai";
 
 
 runTests :: () {
@@ -51,12 +47,16 @@ getNamedProcedures :: ()->[..]NamedProcedure {
 	addTest :: ($code: Code) #expand {
 		array_add(*list, namedProcedure(code));
 	}
+	// runtime
 	addTest(testArray);
 	addTest(testBitArray);
 	addTest(testCoreGraph);
 	addTest(testMath);
 	addTest(testNodesBasicDependency);
 	addTest(testPerlinNoise);
+	// editor
+	addTest(testNetworkPanel);
+
 	return list;
 }
 

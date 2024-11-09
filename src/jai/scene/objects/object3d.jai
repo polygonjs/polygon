@@ -2,9 +2,6 @@ TransformableUniforms :: struct {
 	transformMatrix: Matrix4x4Buffer;
 }
 
-Object3DInitMethod :: #type (object3d: *Object3D);
-
-
 Object3D :: struct {
 	type: Type;
 	id: u64;
@@ -15,8 +12,6 @@ Object3D :: struct {
 	matrix: Matrix4;
 
 	transformable_uniforms: TransformableUniforms;
-	//
-	init :Object3DInitMethod= init_object3d;
 }
 
 
@@ -29,13 +24,13 @@ newObject3D :: ($T: Type) -> *T {
 
 	init_transformable(object);
 
-	tmp :T;
-	object.init = tmp.init;
-	object.init(object);
+	object3DInit(object);
 
 	return object;
 }
-
+object3DInit :: (object: *Object3D) {
+	init_transformable(object);
+}
 object3DDelete :: (object: *$T/Object3D) {
 	free(object);
 }
@@ -54,9 +49,7 @@ init_transformable :: (object: *Object3D) {
 	transformable_uniforms_update(object);
 }
 
-init_object3d :: (object: *Object3D) {
-	init_transformable(object);
-}
+
 
 transformable_update_matrix :: (object: *Object3D) {
 	identity(*object.matrix);

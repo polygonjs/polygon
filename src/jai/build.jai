@@ -28,11 +28,8 @@
 			options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
 			options.dead_code_elimination				= .MODULES_ONLY;
 
-			if buildArgs.optimized {
-				set_optimization(*options, .VERY_OPTIMIZED);
-			} else {
-				set_optimization(*options, .VERY_DEBUG);
-			}
+			setOptimisation(*options, *buildArgs, wasm=true);
+
 
 			import_paths: [..]string;
 			// Add our own modules folder first so that we can override modules with our own version, if necessary.
@@ -105,14 +102,7 @@
 			make_directory_if_it_does_not_exist(options.output_path);
 			options.output_executable_name = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
 
-			if buildArgs.optimized {
-				set_optimization(*options, .VERY_OPTIMIZED);
-			} else {
-				set_optimization(*options, .VERY_DEBUG);
-				if OS == .LINUX {
-					options.backend = .X64;
-				}
-			}
+			setOptimisation(*options, *buildArgs, wasm=false);
 
 			set_build_options(options, w);
 
@@ -261,6 +251,16 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 	// }
 
 	return buildArgs;
+}
+setOptimisation :: (options: *Build_Options, buildArgs: *BuildArgs, wasm:bool) {
+	if buildArgs.optimized {
+		set_optimization(options, .VERY_OPTIMIZED); // OPTIMIZED_VERY_SMALL
+	} else {
+		set_optimization(options, .VERY_DEBUG);
+		if wasm == false && OS == .LINUX {
+			options.backend = .X64;
+		}
+	}
 }
 _checkbox :: (status:bool)->string {
 	return ifx status then "x" else " ";

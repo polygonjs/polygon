@@ -1,12 +1,19 @@
 OrthographicCamera :: struct {
 	#as using camera: Camera;
-	camera.init = init_orthographic_camera;
 
-	size: float32 = 10;
+	size: float32 = DEFAULT_SIZE;
 }
 
+object3DInit :: (camera: *OrthographicCamera) {
+	object3DInit(cast(*Camera)camera);
 
-camera_projection_update :: (camera:*OrthographicCamera) {
+	camera.size = DEFAULT_SIZE;
+
+	cameraProjectionUpdate(camera);
+	cameraUniformsUpdate(camera);
+}
+
+cameraProjectionUpdate :: (camera:*OrthographicCamera) {
 	camera.camera_matrices.projectionMatrix = orthographic_projection_matrix(
 		left   = -camera.size * camera.aspect,
 		right  = +camera.size * camera.aspect,
@@ -18,16 +25,9 @@ camera_projection_update :: (camera:*OrthographicCamera) {
 	);
 }
 
+
+
+
 #scope_file
 
-
-init_orthographic_camera :: (object: *Object3D) {
-	camera := cast(*OrthographicCamera)object;
-	init_camera(camera);
-
-	tmp:OrthographicCamera;
-	camera.size = tmp.size;
-
-	camera_projection_update(camera);
-	camera_uniforms_update(camera);
-}
+DEFAULT_SIZE :: 10.0;

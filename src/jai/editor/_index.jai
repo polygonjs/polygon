@@ -1,1 +1,2 @@
-#load "NodeSceneToWorldScene.jai";
+#load "Editor.jai";
+#load "panels/_index.jai";

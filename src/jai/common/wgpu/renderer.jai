@@ -97,18 +97,21 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	renderer_scene_uniform_buffer_create(renderer, scene);
 	renderer_camera_uniform_buffer_create(renderer, camera);
 	
-	for mesh: scene.children {
-		mat_id := mesh.material.id;
-		if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
-			pc :*PipelineController= newPipelineController(PipelineController, mesh.material);
-			array_add(*pc.meshes, mesh);
-			table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
+	for child: scene.children {
+		if child.type == Mesh {
+			mesh := cast(*Mesh)child;
+			mat_id := mesh.material.id;
+			if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
+				pc :*PipelineController= newPipelineController(PipelineController, mesh.material);
+				array_add(*pc.meshes, mesh);
+				table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
 
-			
-		} else {
-			pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
-			assert(found, "pipeline controller not found");
-			array_add(*pc.meshes, mesh);
+				
+			} else {
+				pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
+				assert(found, "pipeline controller not found");
+				array_add(*pc.meshes, mesh);
+			}
 		}
 	}
 	for pc: renderer.pipelines_by_mat_type {

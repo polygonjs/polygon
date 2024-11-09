@@ -2,9 +2,10 @@
 MergeGeoParams :: struct {
 }
 MergeGeoNode :: struct {
-	#as using geoNode: GeoNode(MergeGeoNode, MergeGeoParams, init);
+	#as using geoNode: GeoNode(MergeGeoNode, MergeGeoParams);
 };
-
+nodeInit :: (node: *TYPE) {
+}
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	mat := newMaterial(NormalMeshMaterial);
@@ -19,7 +20,5 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutp
 
 TYPE :: MergeGeoNode;
 
-init :: (_node: *BaseNodeAny) {
-	node := cast(*TYPE)_node;
-}
+
 

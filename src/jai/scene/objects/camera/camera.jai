@@ -11,7 +11,6 @@ CameraUniforms :: struct {
 
 Camera :: struct {
 	#as using object3D: Object3D;
-	object3D.init = init_camera;
 
 	near: float32 = 0.1;
 	far: float32 = 100.0;
@@ -20,9 +19,8 @@ Camera :: struct {
 	camera_uniforms: CameraUniforms;
 }
 
-init_camera :: (object: *Object3D) {
-	camera := cast(*Camera)object;
-	init_transformable(camera);
+object3DInit :: (camera: *Camera) {
+	object3DInit(cast(*Object3D)camera);
 
 	tmp:Camera;
 	camera.near = tmp.near;
@@ -33,7 +31,7 @@ init_camera :: (object: *Object3D) {
 	translate(*camera.camera_matrices.transformMatrix, .{x = 0.0, y = 0.0, z = 5.0});
 }
 
-camera_uniforms_update :: (camera: *Camera) {
+cameraUniformsUpdate :: (camera: *Camera) {
 	camera.camera_uniforms.worldPos.x = camera.camera_matrices.transformMatrix._14;
 	camera.camera_uniforms.worldPos.y = camera.camera_matrices.transformMatrix._24;
 	camera.camera_uniforms.worldPos.z = camera.camera_matrices.transformMatrix._34;

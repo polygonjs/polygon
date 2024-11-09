@@ -13,10 +13,9 @@ SceneUniforms :: struct {
 
 Scene :: struct {
 	#as using object3D: Object3D;
-	object3D.init = init_scene;
 
 	time: Time=0;
-	children: [..]*Mesh;
+	children: [..]*Object3D;
 
 	scene_uniforms: SceneUniforms;
 
@@ -31,7 +30,21 @@ Scene :: struct {
 	noise:SceneDataNoise;
 };
 
-scene_uniforms_update :: (scene: *Scene) {
+object3DInit :: (scene: *Scene) {
+	object3DInit(cast(*Object3D)scene);
+	array_init(*scene.children, temp);
+}
+
+sceneObjectRemove :: (scene: *Scene, object: *Object3D) {
+	for child, i: scene.children {
+		if child == object {
+			scene.children[i] = null;
+			object3DDelete(object);
+		}
+	}
+}
+
+sceneUniformsUpdate :: (scene: *Scene) {
 	scene.scene_uniforms.time.x = scene.time;
 
 	for scene.children {
@@ -48,11 +61,6 @@ scene_uniforms_update :: (scene: *Scene) {
 
 #scope_file
 
-init_scene :: (object: *Object3D) {
-	scene := cast(*Scene)object;
-
-	array_init(*scene.children, temp);
-}
 
 
 

@@ -209,7 +209,7 @@ on_request_animation_frame :: (
 			} else {
 				CAMERA_WORLD.aspect = WORLD_RENDERER.viewport.size.x / WORLD_RENDERER.viewport.size.y;
 			}
-			camera_projection_update(CAMERA_WORLD);
+			cameraProjectionUpdate(CAMERA_WORLD);
 		}
 		#if RENDER_NODES_NETWORK {
 			if(NODES_RENDERER.full_screen == true) {
@@ -217,17 +217,17 @@ on_request_animation_frame :: (
 			} else {
 				CAMERA_NODES.aspect = NODES_RENDERER.viewport.size.x / NODES_RENDERER.viewport.size.y;
 			}
-			camera_projection_update(CAMERA_NODES);
+			cameraProjectionUpdate(CAMERA_NODES);
 		}
 	}
 	SCENE_WORLD.time = new_time / 1000.0;
 	#if WASM {
 		camera_controls_process_event();
 	}
-	scene_uniforms_update(*SCENE_WORLD);
-	scene_uniforms_update(*SCENE_NODES);
-	camera_uniforms_update(CAMERA_WORLD);
-	camera_uniforms_update(CAMERA_NODES);
+	sceneUniformsUpdate(*SCENE_WORLD);
+	sceneUniformsUpdate(*SCENE_NODES);
+	cameraUniformsUpdate(CAMERA_WORLD);
+	cameraUniformsUpdate(CAMERA_NODES);
 
 	#if RUN_SCENE {
 		scene_on_tick_world(*SCENE_WORLD);

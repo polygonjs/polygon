@@ -1,6 +1,8 @@
 testNodesBasicDependency :: () {
 	nodesScene := newNodesScene();
 	defer sceneDelete(nodesScene);
+	null1 := newNode(nodesScene, NullGeoNode);
+	assertEqual(null1.nodeId, 1, "nodeId starts at more than 1");
 	box1 := newNode(nodesScene, BoxGeoNode);
 	box2 := newNode(nodesScene, BoxGeoNode);
 	icosahedron1 := newNode(nodesScene, IcosahedronGeoNode);
@@ -30,24 +32,28 @@ testNodesBasicDependency :: () {
 	paramSetValue(*box1.p.scale, 2);
 	assertEqual(nodesScene.worldScene.children.count, 1);
 	box3:Box3;
-	box3SetFromGeometry(*box3, nodesScene.worldScene.children[0].geometry);
-	assertEqual(nodesScene.worldScene.children[0].geometry.attributes.position.values.count, 24, "points count");
+	firstGeometry :: (scene:*NodesScene)->*Geometry {
+		firstObject := scene.worldScene.children[0];
+		return (cast(*Mesh)firstObject).geometry;
+	}
+	box3SetFromGeometry(*box3, firstGeometry(nodesScene));
+	assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 24, "points count");
 	assertEqual(box3Size(*box3).x, 2, "size x");
 
 	paramSetValue(*box1.p.scale, 4);
-	box3SetFromGeometry(*box3, nodesScene.worldScene.children[0].geometry);
-	assertEqual(nodesScene.worldScene.children[0].geometry.attributes.position.values.count, 24, "points count");
+	box3SetFromGeometry(*box3, firstGeometry(nodesScene));
+	assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 24, "points count");
 	assertEqual(box3Size(*box3).x, 4, "size x");
 
 	paramSetValue(*box1.p.segments, .{2,2,2});
-	assertEqual(nodesScene.worldScene.children[0].geometry.attributes.position.values.count, 54, "points count");
+	assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 54, "points count");
 	paramSetValue(*box1.p.segments, .{12,4,3});
-	assertEqual(nodesScene.worldScene.children[0].geometry.attributes.position.values.count, 274, "points count");
+	assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
 
 	paramSetValue(*output1.p.input, 1);
-	assertEqual(nodesScene.worldScene.children[0].geometry.attributes.position.values.count, 92, "points count");
+	assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 92, "points count");
 	paramSetValue(*output1.p.input, 0);
-	assertEqual(nodesScene.worldScene.children[0].geometry.attributes.position.values.count, 274, "points count");
+	assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
 
 	// print("result: %\n", nodesScene.worldScene.children[0].geometry.attributes.position.values.count);
 	// paramSetValue(*box1.p.scale, 4.0);

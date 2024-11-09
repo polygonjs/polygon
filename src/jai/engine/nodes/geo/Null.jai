@@ -2,9 +2,11 @@
 NullGeoParams :: struct {
 }
 NullGeoNode :: struct {
-	#as using geoNode: GeoNode(NullGeoNode, MergeGeoParams, init);
+	#as using geoNode: GeoNode(NullGeoNode, MergeGeoParams);
 };
+nodeInit :: (_node: *TYPE) {
 
+}
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	assert(inputs.count > 0, "NullGeoNode::cook not implemented, should have at least one input\n");
 	return inputs[0];
@@ -14,7 +16,5 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutp
 
 TYPE :: NullGeoNode;
 
-init :: (_node: *BaseNodeAny) {
-	node := cast(*TYPE)_node;
-}
+
 

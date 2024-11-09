@@ -1,14 +1,13 @@
 Mesh :: struct {
 	#as using object3D: Object3D;
-	object3D.init = init_mesh;
 
 	geometry: *Geometry;
 	material: *Material;
 	use_compute: bool=false;
 };
 
-init_mesh :: (object: *Object3D) {
-	mesh := cast(*Mesh)object;
+object3DInit :: (mesh: *Mesh) {
+	object3DInit(cast(*Object3D)mesh);
 
 	mesh.geometry = New(Geometry);
 

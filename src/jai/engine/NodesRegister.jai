@@ -9,8 +9,27 @@
 // #run array_i(*NODE_CAST_TYPE_BY_TYPE, 64);
 
 
-GENERATED_CODE_NODE_COMPUTE,
-GENERATED_CODE_SCENE_NODE_DELETE :: #run registerAll();
+// generatedNodeInit :: (scene: *NodesScene, node: *$T) {
+// 	#insert GENERATED_CODE_NODE_INIT;
+// 	assert(false, tprint("generatedNodeInit: node type % is not implemented", inputNode.type));
+// }
+
+nodeSceneObserverOnNodeAdded :: (observer: Any, scene: *NodesScene, node:*$N) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_ADDED;
+	assert(false, tprint("nodeSceneObserverOnNodeAdded: node type % is not implemented", node.type));
+}
+nodeSceneObserverOnNodeRemoved :: (observer: Any, scene: *NodesScene, node:*$N) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_REMOVED;
+	assert(false, tprint("nodeSceneObserverOnNodeRemoved: node type % is not implemented", node.type));
+}
+nodeSceneObserverOnNodeInputAdded :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED;
+	assert(false, tprint("nodeSceneObserverOnNodeInputAdded: node type % is not implemented", node.type));
+}
+nodeSceneObserverOnNodeInputRemoved :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED;
+	assert(false, tprint("nodeSceneObserverOnNodeInputRemoved: node type % is not implemented", node.type));
+}
 
 generatedNodeCompute :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 	#insert GENERATED_CODE_NODE_COMPUTE;
@@ -21,18 +40,38 @@ generatedNodeCompute :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
 	assert(false, tprint("generatedSceneNodeDelete: node type % is not implemented", node.type));
-	return;
 }
 
 #scope_file
 
+ObserverGenerated :: struct {
+	onNodeAdded: string;
+	onNodeRemoved: string;
+	onNodeInputAdded: string;
+	onNodeInputRemoved: string;
+}
+
+GENERATED_CODE_NODE_COMPUTE,
+GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodes();
+
+NODES_SCENE_OBSERVER_ON_NODE_ADDED,
+NODES_SCENE_OBSERVER_ON_NODE_REMOVED,
+NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED,
+NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED :: #run registerNodesSceneObserver();
+
 
 NOTE_TYPES :[..]Type;
+NODES_SCENE_OBSERVER_TYPES :[..]Type;
 // PARAM_TYPES :[..]Type;
 
-nodeRegister :: ($nodeType:Type) {
+nodeRegister :: ($T:Type) {
 	// print(">> nodeRegister: %\n", nodeType);
-	array_add(*NOTE_TYPES, nodeType);
+	array_add(*NOTE_TYPES, T);
+	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
+}
+nodesSceneObserverRegister :: ($T:Type) {
+	// print(">> nodeRegister: %\n", nodeType);
+	array_add(*NODES_SCENE_OBSERVER_TYPES, T);
 	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
 }
 // paramRegister :: ($paramType:Type) {
@@ -41,6 +80,64 @@ nodeRegister :: ($nodeType:Type) {
 // 	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
 // }
 
+registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeRemoved:string, onNodeInputAdded:string, onNodeInputRemoved:string {
+	nodesSceneObserverRegister(Editor);
+
+	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
+
+	generated: ObserverGenerated;
+	{
+		builder: String_Builder;
+		print_to_builder(*builder, IF_FIRST_LINE);
+		for observerType: NODES_SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeAdded(cast(*%) observer.value_pointer, scene, node); return;\n", observerType, observerType));
+		}
+		print_to_builder(*builder, "}");
+		generated.onNodeAdded = builder_to_string(*builder);
+	}
+	{
+		builder: String_Builder;
+		print_to_builder(*builder, IF_FIRST_LINE);
+		for observerType: NODES_SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeRemoved(cast(*%) observer.value_pointer, scene, node); return;\n", observerType, observerType));
+		}
+		print_to_builder(*builder, "}");
+		generated.onNodeRemoved = builder_to_string(*builder);
+	}
+	{
+		builder: String_Builder;
+		print_to_builder(*builder, IF_FIRST_LINE);
+		for observerType: NODES_SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeInputAdded(cast(*%) observer.value_pointer, scene, node, inputIndex); return;\n", observerType, observerType));
+		}
+		print_to_builder(*builder, "}");
+		generated.onNodeInputAdded = builder_to_string(*builder);
+	}
+	{
+		builder: String_Builder;
+		print_to_builder(*builder, IF_FIRST_LINE);
+		for observerType: NODES_SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeInputRemoved(cast(*%) observer.value_pointer, scene, node, inputIndex); return;\n", observerType, observerType));
+		}
+		print_to_builder(*builder, "}");
+		generated.onNodeInputRemoved = builder_to_string(*builder);
+	}
+	return 	generated.onNodeAdded,
+			generated.onNodeRemoved,
+			generated.onNodeInputAdded,
+			generated.onNodeInputRemoved;
+}
+// generateNodeInits :: ()->string {
+// 	builder: String_Builder;
+// 	print_to_builder(*builder, "if node.type == {\n");
+// 	for nodeType: NOTE_TYPES {
+// 		print_to_builder(*builder, tprint("\tcase %; nodeInit(scene, cast(*%) node); return;\n", nodeType, nodeType));
+// 	}
+// 	print_to_builder(*builder, "}");
+
+// 	result := builder_to_string(*builder);
+// 	return result;
+// }
 generateNodeComputes :: ()->string {
 	builder: String_Builder;
 	print_to_builder(*builder, "if inputNode.type == {\n");
@@ -64,7 +161,7 @@ generateSceneNodeDelete :: ()->string {
 	return result;
 }
 
-registerAll :: ()->nodeCompute:string, nodeCompute2:string {
+registerNodes :: () -> nodeCompute:string, nodeCompute2:string {
 	// paramRegister(FloatParam);
 	// paramRegister(UIntegerParam);
 	// paramRegister(Vector3Param);
@@ -76,9 +173,11 @@ registerAll :: ()->nodeCompute:string, nodeCompute2:string {
 	nodeRegister(NullGeoNode);
 	nodeRegister(OutputGeoNode);
 
+	// nodeInit := generateNodeInits();
 	nodeCompute := generateNodeComputes();
 	sceneNodeDelete := generateSceneNodeDelete();
 
-	return nodeCompute, sceneNodeDelete;
+	return 	nodeCompute,
+			sceneNodeDelete;
 }
 

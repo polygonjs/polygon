@@ -1,8 +1,8 @@
 GeoNodeCookOutput :: *Object3D;
 GeoNodeCookInput  :: [..]GeoNodeCookOutput;
 GeoNodeCookMethod :: #type (node: *$T, inputs:GeoNodeCookInput) -> GeoNodeCookOutput;
-GeoNode :: struct ($geoNodeT: Type, $geoParamsType: Type, $geoInitMethod:BaseTypedNodeInitMethod, $minInputs: u8=0, $maxInputs: u8=1) {
-	#as using baseNode: BaseNode(geoNodeT, NodeContext.GEOMETRY, geoParamsType, geoInitMethod, minInputs, maxInputs);
+GeoNode :: struct ($geoNodeT: Type, $geoParamsType: Type, $minInputs: u8=0, $maxInputs: u8=1) {
+	#as using baseNode: BaseNode(geoNodeT, NodeContext.GEOMETRY, geoParamsType, minInputs, maxInputs);
 	// baseNode.ctx = NodeContext.GEOMETRY;
 	// baseNode.init_context_node = init_geo_node;
 
@@ -10,7 +10,7 @@ GeoNode :: struct ($geoNodeT: Type, $geoParamsType: Type, $geoInitMethod:BaseTyp
 	// baseNode.onDirty = onGeoNodeDirty;
 	
 };
-GeoNodeAny :: GeoNode(Any, Any, init);
+GeoNodeAny :: GeoNode(Any, Any);
 
 
 
@@ -21,7 +21,10 @@ GeoNodeAny :: GeoNode(Any, Any, init);
 // 	return null;
 // }
 
-
+geoNodeInit :: (node: *$N) {
+	geoNode := cast(*TYPE)node;
+	// print("init_geo_node geo_node\n");
+}
 
 #scope_file
 
@@ -32,10 +35,7 @@ TYPE :: GeoNodeAny;
 // 	// print("init_geo_node geo_node\n");
 // }
 
-init :: (node: *$N) {
-	geoNode := cast(*TYPE)node;
-	// print("init_geo_node geo_node\n");
-}
+
 
 // cook :GeoNodeCookMethod: (node: *Any, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 // 	mesh := newObject3D(Mesh);

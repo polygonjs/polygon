@@ -4,10 +4,11 @@ IcosahedronGeoParams :: struct {
 	detail: UIntegerParam = .{value=2};
 }
 IcosahedronGeoNode :: struct {
-	#as using geoNode: GeoNode(IcosahedronGeoNode, IcosahedronGeoParams, init);
+	#as using geoNode: GeoNode(IcosahedronGeoNode, IcosahedronGeoParams);
 };
 
-
+nodeInit :: (node: *TYPE) {
+}
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	mat := newMaterial(NormalMeshMaterial);
 	mesh := newObject3D(Mesh);
@@ -31,7 +32,5 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutp
 
 TYPE :: IcosahedronGeoNode;
 
-init :: (_node: *BaseNodeAny) {
-	node := cast(*TYPE)_node;
-}
+
 

@@ -129,11 +129,11 @@ scene_init_nodes :: (scene: *Scene, aspect:float32) {
 
 
 scene_on_tick_world :: (scene: *Scene) {
-	for mesh: scene.children {
-		if mesh.material.type == RaymarchingMeshMaterial {
-			material := cast(*RaymarchingMeshMaterial)mesh.material;
-			uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
-			uniforms.offset.y = sin(scene.time);
-		}
+	for object: scene.children {
+		// if mesh.material.type == RaymarchingMeshMaterial {
+		// 	material := cast(*RaymarchingMeshMaterial)mesh.material;
+		// 	uniforms := cast(*RaymarchingMeshMaterialUniforms)material.uniforms;
+		// 	uniforms.offset.y = sin(scene.time);
+		// }
 	}
 }

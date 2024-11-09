@@ -5,9 +5,11 @@ BoxGeoParams :: struct {
 	segments: Vector3UIntParam = .{value=.{1,1,1}};
 }
 BoxGeoNode :: struct {
-	#as using geoNode: GeoNode(BoxGeoNode, BoxGeoParams, init);
+	#as using geoNode: GeoNode(BoxGeoNode, BoxGeoParams);
 };
 
+nodeInit :: (node: *TYPE) {
+}
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
 	mat := newMaterial(NormalMeshMaterial);
@@ -28,11 +30,11 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutp
 	return mesh;
 }
 
+
+
 #scope_file
 
 TYPE :: BoxGeoNode;
 
-init :: (_node: *BaseNodeAny) {
-	node := cast(*TYPE)_node;
-}
+
 
