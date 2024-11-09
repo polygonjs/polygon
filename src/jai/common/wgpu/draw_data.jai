@@ -55,7 +55,7 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshD
 			using material;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer_with_size(wgpu_context, pc.pipeline, xx UniformBindingIndex.MATERIAL, pc.material.uniforms, pc.material.uniformTypeSize, "material");
+			bind_group_entries = wgpu_uniform_to_buffer_with_size(wgpu_context, pc.pipeline, xx UniformBindingIndex.MATERIAL, *pc.material.uniforms, pc.material.uniformTypeSize, "material");
 		}
 	}
 

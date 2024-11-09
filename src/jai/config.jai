@@ -20,4 +20,4 @@ NODES_SCENE_EMIT_EVENTS :: true;
 // So for now, we do it manually.
 // TODO: maybe consider updating this file from build.jai,
 // before the compiler starts.
-FREE_MEMORY_DEBUG :: false;//RUN_TESTS==true;
+FREE_MEMORY_DEBUG :: true;//RUN_TESTS==true;

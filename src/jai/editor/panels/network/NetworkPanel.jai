@@ -80,7 +80,7 @@ networkdPanelAddNode :: (panel: *TYPE, node: *$T, pos: Vector2) {
 	mesh := newObject3D(Mesh);
 	setColor(panel.basicMat, .{1.0, 0.0, 0.0, 1.0});
 	geometry_box_update(mesh.geometry, segments=.{2,2,2});
-	mesh.material = panel.basicMat;
+	mesh.material = xx panel.basicMat;
 
 	mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
 	transformable_update_matrix(mesh);
@@ -122,7 +122,7 @@ networkPanelInit :: (panel: *NetworkPanel, editor: *Editor) {
 		mat := newMaterial(BackgroundMeshMaterial);
 		setColor(mat, .{0.2, 0.2, 0.2, 1.0});
 		mesh0 := newObject3D(Mesh);
-		mesh0.material = mat;
+		mesh0.material = xx mat;
 		geometry_plane_update(mesh0.geometry, size=.{2,2}, segments=.{1,1});
 		transformable_update_matrix(mesh0);
 		sceneObjectAdd(panel.worldScene, mesh0);

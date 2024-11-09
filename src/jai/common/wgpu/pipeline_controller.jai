@@ -151,7 +151,7 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
 		{
 			size := cast(u64) max( 16, pc.material.uniformTypeSize);
 			buffer := draw_data.uniforms.material.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, pc.material.uniforms, size);
+			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *pc.material.uniforms, size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.object.buffer, *mesh);
 		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, scene_data);

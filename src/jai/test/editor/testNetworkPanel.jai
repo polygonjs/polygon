@@ -13,17 +13,17 @@ testNetworkPanelNodesSceneToWorldScene :: () {
 	editorInit(*editor, nodesScene);
 	assertNotNull(editor.networkPanel.worldScene);
 
-	assertEqual(editor.networkPanel.worldScene.children.count, 2);
-
-	box3 := newNode(nodesScene, BoxGeoNode);
 	assertEqual(editor.networkPanel.worldScene.children.count, 3);
 
-	box4 := newNode(nodesScene, BoxGeoNode);
+	box3 := newNode(nodesScene, BoxGeoNode);
 	assertEqual(editor.networkPanel.worldScene.children.count, 4);
 
+	box4 := newNode(nodesScene, BoxGeoNode);
+	assertEqual(editor.networkPanel.worldScene.children.count, 5);
+
 	sceneDeleteNode(nodesScene, box3);
-	assertEqual(editor.networkPanel.worldScene.children[2], null);
-	assertEqual(editor.networkPanel.worldScene.children.count, 4);
+	assertEqual(editor.networkPanel.worldScene.children[3], null);
+	assertEqual(editor.networkPanel.worldScene.children.count, 5);
 }
 
 

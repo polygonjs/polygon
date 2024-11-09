@@ -1,18 +1,16 @@
-MaterialInitMethod :: #type (material: *Material);
-
 EmptyUniforms :: struct {};
 
-Material :: struct {
+MaterialBase :: struct ($UniformType: Type) {
 	type: Type;
-	uniformType: Type;
-	uniformTypeSize: u32;
+	uniformType: Type=UniformType;
+	uniformTypeSize: u32=size_of(UniformType);
 	id: u64;
 	//
 	name: string;
 	shader: string;
-	uniforms: *void;
+	uniforms: UniformType;
 }
-
+Material :: MaterialBase(Any);
 
 
 newMaterial :: ($T: Type) -> *T {

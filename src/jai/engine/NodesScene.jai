@@ -29,7 +29,6 @@ NodesSceneEvent :: enum u8 {
 // SCENE_TEMPORARY_STORAGE :Temporary_Storage = .{};
 
 newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
-	print("\n newNodesScene\n");
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
 	scene: *NodesScene = alloc(size_of(NodesScene));

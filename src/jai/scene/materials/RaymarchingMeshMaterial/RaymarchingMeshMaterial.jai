@@ -3,25 +3,17 @@ RaymarchingMeshMaterialUniforms :: struct {
 };
 
 RaymarchingMeshMaterial :: struct {
-	#as using material: Material;
+	#as using material: MaterialBase(UNIFORM_TYPE);
 };
 
-uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
-	return cast(*UNIFORM_TYPE)material.uniforms;
-}
+// uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
+// 	return cast(*UNIFORM_TYPE)material.uniforms;
+// }
 
 materialInit :: (material: *MATERIAL_TYPE) {
-	material.uniformType = UNIFORM_TYPE;
-	material.uniformTypeSize = size_of(UNIFORM_TYPE);
-
 	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
-	material.uniforms = alloc(size_of(UNIFORM_TYPE));
-
-	uniforms := cast(*UNIFORM_TYPE)material.uniforms;
-
-	uniforms.offset = .{0.0, 0.0, 0.0, 0.0};
-
+	material.uniforms.offset = .{0.0, 0.0, 0.0, 0.0};
 }
 
 

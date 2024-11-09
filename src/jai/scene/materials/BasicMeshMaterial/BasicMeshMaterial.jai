@@ -3,29 +3,19 @@ BasicMeshMaterialUniforms :: struct {
 };
 
 BasicMeshMaterial :: struct {
-	#as using material: Material;
+	#as using material: MaterialBase(UNIFORM_TYPE);
 };
 
-uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
-	return cast(*UNIFORM_TYPE)material.uniforms;
-}
+// uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
+// 	return cast(*UNIFORM_TYPE)material.uniforms;
+// }
 setColor :: (material: *MATERIAL_TYPE, color: Color) {
-	uniforms(material).color = color;
+	material.uniforms.color = color;
 }
 materialInit :: (material: *MATERIAL_TYPE) {
-	material.uniformType = UNIFORM_TYPE;
-	material.uniformTypeSize = size_of(UNIFORM_TYPE);
-
 	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
-	material.uniforms = alloc(size_of(UNIFORM_TYPE));
-
-	uniforms := cast(*UNIFORM_TYPE)material.uniforms;
-
-	uniforms.color = .{1.0, 0.0, 0.0, 1.0};
-
-
-	// assert(material.uniform_type, "uniform type is Undefined\n");
+	material.uniforms.color = .{1.0, 0.0, 0.0, 1.0};
 }
 
 
