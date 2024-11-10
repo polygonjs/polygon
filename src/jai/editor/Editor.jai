@@ -40,18 +40,26 @@ drawDataInit :: (editor: *Editor) {
 	drawDataInit(editor.viewerPanel);
 	drawDataInit(editor.networkPanel);
 }
-render :: (editor: *Editor, renderCollectionData: *RenderCollectionData) {
-	render(editor.viewerPanel, renderCollectionData);
-	render(editor.networkPanel, renderCollectionData);
+render :: (editor: *Editor) {
+	data :RenderCollectionData= rendererCollectionStart(*WGPU_CONTEXT);
+	render(editor.viewerPanel, *data);
+	render(editor.networkPanel, *data);
+
+	rendererCollectionEnd(*WGPU_CONTEXT, data);
+	rendererDestroyBuffers(editor);
+}
+processEvent :: (editor: *Editor, eventsData:*EventsData) {
+	#if USE_IMGUI {
+		if(ImGui.GetIO().WantCaptureMouse == false) processEventPanels(editor, eventsData);
+	} else {
+		processEventPanels(editor, eventsData);
+	}
 }
 rendererDestroyBuffers :: (editor: *Editor) {
 	rendererDestroyBuffers(editor.viewerPanel);
 	rendererDestroyBuffers(editor.networkPanel);
 }
-cameraControlsProcessEvent :: (editor: *Editor, eventsData:*EventsData) {
-	cameraControlsProcessEvent(editor.viewerPanel, eventsData);
-	cameraControlsProcessEvent(editor.networkPanel, eventsData);
-}
+
 
 onResize :: (editor: *Editor, size:Vector2UInt64) {
 	if editor.windowSize == size {return;}
@@ -105,4 +113,9 @@ editorEmitEvent :: (editor: *Editor, $event: EditorEvent, node: *$T) {
 		case EditorEvent.NODE_REMOVED; 	{ onNodeRemoved(p, node); return;}
 		case EditorEvent.NODE_MOVED; 	{ onNodeMoved(p, node); return;}
 	}
+}
+
+processEventPanels :: (editor: *Editor, eventsData:*EventsData) {
+	processEvent(editor.viewerPanel, eventsData);
+	processEvent(editor.networkPanel, eventsData);
 }

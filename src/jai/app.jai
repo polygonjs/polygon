@@ -83,6 +83,12 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	setInput(output1, 0, box1);
 
 	nodeSetPosition(editor, box1, .{2,1});
+	nodeSetPosition(editor, output1, .{0,-2});
+
+	icosahedron1 := newNode(nodesScene, IcosahedronGeoNode);
+	nodeSetPosition(editor, icosahedron1, .{-2,1});
+
+	// setInput(output1, 0, icosahedron1);
 	// print("box1 size: % % %\n", box1.p.size.id, box1.p.size.type, box1.p.size.value);
 	// print("box1 scale: % % %\n", box1.p.scale.id, box1.p.scale.type, box1.p.scale.value);
 	// sphere1 := newNode(nodesScene, SphereGeoNode);

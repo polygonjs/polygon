@@ -994,6 +994,25 @@ export const WGPUTextureDataLayout: StructInfo<
 	},
 };
 
+export const WGPUImageCopyBuffer: StructInfo<
+	"nextInChain" | "layout" | "buffer"
+> = {
+	size: BigInt(40),
+	members: {
+		nextInChain: {
+			size: WGPU_SIZE.u64,
+			offset: BigInt(0),
+			arrayView: getU64,
+		},
+		layout: {
+			size: WGPUTextureDataLayout.size,
+			offset: BigInt(8),
+			arrayView: getU8,
+		},
+		buffer: { size: WGPU_SIZE.u64, offset: BigInt(32), arrayView: getU64 },
+	},
+};
+
 export const WGPUTextureDescriptor: StructInfo<
 	| "nextInChain"
 	| "label"

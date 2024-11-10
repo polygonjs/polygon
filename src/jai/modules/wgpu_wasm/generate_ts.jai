@@ -3,7 +3,7 @@
 #import "String";
 #load "module.jai";
 
-#load "../../common/type_utils.jai";
+#load "../../runtime/core/utils/Type.jai";
 
 // jai src/jai/modules/wgpu_wasm/generate_ts.jai && src/jai/modules/wgpu_wasm/generate_ts
 
@@ -125,6 +125,7 @@ main :: (){
     print_type_info(*builder, WGPUShaderModuleDescriptor);
     print_type_info(*builder, WGPUShaderModuleWGSLDescriptor);
     print_type_info(*builder, WGPUTextureDataLayout);
+    print_type_info(*builder, WGPUImageCopyBuffer);
     print_type_info(*builder, WGPUTextureDescriptor);
     print_type_info(*builder, WGPUVertexAttribute);
     print_type_info(*builder, WGPUVertexBufferLayout);

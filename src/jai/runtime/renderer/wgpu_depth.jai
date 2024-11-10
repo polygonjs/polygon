@@ -42,15 +42,12 @@ wgpu_update_pipeline_descriptor_depth :: (renderer:*Renderer, pipeline_descripto
 
 create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 	assert(renderer.wgpu_context!=null, "renderer.wgpu_context is null\n");
-	width := wgpu_texture_get_width_surface(renderer.wgpu_context);
-	height := wgpu_texture_get_height_surface(renderer.wgpu_context);
-	// size := renderer_size(renderer);
+	size := rendererTargetSize(renderer);
 
-	// texture_create_required := (<<wgpu_context).depth_texture == null;
 	if( renderer.depth_texture != null) {
 		if(
-			wgpuTextureGetWidth(renderer.depth_texture) == width &&
-			wgpuTextureGetHeight(renderer.depth_texture) == height
+			wgpuTextureGetWidth(renderer.depth_texture) == size.x &&
+			wgpuTextureGetHeight(renderer.depth_texture) == size.y
 		){
 			return;
 		}
@@ -67,8 +64,8 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 	texture_descriptor := WGPUTextureDescriptor.{
 		label = "Depth Texture",
 		size = .{
-			width = width,
-			height = height,
+			width = xx size.x,
+			height = xx size.y,
 			depthOrArrayLayers = 1
 		},
 		sampleCount = sampleCount,

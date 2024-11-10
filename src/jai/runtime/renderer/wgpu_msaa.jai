@@ -18,14 +18,15 @@ wgpu_update_pipeline_descriptor_multisample :: (renderer: *Renderer, pipeline_de
 
 create_multi_sample_texture_if_needed :: ( renderer: *Renderer )  {
 	assert(renderer.wgpu_context!=null, "renderer.wgpu_context is null\n");
-	width := wgpu_texture_get_width_surface(renderer.wgpu_context);
-	height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+	size := rendererTargetSize(renderer);
+	// width := wgpu_texture_get_width_surface(renderer.wgpu_context);
+	// height := wgpu_texture_get_height_surface(renderer.wgpu_context);
 	// size := renderer_size(renderer);
 
 	if( renderer.multisample_texture != null){
 		if(
-			wgpuTextureGetWidth(renderer.multisample_texture) == width &&
-			wgpuTextureGetHeight(renderer.multisample_texture) == height
+			wgpuTextureGetWidth(renderer.multisample_texture) == size.x &&
+			wgpuTextureGetHeight(renderer.multisample_texture) == size.y
 		){
 			return;
 		}
@@ -37,8 +38,8 @@ create_multi_sample_texture_if_needed :: ( renderer: *Renderer )  {
 
 	texture_descriptor := *renderer.multisample_texture_descriptor;
 	texture_descriptor.size = .{
-		width = width,
-		height = height,
+		width = xx size.x,
+		height = xx size.y,
 		depthOrArrayLayers = 1
 	};
 	texture_descriptor.sampleCount = MULTISAMPLE_SAMPLES_COUNT;

@@ -12,6 +12,9 @@ ViewerPanel :: struct {
 			size = .{200,200}
 		},
 		bgColor = DEFAULT_RENDERER_BG_COLOR,
+		use_msaa = true,
+		use_depth_buffer = true,
+		use_readback = false,
 		render_ui = true,
 		clear = true,
 	};
@@ -36,9 +39,10 @@ render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 rendererDestroyBuffers :: (panel: *TYPE) {
 	renderer_destroy_buffers(*panel.renderer);
 }
-cameraControlsProcessEvent :: (panel: *TYPE, eventsData:*EventsData) {
+processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;
-	camera_controls_process_event(*cameraControls, eventsData, element_focused(*renderer, eventsData));
+	focused := element_focused(*renderer, eventsData);
+	camera_controls_process_event(*cameraControls, eventsData, focused);
 }
 onResize :: (panel: *TYPE) {
 	using panel;

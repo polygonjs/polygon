@@ -4,6 +4,7 @@ RendererBufferData :: struct {
 	bind_group_entries: []WGPUBindGroupEntry;
 }
 DEFAULT_RENDERER_BG_COLOR :Color: .{0.05, 0.05, 0.05, 1.0};
+READ_PIXEL_BUFFER_SIZE :: 256;
 Renderer :: struct {
 	#as using viewportContainer: ViewportContainer;
 	name :string;
@@ -21,6 +22,7 @@ Renderer :: struct {
 	//
 	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
+	use_readback: bool=false;
 	//
 	multisample_texture_descriptor : WGPUTextureDescriptor;
 	multisample_texture: WGPUTexture;
@@ -29,6 +31,10 @@ Renderer :: struct {
 	depth_texture_stencil_attachment: WGPURenderPassDepthStencilAttachment;
 	depth_texture: WGPUTexture;
 	depth_texture_view: WGPUTextureView=null;
+	//
+	readback_buffer: WGPUBuffer;
+	readback_texture: WGPUTexture;
+	readback_view: WGPUTextureView;
 }
 
 rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
@@ -40,6 +46,26 @@ rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
 		return renderer.viewport.size;
 	}
 }
+rendererSetSize :: (renderer:*Renderer, size: Vector2UInt64){
+	renderer.viewport.size = size;
+
+	if renderer.use_readback {
+		create_pixel_readback_resources(renderer);
+	}
+}
+rendererCopySize :: (src:*Renderer, target: *Renderer){
+	rendererSetSize(target, src.viewport.size);
+}
+rendererTargetSize :: (renderer:*Renderer) -> Vector2UInt64 {
+	if renderer.use_readback {
+		return renderer.viewport.size;
+	} else {
+		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
+		height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+		return .{xx width, xx height};
+	}
+}
+
 
 #if WASM {
 	renderer_init_wasm :: (canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQueue, preferred_texture_format: WGPUTextureFormat){
@@ -59,33 +85,12 @@ rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
 	}
 }
 
-renderer_init_ui :: (renderer:*Renderer){
-	#if USE_IMGUI {
-		bd := *BD;
-		ImGui.CreateContext(null);
 
-		#if WASM {
-			io := ImGui.GetIO();
-			io.IniFilename = null;
-			ImGui_ImplWasm_Init();
-		}
-
-		// imgui_style := ImGui.GetStyle();
-		// imgui_style.AntiAliasedLinesUseTex = false;
-		// ImGui.StyleColorsLight();
-
-		bd.wgpuDevice = WGPU_CONTEXT.device;
-		imgui_init_info := ImGui_ImplWGPU_InitInfo.{
-			// Device = wgpu_context.device,
-			NumFramesInFlight = 3,
-			RenderTargetFormat = WGPU_CONTEXT.preferred_texture_format,
-			DepthStencilFormat = ifx renderer.use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
-		};
-		ImGui_ImplWGPU_Init(bd, imgui_init_info);
-	}
-}
 
 renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
+
+
+
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -244,91 +249,10 @@ renderer_destroy_buffers :: (renderer:*Renderer){
 	// depth_release(renderer);
 }
 
-renderer_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, buffer_data:*RendererBufferData, bind_group_layout_index: u32, label: string) {
-	assert(buffer_data.buffer_container.buffer_size>0, tprint("% buffer_size is 0\n", label));
-	entries := NewArray(1, WGPUBindGroupEntry);
-	entries[0] = WGPUBindGroupEntry.{
-		binding=0,
-		size=buffer_data.buffer_container.buffer_size,
-		offset=0,
-		buffer=buffer_data.buffer_container.buffer,
-	};
-	bind_group_descriptor := WGPUBindGroupDescriptor.{
-		label = "uniforms_bind_group/object",
-		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, bind_group_layout_index),
-		entryCount = xx entries.count,
-		entries = entries.data
-	};
-	bind_group := wgpuDeviceCreateBindGroup(WGPU_CONTEXT.device, *bind_group_descriptor);
-
-	buffer_data.bind_group = bind_group;
-	buffer_data.bind_group_entries = entries;
-}
-renderer_scene_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, bind_group_layout_index: u32) {
-	renderer_uniform_buffer_assign(renderer, pipeline, *renderer.scene_data, bind_group_layout_index, "scene");
-}
-renderer_camera_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, bind_group_layout_index: u32) {
-	renderer_uniform_buffer_assign(renderer, pipeline, *renderer.camera_data, bind_group_layout_index, "camera");
-}
-
-
-
-
-
-
-
-
-
-
 #scope_file
 
 // material_hash :: (pc: *PipelineController) -> u32 {
 // 	return pc.id;
 // }
 
-// renderer_set_viewport :: (encoder: WGPURenderPassEncoder, x: float, y: float, width: float, height: float, min_depth: float = 0.0, max_depth: float = 1.0) {
-// 	wgpuRenderPassEncoderSetViewport(encoder, x, y, width, height, min_depth, max_depth);
-// 	wgpuRenderPassEncoderSetScissorRect(encoder, xx x, xx y, xx width, xx height);
-// }
-set_viewport :: (encoder: WGPURenderPassEncoder, x: float, y: float, width: float, height: float, min_depth: float = 0.0, max_depth: float = 1.0) {
-	wgpuRenderPassEncoderSetViewport(encoder, x, y, width, height, min_depth, max_depth);
-	// Removed: wgpuRenderPassEncoderSetScissorRect(encoder, xx x, xx y, xx width, xx height);
-}
 
-// Add a new function to set the scissor rect separately if needed
-set_scissor_rect :: (encoder: WGPURenderPassEncoder, x: u32, y: u32, width: u32, height: u32) {
-	wgpuRenderPassEncoderSetScissorRect(encoder, x, y, width, height);
-}
-
-renderer_uniform_buffer_create :: (renderer: *Renderer, buffer_data: *RendererBufferData, uniforms: $UniformType, label: string) {
-	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	size := cast(u64) max( 16, size_of(UniformType));
-
-	buffer_label := to_c_string(label);
-	defer free(buffer_label);
-	buffer_desc: WGPUBufferDescriptor = .{
-		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
-		size = size,
-		label = buffer_label,
-	};
-	buffer := wgpuDeviceCreateBuffer(WGPU_CONTEXT.device, *buffer_desc);
-	assert(buffer != null, "Buffer is not created correctly");
-
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, buffer, 0, *uniforms, size);
-
-	buffer_data.buffer_container = .{buffer=buffer, buffer_size=size};
-}
-
-renderer_scene_uniform_buffer_create :: (renderer: *Renderer, scene:*Scene) {
-	renderer_uniform_buffer_create(renderer, *renderer.scene_data, scene.scene_uniforms, "scene");
-}
-renderer_camera_uniform_buffer_create :: (renderer: *Renderer, camera:*Camera) {
-	renderer_uniform_buffer_create(renderer, *renderer.camera_data, camera.camera_uniforms, "camera");
-}
-
-renderer_scene_uniform_buffer_update :: (renderer: *Renderer, scene:*Scene, uniforms: $UniformType){
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.scene_data.buffer_container.buffer, 0, *scene.scene_uniforms, size_of(UniformType));
-}
-renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*Camera, uniforms: $UniformType){
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.camera_data.buffer_container.buffer, 0, *camera.camera_uniforms, size_of(UniformType));
-}

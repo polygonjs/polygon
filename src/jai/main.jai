@@ -114,7 +114,7 @@ main :: () {
 			
 			while SDL_PollEvent(*sdl_event) {
 				events_data_update(*EVENTS_DATA, *sdl_event);
-				cameraControlsProcessEvent();
+				processEvent(*EDITOR, *EVENTS_DATA);
 
 				if sdl_event.type == {
 					case SDL_QUIT; {do_exit = true;}
@@ -187,29 +187,20 @@ on_request_animation_frame :: (
 	width: u64,
 	height: u64
 ) {
+	onResize(*EDITOR, .{width, height});
+
 	if USE_IMGUI_DEBUG return;
 	#if WASM {
 		context = call_from_wasm_context;
 		events_data_update(*EVENTS_DATA);
 		time := performance_now();
 		compute_fps(time, *UI_DATA);
+		processEvent(*EDITOR, *EVENTS_DATA);
 	} else {
 	}
 
-	onResize(*EDITOR, .{width, height});
-	#if WASM {
-		cameraControlsProcessEvent();
-	}
 	sceneOnTick(*NODES_SCENE, newTime / 1000.0);
-
-	#if USE_WGPU {
-		data :RenderCollectionData= rendererCollectionStart(*WGPU_CONTEXT);
-		render(*EDITOR, *data);
-		rendererCollectionEnd(*WGPU_CONTEXT, data);
-	}
-
-	rendererDestroyBuffers(*EDITOR);
-
+	render(*EDITOR);
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
 	// if FRAMES_COUNT > 2 {do_exit = true;};
@@ -218,13 +209,6 @@ on_request_animation_frame :: (
 
 #scope_file
 
-cameraControlsProcessEvent :: () {
-	#if USE_IMGUI {
-		if(ImGui.GetIO().WantCaptureMouse == false) cameraControlsProcessEvent(*EDITOR, *EVENTS_DATA);
-	} else {
-		cameraControlsProcessEvent(*EDITOR, *EVENTS_DATA);
-	}
-}
 
 
 

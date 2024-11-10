@@ -1,0 +1,63 @@
+
+renderer_scene_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, bind_group_layout_index: u32) {
+	renderer_uniform_buffer_assign(renderer, pipeline, *renderer.scene_data, bind_group_layout_index, "scene");
+}
+renderer_camera_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, bind_group_layout_index: u32) {
+	renderer_uniform_buffer_assign(renderer, pipeline, *renderer.camera_data, bind_group_layout_index, "camera");
+}
+
+renderer_uniform_buffer_create :: (renderer: *Renderer, buffer_data: *RendererBufferData, uniforms: $UniformType, label: string) {
+	// TODO: This is a hack to make sure the buffer is at least 16 bytes
+	size := cast(u64) max( 16, size_of(UniformType));
+
+	buffer_label := to_c_string(label);
+	defer free(buffer_label);
+	buffer_desc: WGPUBufferDescriptor = .{
+		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
+		size = size,
+		label = buffer_label,
+	};
+	buffer := wgpuDeviceCreateBuffer(WGPU_CONTEXT.device, *buffer_desc);
+	assert(buffer != null, "Buffer is not created correctly");
+
+	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, buffer, 0, *uniforms, size);
+
+	buffer_data.buffer_container = .{buffer=buffer, buffer_size=size};
+}
+
+renderer_scene_uniform_buffer_create :: (renderer: *Renderer, scene:*Scene) {
+	renderer_uniform_buffer_create(renderer, *renderer.scene_data, scene.scene_uniforms, "scene");
+}
+renderer_camera_uniform_buffer_create :: (renderer: *Renderer, camera:*Camera) {
+	renderer_uniform_buffer_create(renderer, *renderer.camera_data, camera.camera_uniforms, "camera");
+}
+
+renderer_scene_uniform_buffer_update :: (renderer: *Renderer, scene:*Scene, uniforms: $UniformType){
+	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.scene_data.buffer_container.buffer, 0, *scene.scene_uniforms, size_of(UniformType));
+}
+renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*Camera, uniforms: $UniformType){
+	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.camera_data.buffer_container.buffer, 0, *camera.camera_uniforms, size_of(UniformType));
+}
+
+#scope_file
+
+renderer_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, buffer_data:*RendererBufferData, bind_group_layout_index: u32, label: string) {
+	assert(buffer_data.buffer_container.buffer_size>0, tprint("% buffer_size is 0\n", label));
+	entries := NewArray(1, WGPUBindGroupEntry);
+	entries[0] = WGPUBindGroupEntry.{
+		binding=0,
+		size=buffer_data.buffer_container.buffer_size,
+		offset=0,
+		buffer=buffer_data.buffer_container.buffer,
+	};
+	bind_group_descriptor := WGPUBindGroupDescriptor.{
+		label = "uniforms_bind_group/object",
+		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, bind_group_layout_index),
+		entryCount = xx entries.count,
+		entries = entries.data
+	};
+	bind_group := wgpuDeviceCreateBindGroup(WGPU_CONTEXT.device, *bind_group_descriptor);
+
+	buffer_data.bind_group = bind_group;
+	buffer_data.bind_group_entries = entries;
+}

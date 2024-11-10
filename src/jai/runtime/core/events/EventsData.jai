@@ -2,10 +2,7 @@ EventsDataWindowSize :: struct {
 	w: u32;
 	h: u32;
 };
-EventsDataCursor :: struct {
-	x: u32;
-	y: u32;
-};
+EventsDataCursor :: Vector2UInt;
 ViewportRect :: struct {
 	start: Vector2UInt64;
 	size: Vector2UInt64;

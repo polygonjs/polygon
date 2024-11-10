@@ -46,6 +46,7 @@ wgpuRenderPipelineRelease :: (renderPipeline: WGPURenderPipeline) -> void #forei
 // Methods of CommandEncoder
 wgpuCommandEncoderBeginComputePass :: (commandEncoder: WGPUCommandEncoder, descriptor: *WGPUComputePassDescriptor) -> WGPUComputePassEncoder #foreign;
 wgpuCommandEncoderCopyBufferToBuffer :: (commandEncoder: WGPUCommandEncoder, source: WGPUBuffer, sourceOffset: u64, destination: WGPUBuffer, destinationOffset: u64, size: u64) -> void #foreign;
+wgpuCommandEncoderCopyTextureToBuffer :: (commandEncoder: WGPUCommandEncoder, source: *WGPUImageCopyTexture, destination: *WGPUImageCopyBuffer, copySize: *WGPUExtent3D) -> void #foreign;
 
 
 // Methods of ComputePassEncoder

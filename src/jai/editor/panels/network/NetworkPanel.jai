@@ -2,6 +2,7 @@
 NetworkPanel :: struct {
 	editor: *Editor;
 	worldScene: *Scene;
+	worldSceneRaycast: *Scene;
 	nodesSceneObjectIndex: [..]u32;
 
 	camera: OrthographicCamera;
@@ -9,7 +10,7 @@ NetworkPanel :: struct {
 
 	basicMat: *BasicMeshMaterial;
 
-	renderer: Renderer = .{
+	rendererColor: Renderer = .{
 		name = "NetworkPanelRenderer",
 		full_screen = false,
 		viewport = .{
@@ -18,6 +19,22 @@ NetworkPanel :: struct {
 		},
 		bgColor = DEFAULT_RENDERER_BG_COLOR,
 		use_msaa = false,
+		use_depth_buffer = true,
+		use_readback = false,
+		render_ui = false,
+		clear = false,
+	};
+	rendererRaycast: Renderer = .{
+		name = "NetworkPanelRendererRaycast",
+		full_screen = false,
+		viewport = .{
+			start = .{600,0},
+			size = .{1,1}
+		},
+		bgColor = .{0,0,1,1},
+		use_msaa = false,
+		use_depth_buffer = true,
+		use_readback = true,
 		render_ui = false,
 		clear = false,
 	};
@@ -31,32 +48,42 @@ newNetworkPanel :: (editor: *Editor) -> *TYPE {
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	renderer_init_pipelines(*renderer, worldScene, *camera);
+	renderer_init_pipelines(*rendererColor, worldScene, *camera);
+	renderer_init_pipelines(*rendererRaycast, worldSceneRaycast, *camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
-	cameraUniformsUpdate(*camera); // if this is only in cameraControlsProcessEvent, then the camera is not initialized correctly
-	render(renderCollectionData, *renderer, worldScene, *camera);
+	cameraUniformsUpdate(*camera);
+	render(renderCollectionData, *rendererColor, worldScene, *camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
-	renderer_destroy_buffers(*panel.renderer);
-}
-cameraControlsProcessEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;
-	camera_controls_process_event(*cameraControls, eventsData, element_focused(*renderer, eventsData));
+	renderer_destroy_buffers(*rendererColor);
+}
+processEvent :: (panel: *TYPE, eventsData:*EventsData) {
+	using panel;
+	focused := element_focused(*rendererColor, eventsData);
+	camera_controls_process_event(*cameraControls, eventsData, focused);
+	if (focused){
+		print("\ncursor: %, %\n", eventsData.cursor.x, eventsData.cursor.y);
+		result := read_pixel(*rendererRaycast, worldSceneRaycast, *camera, eventsData.cursor);
+		print("result: %\n", result);
+	}
 }
 
 onResize :: (panel: *TYPE) {
 	using panel;
 	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
 
-	renderer.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
-	renderer.viewport.size = .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 };
+	rendererColor.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
+	rendererRaycast.viewport.start = rendererColor.viewport.start;
+	rendererSetSize(*rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
+	rendererCopySize(*rendererColor, *rendererRaycast);
 
-	if(renderer.full_screen == true) {
+	if(rendererColor.full_screen == true) {
 		camera.aspect = newAspect;
 	} else {
-		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
+		camera.aspect = cast(float32)rendererColor.viewport.size.x / cast(float32)rendererColor.viewport.size.y;
 	}
 	cameraProjectionUpdate(*camera);
 }
@@ -95,6 +122,7 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 		}
 		nodesSceneObjectIndex[node.nodeId] = xx worldScene.children.count;
 		array_add(*worldScene.children, mesh);
+		array_add(*worldSceneRaycast.children, mesh);
 	}
 }
 networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
@@ -103,7 +131,7 @@ networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 	if meshIndex > 0 {
 		mesh := worldScene.children[meshIndex];
 		sceneObjectRemove(worldScene, mesh);
-		worldScene.children[meshIndex] = null;
+		sceneObjectRemove(worldSceneRaycast, mesh);
 		nodesSceneObjectIndex[node.nodeId] = 0;
 	}
 }
@@ -136,6 +164,7 @@ networkPanelInit :: (panel: *NetworkPanel, editor: *Editor) {
 
 	panel.editor = editor;
 	panel.worldScene = newObject3D(Scene);
+	panel.worldSceneRaycast = newObject3D(Scene);
 	panel.camera.type = OrthographicCamera;
 	object3DInit(*panel.camera);
 
@@ -155,4 +184,6 @@ networkPanelInit :: (panel: *NetworkPanel, editor: *Editor) {
 	networkPanelUpdateWorldScene(panel, editor.nodesScene);
 
 	cameraControlsCommit(*panel.cameraControls);
+
+	
 }
