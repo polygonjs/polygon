@@ -82,7 +82,7 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	output1 := newNode(nodesScene, OutputGeoNode);
 	setInput(output1, 0, box1);
 
-	nodeSetPosition(editor, box1, .{2,1});
+	nodeSetPosition(editor, box1, .{2,3});
 	nodeSetPosition(editor, output1, .{0,-2});
 
 	icosahedron1 := newNode(nodesScene, IcosahedronGeoNode);

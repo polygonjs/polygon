@@ -12,11 +12,11 @@ READ_PIXEL_TEXTURE_VIEW_DESCRIPTOR :: WGPUTextureViewDescriptor.{
 	arrayLayerCount = 1,
 };
 READ_PIXEL_BUFFER_DESC :: WGPUBufferDescriptor.{
-		size = READ_PIXEL_BUFFER_SIZE,  // RGBA8 = 4 bytes
-		usage = xx (WGPUBufferUsage.CopyDst | WGPUBufferUsage.MapRead),
-		mappedAtCreation = xx false,
-	};
-create_pixel_readback_resources :: (renderer: *Renderer) {
+	size = READ_PIXEL_BUFFER_SIZE,  // RGBA8 = 4 bytes
+	usage = xx (WGPUBufferUsage.CopyDst | WGPUBufferUsage.MapRead),
+	mappedAtCreation = xx false,
+};
+create_pixel_readback_resources :: (renderer: *Renderer)->bool {
 
 	device := WGPU_CONTEXT.device;
 
@@ -24,55 +24,47 @@ create_pixel_readback_resources :: (renderer: *Renderer) {
 	assert(cast(*void)WGPU_CONTEXT.preferred_texture_format != null, "preferred_texture_format is null");
 
 	rtSize := rendererTargetSize(renderer);
-
+	if rtSize.x<=1 || rtSize.y<=1 {
+		return false;
+	}
 
 	if (READ_PIXEL_TEXTURE_DESC.size.width==rtSize.x && READ_PIXEL_TEXTURE_DESC.size.height==rtSize.y) {
-		return;
+		return true;
 	}
 
 	{
 		using READ_PIXEL_TEXTURE_DESC;
 		size.width = xx rtSize.x;
 		size.height = xx rtSize.y;
-		format = WGPU_CONTEXT.preferred_texture_format;
+		format = rendererFormat(renderer);//.RGBA32Uint; // WGPU_CONTEXT.preferred_texture_format;
 		usage = xx (WGPUTextureUsage.RenderAttachment | WGPUTextureUsage.CopySrc);
 		dimension = WGPUTextureDimension._2D;
 		mipLevelCount = 1;
 		sampleCount = 1;
 	}
-	// texture_desc := WGPUTextureDescriptor.{
-	// 	size = .{
-	// 		width = xx size.x,
-	// 		height = xx size.y,
-	// 		depthOrArrayLayers = 1
-	// 	},
-	// 	format = WGPU_CONTEXT.preferred_texture_format,//WGPUTextureFormat.RGBA8Unorm,  // Or whatever format you need
-	// 	usage = xx (WGPUTextureUsage.RenderAttachment | WGPUTextureUsage.CopySrc),
-	// 	dimension = WGPUTextureDimension._2D,
-	// 	mipLevelCount = 1,
-	// 	sampleCount = 1,
-	// };
 	renderer.readback_texture = wgpuDeviceCreateTexture(device, *READ_PIXEL_TEXTURE_DESC);
 	renderer.readback_view = wgpuTextureCreateView(renderer.readback_texture, *READ_PIXEL_TEXTURE_VIEW_DESCRIPTOR);
 	renderer.readback_buffer = wgpuDeviceCreateBuffer(device, *READ_PIXEL_BUFFER_DESC);
-	print("read pixel init\n");
+	return true;
 }
-read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UInt) -> [READ_PIXEL_BUFFER_SIZE]u8 {
+read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UInt) -> READ_PIXEL_RESULT {
 	if renderer.use_readback {
-		create_pixel_readback_resources(renderer);
+		creation_success := create_pixel_readback_resources(renderer);
+		if !creation_success {
+			print("failed to create\n");
+			return .[0,0,0,0];
+		}
 	}
 
 	// create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
 	device := WGPU_CONTEXT.device;
-	// Render the pixel to the readback texture
 	colorAttachment := WGPURenderPassColorAttachment.{
 		view = renderer.readback_view,
 		loadOp = ifx renderer.clear then WGPULoadOp.Clear else WGPULoadOp.Load,
 		storeOp = WGPUStoreOp.Store,
 		clearValue = wgpu_color_create(renderer.bgColor),
 	};
-	print("colorAttachment:%\n", colorAttachment);
 
 	cmd_encoder := wgpuDeviceCreateCommandEncoder(
 		device,
@@ -90,18 +82,15 @@ read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UIn
 
 	render_pass_encoder := wgpuCommandEncoderBeginRenderPass(cmd_encoder, *render_pass_descriptor);
 	defer wgpuRenderPassEncoderRelease(render_pass_encoder);
-	// Set viewport and scissor to the specific pixel
-	// set_viewport(render_pass_encoder, xx pos.x, xx pos.y, 1, 1);
+
 	scissor_pos :Vector2UInt = .{
 		x = xx (pos.x-renderer.viewport.start.x),
 		y = xx (pos.y-renderer.viewport.start.y),
 	};
 	{
 		using renderer.viewport;
-		print("viewport: %, %\n",size.x, size.y);
 		// set_viewport(render_pass_encoder, xx 0, xx 0, xx size.x, xx size.y);
-		print("scissor: %, %\n", scissor_pos.x, scissor_pos.y);
-		// set_scissor_rect(render_pass_encoder, scissor_pos.x, scissor_pos.y, 1, 1);
+		set_scissor_rect(render_pass_encoder, scissor_pos.x, scissor_pos.y, 1, 1);
 	}
 	
 	renderer_scene_uniform_buffer_update(renderer, scene, scene.scene_uniforms);
@@ -110,7 +99,6 @@ read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UIn
 
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 
-	// Copy texture to buffer
 	copy_texture := WGPUImageCopyTexture.{
 		texture = renderer.readback_texture,
 		mipLevel = 0,
@@ -133,21 +121,28 @@ read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UIn
 	copy_size := WGPUExtent3D.{width = 1, height = 1, depthOrArrayLayers = 1};
 	wgpuCommandEncoderCopyTextureToBuffer(cmd_encoder, *copy_texture, *copy_buffer, *copy_size);
 
-	// Submit command buffer
 	cmd_buffer := wgpuCommandEncoderFinish(cmd_encoder, null);
 	wgpuQueueSubmit(WGPU_CONTEXT.queue, 1, *cmd_buffer);
 
-	// Map the buffer and read the pixel data
-	wgpuBufferMapAsync(renderer.readback_buffer, xx WGPUMapMode.Read, 0, READ_PIXEL_BUFFER_SIZE, wgpu_render_pixel_async_callback, renderer);
+	wgpuBufferMapAsync(renderer.readback_buffer, xx WGPUMapMode.Read, 0, READ_DATA_SIZE, wgpu_render_pixel_async_callback, renderer);
 	wgpuDevicePoll(device, xx true, null);
 
-	// Read the mapped data
-	data := cast(*[READ_PIXEL_BUFFER_SIZE]u8)wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_PIXEL_BUFFER_SIZE);
+	data := cast(*READ_PIXEL_RESULT)wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
 	result := data.*;
 
 	wgpuBufferUnmap(renderer.readback_buffer);
 	return result;
 }
+
+
+#scope_file
+
+READ_PIXEL_BUFFER_SIZE :: 256;
+READ_DATA_SIZE :: 4;
+COMPONENTS_COUNT :: 4;
+DATA_TYPE :: u8;
+READ_PIXEL_RESULT :: [COMPONENTS_COUNT]DATA_TYPE;
+
 wgpu_render_pixel_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {
 	if(status!=WGPUBufferMapAsyncStatus.Success){
 		new_context: Context;

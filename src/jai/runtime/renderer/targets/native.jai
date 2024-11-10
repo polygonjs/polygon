@@ -135,9 +135,9 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 
 	#if COLOR_SPACE_LINEAR {
 		linearFormatIfAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, wgpu_context:*WGPUContext)->WGPUTextureFormat {
-			for 0..(surface_capabilities.formatCount-1) {
-				if( surface_capabilities.formats[it] == .BGRA8Unorm){
-					return surface_capabilities.formats[it];
+			for i:0..(surface_capabilities.formatCount-1) {
+				if( surface_capabilities.formats[i] == .BGRA8Unorm){
+					return surface_capabilities.formats[i];
 				}
 				
 			}

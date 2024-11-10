@@ -16,16 +16,19 @@ Object3D :: struct {
 
 
 newObject3D :: ($T: Type) -> *T {
+	object := object3DAllocate(T);
+
+	object3DInit(object);
+
+	return object;
+}
+object3DAllocate :: ($T: Type)-> *T {
 	object: *T = alloc(size_of(T));
 	object.type = T;
 
 	object.id = NEXT_OBJECT3D_ID;
 	NEXT_OBJECT3D_ID+=1;
-
 	init_transformable(object);
-
-	object3DInit(object);
-
 	return object;
 }
 object3DInit :: (object: *Object3D) {

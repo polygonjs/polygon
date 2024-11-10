@@ -4,7 +4,7 @@ RendererBufferData :: struct {
 	bind_group_entries: []WGPUBindGroupEntry;
 }
 DEFAULT_RENDERER_BG_COLOR :Color: .{0.05, 0.05, 0.05, 1.0};
-READ_PIXEL_BUFFER_SIZE :: 256;
+
 Renderer :: struct {
 	#as using viewportContainer: ViewportContainer;
 	name :string;
@@ -63,6 +63,13 @@ rendererTargetSize :: (renderer:*Renderer) -> Vector2UInt64 {
 		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
 		height := wgpu_texture_get_height_surface(renderer.wgpu_context);
 		return .{xx width, xx height};
+	}
+}
+rendererFormat :: (renderer:*Renderer) -> WGPUTextureFormat {
+	if renderer.use_readback {
+		return .BGRA8Unorm; // .RGBA32Uint; // could potentially work with RGBA32Float
+	} else {
+		return WGPU_CONTEXT.preferred_texture_format;
 	}
 }
 

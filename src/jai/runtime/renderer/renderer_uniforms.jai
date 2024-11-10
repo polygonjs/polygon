@@ -50,8 +50,11 @@ renderer_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipe
 		offset=0,
 		buffer=buffer_data.buffer_container.buffer,
 	};
+	bind_group_descriptor_label := tprint("renderer_uniform_buffer_assign:uniforms_bind_group/%", label);
+	bind_group_descriptor_label_c := to_c_string(bind_group_descriptor_label);
+	defer free(bind_group_descriptor_label_c);
 	bind_group_descriptor := WGPUBindGroupDescriptor.{
-		label = "uniforms_bind_group/object",
+		label = bind_group_descriptor_label_c,
 		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, bind_group_layout_index),
 		entryCount = xx entries.count,
 		entries = entries.data

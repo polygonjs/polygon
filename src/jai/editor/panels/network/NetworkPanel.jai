@@ -1,9 +1,9 @@
 
 NetworkPanel :: struct {
 	editor: *Editor;
-	worldScene: *Scene;
-	worldSceneRaycast: *Scene;
-	nodesSceneObjectIndex: [..]u32;
+	sceneWorld: *Scene;
+	sceneRaycast: *Scene;
+	objectIndex: [..]u32;
 
 	camera: OrthographicCamera;
 	cameraControls: PanControls;
@@ -48,13 +48,13 @@ newNetworkPanel :: (editor: *Editor) -> *TYPE {
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	renderer_init_pipelines(*rendererColor, worldScene, *camera);
-	renderer_init_pipelines(*rendererRaycast, worldSceneRaycast, *camera);
+	renderer_init_pipelines(*rendererColor, sceneWorld, *camera);
+	renderer_init_pipelines(*rendererRaycast, sceneRaycast, *camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
 	cameraUniformsUpdate(*camera);
-	render(renderCollectionData, *rendererColor, worldScene, *camera);
+	render(renderCollectionData, *rendererColor, sceneWorld, *camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
 	using panel;
@@ -65,9 +65,8 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	focused := element_focused(*rendererColor, eventsData);
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
-		print("\ncursor: %, %\n", eventsData.cursor.x, eventsData.cursor.y);
-		result := read_pixel(*rendererRaycast, worldSceneRaycast, *camera, eventsData.cursor);
-		print("result: %\n", result);
+		result := read_pixel(*rendererRaycast, sceneRaycast, *camera, eventsData.cursor);
+		id := meshIdMaterialUnpackId(result);
 	}
 }
 
@@ -88,62 +87,86 @@ onResize :: (panel: *TYPE) {
 	cameraProjectionUpdate(*camera);
 }
 
-networkPanelUpdateWorldScene :: (panel: *TYPE, nodesScene: *NodesScene) {
-	using panel.editor.sceneUiData;
 
-	maxNodeId := -1;
-	for node: nodesScene.nodes {
-		if maxNodeId < node.nodeId {
-			maxNodeId = node.nodeId;
-		}
-	}
-	if nodePositions.count < maxNodeId + 1 {
-		array_resize(*nodePositions, maxNodeId + 1);
-	}
-
-	for node, i: nodesScene.nodes {
-		networkPanelAddNode(panel, node);
-	}
-}
 
 networkPanelAddNode :: (panel: *TYPE, node: *$T) {
-	mesh := newObject3D(Mesh);
-	setColor(panel.basicMat, .{1.0, 0.0, 0.0, 1.0});
-	geometry_box_update(mesh.geometry, segments=.{2,2,2});
-	mesh.material = xx panel.basicMat;
 
-	pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
-	mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
-	transformable_update_matrix(mesh);
-	{
+	_addMesh :: (panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:bool) {
 		using panel;
-		if nodesSceneObjectIndex.count <= node.nodeId {
-			array_resize(*nodesSceneObjectIndex, node.nodeId + 1);
+
+		mesh := newMesh(Mesh, geometry);
+
+		#if forRaycast {
+			scene := sceneRaycast;
+			material := newMaterial(MeshIdMaterial);
+			material.uniforms.id = node.nodeId;
+			mesh.material = xx material;
+		} else {
+			scene := sceneWorld;
+			setColor(panel.basicMat, .{1.0, 0.5, 0.25, 1.0});
+			mesh.material = xx panel.basicMat;
 		}
-		nodesSceneObjectIndex[node.nodeId] = xx worldScene.children.count;
-		array_add(*worldScene.children, mesh);
-		array_add(*worldSceneRaycast.children, mesh);
-	}
-}
-networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
-	using panel;
-	meshIndex := nodesSceneObjectIndex[node.nodeId];
-	if meshIndex > 0 {
-		mesh := worldScene.children[meshIndex];
-		sceneObjectRemove(worldScene, mesh);
-		sceneObjectRemove(worldSceneRaycast, mesh);
-		nodesSceneObjectIndex[node.nodeId] = 0;
-	}
-}
-networkPanelMoveNode :: (panel: *TYPE, node: *$T) {
-	using panel;
-	meshIndex := nodesSceneObjectIndex[node.nodeId];
-	if meshIndex > 0 {
-		mesh := worldScene.children[meshIndex];
+
 		pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
 		mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
 		transformable_update_matrix(mesh);
+		{
+			using panel;
+			#if forRaycast==false {
+				if objectIndex.count <= node.nodeId {
+					array_resize(*objectIndex, node.nodeId + 1);
+				}
+				objectIndex[node.nodeId] = xx scene.children.count;
+			}
+			sceneObjectAdd(scene, mesh);
+		}
 	}
+
+	geometry :*Geometry = New(Geometry);
+	geometry_box_update(geometry, segments=.{2,2,2});
+
+	_addMesh(panel, node, geometry, forRaycast=false);
+	_addMesh(panel, node, geometry, forRaycast=true);
+}
+
+networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
+	_removeNode :: (panel:*TYPE, node:*T, $forRaycast:bool) {
+		using panel;
+		meshIndex := objectIndex[node.nodeId];
+		if meshIndex >= 0 {
+			#if forRaycast {
+				scene := sceneRaycast;
+			} else {
+				scene := sceneWorld;
+			}
+			mesh := scene.children[meshIndex];
+			sceneObjectRemove(scene, mesh);
+			#if forRaycast == true {
+				objectIndex[node.nodeId] = 0;
+			}
+		}
+	}
+	_removeNode(panel, node, forRaycast=false);
+	_removeNode(panel, node, forRaycast=true);
+}
+networkPanelMoveNode :: (panel: *TYPE, node: *$T) {
+	_moveNode :: (panel:*TYPE, node:*T, $forRaycast:bool) {
+		using panel;
+		#if forRaycast {
+			scene := sceneRaycast;
+		} else {
+			scene := sceneWorld;
+		}
+		meshIndex := objectIndex[node.nodeId];
+		if meshIndex >= 0 {
+			mesh := scene.children[meshIndex];
+			pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
+			mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
+			transformable_update_matrix(mesh);
+		}
+	}
+	_moveNode(panel, node, forRaycast=false);
+	_moveNode(panel, node, forRaycast=true);
 }
 
 onNodeAdded :: (panel: *TYPE, node: *$T) {
@@ -160,30 +183,49 @@ onNodeMoved :: (panel: *TYPE, node: *$T) {
 
 TYPE :: NetworkPanel;
 
-networkPanelInit :: (panel: *NetworkPanel, editor: *Editor) {
+networkPanelInit :: (panel: *TYPE, editor: *Editor) {
 
 	panel.editor = editor;
-	panel.worldScene = newObject3D(Scene);
-	panel.worldSceneRaycast = newObject3D(Scene);
+	panel.sceneWorld = newObject3D(Scene);
+	panel.sceneRaycast = newObject3D(Scene);
 	panel.camera.type = OrthographicCamera;
 	object3DInit(*panel.camera);
 
 	panel.basicMat = newMaterial(BasicMeshMaterial);
 	panel.cameraControls.camera = *panel.camera;
 
-	{
+	_addBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
 		mat := newMaterial(BackgroundMeshMaterial);
-		setColor(mat, .{0.2, 0.2, 0.2, 1.0});
+		setColor(mat, color);
 		mesh0 := newObject3D(Mesh);
+		assert(mesh0.geometry != null, "mesh0.geometry is null\n");
 		mesh0.material = xx mat;
 		geometry_plane_update(mesh0.geometry, size=.{2,2}, segments=.{1,1});
 		transformable_update_matrix(mesh0);
-		sceneObjectAdd(panel.worldScene, mesh0);
+		sceneObjectAdd(scene, mesh0);
 	}
+	_addBgMesh(panel, panel.sceneWorld, .{0.2, 0.2, 0.2, 1.0});
+	_addBgMesh(panel, panel.sceneRaycast, .{0, 0, 0, 0});
 
-	networkPanelUpdateWorldScene(panel, editor.nodesScene);
+	networkPanelUpdateScenes(panel, editor.nodesScene);
 
 	cameraControlsCommit(*panel.cameraControls);
+}
 
-	
+networkPanelUpdateScenes :: (panel: *TYPE, nodesScene: *NodesScene) {
+	using panel.editor.sceneUiData;
+
+	maxNodeId := -1;
+	for node: nodesScene.nodes {
+		if maxNodeId < node.nodeId {
+			maxNodeId = node.nodeId;
+		}
+	}
+	if nodePositions.count < maxNodeId + 1 {
+		array_resize(*nodePositions, maxNodeId + 1);
+	}
+
+	for node, i: nodesScene.nodes {
+		networkPanelAddNode(panel, node);
+	}
 }

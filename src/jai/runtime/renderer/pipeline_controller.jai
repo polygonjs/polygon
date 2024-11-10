@@ -69,8 +69,8 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 	pc.pipeline_descriptor = .{label = to_c_string(tprint("% Pipeline", label))};
 
 	pipeline_controller_pipeline_descriptor_layout_init(wgpu_context, *pc.pipeline_descriptor, first_mesh.material);
-	pipeline_controller_create_fragment_state_init(*(pc.fragment_state), *(pc.color_target_state), pc.shader_module, wgpu_context.preferred_texture_format);
-	pc.pipeline_descriptor.fragment = *(pc.fragment_state);
+	pipeline_controller_create_fragment_state_init(*pc.fragment_state, *pc.color_target_state, pc.shader_module, rendererFormat(renderer));
+	pc.pipeline_descriptor.fragment = *pc.fragment_state;
 	// vertex
 	vertex_state: WGPUVertexState;
 	vertex_state.module = pc.shader_module ;
@@ -194,13 +194,17 @@ pipeline_controller_destroy_scheduled_buffers :: (pc: *PipelineController) {
 
 // NEXT_PIPELINE_CONTROLLER_ID :u32= 0;
 
-pipeline_controller_create_fragment_state_init :: (fragment_state: *WGPUFragmentState, color_target_state: *WGPUColorTargetState, shader: WGPUShaderModule, preferred_texture_format:WGPUTextureFormat ){
+pipeline_controller_create_fragment_state_init :: (fragment_state: *WGPUFragmentState, color_target_state: *WGPUColorTargetState, shader: WGPUShaderModule, format:WGPUTextureFormat ){
 
-	color_target_state.format = preferred_texture_format;
-	color_target_state.blend = *(WGPUBlendState.{
-		color = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
-		alpha = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
-	});
+	color_target_state.format = format;
+	if format == WGPUTextureFormat.RGBA32Uint {
+		color_target_state.blend = null;
+	}else {
+		color_target_state.blend = *(WGPUBlendState.{
+			color = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
+			alpha = .{ srcFactor = .One, dstFactor = .Zero, operation = .Add },
+		});
+	}
 	color_target_state.writeMask = xx WGPUColorWriteMask.All;
 
 	fragment_state.module = shader;
