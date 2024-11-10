@@ -66,7 +66,11 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
 		result := read_pixel(*rendererRaycast, sceneRaycast, *camera, eventsData.cursor);
-		id := meshIdMaterialUnpackId(result);
+		nodeId := meshIdMaterialUnpackId(result);
+		node := sceneFindNodeById(editor.nodesScene, nodeId);
+		if node != null {
+			print("node: %\n", node.type);
+		}
 	}
 }
 
@@ -149,7 +153,7 @@ networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 	_removeNode(panel, node, forRaycast=false);
 	_removeNode(panel, node, forRaycast=true);
 }
-networkPanelMoveNode :: (panel: *TYPE, node: *$T) {
+networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 	_moveNode :: (panel:*TYPE, node:*T, $forRaycast:bool) {
 		using panel;
 		#if forRaycast {
@@ -169,15 +173,7 @@ networkPanelMoveNode :: (panel: *TYPE, node: *$T) {
 	_moveNode(panel, node, forRaycast=true);
 }
 
-onNodeAdded :: (panel: *TYPE, node: *$T) {
-	networkPanelAddNode(panel, node);
-}
-onNodeRemoved :: (panel: *TYPE, node: *$T) {
-	networkPanelRemoveNode(panel, node);
-}
-onNodeMoved :: (panel: *TYPE, node: *$T) {
-	networkPanelMoveNode(panel, node);
-}
+
 
 #scope_file
 

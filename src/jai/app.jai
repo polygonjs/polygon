@@ -136,6 +136,7 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	// 	array_add(*scene.children, mesh1);
 	// }
 	
+	editorFlushCommands(editor);
 }
 
 

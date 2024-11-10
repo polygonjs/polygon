@@ -51,7 +51,6 @@ read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UIn
 	if renderer.use_readback {
 		creation_success := create_pixel_readback_resources(renderer);
 		if !creation_success {
-			print("failed to create\n");
 			return .[0,0,0,0];
 		}
 	}

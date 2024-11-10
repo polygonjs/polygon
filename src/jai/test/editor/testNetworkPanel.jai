@@ -11,19 +11,28 @@ testNetworkPanelNodesSceneToWorldScene :: () {
 
 	editor: Editor;
 	editorInit(*editor, nodesScene);
-	assertNotNull(editor.networkPanel.worldScene);
+	assertNotNull(editor.networkPanel.sceneWorld);
+	assertNotNull(editor.networkPanel.sceneRaycast);
 
-	assertEqual(editor.networkPanel.worldScene.children.count, 3);
+	assertEqual(editor.networkPanel.sceneWorld.children.count, 3);
+	assertEqual(editor.networkPanel.sceneRaycast.children.count, 3);
 
 	box3 := newNode(nodesScene, BoxGeoNode);
-	assertEqual(editor.networkPanel.worldScene.children.count, 4);
+	editorFlushCommands(*editor);
+	assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
+	assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
 	box4 := newNode(nodesScene, BoxGeoNode);
-	assertEqual(editor.networkPanel.worldScene.children.count, 5);
+	editorFlushCommands(*editor);
+	assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
+	assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 
 	sceneDeleteNode(nodesScene, box3);
-	assertEqual(editor.networkPanel.worldScene.children[3], null);
-	assertEqual(editor.networkPanel.worldScene.children.count, 5);
+	editorFlushCommands(*editor);
+	assertEqual(editor.networkPanel.sceneWorld.children[3], null);
+	assertEqual(editor.networkPanel.sceneRaycast.children[3], null);
+	assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
+	assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 }
 
 

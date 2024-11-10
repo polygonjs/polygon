@@ -122,6 +122,14 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 		sceneEmitEvent(scene, NodesSceneEvent.NODE_REMOVED, node);
 	}
 }
+sceneFindNodeById :: (scene: *NodesScene, nodeId: NodeId) -> *GeoNodeAny {
+	for node: scene.nodes {
+		if node != null && node.nodeId == nodeId {
+			return node;
+		}
+	}
+	return null;
+}
 
 sceneOnTick :: (scene: *NodesScene, time:Time) {
 	sceneSetTime(scene, time);
