@@ -1,5 +1,4 @@
-#load "runtime/_index.jai";
-#load "editor/_index.jai";
+
 
 
 runTests :: () {
@@ -25,18 +24,27 @@ runTests :: () {
 	for test,i: NAMED_PROCEDURES {
 		found :bool= testNames.count == 0 || array_find(testNames, test.name);
 		if found {
-			print("TEST: %\n", test.name);
+			print("% TEST: %\n", tprintGreen(" "),test.name);
 			test.proc();
 			testsCount += 1;
 		} else {
-			print("TEST SKIPPED: %\n", test.name);
+			print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
 		}
 	}
 
 	print("---------TEST COMPLETED: (%)\n", testsCount);
 }
 
-#scope_file
+test :: (name: string, procedure: SimpleProcedure) {
+	// ensure we don't already have a test with this name
+	for test,i: NAMED_PROCEDURES_COMPILE_TIME {
+		if test.name == name {
+			assert(false, tprint("TEST NAME ALREADY EXISTS (%)", test.name));
+		}
+	}
+	//
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name, procedure});
+}
 
 SimpleProcedure :: #type () -> ();
 
@@ -45,43 +53,11 @@ NamedProcedure :: struct {
 	proc: SimpleProcedure;
 }
 
-NAMED_PROCEDURES :[]NamedProcedure: #run getNamedProcedures();
+NAMED_PROCEDURES_COMPILE_TIME :[..]NamedProcedure;
 
-getNamedProcedures :: ()->[..]NamedProcedure {
-	list: [..]NamedProcedure;
+#scope_file
 
-	addTest :: ($code: Code) #expand {
-		array_add(*list, namedProcedure(code));
-	}
-	// runtime
-	addTest(testArray);
-	addTest(testBitArray);
-	addTest(testCoreGraph);
-	addTest(testMath);
-	addTest(testNodesBasicDependency);
-	addTest(testPerlinNoise);
-	// editor
-	addTest(testNetworkPanel);
 
-	return list;
-}
+NAMED_PROCEDURES :[]NamedProcedure: #run registerTests();
 
-namedProcedure :: ($code: Code) -> NamedProcedure {
-	root, expressions := compiler_get_nodes(code);
-	for expression, i: expressions {
-		if expression.kind == .PROCEDURE_HEADER {
-			header := cast(*Code_Procedure_Header) expression;
-			return .{
-				name = header.name,
-				proc = #insert code
-			};
-		}
-	}
-	
-	assert(false, "NO PROCEDURE FOUND");
-	return .{
-		name = "unknown",
-		proc = (){}
-	};
-}
 
