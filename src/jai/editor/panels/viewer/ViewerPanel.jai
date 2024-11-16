@@ -26,6 +26,11 @@ newViewerPanel :: (editor: *Editor) -> *TYPE {
 
 	return panel;
 }
+viewerPanelDelete :: (panel: *TYPE) {
+	using panel;
+	// object3DDelete(camera);
+	free(panel);
+}
 drawDataInit :: (panel: *TYPE) {
 	using panel;
 	#if USE_IMGUI { renderer_init_ui(*renderer); }
@@ -62,12 +67,13 @@ onResize :: (panel: *TYPE) {
 
 TYPE :: ViewerPanel;
 
-viewerPanelInit :: (panel: *TYPE, editor: *Editor) {
-	panel.editor = editor;
+viewerPanelInit :: (panel: *TYPE, _editor: *Editor) {
 
-	panel.camera.type = PerspectiveCamera;
-	object3DInit(*panel.camera);
-	panel.cameraControls.camera = *panel.camera;
+	using panel;
+	editor = _editor;
+	camera.type = PerspectiveCamera;
+	object3DInit(*camera);
+	cameraControls.camera = *camera;
 
-	cameraControlsCommit(*panel.cameraControls);
+	cameraControlsCommit(*cameraControls);
 }

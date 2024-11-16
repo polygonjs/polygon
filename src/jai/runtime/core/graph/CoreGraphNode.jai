@@ -36,6 +36,10 @@ graphNodeConnect :: (src: *$T0, dest: *$T1, $checkCycle:bool = true)-> bool {
 	assert(src.graphId == dest.graphId, "src and dest must be in the same graph");
 	return graphNodeConnect(graph(src.graphId), src.graphNodeId, dest.graphNodeId, checkCycle);
 }
+graphNodeDisconnect :: (src: *$T0, dest: *$T1)-> bool {
+	assert(src.graphId == dest.graphId, "src and dest must be in the same graph");
+	return graphNodeDisconnect(graph(src.graphId), src.graphNodeId, dest.graphNodeId);
+}
 
 setDirty :: (graphNode: *$T) {
 	setDirty(graph(graphNode.graphId), graphNode);

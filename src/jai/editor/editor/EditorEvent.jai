@@ -2,7 +2,7 @@
 onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	array_add(*EDITOR_NODE_ADD_COMMANDS, .{node=xx node});
 }
-onNodeRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T) {
+onNodeBeforeRemove :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	array_add(*EDITOR_NODE_REMOVE_COMMANDS, .{node=xx node});
 }
 onNodeSetPosition :: (editor: *Editor, scene: *NodesScene, node: *$T, position:Vector2) {
@@ -33,7 +33,7 @@ editorFlushCommands :: (editor: *Editor) {
 
 EditorEvent :: enum u8 {
 	NODE_ADDED :: 0;
-	NODE_REMOVED;
+	NODE_BEFORE_REMOVE;
 	NODE_SET_POSITION;
 	NODE_INPUT_ADDED;
 	NODE_INPUT_REMOVED;

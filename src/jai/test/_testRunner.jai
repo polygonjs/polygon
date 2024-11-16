@@ -27,6 +27,7 @@ runTests :: () {
 			print("% TEST: %\n", tprintGreen(" "),test.name);
 			test.proc();
 			testsCount += 1;
+			reset_temporary_storage();
 		} else {
 			print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
 		}

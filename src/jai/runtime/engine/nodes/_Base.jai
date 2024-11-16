@@ -20,12 +20,11 @@ BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, 
 	#as using coreGraphNode: CoreGraphNode(baseNodeT);
 	ctx: NodeContext=nodeCtx;
 	nodeId: NodeId;
-	// type: string=nodeType;
 	// name: string;
 	// init_context_node :BaseContextNodeInitMethod;//= dummy_init_context_node;
 	// initTypedNode :BaseTypedNodeInitMethod:initMethod;
 	minInputsCount: u8= baseMinInputs;
-	// maxInputsCount: u8= baseMaxInputs;
+	maxInputsCount: u8= baseMaxInputs;
 	// cook:GeoNodeCookMethod:cookMethod;
 	// nodeCompute:NodeComputeMethod:nodeComputeMethod;
 
@@ -33,7 +32,7 @@ BaseNode :: struct ($baseNodeT: Type, $nodeCtx: NodeContext, $ParamsType: Type, 
 	// let's have the structs whose size can change at the end of the struct,
 	// to make it easier to cast and not have read/write issues.
 	p:ParamsType;
-	inputs: [baseMaxInputs]*BaseNode(Any, nodeCtx, Any);
+	// inputs: [baseMaxInputs]*BaseNode(Any, nodeCtx, Any);
 }
 BaseNodeAny :: BaseNode(Any, NodeContext.ANY, Any);
 
@@ -43,22 +42,23 @@ newNode :: (scene: *NodesScene, $T: Type) -> *T {
 	// node.type = T;
 
 	// node.scene = scene;
-	array_add(*scene.nodes, xx node);
 
 	tmp :T;
 	// node.type = T;//tmp.type;
 	node.ctx = tmp.ctx;
-	node.nodeId = scene.nextNodeId;
-	scene.nextNodeId += 1;
 	node.p = tmp.p;
+	node.minInputsCount = tmp.minInputsCount;
+	node.maxInputsCount = tmp.maxInputsCount;
+
+	sceneNodeAdd(scene, node);
 	// node.onDirty = tmp.onDirty;
 	// node.cook = tmp.cook;
 	// node.nodeCompute = tmp.nodeCompute;
 	// node.name = tprint("%-name1",T);
 	array_init(*node.params);
-	for nodeInput, i: node.inputs {
-		node.inputs[i] = null;
-	}
+	// for nodeInput, i: node.inputs {
+	// 	node.inputs[i] = null;
+	// }
 	// array_init(*node.inputs);
 	// node.init_context_node = tmp.init_context_node;
 	// node.initTypedNode = tmp.initTypedNode;
@@ -92,18 +92,50 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0) -> 
 {
 	// #assert(N0.ctx == N1.ctx);
 	assert(node.ctx == inputNode.ctx, "nodes have different contexts");
-	node.inputs[inputIndex] = xx inputNode;
+	assert(node.nodeId != inputNode.nodeId, "node ids must be different");
+	// node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
-	connectionCreated := graphNodeConnect(src=inputNode, dest=node);
+	connectionCreated := graphNodeConnect(src=inputNode, dest=node, checkCycle=true);
 	if connectionCreated == true {
+		nodeConnectionAdd(*graphNodeScene(node).connections, .{
+			src=.{
+				nodeId=inputNode.nodeId,
+				outputIndex=outputIndex
+			},
+			dest=.{
+				nodeId=node.nodeId,
+				inputIndex=inputIndex
+			}
+		});
 		setDirty(node);
 	}
-
 
 	#if NODES_SCENE_EMIT_EVENTS {
 		sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
 	}
 	return connectionCreated;
+}
+removeInput :: (node: *$N0, inputIndex:u8=0) -> bool {
+	scene := graphNodeScene(node);
+	connectionId := nodeConnectionFindByDestNode(*scene.connections, node.nodeId, inputIndex);
+	if connectionId != 0 {
+		connection := scene.connections.connections[connectionId];
+		previousInputNodeId := connection.src.nodeId;
+		previousInputNode := scene.nodes[previousInputNodeId];
+		graphNodeDisconnect(src=previousInputNode, dest=node);
+		nodeConnectionRemove(*scene.connections, connection);
+		// node.inputs[inputIndex] = null;
+		setDirty(node);
+
+		#if NODES_SCENE_EMIT_EVENTS {
+			sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
+		}
+		return true;
+
+	} else {
+		return false;
+	}
+
 }
 setInput :: (node: *$N0, inputNode: *$N1) {
 	setInput(node, 0, inputNode, 0);

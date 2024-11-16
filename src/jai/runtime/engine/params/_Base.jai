@@ -91,6 +91,9 @@ initParam :: (param: *$P, node: *$N) {
 	// param.initParam(param, node);
 	// print("initParam END %\n", <<param);
 }
+paramsResetValue :: (param: *$P) {
+	param.value = param.defaultValue;
+}
 
 
 // initBaseParam :: (param: *$P) {

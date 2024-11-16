@@ -13,28 +13,48 @@ Editor :: struct {
 	sceneUiData: SceneUiData;
 }
 
-editorInit :: (editor: *Editor, nodesScene: *NodesScene) {
-	editor.nodesScene = nodesScene;
-	editorAny: Any = <<editor;
-	tis := cast(*Type_Info_Struct)editorAny.type;
-	sceneAddObserver(nodesScene, editorAny);
-
-	//
-	maxNodeId := -1;
-	for node: nodesScene.nodes {
-		if maxNodeId < node.nodeId {
-			maxNodeId = node.nodeId;
-		}
-	}
+newEditor :: ()->*Editor {
+	editor := New(Editor);
+	editorInit(editor);
+	return editor;
+}
+editorInit :: (editor: *Editor) {
 	array_init(*editor.sceneUiData.nodePositions);
-	array_resize(*editor.sceneUiData.nodePositions, maxNodeId + 1);
-	for node, i: nodesScene.nodes {
-		editor.sceneUiData.nodePositions[node.nodeId] = .{0,0};
-	}
-	//
+
 	editor.viewerPanel = newViewerPanel(editor);
 	editor.networkPanel = newNetworkPanel(editor);
+}
 
+editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
+	assert(editor.nodesScene==null, "editor.nodesScene is not null");
+	editor.nodesScene = nodesScene;
+	editorAny: Any = <<editor;
+	// tis := cast(*Type_Info_Struct)editorAny.type;
+	sceneAddObserver(nodesScene, editorAny);
+
+	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodes.count);
+
+	networkPanelSetScene(editor.networkPanel);
+	// for node, i: nodesScene.nodes {
+	// 	editor.sceneUiData.nodePositions[i] = .{0,0};
+	// }
+	//
+}
+editorRemoveScene :: (editor: *Editor) {
+	assert(editor.nodesScene!=null, "editor.nodesScene is null");
+	editorAny: Any = <<editor;
+	sceneRemoveObserver(editor.nodesScene, editorAny);
+	editor.nodesScene = null;
+}
+editorDelete :: (editor: *Editor) {
+	using editor;
+	if(editor.nodesScene!=null) editorRemoveScene(editor);
+	array_reset(*sceneUiData.nodePositions);
+
+	viewerPanelDelete(viewerPanel);
+	networkPanelDelete(networkPanel);
+
+	free(editor);
 }
 drawDataInit :: (editor: *Editor) {
 	drawDataInit(editor.viewerPanel);

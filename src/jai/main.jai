@@ -44,9 +44,10 @@ main :: () {
 	}
 	sceneInit(*NODES_SCENE);
 	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (A)");
-	editorInit(*EDITOR, *NODES_SCENE);
+	editorInit(EDITOR);
+	editorSetScene(EDITOR, *NODES_SCENE);
 	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (B)");
-	appInit(*NODES_SCENE, *EDITOR);
+	appInit(*NODES_SCENE, EDITOR);
 	// node_name_size := 128;
 	// SCENE_WORLD.node_name.data  = alloc(node_name_size);
 	// SCENE_WORLD.node_name.count = node_name_size;
@@ -114,7 +115,7 @@ main :: () {
 			
 			while SDL_PollEvent(*sdl_event) {
 				events_data_update(*EVENTS_DATA, *sdl_event);
-				processEvent(*EDITOR, *EVENTS_DATA);
+				processEvent(EDITOR, *EVENTS_DATA);
 
 				if sdl_event.type == {
 					case SDL_QUIT; {do_exit = true;}
@@ -172,7 +173,7 @@ main :: () {
 init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
 
-	drawDataInit(*EDITOR);
+	drawDataInit(EDITOR);
 
 }
 
@@ -187,7 +188,7 @@ on_request_animation_frame :: (
 	width: u64,
 	height: u64
 ) {
-	onResize(*EDITOR, .{width, height});
+	onResize(EDITOR, .{width, height});
 
 	if USE_IMGUI_DEBUG return;
 	#if WASM {
@@ -195,12 +196,12 @@ on_request_animation_frame :: (
 		events_data_update(*EVENTS_DATA);
 		time := performance_now();
 		compute_fps(time, *UI_DATA);
-		processEvent(*EDITOR, *EVENTS_DATA);
+		processEvent(EDITOR, *EVENTS_DATA);
 	} else {
 	}
 
 	sceneOnTick(*NODES_SCENE, newTime / 1000.0);
-	render(*EDITOR);
+	render(EDITOR);
 	reset_temporary_storage();
 	FRAMES_COUNT += 1;
 	// if FRAMES_COUNT > 2 {do_exit = true;};

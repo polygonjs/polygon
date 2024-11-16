@@ -5,23 +5,20 @@ NodesScene :: struct {
 	graph: CoreGraph;
 	time:Time=0;
 	timeGraphNode:TimeNode;
+	// validNodeIds: Bit_Array;
 	nodes: [..]*GeoNodeAny;
 	worldScene: *Scene;
 	cookResultByNodeId:Table(CoreGraphNodeId, GeoNodeCookOutput);
+	connections: NodeConnectionList;
 
 	// #if NODES_SCENE_EMIT_EVENTS { // maybe let's keep this in the struct until we have tested serializing
-		observers:[..]Any;
+		// observers:[..]Any;
+		observer:Any;
 	// }
 	// allocator: Allocator;
 	// temporary_storage: Temporary_Storage;
 }
 
-NodesSceneEvent :: enum u8 {
-	NODE_ADDED :: 0;
-	NODE_REMOVED;
-	NODE_INPUT_ADDED;
-	NODE_INPUT_REMOVED;
-}
 
 
 
@@ -33,10 +30,14 @@ newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
 	// push_allocator(allocator);
 	scene: *NodesScene = alloc(size_of(NodesScene));
 
-	array_init(*scene.nodes);
-	// #if NODES_SCENE_EMIT_EVENTS {
-		array_init(*scene.observers);
-	// }
+	{
+		using scene;
+		array_init(*nodes);
+		nodeConnectionListInit(*connections);
+		// #if NODES_SCENE_EMIT_EVENTS {
+			// array_init(*observers);
+		// }
+	}
 	{
 		graph:CoreGraph;
 		graph.scene = scene;
@@ -51,7 +52,11 @@ newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
 	return scene;
 }
 sceneInit :: (scene: *NodesScene) {
-	scene.nextNodeId = INIT_NEXT_NODE_ID;
+	using scene;
+	nextNodeId = INIT_NEXT_NODE_ID;
+	// array_add(*nodes, null);
+	// bit_array_resize(*validNodeIds, 1);
+	// validNodeIds[0] = false;
 	// scene.allocator = allocator;
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
@@ -72,8 +77,12 @@ sceneDelete :: (scene: *NodesScene) {
 	{
 		using scene;
 		array_reset(*nodes);
+		// deinit(*validNodeIds);
 		deinit(*cookResultByNodeId);
+		nodeConnectionListDelete(*connections);
 		graphDelete(*graph);
+		// array_reset(*observers);
+		// observer = null;
 	}
 	object3DDelete(scene.worldScene);
 	free(scene/*,,allocator=scene.allocator*/);
@@ -89,52 +98,10 @@ sceneDelete :: (scene: *NodesScene) {
 // 	`defer context.allocator = old_allocator;
 // 	`defer context.temporary_storage = old_temporary_storage;
 // }
-sceneAddObserver :: (scene: *NodesScene, observer: Any) {
-	array_add(*scene.observers, observer);
-}
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
-	if event == {
-		case NodesSceneEvent.NODE_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeAdded(o, scene, node); return;}
-		case NodesSceneEvent.NODE_REMOVED; 	{for o: scene.observers nodeSceneObserverOnNodeRemoved(o, scene, node); return;}
-	}
-}
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
-	if event == {
-		case NodesSceneEvent.NODE_INPUT_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeInputAdded(o, scene, node, inputIndex); return;}
-		case NodesSceneEvent.NODE_INPUT_REMOVED;{for o: scene.observers nodeSceneObserverOnNodeInputRemoved(o, scene, node, inputIndex); return;}
-	}
-}
 
-sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
-	found, index := array_find(scene.nodes, cast(*GeoNodeAny)node);
-	assert(found, "node not found");
 
-	#if removeFromGraph {
-		for :params param: node { graphNodeDelete(param); }
-		graphNodeDelete(node);
-	}
-	array_reset(*node.params);
 
-	free(node);
-	scene.nodes[index] = null;
 
-	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(scene, NodesSceneEvent.NODE_REMOVED, node);
-	}
-}
-sceneFindNodeById :: (scene: *NodesScene, nodeId: NodeId) -> *GeoNodeAny {
-	for node: scene.nodes {
-		if node != null && node.nodeId == nodeId {
-			return node;
-		}
-	}
-	return null;
-}
-
-sceneOnTick :: (scene: *NodesScene, time:Time) {
-	sceneSetTime(scene, time);
-	sceneUniformsUpdate(scene);
-}
 
 // sceneDebug :: (scene: *NodesScene, message:string) {
 // 	print("---- sceneDebug START (%) (%)\n", scene, message);
@@ -148,12 +115,5 @@ sceneOnTick :: (scene: *NodesScene, time:Time) {
 
 #scope_file
 
-INIT_NEXT_NODE_ID :NodeId: 1;
+INIT_NEXT_NODE_ID :NodeId: 0;
 
-sceneSetTime :: (scene: *NodesScene, time:Time) {
-	scene.time = time;
-	setDirty(*scene.timeGraphNode);
-}
-sceneUniformsUpdate :: (scene: *NodesScene) {
-	sceneUniformsUpdate(scene.worldScene, scene.time);
-}

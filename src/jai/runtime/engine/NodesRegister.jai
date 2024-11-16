@@ -16,35 +16,35 @@
 
 nodeSceneObserverOnNodeAdded :: (observer: Any, scene: *NodesScene, node:*$N) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_ADDED;
-	assert(false, tprint("nodeSceneObserverOnNodeAdded: node type % is not implemented", node.type));
+	assert(false, tprint("nodeSceneObserverOnNodeAdded: node type '%' is not implemented", node.type));
 }
-nodeSceneObserverOnNodeRemoved :: (observer: Any, scene: *NodesScene, node:*$N) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_REMOVED;
-	assert(false, tprint("nodeSceneObserverOnNodeRemoved: node type % is not implemented", node.type));
+nodeSceneObserverOnNodeBeforeRemove :: (observer: Any, scene: *NodesScene, node:*$N) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE;
+	assert(false, tprint("nodeSceneObserverOnNodeBeforeRemove: node type '%' is not implemented", node.type));
 }
 nodeSceneObserverOnNodeInputAdded :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED;
-	assert(false, tprint("nodeSceneObserverOnNodeInputAdded: node type % is not implemented", node.type));
+	assert(false, tprint("nodeSceneObserverOnNodeInputAdded: node type '%' is not implemented", node.type));
 }
 nodeSceneObserverOnNodeInputRemoved :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED;
-	assert(false, tprint("nodeSceneObserverOnNodeInputRemoved: node type % is not implemented", node.type));
+	assert(false, tprint("nodeSceneObserverOnNodeInputRemoved: node type '%' is not implemented", node.type));
 }
 
 generatedNodeCompute :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 	#insert GENERATED_CODE_NODE_COMPUTE;
-	assert(false, tprint("generatedNodeCompute: node type % is not implemented", inputNode.type));
+	assert(false, tprint("generatedNodeCompute: node type '%' is not implemented", inputNode.type));
 	return newObject3D(Mesh);
 }
 
 generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
-	assert(false, tprint("generatedSceneNodeDelete: node type % is not implemented", node.type));
+	assert(false, tprint("generatedSceneNodeDelete: node type '%' is not implemented", node.type));
 }
 
 generatedCameraProjectionUpdate :: (object:*$T) {
 	#insert GENERATED_CODE_CAMERA_PROJECTION_UPDATE;
-	assert(false, tprint("generatedCameraProjectionUpdate: object type % is not implemented", object.type));
+	assert(false, tprint("generatedCameraProjectionUpdate: object type '%' is not implemented", object.type));
 }
 
 #scope_file
@@ -56,7 +56,7 @@ GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodes();
 GENERATED_CODE_CAMERA_PROJECTION_UPDATE :: #run registerCameras();
 
 NODES_SCENE_OBSERVER_ON_NODE_ADDED,
-NODES_SCENE_OBSERVER_ON_NODE_REMOVED,
+NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE,
 NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED,
 NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED :: #run registerNodesSceneObserver();
 
@@ -82,14 +82,14 @@ nodesSceneObserverRegister :: ($T:Type) {
 // 	// table_set(*NODE_CAST_TYPE_BY_TYPE, nodeType, T);
 // }
 
-registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeRemoved:string, onNodeInputAdded:string, onNodeInputRemoved:string {
+registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeBeforeRemove:string, onNodeInputAdded:string, onNodeInputRemoved:string {
 	nodesSceneObserverRegister(Editor);
 
 	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
 
 	SceneObserverGeneratedCode :: struct {
 		onNodeAdded: string;
-		onNodeRemoved: string;
+		onNodeBeforeRemove: string;
 		onNodeInputAdded: string;
 		onNodeInputRemoved: string;
 	}
@@ -106,12 +106,13 @@ registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeRemoved:string, onN
 	}
 	{
 		builder: String_Builder;
+		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
 		print_to_builder(*builder, IF_FIRST_LINE);
 		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeRemoved(cast(*%) observer.value_pointer, scene, node); return;\n", observerType, observerType));
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeBeforeRemove(cast(*%) observer.value_pointer, scene, node); return;\n", observerType, observerType));
 		}
 		print_to_builder(*builder, "}");
-		generated.onNodeRemoved = builder_to_string(*builder);
+		generated.onNodeBeforeRemove = builder_to_string(*builder);
 	}
 	{
 		builder: String_Builder;
@@ -132,7 +133,7 @@ registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeRemoved:string, onN
 		generated.onNodeInputRemoved = builder_to_string(*builder);
 	}
 	return 	generated.onNodeAdded,
-			generated.onNodeRemoved,
+			generated.onNodeBeforeRemove,
 			generated.onNodeInputAdded,
 			generated.onNodeInputRemoved;
 }

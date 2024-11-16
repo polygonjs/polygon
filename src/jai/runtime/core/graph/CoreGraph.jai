@@ -130,6 +130,18 @@ graphNodeConnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGrap
 	_graphCreateConnection(graph, srcId, destId);
 	return true;
 }
+graphNodeDisconnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId)-> bool {
+	using graph;
+	if predecessors[destId].count == 0 {
+		return false;
+	}
+	found := array_find(predecessors[destId], srcId);
+	if found == false {
+		return false;
+	}
+	_graphDeleteConnection(graph, srcId, destId);
+	return true;
+}
 
 setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod) {
 	graph.onDirty[graphNode.graphNodeId] = onDirty;
@@ -166,8 +178,29 @@ CORE_GRAPHS:[..]*CoreGraph;
 
 _graphCreateConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
 	using graph;
+
 	array_add(*predecessors[destId], srcId);
 	array_add(*successors[srcId], destId);
+
+	_updatePredecessorsAndSuccessors(graph, srcId, destId);
+
+}
+_graphDeleteConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
+	using graph;
+
+	{
+		found, index := array_find(predecessors[destId], srcId);
+		predecessors[destId][index] = xx 0;
+	}
+	{
+		found, index := array_find(successors[srcId], destId);
+		successors[srcId][index] = xx 0;
+	}
+
+	_updatePredecessorsAndSuccessors(graph, srcId, destId);
+}
+_updatePredecessorsAndSuccessors :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
+	using graph;
 
 	// update successors
 	if allSuccessorsDirty[destId] == true {
@@ -186,8 +219,8 @@ _graphCreateConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: Co
 	// update newly connected
 	allSuccessorsDirty[srcId] = true;
 	allPredecessorsDirty[destId] = true;
-
 }
+
 _graphAllPredecessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 	using graph;
 

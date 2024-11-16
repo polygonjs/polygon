@@ -46,6 +46,12 @@ newNetworkPanel :: (editor: *Editor) -> *TYPE {
 
 	return panel;
 }
+networkPanelDelete :: (panel: *TYPE) {
+	using panel;
+	object3DDelete(sceneWorld);
+	object3DDelete(sceneRaycast);
+	free(panel);
+}
 drawDataInit :: (panel: *TYPE) {
 	using panel;
 	renderer_init_pipelines(*rendererColor, sceneWorld, *camera);
@@ -173,22 +179,24 @@ networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 	_moveNode(panel, node, forRaycast=true);
 }
 
-
+networkPanelSetScene :: (panel: *TYPE) {
+	networkPanelUpdateScenes(panel, panel.editor.nodesScene);
+}
 
 #scope_file
 
 TYPE :: NetworkPanel;
 
-networkPanelInit :: (panel: *TYPE, editor: *Editor) {
+networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
+	using panel;
+	editor = _editor;
+	sceneWorld = newObject3D(Scene);
+	sceneRaycast = newObject3D(Scene);
+	camera.type = OrthographicCamera;
+	object3DInit(*camera);
 
-	panel.editor = editor;
-	panel.sceneWorld = newObject3D(Scene);
-	panel.sceneRaycast = newObject3D(Scene);
-	panel.camera.type = OrthographicCamera;
-	object3DInit(*panel.camera);
-
-	panel.basicMat = newMaterial(BasicMeshMaterial);
-	panel.cameraControls.camera = *panel.camera;
+	basicMat = newMaterial(BasicMeshMaterial);
+	cameraControls.camera = *camera;
 
 	_addBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
 		mat := newMaterial(BackgroundMeshMaterial);
@@ -200,28 +208,22 @@ networkPanelInit :: (panel: *TYPE, editor: *Editor) {
 		transformable_update_matrix(mesh0);
 		sceneObjectAdd(scene, mesh0);
 	}
-	_addBgMesh(panel, panel.sceneWorld, .{0.2, 0.2, 0.2, 1.0});
-	_addBgMesh(panel, panel.sceneRaycast, .{0, 0, 0, 0});
+	_addBgMesh(panel, sceneWorld, .{0.2, 0.2, 0.2, 1.0});
+	_addBgMesh(panel, sceneRaycast, .{0, 0, 0, 0});
 
-	networkPanelUpdateScenes(panel, editor.nodesScene);
-
-	cameraControlsCommit(*panel.cameraControls);
+	cameraControlsCommit(*cameraControls);
 }
 
 networkPanelUpdateScenes :: (panel: *TYPE, nodesScene: *NodesScene) {
 	using panel.editor.sceneUiData;
 
-	maxNodeId := -1;
-	for node: nodesScene.nodes {
-		if maxNodeId < node.nodeId {
-			maxNodeId = node.nodeId;
-		}
-	}
-	if nodePositions.count < maxNodeId + 1 {
-		array_resize(*nodePositions, maxNodeId + 1);
+	if nodePositions.count < nodesScene.nodes.count {
+		array_resize(*nodePositions, nodesScene.nodes.count);
 	}
 
 	for node, i: nodesScene.nodes {
-		networkPanelAddNode(panel, node);
+		if node != null {
+			networkPanelAddNode(panel, node);
+		}
 	}
 }

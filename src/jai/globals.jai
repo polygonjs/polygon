@@ -8,7 +8,7 @@
 }
 EVENTS_DATA:EventsData;
 UI_DATA:UiData;
-EDITOR:Editor;
+EDITOR:*Editor;
 NODES_SCENE:NodesScene;
 
 
