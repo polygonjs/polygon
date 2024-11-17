@@ -8,7 +8,8 @@ NodesScene :: struct {
 	// validNodeIds: Bit_Array;
 	nodes: [..]*GeoNodeAny;
 	worldScene: *Scene;
-	cookResultByNodeId:Table(CoreGraphNodeId, GeoNodeCookOutput);
+	nodeInputCookResults:[..]GeoNodeCookInput;
+	cookResults:[..]GeoNodeCookOutput;
 	connections: NodeConnectionList;
 
 	// #if NODES_SCENE_EMIT_EVENTS { // maybe let's keep this in the struct until we have tested serializing
@@ -60,35 +61,15 @@ sceneInit :: (scene: *NodesScene) {
 	// scene.allocator = allocator;
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
-	init(*scene.cookResultByNodeId, 64);
-
-	graphInit(*scene.graph, scene);
+	array_init(*nodeInputCookResults);
+	array_init(*cookResults);
+	graphInit(*graph, scene);
 	scene.timeGraphNode.type = TimeNode;
 	graphNodeInit(*scene.timeGraphNode, *scene.graph);
 
 	scene.worldScene = newObject3D(Scene);
 }
-sceneDelete :: (scene: *NodesScene) {
-	for node, i: scene.nodes {
-		if node != null {
-			generatedSceneNodeDelete(scene, node, removeFromGraph=false);
-		}
-	}
-	{
-		using scene;
-		array_reset(*nodes);
-		// deinit(*validNodeIds);
-		deinit(*cookResultByNodeId);
-		nodeConnectionListDelete(*connections);
-		graphDelete(*graph);
-		// array_reset(*observers);
-		// observer = null;
-	}
-	object3DDelete(scene.worldScene);
-	free(scene/*,,allocator=scene.allocator*/);
-	// sceneAllocatorPush(scene);
-	// reset_temporary_storage();
-}
+
 // sceneAllocatorPush :: (scene: *NodesScene) #expand #no_debug {
 // 	old_allocator := context.allocator;
 // 	old_temporary_storage := context.temporary_storage;

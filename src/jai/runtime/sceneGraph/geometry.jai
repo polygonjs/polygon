@@ -4,6 +4,9 @@ GeometryAttribute :: struct($T: Type, $F: WGPUVertexFormat) {
 	values: [..]T;
 	format:WGPUVertexFormat = F;
 }
+geometryAttributeDelete :: (attribute: *GeometryAttribute($T, $F)) {
+	array_reset(*attribute.values);
+}
 
 GeometryAttributes :: struct {
 	position: GeometryAttribute(Vector3, .Float32x3);
@@ -11,11 +14,22 @@ GeometryAttributes :: struct {
 	// color: GeometryAttribute(Vector3, .Float32x3);
 	uv: GeometryAttribute(Vector2, .Float32x2);
 }
+geometryAttributesDelete :: (attributes: *GeometryAttributes) {
+	using attributes;
+	geometryAttributeDelete(*position);
+	geometryAttributeDelete(*normal);
+	geometryAttributeDelete(*uv);
+}
+
 Geometry :: struct {
 	attributes: GeometryAttributes;
 	indices: [..]VertexIndex;
 }
-
+geometryDelete :: (geometry: *Geometry) {
+	geometryAttributesDelete(*geometry.attributes);
+	array_reset(*geometry.indices);
+	free(geometry);
+}
 
 geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt) {
 	geometry_box_attributes_set(geometry, .{segments = segments});

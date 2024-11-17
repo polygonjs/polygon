@@ -37,12 +37,20 @@ nodeConnectionListInit :: (list:*NodeConnectionList) {
 	validIndices[0] = false;
 	nextIndex = 1;
 }
-nodeConnectionListDelete :: (list:*NodeConnectionList) {
+nodeConnectionListClear :: (list:*NodeConnectionList) {
 	using list;
+
 	array_reset(*connections);
-	deinit(*validIndices);
 	for connectionIds, nodeId: connectionIdBySrcNodeId { array_reset(*connectionIds); }
 	for connectionIds, nodeId: connectionIdByDestNodeId { array_reset(*connectionIds); }
+
+}
+nodeConnectionListDelete :: (list:*NodeConnectionList) {
+	using list;
+
+	nodeConnectionListClear(list);
+
+	deinit(*validIndices);
 	array_reset(*connectionIdBySrcNodeId);
 	array_reset(*connectionIdByDestNodeId);
 }

@@ -7,9 +7,7 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 	// found, index := array_find(nodes, cast(*GeoNodeAny)node);
 	// assert(found, "node not found");
 
-	{
-		for :params param: node { paramsResetValue(param); }
-	}
+	nodeResetParams(node);
 
 	{
 		// remove inputs

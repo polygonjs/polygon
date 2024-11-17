@@ -44,7 +44,7 @@ main :: () {
 	}
 	sceneInit(*NODES_SCENE);
 	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (A)");
-	editorInit(EDITOR);
+	EDITOR := newEditor();
 	editorSetScene(EDITOR, *NODES_SCENE);
 	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (B)");
 	appInit(*NODES_SCENE, EDITOR);

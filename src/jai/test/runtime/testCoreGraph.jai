@@ -19,7 +19,6 @@ testCoreGraph :: () {
 				assertEqual(leaksCount(), 0, "no leak when deleting a scene with 1 node");
 			}
 			{
-				print("------------------\n");
 				// scene with 2 node, input of one another
 				nodesScene := newNodesScene();
 				box1 := newNode(nodesScene, BoxGeoNode);
@@ -42,6 +41,7 @@ testCoreGraph :: () {
 				paramSetValue(*box1.p.scale, 1.0);
 				// sceneDeleteNode(nodesScene, box1);
 				sceneDelete(nodesScene);
+				report_memory_leaks();
 				assertEqual(leaksCount(), 0, "no leak when deleting a scene with 3 nodes");
 			}
 		});

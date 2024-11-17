@@ -8,7 +8,6 @@ testNetworkPanel :: () {
 		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
 
 		editor := newEditor();
-		editorInit(editor);
 		editorSetScene(editor, nodesScene);
 		assertNotNull(editor.networkPanel.sceneWorld);
 		assertNotNull(editor.networkPanel.sceneRaycast);

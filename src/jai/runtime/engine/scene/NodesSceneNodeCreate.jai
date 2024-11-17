@@ -10,9 +10,12 @@ sceneNodeAdd :: (scene: *NodesScene, node: *$T) {
 		}
 	} else {
 		array_resize(*nodes, xx (nextNodeId+1));
+		array_resize(*nodeInputCookResults, xx (nextNodeId+1));
+		array_resize(*cookResults, xx (nextNodeId+1));
 		// bit_array_resize(*validNodeIds, xx (nextNodeId+1));
 		nextNodeId += 1;
 	}
+	array_resize(*nodeInputCookResults[node.nodeId], node.maxInputsCount);
 
 	nodes[node.nodeId] = xx node;
 	// validNodeIds[node.nodeId] = true;

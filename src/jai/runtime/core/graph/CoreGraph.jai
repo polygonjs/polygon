@@ -45,11 +45,8 @@ graph :: (graphNode: *CoreGraphNodeAny) -> *CoreGraph {
 graph :: (graphId: CoreGraphId) -> *CoreGraph {
 	return CORE_GRAPHS[graphId];
 }
-
-graphDelete :: (graph: *CoreGraph) {
+graphClearConnections :: (graph: *CoreGraph) {
 	using graph;
-	array_reset(*nodes);
-	array_reset(*onDirty);
 	
 	for subArray: predecessors { array_reset(*subArray); }
 	for subArray: successors { array_reset(*subArray); }
@@ -59,6 +56,13 @@ graphDelete :: (graph: *CoreGraph) {
 	array_reset(*successors);
 	array_reset(*allPredecessors);
 	array_reset(*allSuccessors);
+}
+graphDelete :: (graph: *CoreGraph) {
+	using graph;
+	array_reset(*nodes);
+	array_reset(*onDirty);
+	
+	graphClearConnections(graph);
 
 	deinit(*allPredecessorsDirty);
 	deinit(*allSuccessorsDirty);

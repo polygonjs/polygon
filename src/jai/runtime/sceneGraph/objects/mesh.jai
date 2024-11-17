@@ -14,10 +14,10 @@ newMesh :: ($T: Type, geometry: *Geometry=null, material: *Material=null) -> *T 
 	return object;
 }
 
-object3DInit :: (mesh: *Mesh) {
+object3DInit :: (mesh: *TYPE) {
 	object3DInit(mesh, null, null);
 }
-object3DInit :: (mesh: *Mesh, geometry: *Geometry=null, material: *Material=null) {
+object3DInit :: (mesh: *TYPE, geometry: *Geometry=null, material: *Material=null) {
 	object3DInit(cast(*Object3D)mesh);
 
 	if geometry == null {
@@ -36,3 +36,6 @@ object3DInit :: (mesh: *Mesh, geometry: *Geometry=null, material: *Material=null
 	assert(mesh.geometry.attributes.position.format != WGPUVertexFormat.Undefined, "mesh.geometry.attributes.position.format is Undefined\n");
 }
 
+#scope_file
+
+TYPE :: Mesh;

@@ -8,7 +8,7 @@ NetworkPanel :: struct {
 	camera: OrthographicCamera;
 	cameraControls: PanControls;
 
-	basicMat: *BasicMeshMaterial;
+	basicMat: *MATERIAL_BASIC;
 
 	rendererColor: Renderer = .{
 		name = "NetworkPanelRenderer",
@@ -42,14 +42,53 @@ NetworkPanel :: struct {
 
 newNetworkPanel :: (editor: *Editor) -> *TYPE {
 	panel: *TYPE = New(TYPE);
+
 	networkPanelInit(panel, editor);
 
 	return panel;
 }
 networkPanelDelete :: (panel: *TYPE) {
 	using panel;
+
+	// delete bg material
+	{
+		bgObject := sceneWorld.children[0];
+		mesh := cast(*Mesh)bgObject;
+		materialDelete(cast(*MATERIAL_BG)mesh.material);
+		geometryDelete(mesh.geometry);
+		object3DDelete(mesh);
+		sceneWorld.children[0] = null;
+	}
+	{
+		bgObject := sceneRaycast.children[0];
+		mesh := cast(*Mesh)bgObject;
+		materialDelete(cast(*MATERIAL_BG)mesh.material);
+		geometryDelete(mesh.geometry);
+		object3DDelete(mesh);
+		sceneRaycast.children[0] = null;
+	}
+
+	for object, i : sceneWorld.children {
+		if object != null {
+			object3DDelete(object);
+			sceneWorld.children[i] = null;
+		}
+	}
+	for object,i : sceneRaycast.children {
+		if object != null {
+			mesh := cast(*Mesh)object;
+			materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
+			geometryDelete(mesh.geometry);
+			object3DDelete(object);
+			sceneRaycast.children[i] = null;
+		}
+	}
+	
+	array_reset(*objectIndex);
 	object3DDelete(sceneWorld);
 	object3DDelete(sceneRaycast);
+	materialDelete(basicMat);
+	print("panel deleted, %\n", panel);
 	free(panel);
 }
 drawDataInit :: (panel: *TYPE) {
@@ -108,7 +147,7 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 
 		#if forRaycast {
 			scene := sceneRaycast;
-			material := newMaterial(MeshIdMaterial);
+			material := newMaterial(MATERIAL_RAYCAST);
 			material.uniforms.id = node.nodeId;
 			mesh.material = xx material;
 		} else {
@@ -149,8 +188,13 @@ networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 			} else {
 				scene := sceneWorld;
 			}
-			mesh := scene.children[meshIndex];
-			sceneObjectRemove(scene, mesh);
+			object := scene.children[meshIndex];
+			#if forRaycast {
+				mesh := cast(*Mesh)object;
+				materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
+				geometryDelete(mesh.geometry);
+			}
+			sceneObjectRemove(scene, object);
 			#if forRaycast == true {
 				objectIndex[node.nodeId] = 0;
 			}
@@ -186,6 +230,9 @@ networkPanelSetScene :: (panel: *TYPE) {
 #scope_file
 
 TYPE :: NetworkPanel;
+MATERIAL_RAYCAST :: MeshIdMaterial;
+MATERIAL_BG :: BackgroundMeshMaterial;
+MATERIAL_BASIC :: BackgroundMeshMaterial;
 
 networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	using panel;
@@ -195,11 +242,11 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	camera.type = OrthographicCamera;
 	object3DInit(*camera);
 
-	basicMat = newMaterial(BasicMeshMaterial);
+	basicMat = newMaterial(MATERIAL_BASIC);
 	cameraControls.camera = *camera;
 
 	_addBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
-		mat := newMaterial(BackgroundMeshMaterial);
+		mat := newMaterial(MATERIAL_BG);
 		setColor(mat, color);
 		mesh0 := newObject3D(Mesh);
 		assert(mesh0.geometry != null, "mesh0.geometry is null\n");

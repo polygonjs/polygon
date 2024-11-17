@@ -3,7 +3,7 @@ testNodesBasicDependency :: () {
 			nodesScene := newNodesScene();
 		defer sceneDelete(nodesScene);
 		null1 := newNode(nodesScene, NullGeoNode);
-		assertEqual(null1.nodeId, 1, "nodeId starts at more than 1");
+		assertEqual(null1.nodeId, 0, "nodeId starts at 0");
 		box1 := newNode(nodesScene, BoxGeoNode);
 		box2 := newNode(nodesScene, BoxGeoNode);
 		icosahedron1 := newNode(nodesScene, IcosahedronGeoNode);

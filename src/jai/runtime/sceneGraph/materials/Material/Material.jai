@@ -24,6 +24,9 @@ newMaterial :: ($T: Type) -> *T {
 
 	return material;
 }
+materialDelete :: (material: *$T) {
+	free(material);
+}
 
 #scope_file
 
