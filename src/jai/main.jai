@@ -15,13 +15,13 @@ do_exit := false;
 		new_context: Context;
 		push_context new_context {
 			print("\n");
-			print_red("ERROR WGPU START\n");
+			printRed("ERROR WGPU START\n");
 		}
 		#if USE_WGPU {
 			print_c("[WGPU :: %]: %\n", level, to_string(msg));
 		}
 		push_context new_context {
-			print_red("ERROR WGPU END\n");
+			printRed("ERROR WGPU END\n");
 			print("\n");
 		}
 	}
@@ -36,6 +36,7 @@ do_exit := false;
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
+	registerNodes();
 	#if RUN_TESTS {
 		runTests();
 		#if WASM==false {
@@ -43,10 +44,10 @@ main :: () {
 		}
 	}
 	sceneInit(*NODES_SCENE);
-	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (A)");
+	assert(NODES_SCENE.timeGraphNode.name == "TimeNode", "timeGraphNode not set up correctly (A)");
 	EDITOR := newEditor();
 	editorSetScene(EDITOR, *NODES_SCENE);
-	assert(NODES_SCENE.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly (B)");
+	assert(NODES_SCENE.timeGraphNode.name == "TimeNode", "timeGraphNode not set up correctly (B)");
 	appInit(*NODES_SCENE, EDITOR);
 	// node_name_size := 128;
 	// SCENE_WORLD.node_name.data  = alloc(node_name_size);
@@ -154,7 +155,7 @@ main :: () {
 		reset_temporary_storage();
 		#if WASM==false && FREE_MEMORY_DEBUG==true defer report_memory_leaks();
 		SDL_Quit();
-		print_green("polygon quit\n");
+		printGreen("polygon quit\n");
 	}
 
 }
@@ -218,6 +219,10 @@ on_request_animation_frame :: (
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
 else #import "Basic";
+#if FREE_MEMORY_DEBUG {
+	#import "Flat_Pool";
+	#import "Unmapping_Allocator";
+}
 #import "Bit_Array";
 #import "Hash_Table";
 #import "Math";

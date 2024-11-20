@@ -19,7 +19,7 @@ ANSI_WHITE_BACKGROUND := "\u001B[47m";
 
 printColor :: (content:string, bgColor:string){
 	print(
-		"% % % %\n",
+		"% % % %",
 		bgColor,
 		ANSI_BLACK,
 		content,
@@ -36,16 +36,16 @@ tprintColor :: (content:string, bgColor:string) -> string {
 	);
 }
 
-print_red :: (content:string){
+printRed :: (content:string){
 	printColor(content, ANSI_RED_BACKGROUND );
 }
-print_yellow :: (content:string){
+printYellow :: (content:string){
 	printColor(content, ANSI_YELLOW_BACKGROUND );
 }
-print_green :: (content:string){
+printGreen :: (content:string){
 	printColor(content, ANSI_GREEN_BACKGROUND );
 }
-print_blue :: (content:string){
+printBlue :: (content:string){
 	printColor(content, ANSI_BLUE_BACKGROUND );
 }
 tprintYellow :: (content:string)->string{

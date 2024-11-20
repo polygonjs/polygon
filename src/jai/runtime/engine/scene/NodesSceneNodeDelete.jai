@@ -1,7 +1,7 @@
 
-sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
+sceneDeleteNode :: (scene: *NodesScene, nodeId: NodeId, $removeFromGraph:bool = true) {
 	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, node);
+		sceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, nodeId);
 	}
 	using scene;
 	// found, index := array_find(nodes, cast(*GeoNodeAny)node);
@@ -16,7 +16,7 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 		// 		removeInput(node, xx i);
 		// 	}
 		// }
-		srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+		srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, nodeId);
 		for srcConnectionId: srcConnectionIds {
 			if srcConnectionId != 0 {
 				connection := connections.connections[srcConnectionId];
@@ -27,11 +27,11 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 
 	{
 		// remove inputs from successors
-		destConnectionIds := nodeConnectionFindSuccessorConnectionIds(*connections, node.nodeId);
+		destConnectionIds := nodeConnectionFindSuccessorConnectionIds(*connections, nodeId);
 		for destConnectionId: destConnectionIds {
 			if destConnectionId != 0 {
 				connection := connections.connections[destConnectionId];
-				if connection.src.nodeId == node.nodeId {
+				if connection.src.nodeId == nodeId {
 					removeInput(nodes[connection.dest.nodeId], connection.dest.inputIndex);
 				}
 			}
@@ -39,20 +39,22 @@ sceneDeleteNode :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true)
 	}
 
 	// remove graph node
-	#if removeFromGraph {
-		for :params param: node { graphNodeDelete(param); }
-		graphNodeDelete(node);
-	}
-	array_reset(*node.params);
+	// #if removeFromGraph {
+	// 	for :params param: node { graphNodeDelete(param); }
+	// 	graphNodeDelete(node);
+	// }
+	// array_reset(*node.params);
 
 	index := node.nodeId;
-	nodes[index] = null;
+	validNodeTypes[index] = false;
+	print("params reset not done\n");
 	// validNodeIds[index] = false;
 	if index < nextNodeId {
 		nextNodeId = index;
 	}
 
-	free(node);
+	print("validNodes not unset\n");
+	// free(node);
 
 
 }

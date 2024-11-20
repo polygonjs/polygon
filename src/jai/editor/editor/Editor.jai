@@ -32,7 +32,7 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 	// tis := cast(*Type_Info_Struct)editorAny.type;
 	sceneAddObserver(nodesScene, editorAny);
 
-	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodes.count);
+	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodeTypes.count);
 
 	networkPanelSetScene(editor.networkPanel);
 	// for node, i: nodesScene.nodes {
@@ -88,8 +88,11 @@ onResize :: (editor: *Editor, size:Vector2UInt64) {
 	onResize(editor.networkPanel);
 }
 
-nodeSetPosition :: (editor: *Editor, node: *$T, position: Vector2) {
+nodeSetPosition :: (editor: *Editor, node: *BaseNode, position: Vector2) {
 	onNodeSetPosition(editor, editor.nodesScene, node, position);
+}
+nodeSetPosition :: (editor: *Editor, node: BaseNode, position: Vector2) {
+	nodeSetPosition(editor, *node, position);
 }
 
 #scope_file

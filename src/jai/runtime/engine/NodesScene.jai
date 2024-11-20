@@ -1,12 +1,16 @@
-NodeId :: u32;
+
 
 NodesScene :: struct {
+	pool: Flat_Pool;
+	allocator: Allocator;
+	//
 	nextNodeId: NodeId = INIT_NEXT_NODE_ID;
 	graph: CoreGraph;
 	time:Time=0;
 	timeGraphNode:TimeNode;
-	// validNodeIds: Bit_Array;
-	nodes: [..]*GeoNodeAny;
+	// nodes: [..]*GeoNodeAny;
+	validNodeTypes: Bit_Array;
+	nodeTypes: [..]*BaseNode;
 	worldScene: *Scene;
 	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;
@@ -22,19 +26,25 @@ NodesScene :: struct {
 
 
 
-
 // SCENE_ALLOCATOR :Allocator: .{temporary_allocator_proc, null};
 // SCENE_TEMPORARY_STORAGE :Temporary_Storage = .{};
 
-newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
+newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
 	scene: *NodesScene = alloc(size_of(NodesScene));
+	if _allocator == null {
+		flat_pool:Flat_Pool;
+		scene.pool = flat_pool;
+		scene.allocator.proc = flat_pool_allocator_proc;
+		scene.allocator.data = *scene.pool;
+		// scene.allocator = *get_unmapping_allocator();
+	} else {
+		scene.allocator = _allocator;
+	}
 
 	{
 		using scene;
-		array_init(*nodes);
-		nodeConnectionListInit(*connections);
 		// #if NODES_SCENE_EMIT_EVENTS {
 			// array_init(*observers);
 		// }
@@ -43,9 +53,9 @@ newNodesScene :: (/*allocator: Allocator=SCENE_ALLOCATOR*/) -> *NodesScene {
 		graph:CoreGraph;
 		graph.scene = scene;
 		graph_member := get_field(type_info(NodesScene), "graph");
-		src_ptr := cast(*u8)*graph;
-		target_ptr := cast(*u8)scene + graph_member.offset_in_bytes;
-		memcpy(target_ptr, src_ptr, size_of(CoreGraph));
+		srPtr := cast(*u8)*graph;
+		targetPtr := cast(*u8)scene + graph_member.offset_in_bytes;
+		memcpy(targetPtr, srPtr, size_of(CoreGraph));
 	}
 	scene.time = 0;
 	sceneInit(scene);
@@ -61,11 +71,15 @@ sceneInit :: (scene: *NodesScene) {
 	// scene.allocator = allocator;
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
-	array_init(*nodeInputCookResults);
-	array_init(*cookResults);
+	// array_init(*nodes);
+	array_init(*nodeTypes, scene.allocator);
+	nodeConnectionListInit(*connections);
+	array_init(*nodeInputCookResults, scene.allocator);
+	array_init(*cookResults, scene.allocator);
 	graphInit(*graph, scene);
-	scene.timeGraphNode.type = TimeNode;
-	graphNodeInit(*scene.timeGraphNode, *scene.graph);
+	// scene.timeGraphNode.type = TimeNode;
+	scene.timeGraphNode.name = "TimeNode";
+	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
 	scene.worldScene = newObject3D(Scene);
 }

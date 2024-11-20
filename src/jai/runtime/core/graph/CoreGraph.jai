@@ -1,13 +1,13 @@
 CoreGraphId :: u8;
-CoreGraphNodeId :: u32;
+
 CoreGraph :: struct {
 	graphId: CoreGraphId;
 	// we start from 1, so that we know 0 is nothing
-	nextId :CoreGraphNodeId= 1; // TODO: recycle ids when a node is removed
+	nextGraphNodeId :CoreGraphNodeId= 0; // TODO: recycle ids when a node is removed
 	scene: *NodesScene;
 	nodes: [..]*CoreGraphNodeAny;
 	dirty: Bit_Array;
-	onDirty:[..]CoreGraphNodeOnDirtyMethod;
+	onDirtyCallbacks:[..]CoreGraphNodeOnDirtyMethod;
 	predecessors: [..][..]CoreGraphNodeId;
 	successors: [..][..]CoreGraphNodeId;
 	allPredecessors: [..][..]CoreGraphNodeId;
@@ -19,7 +19,9 @@ CoreGraph :: struct {
 graphInit :: (graph: *CoreGraph, _scene: *NodesScene) {
 	graph.scene = _scene;
 	graph.graphId = NEXT_CORE_GRAPH_ID;
-	array_resize(*CORE_GRAPHS, max(graph.graphId + 1, xx CORE_GRAPHS.count));
+	if graph.graphId >= xx CORE_GRAPHS.count {
+		array_resize(*CORE_GRAPHS, xx (graph.graphId + 1));
+	}
 	CORE_GRAPHS[graph.graphId] = graph;
 	NEXT_CORE_GRAPH_ID += 1;
 	// init(*graph.nodeById, 512);
@@ -60,7 +62,7 @@ graphClearConnections :: (graph: *CoreGraph) {
 graphDelete :: (graph: *CoreGraph) {
 	using graph;
 	array_reset(*nodes);
-	array_reset(*onDirty);
+	array_reset(*onDirtyCallbacks);
 	
 	graphClearConnections(graph);
 
@@ -69,34 +71,36 @@ graphDelete :: (graph: *CoreGraph) {
 	deinit(*dirty);
 }
 
-graphAddNode :: (graph: *CoreGraph, graphNode: *$T) {
+graphAddNode :: (graph: *CoreGraph, graphNode: *CoreGraphNode, onDirtyCallback:CoreGraphNodeOnDirtyMethod=null) {
+	assert(graphNode.graphNodeId == 0, "graphAddNode: graphNode.graphId is not 0");
+	
 	using graph;
 	graphNode.graphId = graphId;
-	graphNode.graphNodeId = nextId;
-	assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
+	graphNode.graphNodeId = nextGraphNodeId;
+	// assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
 
-	nextId += 1;
-	while nextId < nodes.count && nodes[nextId] != null {
-		nextId += 1;
+	nextGraphNodeId += 1;
+	while nextGraphNodeId < nodes.count && nodes[nextGraphNodeId] != null {
+		nextGraphNodeId += 1;
 	}
+	newSize := nextGraphNodeId;
+	if newSize > nodes.count {
+		array_resize(*nodes, newSize);
+		array_resize(*onDirtyCallbacks, newSize);
+		array_resize(*predecessors, newSize);
+		array_resize(*successors, newSize);
+		array_resize(*allPredecessors, newSize);
+		array_resize(*allSuccessors, newSize);
 
-	if nodes.count < nextId {
-		array_resize(*nodes, nextId);
-		array_resize(*onDirty, nextId);
-		array_resize(*predecessors, nextId);
-		array_resize(*successors, nextId);
-		array_resize(*allPredecessors, nextId);
-		array_resize(*allSuccessors, nextId);
-
-		bit_array_resize(*allPredecessorsDirty, nextId);
-		bit_array_resize(*allSuccessorsDirty, nextId);
-		bit_array_resize(*dirty, nextId);
+		bit_array_resize(*allPredecessorsDirty, newSize);
+		bit_array_resize(*allSuccessorsDirty, newSize);
+		bit_array_resize(*dirty, newSize);
 	}
 
 	// table_set(*nodeById, graphNode.graphNodeId, graphNode);
-	nodes[graphNode.graphNodeId] = xx graphNode;
+	nodes[graphNode.graphNodeId] = graphNode;
 	dirty[graphNode.graphNodeId] = true;
-	onDirty[graphNode.graphNodeId] = null;
+	onDirtyCallbacks[graphNode.graphNodeId] = onDirtyCallback;
 	allPredecessorsDirty[graphNode.graphNodeId] = true;
 	allSuccessorsDirty[graphNode.graphNodeId] = true;
 }
@@ -104,7 +108,7 @@ graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
 	using graph;
 
 	nodes[graphNode.graphNodeId] = null;
-	onDirty[graphNode.graphNodeId] = null;
+	onDirtyCallbacks[graphNode.graphNodeId] = null;
 	// array_reset_keeping_memory(*predecessors[graphNode.graphNodeId]);
 	// array_reset_keeping_memory(*successors[graphNode.graphNodeId]);
 	// array_reset_keeping_memory(*allPredecessors[graphNode.graphNodeId]);
@@ -147,14 +151,20 @@ graphNodeDisconnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreG
 	return true;
 }
 
-setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod) {
-	graph.onDirty[graphNode.graphNodeId] = onDirty;
-}
-dirty :: (node: *$T) -> bool {
+// setOnDirty :: (graph: *CoreGraph, graphNode: *CoreGraphNodeAny, onDirty:CoreGraphNodeOnDirtyMethod) {
+// 	graph.onDirty[graphNode.graphNodeId] = onDirty;
+// }
+isDirty :: (node: *$T) -> bool {
 	return graph(node.graphId).dirty[node.graphNodeId];
 }
-unSetDirty :: (node: *$T) {
+isDirty :: (graph: *CoreGraph, graphNodeId: CoreGraphNodeId) -> bool {
+	return graph.dirty[graphNodeId];
+}
+unSetDirty :: (node: *$T/CoreGraphNode) {
 	graph(node.graphId).dirty[node.graphNodeId] = false;
+}
+unSetDirty :: (graph: *CoreGraph, graphNodeId: CoreGraphNodeId) {
+	graph.dirty[graphNodeId] = false;
 }
 setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 	using graph;
@@ -164,12 +174,21 @@ setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 			_graphAllSuccessorsUpdate(graph, graphNode.graphNodeId);
 		}
 		for successorId: allSuccessors[graphNode.graphNodeId] {
-			setDirty(graph, nodes[successorId], false);
+			// setDirty(graph, nodes[successorId], propagate=false);
+			dirty[successorId] = true;
 		}
 		for successorId: allSuccessors[graphNode.graphNodeId] {
-			onDirty := graph.onDirty[successorId];
-			if onDirty != null {
-				onDirty(nodes[successorId]);
+			onDirtyCallback := onDirtyCallbacks[successorId];
+			if onDirtyCallback != null {
+				onDirtyCallback(graph, nodes[successorId]);
+			}
+		}
+
+		{
+			onDirtyCallback := onDirtyCallbacks[graphNode.graphNodeId];
+			if onDirtyCallback != null {
+				assert(graphNode.graphNodeId == nodes[graphNode.graphNodeId].graphNodeId, "setDirty: graphNode and nodes[graphNode.graphNodeId] are not the same");
+				onDirtyCallback(graph, graphNode);
 			}
 		}
 	}

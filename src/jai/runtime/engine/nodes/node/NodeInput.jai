@@ -1,4 +1,4 @@
-setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0) -> bool
+setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex:u8=0) -> bool
 // #modify {
 // 	ti0 := cast(*Type_Info) N0;
 // 	tis0 := cast(*Type_Info_Struct)ti0;
@@ -10,7 +10,7 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0) -> 
 // }
 {
 	// #assert(N0.ctx == N1.ctx);
-	assert(node.ctx == inputNode.ctx, "nodes have different contexts");
+	assert(NODE_CONTEXTS[node.nodeTypeId] == NODE_CONTEXTS[inputNode.nodeTypeId], "nodes have different contexts");
 	assert(node.nodeId != inputNode.nodeId, "node ids must be different");
 	// node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
@@ -30,24 +30,27 @@ setInput :: (node: *$N0, inputIndex:u8=0, inputNode: *$N1, outputIndex:u8=0) -> 
 	}
 
 	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
+		sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node.nodeId, inputIndex);
 	}
 	return connectionCreated;
 }
-removeInput :: (node: *$N0, inputIndex:u8=0) -> bool {
+setInput :: (node: BaseNode, inputIndex:u8=0, inputNode: BaseNode, outputIndex:u8=0) -> bool {
+	return setInput(*node, inputIndex, *inputNode, outputIndex);
+}
+removeInput :: (node: *BaseNode, inputIndex:u8=0) -> bool {
 	scene := graphNodeScene(node);
 	connectionId := nodeConnectionFindByDestNode(*scene.connections, node.nodeId, inputIndex);
 	if connectionId != 0 {
 		connection := scene.connections.connections[connectionId];
 		previousInputNodeId := connection.src.nodeId;
-		previousInputNode := scene.nodes[previousInputNodeId];
+		previousInputNode := scene.nodeTypes[previousInputNodeId];
 		graphNodeDisconnect(src=previousInputNode, dest=node);
 		nodeConnectionRemove(*scene.connections, connection);
 		// node.inputs[inputIndex] = null;
 		setDirty(node);
 
 		#if NODES_SCENE_EMIT_EVENTS {
-			sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
+			sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node.nodeId, inputIndex);
 		}
 		return true;
 
@@ -56,6 +59,6 @@ removeInput :: (node: *$N0, inputIndex:u8=0) -> bool {
 	}
 
 }
-setInput :: (node: *$N0, inputNode: *$N1) {
+setInput :: (node: *BaseNode, inputNode: *BaseNode) {
 	setInput(node, 0, inputNode, 0);
 }

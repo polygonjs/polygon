@@ -1,12 +1,13 @@
 
-nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
-	assert(node != null, "nodeCompute: node name is null");
-	scene := graphNodeScene(node);
+nodeCompute :: (scene:*NodesScene, nodeId: NodeId, depth:u8=0) -> GeoNodeCookOutput {
+	// assert(node != null, "nodeCompute: node name is null");
+	// scene := graphNodeScene(node);
 	using scene;
 	// print("% 2.nodeCompute %\n", indent(depth), <<node);
 	// sceneDebug(node.scene, tprint("%nodeCompute %", indent(depth), node.name));
-	if dirty(node) == false {
-		result := cookResults[node.nodeId];
+	node := nodeTypes[nodeId];
+	if isDirty(*graph, node.graphNodeId) == false {
+		result := cookResults[nodeId];
 		if result != null {
 			return result;
 		}
@@ -32,17 +33,20 @@ nodeCompute :: (node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	for srcConnectionId: srcConnectionIds {
 		if srcConnectionId != 0 {
 			connection := connections.connections[srcConnectionId];
-			inputNode := nodes[connection.src.nodeId];
+			inputNodeId := connection.src.nodeId;
+			// inputNode := nodes[connection.src.nodeId];
 			inputIndex := connection.dest.inputIndex;
-			nodeInputCookResults[node.nodeId][inputIndex] = generatedNodeCompute(inputNode, depth+1);
+			nodeInputCookResults[node.nodeId][inputIndex] = nodeCompute(scene, inputNodeId, depth+1);
 		}
 	}
 	
+	nodeTypeData := scene.nodeTypes[nodeId];
+	nodeTypeId := nodeTypeData.nodeTypeId;
+	cookMethod := COOK_METHODS[nodeTypeId];
 	// print("%inputResults POST: %\n", indent(depth), inputResults);
-	result := cook(node, nodeInputCookResults[node.nodeId]);
-	unSetDirty(node);
+	result := cookMethod(scene, nodeId, nodeInputCookResults[node.nodeId]);
+	unSetDirty(*graph, node.graphNodeId);
 	// TODO: dispose previous result
-	print("nodeCompute %\n", node.type);
 
 	previousResult := cookResults[node.nodeId];
 	if previousResult != null {

@@ -1,5 +1,5 @@
 TimeNode :: struct {
-	#as using coreGraphNode: CoreGraphNode(TimeNode);
+	#as using coreGraphNode: CoreGraphNode;//(TimeNode);
 }
 
 sceneOnTick :: (scene: *NodesScene, time:Time) {

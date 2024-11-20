@@ -56,11 +56,11 @@ nodeConnectionListDelete :: (list:*NodeConnectionList) {
 }
 nodeConnectionInitForNode :: (list:*NodeConnectionList, nodeId:NodeId) {
 	using list;
-	if nodeId >= connectionIdBySrcNodeId.count {
-		array_resize(*connectionIdBySrcNodeId, nodeId+1);
-		array_resize(*connectionIdByDestNodeId, nodeId+1);
-		array_resize(*connections, nodeId+1);
-		bit_array_resize(*validIndices, nodeId+1);
+	if nodeId >= xx connectionIdBySrcNodeId.count {
+		array_resize(*connectionIdBySrcNodeId, xx nodeId+1);
+		array_resize(*connectionIdByDestNodeId, xx nodeId+1);
+		array_resize(*connections, xx nodeId+1);
+		bit_array_resize(*validIndices, xx (nodeId+1));
 	}
 }
 nodeConnectionFindSuccessorConnectionIds :: (list:*NodeConnectionList, nodeId:NodeId)->[..]NodeConnectionId {
@@ -175,8 +175,8 @@ _addAtIndex :: (list:*NodeConnectionList, connection:NodeConnection, index:NodeC
 }
 
 _addConnectionId :: (idList: *[..][..]NodeConnectionId, nodeId:NodeId, connectionId:NodeConnectionId) {
-	if nodeId >= idList.count {
-		array_resize(idList, nodeId+1);
+	if nodeId >= xx idList.count {
+		array_resize(idList, xx nodeId+1);
 	}
 	connectionIds:*[..]u64 = *(<<idList)[nodeId];
 	assert(array_find_ptr(connectionIds, connectionId)==false, "connection should not exist yet\n");

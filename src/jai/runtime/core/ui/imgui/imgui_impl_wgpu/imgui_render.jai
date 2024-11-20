@@ -93,7 +93,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 	width := draw_data.DisplaySize.x * draw_data.FramebufferScale.x;
 	height := draw_data.DisplaySize.y * draw_data.FramebufferScale.y;
 	if (width <= 0.0 || height <= 0.0 || draw_data.CmdListsCount == 0){
-		print_red(tprint("not rendering, width:%, height:%, draw_data.CmdListsCount:%\n", width, height, draw_data.CmdListsCount));
+		printRed(tprint("not rendering, width:%, height:%, draw_data.CmdListsCount:%\n", width, height, draw_data.CmdListsCount));
 		return;
 	}
 
@@ -127,7 +127,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 			fr.VertexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *vb_desc);
 		}
 		if (!fr.VertexBuffer) {
-			print_red("fr.VertexBuffer not created\n");
+			printRed("fr.VertexBuffer not created\n");
 			return;
 		}
 
@@ -154,7 +154,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 			};
 			fr.IndexBuffer = wgpuDeviceCreateBuffer(bd.wgpuDevice, *ib_desc);
 			if (!fr.IndexBuffer){
-				print_red("fr.IndexBuffer not created\n");
+				printRed("fr.IndexBuffer not created\n");
 				return;
 			}
 		}
@@ -231,7 +231,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 					(pcmd.ClipRect.w - clip_off.y) * clip_scale.y
 				};
 				if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y){
-					print_yellow("incorrect clip bounds\n");
+					printYellow("incorrect clip bounds\n");
 					continue;
 				}
 

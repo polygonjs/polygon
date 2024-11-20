@@ -1,11 +1,11 @@
 testNetworkPanel :: () {
 	test("NetworkPanel", () {
 		nodesScene :*NodesScene = newNodesScene();
-		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
-		box1 := newNode(nodesScene, BoxGeoNode);
-		assertEqual(nodesScene.nodes.count, 1, "1 node in scene");
-		box2 := newNode(nodesScene, BoxGeoNode);
-		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
+		assertEqual(nodesScene.nodeTypes.count, 0, "0 nodes in scene");
+		box1 := createNode(nodesScene, BoxGeoNode);
+		assertEqual(nodesScene.nodeTypes.count, 1, "1 node in scene");
+		box2 := createNode(nodesScene, BoxGeoNode);
+		assertEqual(nodesScene.nodeTypes.count, 2, "2 nodes in scene");
 
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);
@@ -15,12 +15,12 @@ testNetworkPanel :: () {
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 3);
 		assertEqual(editor.networkPanel.sceneRaycast.children.count, 3);
 
-		box3 := newNode(nodesScene, BoxGeoNode);
+		box3 := createNode(nodesScene, BoxGeoNode);
 		editorFlushCommands(editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
 		assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
-		box4 := newNode(nodesScene, BoxGeoNode);
+		box4 := createNode(nodesScene, BoxGeoNode);
 		editorFlushCommands(editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
 		assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);

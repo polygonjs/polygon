@@ -112,10 +112,10 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	if (focused){
 		result := read_pixel(*rendererRaycast, sceneRaycast, *camera, eventsData.cursor);
 		nodeId := meshIdMaterialUnpackId(result);
-		node := sceneFindNodeById(editor.nodesScene, nodeId);
-		if node != null {
-			print("node: %\n", node.type);
-		}
+		// node := sceneFindNodeById(editor.nodesScene, nodeId);
+		// if node != null {
+			print("nodeId: %\n", nodeId);
+		// }
 	}
 }
 
@@ -264,11 +264,11 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 networkPanelUpdateScenes :: (panel: *TYPE, nodesScene: *NodesScene) {
 	using panel.editor.sceneUiData;
 
-	if nodePositions.count < nodesScene.nodes.count {
-		array_resize(*nodePositions, nodesScene.nodes.count);
+	if nodePositions.count < nodesScene.nodeTypes.count {
+		array_resize(*nodePositions, nodesScene.nodeTypes.count);
 	}
 
-	for node, i: nodesScene.nodes {
+	for node, i: nodesScene.nodeTypes {
 		if node != null {
 			networkPanelAddNode(panel, node);
 		}

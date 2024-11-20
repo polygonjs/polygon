@@ -1,6 +1,7 @@
 NodesSceneEvent :: enum u8 {
 	NODE_ADDED :: 0;
 	NODE_BEFORE_REMOVE;
+	NODE_ON_DIRTY;
 	NODE_INPUT_ADDED;
 	NODE_INPUT_REMOVED;
 }
@@ -16,25 +17,23 @@ sceneRemoveObserver :: (scene: *NodesScene, observer: Any) {
 	scene.observer.value_pointer = null;
 	// array_remove(*scene.observers, observer);
 }
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
+sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, nodeId: NodeId) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		// case NodesSceneEvent.NODE_ADDED; 	{for o: scene.observers nodeSceneObserverOnNodeAdded(o, scene, node); return;}
-		// case NodesSceneEvent.NODE_REMOVED; 	{for o: scene.observers nodeSceneObserverOnNodeRemoved(o, scene, node); return;}
-		case NodesSceneEvent.NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, node);}
-		case NodesSceneEvent.NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
+		// case NodesSceneEvent.NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, nodeId);}
+		// case NodesSceneEvent.NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, nodeId);}
 	}
 }
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
+sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, nodeId: NodeId, inputIndex: u8=0) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		case NodesSceneEvent.NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, node, inputIndex);}
-		case NodesSceneEvent.NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, node, inputIndex);}
+		// case NodesSceneEvent.NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, nodeId, inputIndex);}
+		// case NodesSceneEvent.NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, nodeId, inputIndex);}
 	}
 }
