@@ -9,10 +9,10 @@ onNodeSetPosition :: (editor: *Editor, scene: *NodesScene, node: *$T, position:V
 	array_add(*EDITOR_NODE_SET_POSITION_COMMANDS, .{node=xx node, position=position});
 }
 onNodeInputAdded :: (editor: *Editor, scene: *NodesScene, node: *$T, inputIndex: u8) {
-	print("onNodeInputAdded % %\n", node, inputIndex);
+	// print("onNodeInputAdded % %\n", node, inputIndex);
 }
 onNodeInputRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T, inputIndex: u8) {
-	print("onNodeInputRemoved % %\n", node, inputIndex);
+	// print("onNodeInputRemoved % %\n", node, inputIndex);
 }
 
 editorFlushCommands :: (editor: *Editor) {

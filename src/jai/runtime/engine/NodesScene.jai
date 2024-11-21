@@ -1,7 +1,11 @@
 
 
 NodesScene :: struct {
-	pool: Flat_Pool;
+	#if USE_FLAT_POOL {
+		pool: Flat_Pool;
+	} else {
+		pool: Pool;
+	}
 	allocator: Allocator;
 	//
 	nextNodeId: NodeId = INIT_NEXT_NODE_ID;
@@ -34,7 +38,7 @@ NodesScene :: struct {
 newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
-	scene: *NodesScene = alloc(size_of(NodesScene));
+	scene: *NodesScene = New(NodesScene);
 	if _allocator == null {
 		allocatorAssign(scene);
 	} else {

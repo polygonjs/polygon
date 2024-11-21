@@ -14,7 +14,11 @@ SceneUniforms :: struct {
 Scene :: struct {
 	#as using object3D: Object3D;
 
-	pool: Flat_Pool;
+	#if USE_FLAT_POOL {
+		pool: Flat_Pool;
+	} else {
+		pool: Pool;
+	}
 
 	children: [..]*Object3D;
 

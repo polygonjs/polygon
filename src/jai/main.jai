@@ -218,9 +218,12 @@ on_request_animation_frame :: (
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
 else #import "Basic";
+#if USE_FLAT_POOL #import "Flat_Pool";
 #if FREE_MEMORY_DEBUG {
-	#import "Flat_Pool";
 	#import "Unmapping_Allocator";
+	#if USE_POOL #import "Pool";//()(USE_UNMAPPING_ALLOCATOR=true); // Unmapping_Allocator module seems to have its own leaks?
+} else {
+	#if USE_POOL #import "Pool";
 }
 #import "Bit_Array";
 #import "Hash_Table";

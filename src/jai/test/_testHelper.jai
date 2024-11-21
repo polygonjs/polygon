@@ -48,4 +48,11 @@
 		return count;
 	}
 
+} else {
+	assertLeaksCount :: (expectedCount:s64, message:string="no message") {
+
+	}
+	assertLeaksCount :: (expectedCounts:[]s64, message:string="no message") {
+		
+	}
 }

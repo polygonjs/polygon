@@ -41,7 +41,12 @@ testNodesBasicDependency :: () {
 		
 		paramSetValue(*box1.p.scale, 2);
 		nodesSceneOutputNodesCompute(nodesScene);
-		assertLeaksCount(1, "leaks on cook 1");
+		#if USE_FLAT_POOL {
+			expectedLeaksCount := 1;
+		} else {
+			expectedLeaksCount := 0;
+		}
+		assertLeaksCount(expectedLeaksCount, "leaks on cook 1");
 		assertEqual(nodesScene.worldScene.children.count, 1);
 		box3:Box3;
 		firstGeometry :: (scene:*NodesScene)->*Geometry {
@@ -54,7 +59,7 @@ testNodesBasicDependency :: () {
 
 		paramSetValue(*box1.p.scale, 4);
 		nodesSceneOutputNodesCompute(nodesScene);
-		assertLeaksCount(1, "leaks on cook 3");
+		assertLeaksCount(expectedLeaksCount, "leaks on cook 3");
 		assertEqual(nodeCooksCount(box1), 3);
 		assertEqual(nodeCooksCount(icosahedron1), 0, "icosahedron1 has not yet cooked");
 		box3SetFromGeometry(*box3, firstGeometry(nodesScene));
@@ -63,12 +68,12 @@ testNodesBasicDependency :: () {
 
 		paramSetValue(*box1.p.segments, .{2,2,2});
 		nodesSceneOutputNodesCompute(nodesScene);
-		assertLeaksCount(1, "leaks on cook 4");
+		assertLeaksCount(expectedLeaksCount, "leaks on cook 4");
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 54, "points count");
 		paramSetValue(*box1.p.segments, .{12,4,3});
 		nodesSceneOutputNodesCompute(nodesScene);
 		// report_memory_leaks();
-		assertLeaksCount(1, "leaks on cook 5");
+		assertLeaksCount(expectedLeaksCount, "leaks on cook 5");
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
 		assertEqual(nodeCooksCount(box1), 5);
 		assertEqual(nodeCooksCount(icosahedron1), 0, "icosahedron1 has not yet cooked");
@@ -93,7 +98,7 @@ testNodesBasicDependency :: () {
 		// paramSetValue(*box1.p.segments, Vector3UInt.{4,2,2});
 		// print("result: %\n", nodesScene.worldScene.children[0].geometry.attributes.position.values.count);
 
-		assertLeaksCount(1, "leak before scene delete");
+		assertLeaksCount(expectedLeaksCount, "leak before scene delete");
 		sceneDelete(nodesScene);
 		// reset_temporary_storage();
 		// report_memory_leaks();

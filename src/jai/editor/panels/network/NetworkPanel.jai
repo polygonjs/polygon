@@ -1,6 +1,10 @@
 
 NetworkPanel :: struct {
-	pool: Flat_Pool;
+	#if USE_FLAT_POOL {
+		pool: Flat_Pool;
+	} else {
+		pool: Pool;
+	}
 	allocator: Allocator;
 	//
 	editor: *Editor;
