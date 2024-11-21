@@ -102,6 +102,6 @@ testNodesBasicDependency :: () {
 
 }
 
-#scope_file
+// #scope_file
 
-result:*Object3D;
+// result:*Object3D;

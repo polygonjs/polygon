@@ -32,7 +32,7 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 	// tis := cast(*Type_Info_Struct)editorAny.type;
 	sceneAddObserver(nodesScene, editorAny);
 
-	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodeTypes.count);
+	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodes.count);
 
 	networkPanelSetScene(editor.networkPanel);
 	// for node, i: nodesScene.nodes {

@@ -1,6 +1,7 @@
 EmptyUniforms :: struct {};
 
 MaterialBase :: struct ($UniformType: Type) {
+	allocator: Allocator;
 	type: Type;
 	uniformType: Type=UniformType;
 	uniformTypeSize: u32=size_of(UniformType);
@@ -13,14 +14,12 @@ MaterialBase :: struct ($UniformType: Type) {
 Material :: MaterialBase(Any);
 
 
-newMaterial :: ($T: Type, scene: *NodesScene) -> *T {
+newMaterial :: (scene: *Scene, $T: Type) -> *T {
 	return newMaterial(T, scene.allocator);
 }
 newMaterial :: ($T: Type, allocator: Allocator) -> *T {
-	previousAllocator := context.allocator;
-	context.allocator = allocator;
-	material: *T = alloc(size_of(T));
-	context.allocator = previousAllocator;
+	material: *T = New(T,,allocator);
+	material.allocator = allocator;
 	material.type = T;
 
 	material.id = NEXT_MATERIAL_ID;
@@ -31,7 +30,7 @@ newMaterial :: ($T: Type, allocator: Allocator) -> *T {
 	return material;
 }
 materialDelete :: (material: *$T) {
-	free(material);
+	free(material,, material.allocator);
 }
 
 #scope_file

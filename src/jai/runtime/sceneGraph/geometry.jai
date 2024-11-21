@@ -6,22 +6,16 @@ Geometry :: struct {
 	indices: [..]VertexIndex;
 }
 newGeometry :: (allocator: Allocator) -> *Geometry {
-	previousAllocator := context.allocator;
-	context.allocator = allocator;
-	geometry :*Geometry= New(Geometry);
-	context.allocator = previousAllocator;
+	geometry :*Geometry= New(Geometry,, allocator);
 	geometry.allocator = allocator;
 	geometryAttributesSetAllocator(*geometry.attributes, allocator);
 	geometry.indices.allocator = allocator;
 	return geometry;
 }
 geometryDelete :: (geometry: *Geometry) {
-	previousAllocator := context.allocator;
-	context.allocator = geometry.allocator;
 	geometryAttributesDelete(*geometry.attributes);
 	array_reset(*geometry.indices);
 	free(geometry,, geometry.allocator);
-	context.allocator = previousAllocator;
 }
 
 geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt) {

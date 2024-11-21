@@ -18,7 +18,6 @@ nodeInit :: (node: *TYPE) {
 
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
-	// node := cast(*TYPE)scene.nodeTypes[nodeId];
 	mesh := newMesh( graphNodeScene(node).worldScene, Mesh);
 
 	using node.p;

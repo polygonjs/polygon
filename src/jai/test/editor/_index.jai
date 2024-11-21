@@ -1,1 +1,1 @@
-// #load "testNetworkPanel.jai";
+#load "testNetworkPanel.jai";

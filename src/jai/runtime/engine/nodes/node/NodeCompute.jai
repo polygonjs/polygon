@@ -13,7 +13,7 @@ nodeCompute :: (scene:*NodesScene, node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 		if srcConnectionId != 0 {
 			connection := connections.connections[srcConnectionId];
 			inputNodeId := connection.src.nodeId;
-			inputNode := nodeTypes[inputNodeId];
+			inputNode := nodes[inputNodeId];
 			inputIndex := connection.dest.inputIndex;
 			nodeInputCookResults[node.nodeId][inputIndex] = generatedNodeCompute(scene, inputNode, depth+1);
 		}
@@ -36,15 +36,6 @@ postCook :: (scene:*NodesScene, node: *$T, result: GeoNodeCookOutput, $storeResu
 		cookResults[node.nodeId] = result;
 	}
 }
-// nodeCookMethod :: (node: $T)->GeoNodeCookMethod {
-// 	return nodeCookMethod(graphNodeScene(node), node.nodeId);
-// }
-// nodeCookMethod :: (scene:*NodesScene, nodeId: NodeId)->GeoNodeCookMethod {
-// 	nodeTypeData := scene.nodeTypes[nodeId];
-// 	nodeTypeId := nodeTypeData.nodeTypeId;
-// 	cookMethod := COOK_METHODS[nodeTypeId];
-// 	return cookMethod;
-// }
 
 nodeCooksCount :: (node: *$T)->u32 {
 	return graphNodeScene(node).cooksCount[node.nodeId];

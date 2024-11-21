@@ -1,11 +1,11 @@
 testNetworkPanel :: () {
 	test("NetworkPanel", () {
 		nodesScene :*NodesScene = newNodesScene();
-		assertEqual(nodesScene.nodeTypes.count, 0, "0 nodes in scene");
+		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
 		box1 := createNode(nodesScene, BoxGeoNode);
-		assertEqual(nodesScene.nodeTypes.count, 1, "1 node in scene");
+		assertEqual(nodesScene.nodes.count, 1, "1 node in scene");
 		box2 := createNode(nodesScene, BoxGeoNode);
-		assertEqual(nodesScene.nodeTypes.count, 2, "2 nodes in scene");
+		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
 
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);
@@ -35,7 +35,6 @@ testNetworkPanel :: () {
 		editorRemoveScene(editor);
 		sceneDelete(nodesScene);
 		editorDelete(editor);
-		report_memory_leaks();
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
 }

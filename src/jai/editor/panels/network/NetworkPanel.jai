@@ -8,7 +8,7 @@ NetworkPanel :: struct {
 	sceneRaycast: *Scene;
 	objectIndex: [..]u32;
 
-	camera: OrthographicCamera;
+	camera: *OrthographicCamera;
 	cameraControls: PanControls;
 
 	basicMat: *MATERIAL_BASIC;
@@ -53,62 +53,63 @@ newNetworkPanel :: (editor: *Editor) -> *TYPE {
 networkPanelDelete :: (panel: *TYPE) {
 	using panel;
 
-	flat_pool:Flat_Pool;
-	panel.pool = flat_pool;
-	panel.allocator.proc = flat_pool_allocator_proc;
-	panel.allocator.data = *panel.pool;
 
 	// delete bg material
-	print("TODO: delete the network panel with the pool");
-	{
-		bgObject := sceneWorld.children[0];
-		mesh := cast(*Mesh)bgObject;
-		materialDelete(cast(*MATERIAL_BG)mesh.material);
-		geometryDelete(mesh.geometry);
-		worldObjectDelete(mesh);
-		sceneWorld.children[0] = null;
-	}
-	{
-		bgObject := sceneRaycast.children[0];
-		mesh := cast(*Mesh)bgObject;
-		materialDelete(cast(*MATERIAL_BG)mesh.material);
-		geometryDelete(mesh.geometry);
-		worldObjectDelete(mesh);
-		sceneRaycast.children[0] = null;
-	}
+	// {
+	// 	bgObject := sceneWorld.children[0];
+	// 	mesh := cast(*Mesh)bgObject;
+	// 	materialDelete(cast(*MATERIAL_BG)mesh.material);
+	// 	geometryDelete(mesh.geometry);
+	// 	worldObjectDelete(mesh);
+	// 	sceneWorld.children[0] = null;
+	// }
+	// {
+	// 	bgObject := sceneRaycast.children[0];
+	// 	mesh := cast(*Mesh)bgObject;
+	// 	materialDelete(cast(*MATERIAL_BG)mesh.material);
+	// 	geometryDelete(mesh.geometry);
+	// 	worldObjectDelete(mesh);
+	// 	sceneRaycast.children[0] = null;
+	// }
 
-	for object, i : sceneWorld.children {
-		if object != null {
-			generatedWorldObjectDelete(object);
-			sceneWorld.children[i] = null;
-		}
-	}
-	for object,i : sceneRaycast.children {
-		if object != null {
-			mesh := cast(*Mesh)object;
-			materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
-			geometryDelete(mesh.geometry);
-			generatedWorldObjectDelete(object);
-			sceneRaycast.children[i] = null;
-		}
-	}
+	// for object, i : sceneWorld.children {
+	// 	if object != null {
+	// 		generatedWorldObjectDelete(object);
+	// 		sceneWorld.children[i] = null;
+	// 		raycastObject := sceneRaycast.children[i];
+	// 		if raycastObject.type == Mesh {
+	// 			(cast(*Mesh)raycastObject).geometry = null;
+	// 		}
+	// 	}
+	// }
+	worldObjectDelete(sceneWorld);
+	worldObjectDelete(sceneRaycast);
+	// for object,i : sceneRaycast.children {
+	// 	if object != null {
+	// 		mesh := cast(*Mesh)object;
+	// 		materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
+	// 		// geometryDelete(mesh.geometry);
+	// 		generatedWorldObjectDelete(object);
+	// 		sceneRaycast.children[i] = null;
+	// 	}
+	// }
 	
-	array_reset(*objectIndex);
-	generatedWorldObjectDelete(sceneWorld);
-	generatedWorldObjectDelete(sceneRaycast);
-	materialDelete(basicMat);
-	print("panel deleted, %\n", panel);
-	free(panel,, panel.allocator);
+	// array_reset(*objectIndex);
+	// generatedWorldObjectDelete(sceneWorld);
+	// generatedWorldObjectDelete(sceneRaycast);
+	// materialDelete(basicMat);
+	allocatorReset(panel);
+	free(panel);
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	renderer_init_pipelines(*rendererColor, sceneWorld, *camera);
-	renderer_init_pipelines(*rendererRaycast, sceneRaycast, *camera);
+	renderer_init_pipelines(*rendererColor, sceneWorld, camera);
+	renderer_init_pipelines(*rendererRaycast, sceneRaycast, camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
-	cameraUniformsUpdate(*camera);
-	render(renderCollectionData, *rendererColor, sceneWorld, *camera);
+	cameraUniformsUpdate(camera);
+	render(renderCollectionData, *rendererColor, sceneWorld, camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
 	using panel;
@@ -119,7 +120,7 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	focused := element_focused(*rendererColor, eventsData);
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
-		result := read_pixel(*rendererRaycast, sceneRaycast, *camera, eventsData.cursor);
+		result := read_pixel(*rendererRaycast, sceneRaycast, camera, eventsData.cursor);
 		nodeId := meshIdMaterialUnpackId(result);
 		// node := sceneFindNodeById(editor.nodesScene, nodeId);
 		// if node != null {
@@ -142,7 +143,7 @@ onResize :: (panel: *TYPE) {
 	} else {
 		camera.aspect = cast(float32)rendererColor.viewport.size.x / cast(float32)rendererColor.viewport.size.y;
 	}
-	cameraProjectionUpdate(*camera);
+	cameraProjectionUpdate(camera);
 }
 
 
@@ -183,7 +184,7 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 		}
 	}
 
-	geometry :*Geometry = New(Geometry);
+	geometry :*Geometry = newGeometry(panel.sceneWorld.allocator);
 	geometry_box_update(geometry, segments=.{2,2,2});
 
 	_addMesh(panel, node, geometry, forRaycast=false);
@@ -206,7 +207,7 @@ networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 				materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
 				geometryDelete(mesh.geometry);
 			}
-			sceneObjectRemove(scene, object);
+			sceneObjectRemove(scene, object, delete=false);
 			#if forRaycast == true {
 				objectIndex[node.nodeId] = 0;
 			}
@@ -247,20 +248,25 @@ MATERIAL_BG :: BackgroundMeshMaterial;
 MATERIAL_BASIC :: BackgroundMeshMaterial;
 
 networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
+	allocatorAssign(panel);
+
+
 	using panel;
+	objectIndex.allocator = panel.allocator;
 	editor = _editor;
 	sceneWorld = newScene(panel.allocator);
 	sceneRaycast = newScene(panel.allocator);
-	camera.type = OrthographicCamera;
-	object3DInit(*camera);
+	camera = newObject3D(sceneWorld, OrthographicCamera);
+	// camera.type = OrthographicCamera;
+	// object3DInit(*camera);
 
 	basicMat = newMaterial(MATERIAL_BASIC, panel.allocator);
-	cameraControls.camera = *camera;
+	cameraControls.camera = camera;
 
 	_addBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
-		mat := newMaterial(MATERIAL_BG, panel.allocator);
+		mat := newMaterial(scene, MATERIAL_BG);
 		setColor(mat, color);
-		mesh0 := newObject3D(scene, Mesh);
+		mesh0 := newMesh(scene, Mesh);
 		assert(mesh0.geometry != null, "mesh0.geometry is null\n");
 		mesh0.material = xx mat;
 		geometry_plane_update(mesh0.geometry, size=.{2,2}, segments=.{1,1});
@@ -276,11 +282,11 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 networkPanelUpdateScenes :: (panel: *TYPE, nodesScene: *NodesScene) {
 	using panel.editor.sceneUiData;
 
-	if nodePositions.count < nodesScene.nodeTypes.count {
-		array_resize(*nodePositions, nodesScene.nodeTypes.count);
+	if nodePositions.count < nodesScene.nodes.count {
+		array_resize(*nodePositions, nodesScene.nodes.count);
 	}
 
-	for node, i: nodesScene.nodeTypes {
+	for node, i: nodesScene.nodes {
 		if node != null {
 			networkPanelAddNode(panel, node);
 		}

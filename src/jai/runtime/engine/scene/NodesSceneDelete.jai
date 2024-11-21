@@ -11,7 +11,7 @@ sceneDelete :: (scene: *NodesScene) {
 	// }
 	{
 		// array_reset(*nodeTypes);
-		deinit(*validNodeTypes);
+		deinit(*validNodes);
 		// for list: nodeInputCookResults { array_reset(*list); }
 		// array_reset(*nodeInputCookResults);
 		// print("todo: use pool")
@@ -23,8 +23,8 @@ sceneDelete :: (scene: *NodesScene) {
 		// observer = null;
 	}
 	worldObjectDelete(worldScene);
-	// deinit_unmapping_allocator(a);
-	reset(*scene.pool, overwrite_memory=true);
+	
+	allocatorReset(scene);
 	free(scene/*,,allocator=scene.allocator*/);
 
 	// sceneAllocatorPush(scene);

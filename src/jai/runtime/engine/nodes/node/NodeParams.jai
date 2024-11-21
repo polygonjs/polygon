@@ -56,7 +56,7 @@ params :: (node: *$T, body: Code, flags: For_Flags) #expand {
 }
 paramsCount :: (node: *$T) -> u8 {
 	count :u8= 0;
-	for param: node.params {
+	for :params param: node {
 		count += 1;
 	}
 	return count;

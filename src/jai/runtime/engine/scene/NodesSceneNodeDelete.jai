@@ -1,7 +1,8 @@
 
-sceneDeleteNode :: (scene: *NodesScene, nodeId: NodeId, $removeFromGraph:bool = true) {
+sceneDeleteNode :: (scene: *NodesScene, node: $T, $removeFromGraph:bool = true) {
+	nodeId := node.nodeId;
 	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, nodeId);
+		sceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, node);
 	}
 	using scene;
 	// found, index := array_find(nodes, cast(*GeoNodeAny)node);
@@ -39,22 +40,20 @@ sceneDeleteNode :: (scene: *NodesScene, nodeId: NodeId, $removeFromGraph:bool = 
 	}
 
 	// remove graph node
-	// #if removeFromGraph {
-	// 	for :params param: node { graphNodeDelete(param); }
-	// 	graphNodeDelete(node);
-	// }
+	#if removeFromGraph {
+		for :params param: node { graphNodeDelete(param); }
+		graphNodeDelete(node);
+	}
 	// array_reset(*node.params);
 
 	index := node.nodeId;
-	validNodeTypes[index] = false;
-	print("params reset not done\n");
+	validNodes[index] = false;
 	// validNodeIds[index] = false;
 	if index < nextNodeId {
 		nextNodeId = index;
 	}
 
-	print("validNodes not unset\n");
-	// free(node);
+	free(node,, scene.allocator);
 
 
 }

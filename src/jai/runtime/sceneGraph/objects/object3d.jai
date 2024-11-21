@@ -25,10 +25,7 @@ newObject3D :: (scene: *Scene, $T: Type) -> *T {
 	return object;
 }
 object3DAllocate :: ($T: Type, allocator: Allocator)-> *T {
-	previousAllocator := context.allocator;
-	context.allocator = allocator;
-	object: *T = alloc(size_of(T));
-	context.allocator = previousAllocator;
+	object: *T = New(T,, allocator);
 	object.allocator = allocator;
 	object.type = T;
 
@@ -42,10 +39,7 @@ object3DInit :: (object: *TYPE) {
 	init_transformable(object);
 }
 worldObjectDelete :: (object: *TYPE) {
-	previousAllocator := context.allocator;
-	context.allocator = object.allocator;
-	free(object);
-	context.allocator = previousAllocator;
+	free(object,, object.allocator);
 }
 
 init_transformable :: (object: *Object3D) {

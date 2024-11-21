@@ -3,15 +3,15 @@
 
 registerTests :: ()->[..]NamedProcedure {
 
-	// // editor
-	// testNetworkPanel();
-	// // runtime
-	// testArray();
-	// testBitArray();
-	// testCoreGraph();
-	// testMath();
+	// editor
+	testNetworkPanel();
+	// runtime
+	testArray();
+	testBitArray();
+	testCoreGraph();
+	testMath();
 	testNodesBasicDependency();
-	// testPerlinNoise();
+	testPerlinNoise();
 
 	return NAMED_PROCEDURES_COMPILE_TIME;
 }

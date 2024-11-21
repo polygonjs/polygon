@@ -17,23 +17,23 @@ sceneRemoveObserver :: (scene: *NodesScene, observer: Any) {
 	scene.observer.value_pointer = null;
 	// array_remove(*scene.observers, observer);
 }
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, nodeId: NodeId) {
+sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		// case NodesSceneEvent.NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, nodeId);}
-		// case NodesSceneEvent.NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, nodeId);}
+		case NodesSceneEvent.NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, node);}
+		case NodesSceneEvent.NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
 	}
 }
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, nodeId: NodeId, inputIndex: u8=0) {
+sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		// case NodesSceneEvent.NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, nodeId, inputIndex);}
-		// case NodesSceneEvent.NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, nodeId, inputIndex);}
+		case NodesSceneEvent.NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, node, inputIndex);}
+		case NodesSceneEvent.NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, node, inputIndex);}
 	}
 }

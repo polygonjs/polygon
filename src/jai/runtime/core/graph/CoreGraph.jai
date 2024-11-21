@@ -118,8 +118,8 @@ graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
 	array_resize(*allPredecessors[graphNode.graphNodeId], 0);
 	array_resize(*allSuccessors[graphNode.graphNodeId], 0);
 
-	if nextId > graphNode.graphNodeId {
-		nextId = graphNode.graphNodeId;
+	if nextGraphNodeId > graphNode.graphNodeId {
+		nextGraphNodeId = graphNode.graphNodeId;
 	}
 }
 

@@ -36,10 +36,7 @@ newScene :: (scene: *NodesScene) -> *TYPE {
 newScene :: (allocator: Allocator) -> *TYPE {
 	scene := object3DAllocate(TYPE, allocator);
 
-	flat_pool:Flat_Pool;
-	scene.pool = flat_pool;
-	scene.allocator.proc = flat_pool_allocator_proc;
-	scene.allocator.data = *scene.pool;
+	allocatorAssign(scene);
 
 	object3DInit(scene);
 
@@ -60,21 +57,20 @@ sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
 	}
 	array_add(*scene.children, object);
 }
-sceneObjectRemove :: (scene: *TYPE, object: *Object3D) {
+sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
 	for child, i: scene.children {
 		if child == object {
 			scene.children[i] = null;
-			generatedWorldObjectDelete(object);
+			#if delete {
+				generatedWorldObjectDelete(object);
+			}
 			return;
 		}
 	}
 }
 worldObjectDelete :: (scene: *TYPE) {
-	reset(*scene.pool, overwrite_memory=true);
-	previousAllocator := context.allocator;
-	context.allocator = scene.allocator;
-	free(scene/*,,allocator=scene.allocator*/);
-	context.allocator = previousAllocator;
+	allocatorReset(scene);
+	free(scene,,allocator=scene.allocator);
 }
 
 sceneUniformsUpdate :: (scene: *TYPE, time:Time) {

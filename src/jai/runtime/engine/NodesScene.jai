@@ -9,8 +9,8 @@ NodesScene :: struct {
 	time:Time=0;
 	timeGraphNode:TimeNode;
 	// nodes: [..]*GeoNodeAny;
-	validNodeTypes: Bit_Array;
-	nodeTypes: [..]*BaseNodeAny;
+	validNodes: Bit_Array;
+	nodes: [..]*BaseNodeAny;
 	worldScene: *Scene;
 	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;
@@ -36,15 +36,10 @@ newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 	// push_allocator(allocator);
 	scene: *NodesScene = alloc(size_of(NodesScene));
 	if _allocator == null {
-		flat_pool:Flat_Pool;
-		scene.pool = flat_pool;
-		scene.allocator.proc = flat_pool_allocator_proc;
-		scene.allocator.data = *scene.pool;
-		// scene.allocator = *get_unmapping_allocator();
+		allocatorAssign(scene);
 	} else {
 		scene.allocator = _allocator;
 	}
-	scene.defaultMaterial = xx newMaterial(NormalMeshMaterial, scene);
 	{
 		using scene;
 		// #if NODES_SCENE_EMIT_EVENTS {
@@ -74,7 +69,7 @@ sceneInit :: (scene: *NodesScene) {
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
 	// array_init(*nodes);
-	array_init(*nodeTypes, scene.allocator);
+	array_init(*nodes, scene.allocator);
 	nodeConnectionListInit(*connections);
 	array_init(*nodeInputCookResults, scene.allocator);
 	array_init(*cookResults, scene.allocator);
@@ -85,6 +80,8 @@ sceneInit :: (scene: *NodesScene) {
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
 	scene.worldScene = newScene(scene);
+	scene.defaultMaterial = xx newMaterial(scene.worldScene, NormalMeshMaterial);
+
 }
 
 // sceneAllocatorPush :: (scene: *NodesScene) #expand #no_debug {
