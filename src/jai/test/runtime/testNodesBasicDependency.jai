@@ -1,5 +1,6 @@
 testNodesBasicDependency :: () {
 	test("NodesBasicDependency", (){
+		assertLeaksCount(0, "leaks on start");
 		nodesScene := newNodesScene();
 		null1 := createNode(nodesScene, NullGeoNode);
 		assertEqual(null1.nodeId, 0, "nodeId starts at 0");
@@ -17,13 +18,21 @@ testNodesBasicDependency :: () {
 		assertNotNull(graph(box1.p.scale.graphId), "box1.scene.scale.graph not null");
 		
 		output1 := createNode(nodesScene, OutputGeoNode);
+		assertLeaksCount(.[21, 25], "leaks after creating output node");
 		// // assertNotEqual(cast(*void)box1.cook, cast(*void)output1.cook, "cook methods do not point to same method");
 
 		assertEqual(nodesScene.worldScene.children.count, 0);
 
 		setInput(output1, 0, box1);
 		setInput(output1, 1, icosahedron1);
+		// report_memory_leaks();
+		// assertEqual(leaksCount(), 0, "leaks before cook");
 		nodesSceneOutputNodesCompute(nodesScene);
+		// report_memory_leaks();
+		// assertEqual(leaksCount(), 0, "leaks on first cook");
+		assertEqual(nodeCooksCount(output1), 1);
+		assertEqual(nodeCooksCount(box1), 1);
+		assertEqual(nodeCooksCount(icosahedron1), 0, "icosahedron1 has not yet cooked");
 		assertEqual(nodesScene.worldScene.children.count, 1);
 		// // onBoxDirty :CoreGraphNodeOnDirtyMethod: (node: *CoreGraphNode) {
 		// // 	result = nodeCompute(box1);
@@ -32,6 +41,7 @@ testNodesBasicDependency :: () {
 		
 		paramSetValue(*box1.p.scale, 2);
 		nodesSceneOutputNodesCompute(nodesScene);
+		assertLeaksCount(1, "leaks on cook 1");
 		assertEqual(nodesScene.worldScene.children.count, 1);
 		box3:Box3;
 		firstGeometry :: (scene:*NodesScene)->*Geometry {
@@ -44,19 +54,36 @@ testNodesBasicDependency :: () {
 
 		paramSetValue(*box1.p.scale, 4);
 		nodesSceneOutputNodesCompute(nodesScene);
+		assertLeaksCount(1, "leaks on cook 3");
+		assertEqual(nodeCooksCount(box1), 3);
+		assertEqual(nodeCooksCount(icosahedron1), 0, "icosahedron1 has not yet cooked");
 		box3SetFromGeometry(*box3, firstGeometry(nodesScene));
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 24, "points count");
 		assertEqual(box3Size(*box3).x, 4, "size x");
 
-		// paramSetValue(*box1.p.segments, .{2,2,2});
-		// assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 54, "points count");
-		// paramSetValue(*box1.p.segments, .{12,4,3});
-		// assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
+		paramSetValue(*box1.p.segments, .{2,2,2});
+		nodesSceneOutputNodesCompute(nodesScene);
+		assertLeaksCount(1, "leaks on cook 4");
+		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 54, "points count");
+		paramSetValue(*box1.p.segments, .{12,4,3});
+		nodesSceneOutputNodesCompute(nodesScene);
+		// report_memory_leaks();
+		assertLeaksCount(1, "leaks on cook 5");
+		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
+		assertEqual(nodeCooksCount(box1), 5);
+		assertEqual(nodeCooksCount(icosahedron1), 0, "icosahedron1 has not yet cooked");
 
-		// paramSetValue(*output1.p.input, 1);
-		// assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 92, "points count");
-		// paramSetValue(*output1.p.input, 0);
-		// assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
+		paramSetValue(*output1.p.input, 1);
+		nodesSceneOutputNodesCompute(nodesScene);
+		assertEqual(nodeCooksCount(box1), 5);
+		assertEqual(nodeCooksCount(icosahedron1), 1);
+		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 92, "points count");
+
+		paramSetValue(*output1.p.input, 0);
+		nodesSceneOutputNodesCompute(nodesScene);
+		assertEqual(nodeCooksCount(box1), 5);
+		assertEqual(nodeCooksCount(icosahedron1), 1);
+		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 274, "points count");
 
 		// print("result: %\n", nodesScene.worldScene.children[0].geometry.attributes.position.values.count);
 		// paramSetValue(*box1.p.scale, 4.0);
@@ -66,10 +93,11 @@ testNodesBasicDependency :: () {
 		// paramSetValue(*box1.p.segments, Vector3UInt.{4,2,2});
 		// print("result: %\n", nodesScene.worldScene.children[0].geometry.attributes.position.values.count);
 
+		assertLeaksCount(1, "leak before scene delete");
 		sceneDelete(nodesScene);
 		// reset_temporary_storage();
-		report_memory_leaks();
-		assertEqual(leaksCount(), 0, "no leak when deleting an empty scene");
+		// report_memory_leaks();
+		assertLeaksCount(0, "no leak after scene delete");
 	});
 
 }

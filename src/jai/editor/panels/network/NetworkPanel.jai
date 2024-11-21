@@ -1,5 +1,8 @@
 
 NetworkPanel :: struct {
+	pool: Flat_Pool;
+	allocator: Allocator;
+	//
 	editor: *Editor;
 	sceneWorld: *Scene;
 	sceneRaycast: *Scene;
@@ -50,13 +53,19 @@ newNetworkPanel :: (editor: *Editor) -> *TYPE {
 networkPanelDelete :: (panel: *TYPE) {
 	using panel;
 
+	flat_pool:Flat_Pool;
+	panel.pool = flat_pool;
+	panel.allocator.proc = flat_pool_allocator_proc;
+	panel.allocator.data = *panel.pool;
+
 	// delete bg material
+	print("TODO: delete the network panel with the pool");
 	{
 		bgObject := sceneWorld.children[0];
 		mesh := cast(*Mesh)bgObject;
 		materialDelete(cast(*MATERIAL_BG)mesh.material);
 		geometryDelete(mesh.geometry);
-		object3DDelete(mesh);
+		worldObjectDelete(mesh);
 		sceneWorld.children[0] = null;
 	}
 	{
@@ -64,13 +73,13 @@ networkPanelDelete :: (panel: *TYPE) {
 		mesh := cast(*Mesh)bgObject;
 		materialDelete(cast(*MATERIAL_BG)mesh.material);
 		geometryDelete(mesh.geometry);
-		object3DDelete(mesh);
+		worldObjectDelete(mesh);
 		sceneRaycast.children[0] = null;
 	}
 
 	for object, i : sceneWorld.children {
 		if object != null {
-			object3DDelete(object);
+			generatedWorldObjectDelete(object);
 			sceneWorld.children[i] = null;
 		}
 	}
@@ -79,17 +88,17 @@ networkPanelDelete :: (panel: *TYPE) {
 			mesh := cast(*Mesh)object;
 			materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
 			geometryDelete(mesh.geometry);
-			object3DDelete(object);
+			generatedWorldObjectDelete(object);
 			sceneRaycast.children[i] = null;
 		}
 	}
 	
 	array_reset(*objectIndex);
-	object3DDelete(sceneWorld);
-	object3DDelete(sceneRaycast);
+	generatedWorldObjectDelete(sceneWorld);
+	generatedWorldObjectDelete(sceneRaycast);
 	materialDelete(basicMat);
 	print("panel deleted, %\n", panel);
-	free(panel);
+	free(panel,, panel.allocator);
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
@@ -143,15 +152,18 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 	_addMesh :: (panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:bool) {
 		using panel;
 
-		mesh := newMesh(Mesh, geometry);
+		#if forRaycast == true {
+			scene := sceneRaycast;
+		} else {
+			scene := sceneWorld;
+		}
+		mesh := newMesh(scene, Mesh, geometry);
 
 		#if forRaycast {
-			scene := sceneRaycast;
-			material := newMaterial(MATERIAL_RAYCAST);
+			material := newMaterial(MATERIAL_RAYCAST, panel.allocator);
 			material.uniforms.id = node.nodeId;
 			mesh.material = xx material;
 		} else {
-			scene := sceneWorld;
 			setColor(panel.basicMat, .{1.0, 0.5, 0.25, 1.0});
 			mesh.material = xx panel.basicMat;
 		}
@@ -237,18 +249,18 @@ MATERIAL_BASIC :: BackgroundMeshMaterial;
 networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	using panel;
 	editor = _editor;
-	sceneWorld = newObject3D(Scene);
-	sceneRaycast = newObject3D(Scene);
+	sceneWorld = newScene(panel.allocator);
+	sceneRaycast = newScene(panel.allocator);
 	camera.type = OrthographicCamera;
 	object3DInit(*camera);
 
-	basicMat = newMaterial(MATERIAL_BASIC);
+	basicMat = newMaterial(MATERIAL_BASIC, panel.allocator);
 	cameraControls.camera = *camera;
 
 	_addBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
-		mat := newMaterial(MATERIAL_BG);
+		mat := newMaterial(MATERIAL_BG, panel.allocator);
 		setColor(mat, color);
-		mesh0 := newObject3D(Mesh);
+		mesh0 := newObject3D(scene, Mesh);
 		assert(mesh0.geometry != null, "mesh0.geometry is null\n");
 		mesh0.material = xx mat;
 		geometry_plane_update(mesh0.geometry, size=.{2,2}, segments=.{1,1});

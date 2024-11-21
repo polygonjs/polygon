@@ -17,20 +17,19 @@ nodeInit :: (node: *TYPE) {
 }
 
 
-cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput) -> GeoNodeCookOutput {
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
 	// node := cast(*TYPE)scene.nodeTypes[nodeId];
-	mat := newMaterial(NormalMeshMaterial);
-	mesh := newObject3D(Mesh);
+	mesh := newMesh( graphNodeScene(node).worldScene, Mesh);
 
 	using node.p;
 	geometry_box_attributes_set(mesh.geometry, .{
 		size = mult(size.value, scale.value),
 		segments = segments.value
 	});
-	geometry_attributes_validate(mesh.geometry);
+	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
-	mesh.material = xx mat;
+	mesh.material = xx graphNodeScene(node).defaultMaterial;
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformable_update_matrix(mesh);
 

@@ -14,7 +14,7 @@
 // 	// 	size = mult(node.p.size.value, node.p.scale.value),
 // 	// 	segments = node.p.segments.value
 // 	// });
-// 	// geometry_attributes_validate(mesh.geometry);
+// 	// geometryAttributesValidate(mesh.geometry);
 // 	// normals_compute(mesh.geometry);
 
 // 	// mesh.material = mat;

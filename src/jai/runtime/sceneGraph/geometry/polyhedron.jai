@@ -44,7 +44,7 @@ subdivide :: (geometry: *Geometry, params: PolyhedronGeometryParams) {
 
 subdivide_face :: (geometry: *Geometry, a: Vector3, b: Vector3, c: Vector3, detail: u32) {
 	cols := detail + 1;
-	v :Vector3ArrayArray= NewArray(cols+1, *Vector3Array);
+	v :Vector3ArrayArray= NewArray(cols+1, *Vector3Array,,temp);
 	for i:0..cols {
 
 		rows := cols - i;

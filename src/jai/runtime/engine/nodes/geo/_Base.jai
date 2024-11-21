@@ -1,7 +1,7 @@
 GeoNodeCookOutput :: *Object3D;
 GeoNodeCookInput  :: [..]GeoNodeCookOutput;
 // GeoNodeCookMethod :: #type (node: *$T, inputs:GeoNodeCookInput) -> GeoNodeCookOutput;
-GeoNodeCookMethod :: #type (nodeId: $T, inputs:GeoNodeCookInput) -> GeoNodeCookOutput;
+GeoNodeCookMethod :: #type (nodeId: $T, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput;
 // GeoNode :: struct ($geoNodeT: Type, $geoParamsType: Type, $minInputs: u8=0, $maxInputs: u8=1) {
 // 	#as using baseNode: BaseNode(geoNodeT, NodeContext.GEOMETRY, geoParamsType, minInputs, maxInputs);
 // 	// baseNode.ctx = NodeContext.GEOMETRY;

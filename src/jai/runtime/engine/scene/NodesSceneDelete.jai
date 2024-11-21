@@ -14,14 +14,15 @@ sceneDelete :: (scene: *NodesScene) {
 		deinit(*validNodeTypes);
 		// for list: nodeInputCookResults { array_reset(*list); }
 		// array_reset(*nodeInputCookResults);
-		// for cookResult, i: cookResults { print("free:%,%\n", cookResult, i); object3DDelete(cookResult); }
+		// print("todo: use pool")
+		// for cookResult, i: cookResults { generatedWorldObjectDelete(cookResult); }
 		// array_reset(*cookResults);
 		graphDelete(*graph);
 		nodeConnectionListDelete(*connections);
 		// array_reset(*observers);
 		// observer = null;
 	}
-	object3DDelete(worldScene);
+	worldObjectDelete(worldScene);
 	// deinit_unmapping_allocator(a);
 	reset(*scene.pool, overwrite_memory=true);
 	free(scene/*,,allocator=scene.allocator*/);

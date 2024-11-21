@@ -10,9 +10,9 @@ registerMergeGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=128);
 }
 
-cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
-	mat := newMaterial(NormalMeshMaterial);
-	mesh := newObject3D(Mesh);
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCookOutput {
+	mesh := newObject3D(graphNodeScene(node).worldScene, Mesh);
+	mesh.material = xx graphNodeScene(node).defaultMaterial;
 
 	print("MergeGeoNode::cook not implemented\n");
 

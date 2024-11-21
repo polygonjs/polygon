@@ -13,8 +13,14 @@ MaterialBase :: struct ($UniformType: Type) {
 Material :: MaterialBase(Any);
 
 
-newMaterial :: ($T: Type) -> *T {
+newMaterial :: ($T: Type, scene: *NodesScene) -> *T {
+	return newMaterial(T, scene.allocator);
+}
+newMaterial :: ($T: Type, allocator: Allocator) -> *T {
+	previousAllocator := context.allocator;
+	context.allocator = allocator;
 	material: *T = alloc(size_of(T));
+	context.allocator = previousAllocator;
 	material.type = T;
 
 	material.id = NEXT_MATERIAL_ID;

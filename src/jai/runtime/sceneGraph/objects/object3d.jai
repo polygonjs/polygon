@@ -3,6 +3,7 @@ TransformableUniforms :: struct {
 }
 
 Object3D :: struct {
+	allocator: Allocator;
 	type: Type;
 	id: u64;
 	//
@@ -15,15 +16,20 @@ Object3D :: struct {
 }
 
 
-newObject3D :: ($T: Type) -> *T {
-	object := object3DAllocate(T);
+newObject3D :: (scene: *Scene, $T: Type) -> *T {
+	assert(T != Mesh, "Mesh is not allowed to be allocated with newObject3D, use newMesh instead\n");
+	object := object3DAllocate(T, scene.allocator);
 
 	object3DInit(object);
 
 	return object;
 }
-object3DAllocate :: ($T: Type)-> *T {
+object3DAllocate :: ($T: Type, allocator: Allocator)-> *T {
+	previousAllocator := context.allocator;
+	context.allocator = allocator;
 	object: *T = alloc(size_of(T));
+	context.allocator = previousAllocator;
+	object.allocator = allocator;
 	object.type = T;
 
 	object.id = NEXT_OBJECT3D_ID;
@@ -31,12 +37,15 @@ object3DAllocate :: ($T: Type)-> *T {
 	init_transformable(object);
 	return object;
 }
-object3DInit :: (object: *Object3D) {
+object3DInit :: (object: *TYPE) {
 	assert(cast(*void)object.type != null, "object.type is null\n");
 	init_transformable(object);
 }
-object3DDelete :: (object: *$T/Object3D) {
+worldObjectDelete :: (object: *TYPE) {
+	previousAllocator := context.allocator;
+	context.allocator = object.allocator;
 	free(object);
+	context.allocator = previousAllocator;
 }
 
 init_transformable :: (object: *Object3D) {
@@ -71,3 +80,4 @@ transformable_uniforms_update :: (object: *Object3D) {
 #scope_file
 
 NEXT_OBJECT3D_ID :u64= 0;
+TYPE :: Object3D;

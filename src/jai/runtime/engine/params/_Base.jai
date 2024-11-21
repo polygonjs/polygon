@@ -21,6 +21,7 @@ paramValueByType :: (T:Type, $doAssert:bool=true)->Type {
 	if T == {
 		// case ParamType.ANY; return u8;
 		case FloatParam; return float32;
+		case UInt8Param; return u8;
 		case UIntegerParam; return u32;
 		case Vector3Param; return Vector3;
 		case Vector3UIntParam; return Vector3UInt;
@@ -35,6 +36,7 @@ paramValueByType :: (T:Type, $doAssert:bool=true)->Type {
 paramType :: (typeName:string)->Type {
 	if typeName == {
 		case "FloatParam"; return FloatParam;
+		case "UInt8Param"; return UInt8Param;
 		case "UIntegerParam"; return UIntegerParam;
 		case "Vector3Param"; return Vector3Param;
 		case "Vector3UIntParam"; return Vector3UIntParam;
@@ -45,6 +47,7 @@ paramType :: (typeName:string)->Type {
 initParamByType :: (param: *$P, node: *$N) {
 	if param.type == {
 		case FloatParam; {initParam(cast(*FloatParam)param, node);return;}
+		case UInt8Param; {initParam(cast(*UInt8Param)param, node);return;}
 		case UIntegerParam; {initParam(cast(*UIntegerParam)param, node);return;}
 		case Vector3Param; {initParam(cast(*Vector3Param)param, node);return;}
 		case Vector3UIntParam; {initParam(cast(*Vector3UIntParam)param, node);return;}

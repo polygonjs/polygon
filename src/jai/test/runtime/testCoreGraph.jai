@@ -6,7 +6,7 @@ testCoreGraph :: () {
 				nodesScene := newNodesScene();
 				sceneDelete(nodesScene);
 				// report_memory_leaks();
-				assertEqual(leaksCount(), 0, "no leak when deleting an empty scene");
+				assertLeaksCount(0, "no leak when deleting an empty scene");
 			}
 			{
 				// scene with 1 node
@@ -16,7 +16,7 @@ testCoreGraph :: () {
 				sceneDelete(nodesScene);
 				// report_memory_leaks();
 				// print("leaksCount(): %\n", leaksCount());
-				assertEqual(leaksCount(), 0, "no leak when deleting a scene with 1 node");
+				assertLeaksCount(0, "no leak when deleting a scene with 1 node");
 			}
 			{
 				// scene with 2 node, input of one another
@@ -28,7 +28,7 @@ testCoreGraph :: () {
 				sceneDelete(nodesScene);
 				// report_memory_leaks();
 				// print("leaksCount(): %\n", leaksCount());
-				assertEqual(leaksCount(), 0, "no leak when deleting a scene with 2 nodes");
+				assertLeaksCount(0, "no leak when deleting a scene with 2 nodes");
 			}
 			{
 				// scene with 3 node, and we have updated a param value
@@ -42,7 +42,7 @@ testCoreGraph :: () {
 				// sceneDeleteNode(nodesScene, box1);
 				sceneDelete(nodesScene);
 				report_memory_leaks();
-				assertEqual(leaksCount(), 0, "no leak when deleting a scene with 3 nodes");
+				assertLeaksCount(0, "no leak when deleting a scene with 3 nodes");
 			}
 		});
 	}

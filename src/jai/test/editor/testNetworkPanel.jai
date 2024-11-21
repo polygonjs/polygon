@@ -36,7 +36,7 @@ testNetworkPanel :: () {
 		sceneDelete(nodesScene);
 		editorDelete(editor);
 		report_memory_leaks();
-		assertEqual(leaksCount(), 0, "no leak when deleting a scene with 4 nodes");
+		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
 }
 

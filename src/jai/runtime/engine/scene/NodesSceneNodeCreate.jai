@@ -6,10 +6,10 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 	// node:*BaseNode;
 	// {	
 		// push_allocator(scene.allocator);
-		old_allocator := context.allocator;
+		previousAllocator := context.allocator;
 		context.allocator = scene.allocator;
 		node := New(T);
-		context.allocator = old_allocator;
+		context.allocator = previousAllocator;
 		node.type = T;
 		node.nodeId = nextNodeId;
 		node.nodeTypeId = nodeTypeId;
@@ -28,6 +28,7 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 		array_resize(*nodeTypes, newSize);
 		array_resize(*nodeInputCookResults, newSize);
 		array_resize(*cookResults, newSize);
+		array_resize(*cooksCount, newSize);
 		bit_array_resize(*validNodeTypes, newSize);
 	}
 

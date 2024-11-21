@@ -14,6 +14,8 @@ SceneUniforms :: struct {
 Scene :: struct {
 	#as using object3D: Object3D;
 
+	pool: Flat_Pool;
+
 	children: [..]*Object3D;
 
 	scene_uniforms: SceneUniforms;
@@ -28,13 +30,28 @@ Scene :: struct {
 	// segments: Vector3Int = .{128, 128, 128};
 	// noise:SceneDataNoise;
 };
+newScene :: (scene: *NodesScene) -> *TYPE {
+	return newScene(scene.allocator);
+}
+newScene :: (allocator: Allocator) -> *TYPE {
+	scene := object3DAllocate(TYPE, allocator);
 
-object3DInit :: (scene: *Scene) {
+	flat_pool:Flat_Pool;
+	scene.pool = flat_pool;
+	scene.allocator.proc = flat_pool_allocator_proc;
+	scene.allocator.data = *scene.pool;
+
+	object3DInit(scene);
+
+	return scene;
+}
+
+object3DInit :: (scene: *TYPE) {
 	object3DInit(cast(*Object3D)scene);
 	array_init(*scene.children, temp);
 }
 
-sceneObjectAdd :: (scene: *Scene, object: *Object3D) {
+sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
 	for child, i: scene.children {
 		if child == null {
 			scene.children[i] = object;
@@ -43,16 +60,24 @@ sceneObjectAdd :: (scene: *Scene, object: *Object3D) {
 	}
 	array_add(*scene.children, object);
 }
-sceneObjectRemove :: (scene: *Scene, object: *Object3D) {
+sceneObjectRemove :: (scene: *TYPE, object: *Object3D) {
 	for child, i: scene.children {
 		if child == object {
 			scene.children[i] = null;
-			object3DDelete(object);
+			generatedWorldObjectDelete(object);
+			return;
 		}
 	}
 }
+worldObjectDelete :: (scene: *TYPE) {
+	reset(*scene.pool, overwrite_memory=true);
+	previousAllocator := context.allocator;
+	context.allocator = scene.allocator;
+	free(scene/*,,allocator=scene.allocator*/);
+	context.allocator = previousAllocator;
+}
 
-sceneUniformsUpdate :: (scene: *Scene, time:Time) {
+sceneUniformsUpdate :: (scene: *TYPE, time:Time) {
 	scene.scene_uniforms.time.x = time;
 
 	for scene.children {
@@ -69,6 +94,6 @@ sceneUniformsUpdate :: (scene: *Scene, time:Time) {
 
 #scope_file
 
-
+TYPE :: Scene;
 
 

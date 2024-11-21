@@ -1,54 +1,47 @@
-VertexIndex :: u32;
 
-GeometryAttribute :: struct($T: Type, $F: WGPUVertexFormat) {
-	values: [..]T;
-	format:WGPUVertexFormat = F;
-}
-geometryAttributeDelete :: (attribute: *GeometryAttribute($T, $F)) {
-	array_reset(*attribute.values);
-}
-
-GeometryAttributes :: struct {
-	position: GeometryAttribute(Vector3, .Float32x3);
-	normal: GeometryAttribute(Vector3, .Float32x3);
-	// color: GeometryAttribute(Vector3, .Float32x3);
-	uv: GeometryAttribute(Vector2, .Float32x2);
-}
-geometryAttributesDelete :: (attributes: *GeometryAttributes) {
-	using attributes;
-	geometryAttributeDelete(*position);
-	geometryAttributeDelete(*normal);
-	geometryAttributeDelete(*uv);
-}
 
 Geometry :: struct {
+	allocator: Allocator;
 	attributes: GeometryAttributes;
 	indices: [..]VertexIndex;
 }
+newGeometry :: (allocator: Allocator) -> *Geometry {
+	previousAllocator := context.allocator;
+	context.allocator = allocator;
+	geometry :*Geometry= New(Geometry);
+	context.allocator = previousAllocator;
+	geometry.allocator = allocator;
+	geometryAttributesSetAllocator(*geometry.attributes, allocator);
+	geometry.indices.allocator = allocator;
+	return geometry;
+}
 geometryDelete :: (geometry: *Geometry) {
+	previousAllocator := context.allocator;
+	context.allocator = geometry.allocator;
 	geometryAttributesDelete(*geometry.attributes);
 	array_reset(*geometry.indices);
-	free(geometry);
+	free(geometry,, geometry.allocator);
+	context.allocator = previousAllocator;
 }
 
 geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt) {
 	geometry_box_attributes_set(geometry, .{segments = segments});
-	geometry_attributes_validate(geometry);
+	geometryAttributesValidate(geometry);
 	normals_compute(geometry);
 }
 geometry_icosahedron_update :: (geometry: *Geometry, detail: u8) {
 	geometry_icosahedron_attributes_set(geometry, .{detail = detail});
-	geometry_attributes_validate(geometry);
+	geometryAttributesValidate(geometry);
 	normals_compute(geometry);
 }
 geometry_plane_update :: (geometry: *Geometry, size: Vector2=.{1,1}, segments: Vector2UInt=.{1,1}) {
 	geometry_plane_attributes_set(geometry, .{size = size, segments = segments});
-	geometry_attributes_validate(geometry);
+	geometryAttributesValidate(geometry);
 	normals_compute(geometry);
 }
 geometry_sphere_update :: (geometry: *Geometry, segments: Vector2UInt) {
 	geometry_sphere_attributes_set(geometry, .{widthSegments = segments.x, heightSegments = segments.y});
-	geometry_attributes_validate(geometry);
+	geometryAttributesValidate(geometry);
 	normals_compute(geometry);
 }
 
@@ -62,11 +55,3 @@ geometry_add_noise :: (geometry: *Geometry, freq: Vector3) {
 	normals_compute(geometry);
 }
 
-geometry_attributes_validate :: (geometry: *Geometry) {
-	using geometry.attributes;
-	points_count := position.values.count;
-	assert(points_count > 0, "points count is 0");
-	assert(points_count == normal.values.count, tprint("geometry_attributes_validate: position count (%) and normal count (%) mismatch\n", points_count, normal.values.count));
-	// assert(points_count == geometry.attributes.color.values.count, "geometry_attributes_validate: position and color count mismatch");
-	assert(points_count == uv.values.count, tprint("geometry_attributes_validate: position count (%) and uv count (%) mismatch\n", points_count, uv.values.count));
-}

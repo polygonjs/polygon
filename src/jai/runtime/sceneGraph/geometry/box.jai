@@ -10,16 +10,16 @@ geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) 
 	count0 := plane_points_and_indices_count(params.segments.x, params.segments.y);
 	count1 := plane_points_and_indices_count(params.segments.x, params.segments.z);
 	count2 := plane_points_and_indices_count(params.segments.y, params.segments.z);
-	points_count := (count0.points_count + count1.points_count + count2.points_count) * 2;
+	pointsCount := (count0.pointsCount + count1.pointsCount + count2.pointsCount) * 2;
 	// print("box points_count:u64=%;\n", points_count);
-	indices_count := (count0.indices_count + count1.indices_count + count2.indices_count) * 2;
+	indicesCount := (count0.indicesCount + count1.indicesCount + count2.indicesCount) * 2;
 	// print("index_count:u64=%;\n", indices_count);
 
-	array_resize(*geometry.attributes.position.values, points_count, false);
-	array_resize(*geometry.attributes.normal.values, points_count, false);
+	array_resize(*geometry.attributes.position.values, pointsCount, false);
+	array_resize(*geometry.attributes.normal.values, pointsCount, false);
 	// array_resize(*geometry.attributes.color.values, points_count, false);
-	array_resize(*geometry.attributes.uv.values, points_count, false);
-	array_resize(*geometry.indices, indices_count, false);
+	array_resize(*geometry.attributes.uv.values, pointsCount, false);
+	array_resize(*geometry.indices, indicesCount, false);
 
 	offset:BuildPlaneOffset = .{points = 0, indices = 0};
 
@@ -36,13 +36,13 @@ geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) 
 
 
 PointsAndIndicesCount :: struct {
-	points_count: u32;
-	indices_count: u32;
+	pointsCount: u32;
+	indicesCount: u32;
 }
 plane_points_and_indices_count :: ( segmentsX: u32, segmentsY: u32 ) -> PointsAndIndicesCount {
-	points_count := (segmentsX+1) * (segmentsY+1);
-	indices_count := segmentsX * segmentsY * 6;
-	return .{points_count, indices_count};
+	pointsCount := (segmentsX+1) * (segmentsY+1);
+	indicesCount := segmentsX * segmentsY * 6;
+	return .{pointsCount, indicesCount};
 }
 BuildPlaneOffset :: struct {
 	points: u32;

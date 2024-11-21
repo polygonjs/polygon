@@ -3,7 +3,7 @@
 generatedNodeCompute :: (scene: *NodesScene, inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 	#insert GENERATED_CODE_NODE_COMPUTE;
 	assert(false, tprint("generatedNodeCompute: node type '%' is not implemented", inputNode.type));
-	return newObject3D(Mesh);
+	return newObject3D(scene.worldScene, Mesh);
 }
 
 generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {

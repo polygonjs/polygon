@@ -14,7 +14,9 @@ NodesScene :: struct {
 	worldScene: *Scene;
 	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;
+	cooksCount:[..]u32;
 	connections: NodeConnectionList;
+	defaultMaterial: *Material;
 
 	// #if NODES_SCENE_EMIT_EVENTS { // maybe let's keep this in the struct until we have tested serializing
 		// observers:[..]Any;
@@ -42,7 +44,7 @@ newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 	} else {
 		scene.allocator = _allocator;
 	}
-
+	scene.defaultMaterial = xx newMaterial(NormalMeshMaterial, scene);
 	{
 		using scene;
 		// #if NODES_SCENE_EMIT_EVENTS {
@@ -76,12 +78,13 @@ sceneInit :: (scene: *NodesScene) {
 	nodeConnectionListInit(*connections);
 	array_init(*nodeInputCookResults, scene.allocator);
 	array_init(*cookResults, scene.allocator);
+	array_init(*cooksCount, scene.allocator);
 	graphInit(*graph, scene);
 	// scene.timeGraphNode.type = TimeNode;
 	scene.timeGraphNode.name = "TimeNode";
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
-	scene.worldScene = newObject3D(Scene);
+	scene.worldScene = newScene(scene);
 }
 
 // sceneAllocatorPush :: (scene: *NodesScene) #expand #no_debug {
