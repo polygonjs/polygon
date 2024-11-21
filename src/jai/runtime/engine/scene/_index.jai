@@ -1,4 +1,5 @@
 // scene
+#load "NodesSceneCompute.jai";
 #load "NodesSceneDelete.jai";
 #load "NodesSceneEvent.jai";
 #load "NodesSceneTime.jai";

@@ -37,12 +37,13 @@ NodeContext :: enum u8 {
 // }
 // BaseNodeAny :: BaseNode(Any, NodeContext.ANY, Any);
 
-BaseNode :: struct {
-	#as using coreGraphNode: CoreGraphNode;
+BaseNode :: struct ($BaseNodeType: Type, $ParamsType: Type){
+	#as using coreGraphNode: CoreGraphNode(BaseNodeType);
 	nodeId:NodeId;
 	nodeTypeId:u64;
+	p:ParamsType;
 }
-BaseNodeAny :: BaseNode;
+BaseNodeAny :: BaseNode(Any, Any);
 
 // createNode :: (scene: *NodesScene, $T: Type) -> NodeId {
 // 	// node: *T = alloc(size_of(T));
@@ -88,9 +89,9 @@ BaseNodeAny :: BaseNode;
 
 TYPE :: BaseNodeAny;
 
-initBaseNode :: (node: *$T) {
-	array_init(*node.params);
-	nodeParamsInit(node);
-}
+// initBaseNode :: (node: *$T) {
+// 	// array_init(*node.params);
+// 	nodeParamsInit(node);
+// }
 
 

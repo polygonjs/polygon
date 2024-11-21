@@ -7,7 +7,7 @@ CoreGraph :: struct {
 	scene: *NodesScene;
 	nodes: [..]*CoreGraphNodeAny;
 	dirty: Bit_Array;
-	onDirtyCallbacks:[..]CoreGraphNodeOnDirtyMethod;
+	// onDirtyCallbacks:[..]CoreGraphNodeOnDirtyMethod;
 	predecessors: [..][..]CoreGraphNodeId;
 	successors: [..][..]CoreGraphNodeId;
 	allPredecessors: [..][..]CoreGraphNodeId;
@@ -62,7 +62,7 @@ graphClearConnections :: (graph: *CoreGraph) {
 graphDelete :: (graph: *CoreGraph) {
 	using graph;
 	array_reset(*nodes);
-	array_reset(*onDirtyCallbacks);
+	// array_reset(*onDirtyCallbacks);
 	
 	graphClearConnections(graph);
 
@@ -71,7 +71,7 @@ graphDelete :: (graph: *CoreGraph) {
 	deinit(*dirty);
 }
 
-graphAddNode :: (graph: *CoreGraph, graphNode: *CoreGraphNode, onDirtyCallback:CoreGraphNodeOnDirtyMethod=null) {
+graphAddNode :: (graph: *CoreGraph, graphNode: *$T/*, onDirtyCallback:CoreGraphNodeOnDirtyMethod=null*/) {
 	assert(graphNode.graphNodeId == 0, "graphAddNode: graphNode.graphId is not 0");
 	
 	using graph;
@@ -86,7 +86,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *CoreGraphNode, onDirtyCallback:C
 	newSize := nextGraphNodeId;
 	if newSize > nodes.count {
 		array_resize(*nodes, newSize);
-		array_resize(*onDirtyCallbacks, newSize);
+		// array_resize(*onDirtyCallbacks, newSize);
 		array_resize(*predecessors, newSize);
 		array_resize(*successors, newSize);
 		array_resize(*allPredecessors, newSize);
@@ -98,9 +98,9 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *CoreGraphNode, onDirtyCallback:C
 	}
 
 	// table_set(*nodeById, graphNode.graphNodeId, graphNode);
-	nodes[graphNode.graphNodeId] = graphNode;
+	nodes[graphNode.graphNodeId] = cast(*CoreGraphNodeAny)graphNode;
 	dirty[graphNode.graphNodeId] = true;
-	onDirtyCallbacks[graphNode.graphNodeId] = onDirtyCallback;
+	// onDirtyCallbacks[graphNode.graphNodeId] = onDirtyCallback;
 	allPredecessorsDirty[graphNode.graphNodeId] = true;
 	allSuccessorsDirty[graphNode.graphNodeId] = true;
 }
@@ -108,7 +108,7 @@ graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
 	using graph;
 
 	nodes[graphNode.graphNodeId] = null;
-	onDirtyCallbacks[graphNode.graphNodeId] = null;
+	// onDirtyCallbacks[graphNode.graphNodeId] = null;
 	// array_reset_keeping_memory(*predecessors[graphNode.graphNodeId]);
 	// array_reset_keeping_memory(*successors[graphNode.graphNodeId]);
 	// array_reset_keeping_memory(*allPredecessors[graphNode.graphNodeId]);
@@ -177,20 +177,20 @@ setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 			// setDirty(graph, nodes[successorId], propagate=false);
 			dirty[successorId] = true;
 		}
-		for successorId: allSuccessors[graphNode.graphNodeId] {
-			onDirtyCallback := onDirtyCallbacks[successorId];
-			if onDirtyCallback != null {
-				onDirtyCallback(graph, nodes[successorId]);
-			}
-		}
+		// for successorId: allSuccessors[graphNode.graphNodeId] {
+		// 	onDirtyCallback := onDirtyCallbacks[successorId];
+		// 	if onDirtyCallback != null {
+		// 		onDirtyCallback(graph, nodes[successorId]);
+		// 	}
+		// }
 
-		{
-			onDirtyCallback := onDirtyCallbacks[graphNode.graphNodeId];
-			if onDirtyCallback != null {
-				assert(graphNode.graphNodeId == nodes[graphNode.graphNodeId].graphNodeId, "setDirty: graphNode and nodes[graphNode.graphNodeId] are not the same");
-				onDirtyCallback(graph, graphNode);
-			}
-		}
+		// {
+		// 	onDirtyCallback := onDirtyCallbacks[graphNode.graphNodeId];
+		// 	if onDirtyCallback != null {
+		// 		assert(graphNode.graphNodeId == nodes[graphNode.graphNodeId].graphNodeId, "setDirty: graphNode and nodes[graphNode.graphNodeId] are not the same");
+		// 		onDirtyCallback(graph, graphNode);
+		// 	}
+		// }
 	}
 }
 

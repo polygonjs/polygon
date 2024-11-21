@@ -1,13 +1,13 @@
 
-nodeCompute :: (scene:*NodesScene, nodeId: NodeId, depth:u8=0) -> GeoNodeCookOutput {
+nodeCompute :: (scene:*NodesScene, node: *$T, depth:u8=0) -> GeoNodeCookOutput {
 	// assert(node != null, "nodeCompute: node name is null");
 	// scene := graphNodeScene(node);
 	using scene;
 	// print("% 2.nodeCompute %\n", indent(depth), <<node);
 	// sceneDebug(node.scene, tprint("%nodeCompute %", indent(depth), node.name));
-	node := nodeTypes[nodeId];
+	// node := nodeTypes[node.nodeId];
 	if isDirty(*graph, node.graphNodeId) == false {
-		result := cookResults[nodeId];
+		result := cookResults[node.nodeId];
 		if result != null {
 			return result;
 		}
@@ -34,17 +34,15 @@ nodeCompute :: (scene:*NodesScene, nodeId: NodeId, depth:u8=0) -> GeoNodeCookOut
 		if srcConnectionId != 0 {
 			connection := connections.connections[srcConnectionId];
 			inputNodeId := connection.src.nodeId;
-			// inputNode := nodes[connection.src.nodeId];
+			inputNode := nodeTypes[connection.src.nodeId];
 			inputIndex := connection.dest.inputIndex;
-			nodeInputCookResults[node.nodeId][inputIndex] = nodeCompute(scene, inputNodeId, depth+1);
+			nodeInputCookResults[node.nodeId][inputIndex] = generatedNodeCompute(scene, inputNode, depth+1);
 		}
 	}
 	
-	nodeTypeData := scene.nodeTypes[nodeId];
-	nodeTypeId := nodeTypeData.nodeTypeId;
-	cookMethod := COOK_METHODS[nodeTypeId];
+	// cookMethod := nodeCookMethod(scene, nodeId);
 	// print("%inputResults POST: %\n", indent(depth), inputResults);
-	result := cookMethod(scene, nodeId, nodeInputCookResults[node.nodeId]);
+	result := cook(node, nodeInputCookResults[node.nodeId]);//cookMethod(scene, nodeId, nodeInputCookResults[node.nodeId]);
 	unSetDirty(*graph, node.graphNodeId);
 	// TODO: dispose previous result
 
@@ -55,6 +53,15 @@ nodeCompute :: (scene:*NodesScene, nodeId: NodeId, depth:u8=0) -> GeoNodeCookOut
 	cookResults[node.nodeId] = result;
 	return result;
 }
+// nodeCookMethod :: (node: $T)->GeoNodeCookMethod {
+// 	return nodeCookMethod(graphNodeScene(node), node.nodeId);
+// }
+// nodeCookMethod :: (scene:*NodesScene, nodeId: NodeId)->GeoNodeCookMethod {
+// 	nodeTypeData := scene.nodeTypes[nodeId];
+// 	nodeTypeId := nodeTypeData.nodeTypeId;
+// 	cookMethod := COOK_METHODS[nodeTypeId];
+// 	return cookMethod;
+// }
 
 
 

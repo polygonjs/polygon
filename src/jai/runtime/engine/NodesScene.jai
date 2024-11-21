@@ -10,7 +10,7 @@ NodesScene :: struct {
 	timeGraphNode:TimeNode;
 	// nodes: [..]*GeoNodeAny;
 	validNodeTypes: Bit_Array;
-	nodeTypes: [..]*BaseNode;
+	nodeTypes: [..]*BaseNodeAny;
 	worldScene: *Scene;
 	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;

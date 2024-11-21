@@ -1,4 +1,4 @@
-createNode :: (scene: *NodesScene, $T:Type)->*BaseNode {
+createNode :: (scene: *NodesScene, $T:Type)->*T {
 	using scene;
 
 	// node.nodeId = nextNodeId;
@@ -8,13 +8,14 @@ createNode :: (scene: *NodesScene, $T:Type)->*BaseNode {
 		// push_allocator(scene.allocator);
 		old_allocator := context.allocator;
 		context.allocator = scene.allocator;
-		node := New(BaseNode);
+		node := New(T);
 		context.allocator = old_allocator;
+		node.type = T;
 		node.nodeId = nextNodeId;
 		node.nodeTypeId = nodeTypeId;
 		node.name = tprint("%",T);
 	// }
-	onDirty := ON_DIRTY_METHODS[nodeTypeId];
+	// onDirty := ON_DIRTY_METHODS[nodeTypeId];
 	
 	nextNodeId += 1;
 	while nextNodeId < nodeTypes.count && validNodeTypes[nextNodeId]==true {
@@ -30,16 +31,17 @@ createNode :: (scene: *NodesScene, $T:Type)->*BaseNode {
 		bit_array_resize(*validNodeTypes, newSize);
 	}
 
-	maxInputsCount := NODE_INPUTS_COUNT[node.nodeTypeId].max;
+	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
 	nodeInputCookResults[node.nodeId].allocator = scene.allocator;
 	array_resize(*nodeInputCookResults[node.nodeId], maxInputsCount);
 
 	// nodes[node.nodeId] = xx node;
-	nodeTypes[node.nodeId] = node;
-	graphAddNode(*graph, node, onDirty);
+	nodeTypes[node.nodeId] = cast(*BaseNodeAny)node;
+	graphAddNode(*graph, node);
 	validNodeTypes[node.nodeId] = true;
 	// validNodeIds[node.nodeId] = true;
 	nodeConnectionInitForNode(*connections, node.nodeId);
+	nodeParamsInit(node);
 
 	#if NODES_SCENE_EMIT_EVENTS {
 		sceneEmitEvent(scene, NodesSceneEvent.NODE_ADDED, node.nodeId);

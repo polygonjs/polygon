@@ -5,8 +5,13 @@ OutputGeoParams :: struct {
 	input: UIntegerParam = .{value=0};
 }
 OutputGeoNode :: struct {
-	// #as using geoNode: GeoNode(OutputGeoNode, OutputGeoParams, maxInputs=10);
+	#as using geoNode: GeoNode(OutputGeoNode, OutputGeoParams);
 };
+
+
+registerOutputGeoNode :: (){
+	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=10);
+}
 
 nodeInit :: (_node: *TYPE) {
 	node := cast(*TYPE)_node;
@@ -16,9 +21,27 @@ nodeInit :: (_node: *TYPE) {
 	// print("node.params.count 2: %, %\n", node.params.count, node.params);
 	// init_geo_node(node);
 }
-registerOutputGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1, cook=cook, onDirty=onDirty);
+
+cook :GeoNodeCookMethod: (node: *TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
+	selectedIndex := ifx node.p.input.value < inputs.count then node.p.input.value else inputs.count - 1;
+	input := inputs[selectedIndex];
+	scene := graphNodeScene(node);
+	// node := scene.nodeTypes[nodeId];
+	// scene := graphNodeScene(node);
+	print("cook output:%\n", input);
+	if input != null {
+		array_resize(*scene.worldScene.children, 1);
+		scene.worldScene.children[0] = xx input;
+		print("set child\n");
+	} else {
+		array_resize(*scene.worldScene.children, 0);
+		print("set child to null\n");
+	}
+
+	return input;
+	// return null;
 }
+
 
 
 #scope_file
@@ -31,28 +54,12 @@ nodeCast :: (node: *CoreGraphNodeAny)->*TYPE {
 }
 
 onDirty :CoreGraphNodeOnDirtyMethod: (graph:*CoreGraph, graphNode: *CoreGraphNode) {
-	node := cast(*BaseNode)graphNode;
+	node := cast(*BaseNodeAny)graphNode;
 	scene := graph.scene;
 	// print("cast: %\n", <<(cast(*TYPE) coreGraphNode));
-	nodeCompute(scene, node.nodeId);
+	nodeCompute(scene, node);
 }
 // nodeComputeOutputGeoNode :NodeComputeMethod: (node: *TYPE, depth:u8=0)->GeoNodeCookOutput {
 // 	return nodeCompute(cast(*TYPE)node, depth);
 // }
 
-cook :GeoNodeCookMethod: (scene: *NodesScene, nodeId: NodeId, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
-	selectedIndex := 0;//ifx node.p.input.value < inputs.count then node.p.input.value else inputs.count - 1;
-	input := inputs[selectedIndex];
-	// node := scene.nodeTypes[nodeId];
-	// scene := graphNodeScene(node);
-
-	if input != null {
-		array_resize(*scene.worldScene.children, 1);
-		scene.worldScene.children[0] = xx input;
-	} else {
-		array_resize(*scene.worldScene.children, 0);
-	}
-
-	return input;
-	// return null;
-}

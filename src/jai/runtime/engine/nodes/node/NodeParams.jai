@@ -27,7 +27,8 @@ nodeParamsInit :: (node: *$N) {
 
 	for :params param: node {
 		if cast(*void)param.type == null {
-			param.type = type;
+			assert(false, "*** handle_params: param.type is null\n");
+			// param.type = type;
 		}
 		initParamByType(param, node);
 	}

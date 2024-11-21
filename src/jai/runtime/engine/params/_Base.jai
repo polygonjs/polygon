@@ -53,8 +53,8 @@ initParamByType :: (param: *$P, node: *$N) {
 }
 
 BaseParam :: struct ($paramType: Type, $valueType: Type) {
-	#as using coreGraphNode: CoreGraphNode;//(paramType);
-	// type: ParamType= paramType;
+	#as using coreGraphNode: CoreGraphNode(paramType);
+	// type: Type= paramType;
 	// paramType:ParamType=ParamTypeValue;
 	node: *BaseNodeAny;
 	value: valueType;
@@ -82,9 +82,9 @@ initParam :: (param: *$P, node: *$N) {
 	param.type = P;
 	// tmp:P;
 
-	graphNodeInit(param, graph(node.graphId));
+	graphAddNode(graph(node.graphId), param);
 
-	array_add(*node.params, xx param);
+	// array_add(*node.params, xx param);
 	graphNodeConnect(src=param, dest=node, false);
 
 	// initBaseParam(param);

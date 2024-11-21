@@ -36,7 +36,6 @@ do_exit := false;
 main :: () {
 	#if WASM==true call_from_wasm_context = context;
 
-	registerNodes();
 	#if RUN_TESTS {
 		runTests();
 		#if WASM==false {

@@ -10,8 +10,10 @@ setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex
 // }
 {
 	// #assert(N0.ctx == N1.ctx);
-	assert(NODE_CONTEXTS[node.nodeTypeId] == NODE_CONTEXTS[inputNode.nodeTypeId], "nodes have different contexts");
+	assert(NODE_METADATAS[node.nodeTypeId].ctx == NODE_METADATAS[inputNode.nodeTypeId].ctx, "nodes have different contexts");
 	assert(node.nodeId != inputNode.nodeId, "node ids must be different");
+	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+	assert(inputIndex < maxInputsCount, "input index out of bounds");
 	// node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
 	connectionCreated := graphNodeConnect(src=inputNode, dest=node, checkCycle=true);

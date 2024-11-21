@@ -1,10 +1,10 @@
 
 
-// generatedNodeCompute :: (inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
-// 	#insert GENERATED_CODE_NODE_COMPUTE;
-// 	assert(false, tprint("generatedNodeCompute: node type '%' is not implemented", inputNode.type));
-// 	return newObject3D(Mesh);
-// }
+generatedNodeCompute :: (scene: *NodesScene, inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
+	#insert GENERATED_CODE_NODE_COMPUTE;
+	assert(false, tprint("generatedNodeCompute: node type '%' is not implemented", inputNode.type));
+	return newObject3D(Mesh);
+}
 
 generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
@@ -13,6 +13,8 @@ generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:boo
 
 registerNodes :: () {
 
+	array_reset(*TMP_METADATAS);
+
 	registerBoxGeoNode();
 	registerIcosahedronGeoNode();
 	registerMergeGeoNode();
@@ -20,19 +22,42 @@ registerNodes :: () {
 	registerOutputGeoNode();
 	
 }
-registerNodesAndGenerateCode :: () -> sceneNodeDelete:string {
+nodesMetaDatasCount :: ()->u64{
+	registerNodes();
+	return xx TMP_METADATAS.count;
+}
+nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData {
+	registerNodes();
+
+	list:[NODE_METADATAS_COUNT]NodeMetaData;
+
+	for nodeMetaData, i: TMP_METADATAS {
+		list[i] = nodeMetaData;
+	}
+	return list;
+}
+
+registerNodesAndGenerateCode :: () -> (nodeCompute:string, sceneNodeDelete:string) {
 
 	registerNodes();
 
-	// nodeCompute := generateNodeComputes();
+	nodeCompute := generateNodeComputes();
 	sceneNodeDelete := generateSceneNodeDelete();
 
-	// return 	nodeCompute,
-	return		sceneNodeDelete;
+	return 	nodeCompute,
+	sceneNodeDelete;
 }
 
 getNodeTypeId :: (T:Type)->u64 {
-	found, index := array_find(NODE_TYPES, T);
+	index := -1;
+	found := false;
+	for nodeMetaData, i: NODE_METADATAS {
+		if nodeMetaData.type == T {
+			found = true;
+			index = i;
+			break;
+		}
+	}
 	assert(found, tprint("node type not found: '%'", T));
 	// assert(found, "node type not found");
 	return xx index;
@@ -42,21 +67,25 @@ nodeRegister :: (
 	ctx: NodeContext,
 	$T:Type,
 	minInputsCount:u8,
-	maxInputsCount:u8,
-	cook:GeoNodeCookMethod,
-	onDirty:CoreGraphNodeOnDirtyMethod=null
+	maxInputsCount:u8
+	// cook:GeoNodeCookMethod,
+	// onDirty:CoreGraphNodeOnDirtyMethod=null
 	) {
-	
-	array_add(*NODE_CONTEXTS, ctx);
-	array_add(*NODE_TYPES, T);
-	array_add(*NODE_INPUTS_COUNT, .{min=minInputsCount, max=maxInputsCount});
-	printRed("REGISTERS\n");
-	print(">>> registered node type '%' minInputsCount: % maxInputsCount: %, cook: %\n", T, minInputsCount, maxInputsCount, cook);
+	array_add(*TMP_METADATAS, .{
+		ctx = ctx,
+		type = T,
+		inputsCount = .{min=minInputsCount, max=maxInputsCount}
+	});
+	// array_add(*NODE_CONTEXTS, ctx);
+	// array_add(*NODE_TYPES, T);
+	// array_add(*NODE_INPUTS_COUNT, .{min=minInputsCount, max=maxInputsCount});
+	// printRed("REGISTERS\n");
+	// print(">>> registered node type '%' minInputsCount: % maxInputsCount: %\n", T, minInputsCount, maxInputsCount);
 
 	// cookMethod:Any;
 	// cookMethod = cook;
-	array_add(*COOK_METHODS, cook);
-	array_add(*ON_DIRTY_METHODS, onDirty);
+	// array_add(*COOK_METHODS, cook);
+	// array_add(*ON_DIRTY_METHODS, onDirty);
 
 	// node_info :*Type_Info= type_info(T);
 	// print("info.type == %\n", node_info.type);
@@ -81,18 +110,23 @@ nodeRegister :: (
 nodeRegisterGeo :: (
 	$T:Type,
 	minInputsCount:u8,
-	maxInputsCount:u8,
-	cook:GeoNodeCookMethod,
-	onDirty:CoreGraphNodeOnDirtyMethod=null
+	maxInputsCount:u8
+	// cook:GeoNodeCookMethod,
+	// onDirty:CoreGraphNodeOnDirtyMethod=null
 	){
-		nodeRegister(NodeContext.GEOMETRY, T, minInputsCount, maxInputsCount, cook, onDirty);
+		nodeRegister(NodeContext.GEOMETRY, T, minInputsCount, maxInputsCount);
 	}
 
-NODE_CONTEXTS :[..]NodeContext;
-NODE_TYPES :[..]Type;
-NODE_INPUTS_COUNT :[..]NodeInputsCount;
-COOK_METHODS :[..]GeoNodeCookMethod;
-ON_DIRTY_METHODS :[..]CoreGraphNodeOnDirtyMethod;
+NodeMetaData :: struct {
+	ctx: NodeContext;
+	type: Type;
+	inputsCount: NodeInputsCount;
+}
+
+#no_reset NODE_METADATAS_COUNT :u64: #run nodesMetaDatasCount();
+#no_reset NODE_METADATAS :[NODE_METADATAS_COUNT]NodeMetaData: #run nodesMetaDatas();
+// COOK_METHODS :[..]GeoNodeCookMethod;
+// ON_DIRTY_METHODS :[..]CoreGraphNodeOnDirtyMethod;
 
 NodeInputsCount :: struct {
 	min: u8;
@@ -101,8 +135,10 @@ NodeInputsCount :: struct {
 
 #scope_file
 
+TMP_METADATAS: [..]NodeMetaData;
 
-// GENERATED_CODE_NODE_COMPUTE,
+
+GENERATED_CODE_NODE_COMPUTE,
 GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodesAndGenerateCode();
 
 
@@ -111,22 +147,24 @@ GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodesAndGenerateCode();
 
 
 
-// generateNodeComputes :: ()->string {
-// 	builder: String_Builder;
-// 	print_to_builder(*builder, "if inputNode.type == {\n");
-// 	for nodeType: NODE_TYPES {
-// 		print_to_builder(*builder, tprint("\tcase %; return nodeCompute(cast(*%) inputNode, depth);\n", nodeType, nodeType));
-// 	}
-// 	print_to_builder(*builder, "}");
+generateNodeComputes :: ()->string {
+	builder: String_Builder;
+	print_to_builder(*builder, "if inputNode.type == {\n");
+	for nodeMetaData: NODE_METADATAS {
+		nodeType := nodeMetaData.type;
+		print_to_builder(*builder, tprint("\tcase %; return nodeCompute(scene, cast(*%) inputNode, depth);\n", nodeType, nodeType));
+	}
+	print_to_builder(*builder, "}");
 
-// 	result := builder_to_string(*builder);
-// 	reset(*builder);
-// 	return result;
-// }
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}
 generateSceneNodeDelete :: ()->string {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
-	for nodeType: NODE_TYPES {
+	for nodeMetaData: NODE_METADATAS {
+		nodeType := nodeMetaData.type;
 		print_to_builder(*builder, tprint("\tcase %; sceneDeleteNode(scene, cast(*%) node, removeFromGraph);return;\n", nodeType, nodeType));
 	}
 	print_to_builder(*builder, "}");
