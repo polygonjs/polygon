@@ -4,9 +4,11 @@ MeshDrawData :: struct {
 	uniforms:PipelineDataUniform;
 }
 
-draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshDrawData {
+newDrawData :: (renderer: *Renderer, pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> *MeshDrawData {
 	wgpu_context := pc.wgpu_context;
-	draw_data :MeshDrawData;
+	drawData :*MeshDrawData = New(MeshDrawData,, renderer.allocator);
+	push_allocator(renderer.allocator);
+	array_init(*drawData.vertex);
 
 	{
 		using mesh.geometry.attributes;
@@ -30,21 +32,21 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshD
 		// 		);
 		// 	}
 		// } else {
-			array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *position, Vector3, "position"));
+			array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *position, Vector3, "position"));
 		// }
-		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *normal, Vector3, "normal"));
+		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *normal, Vector3, "normal"));
 		// array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *color, Vector3, "color"));
-		array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *uv, Vector2, "uv"));
+		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *uv, Vector2, "uv"));
 	}
 
 	{
-		using draw_data.index;
+		using drawData.index;
 		buffer,
 		buffer_size = wgpu_index_array_to_buffer(wgpu_context, mesh.geometry.indices);
 	}
 
 	{
-		using draw_data.uniforms;
+		using drawData.uniforms;
 		{
 			using object;
 			buffer,
@@ -60,7 +62,7 @@ draw_data_create :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> MeshD
 	}
 
 
-	return draw_data;
+	return drawData;
 }
 
 

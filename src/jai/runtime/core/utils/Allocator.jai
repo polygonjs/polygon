@@ -22,6 +22,6 @@ allocatorReset :: (target: *$T) {
 		fini(*target.pool);
 	} else {
 		reset(*target.pool);
-        release(*target.pool);
+		release(*target.pool);
 	}
 }

@@ -143,11 +143,11 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 		{
 			assert(pc.meshes_draw_data.count > 0, "pc.meshes_draw_data not initialized\n");
 			using controller_noise.attributes;
-			draw_data := *pc.meshes_draw_data[0];
-			assert(draw_data.vertex.count > 0, "draw data not initialized\n");
-			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, draw_data.vertex[0].buffer, 0, position_in.buffer, 0, position_in.buffer_size);
-			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, draw_data.vertex[1].buffer, 0, normal_in.buffer, 0, normal_in.buffer_size);
-			draw_data.vertex[0] = position_out;
+			drawData := pc.meshes_draw_data[0];
+			assert(drawData.vertex.count > 0, "draw data not initialized\n");
+			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, drawData.vertex[0].buffer, 0, position_in.buffer, 0, position_in.buffer_size);
+			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, drawData.vertex[1].buffer, 0, normal_in.buffer, 0, normal_in.buffer_size);
+			drawData.vertex[0] = position_out;
 		}
 		{
 			// using controller_attribute_set.attributes;
@@ -155,13 +155,13 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 		}
 		{
 			using controller_normals.attributes;
-			draw_data := *pc.meshes_draw_data[0];
-			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, draw_data.index.buffer, 0, index_in.buffer, 0, index_in.buffer_size);
+			drawData := pc.meshes_draw_data[0];
+			wgpuCommandEncoderCopyBufferToBuffer(command_encoder, drawData.index.buffer, 0, index_in.buffer, 0, index_in.buffer_size);
 		}
 		{
 			using controller_attribute_normalize.attributes;
-			draw_data := *pc.meshes_draw_data[0];
-			draw_data.vertex[1] = attribute_out;
+			drawData := pc.meshes_draw_data[0];
+			drawData.vertex[1] = attribute_out;
 		}
 
 		command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer pipeline_controller_update"}));

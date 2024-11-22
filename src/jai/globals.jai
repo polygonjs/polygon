@@ -9,6 +9,6 @@
 EVENTS_DATA:EventsData;
 UI_DATA:UiData;
 EDITOR:*Editor;
-NODES_SCENE:NodesScene;
+NODES_SCENE:*NodesScene;
 
 

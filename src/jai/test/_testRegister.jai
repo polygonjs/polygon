@@ -4,6 +4,7 @@
 registerTests :: ()->[..]NamedProcedure {
 
 	// editor
+	testEditor();
 	testNetworkPanel();
 	// runtime
 	testArray();

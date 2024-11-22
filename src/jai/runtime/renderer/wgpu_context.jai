@@ -11,5 +11,5 @@ WGPUContext :: struct {
 		config: WGPUSurfaceConfiguration;
 		surface_texture :WGPUSurfaceTexture;
 	}
-	
+	framesCount: FrameCount;
 };

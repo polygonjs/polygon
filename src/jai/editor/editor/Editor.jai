@@ -1,6 +1,7 @@
 
 
 Editor :: struct {
+	exitRequested: bool=false;
 	nodesScene: *NodesScene;
 
 	windowSize: Vector2UInt64;
@@ -11,6 +12,8 @@ Editor :: struct {
 		nodePositions:[..]Vector2;
 	}
 	sceneUiData: SceneUiData;
+
+	onAfterTick: EditorCustomOnTickCallback=DEFAULT_EDITOR_ON_TICK;
 }
 
 newEditor :: ()->*Editor {
@@ -60,7 +63,8 @@ drawDataInit :: (editor: *Editor) {
 	drawDataInit(editor.viewerPanel);
 	drawDataInit(editor.networkPanel);
 }
-render :: (editor: *Editor) {
+editorRender :: (editor: *Editor) {
+	WGPU_CONTEXT.framesCount = editor.nodesScene.framesCount;
 	data :RenderCollectionData= rendererCollectionStart(*WGPU_CONTEXT);
 	render(editor.viewerPanel, *data);
 	render(editor.networkPanel, *data);
@@ -87,6 +91,30 @@ onResize :: (editor: *Editor, size:Vector2UInt64) {
 	onResize(editor.viewerPanel);
 	onResize(editor.networkPanel);
 }
+editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
+	onResize(editor, .{width, height});
+
+	if USE_IMGUI_DEBUG return;
+	#if WASM {
+		context = call_from_wasm_context;
+		events_data_update(*EVENTS_DATA);
+		time := performance_now();
+		compute_fps(editor.nodesScene, time, *UI_DATA);
+		processEvent(editor, *EVENTS_DATA);
+	} else {
+	}
+
+	sceneOnTick(editor.nodesScene, newTime / 1000.0);
+	editorRender(editor);
+	reset_temporary_storage();
+	editor.nodesScene.framesCount += 1;
+	editor.onAfterTick(editor);
+
+	if(editor.exitRequested) {
+		editorRemoveScene(editor);
+	}
+	// if FRAMES_COUNT > 2 {do_exit = true;};
+}
 
 nodeSetPosition :: (editor: *Editor, node: *BaseNode, position: Vector2) {
 	onNodeSetPosition(editor, editor.nodesScene, node, position);
@@ -95,7 +123,15 @@ nodeSetPosition :: (editor: *Editor, node: BaseNode, position: Vector2) {
 	nodeSetPosition(editor, *node, position);
 }
 
+editorRequestExit :: (editor: *Editor) {
+	editor.exitRequested = true;
+}
+
+EditorCustomOnTickCallback :: #type (editor: *Editor);
+
 #scope_file
+
+DEFAULT_EDITOR_ON_TICK :EditorCustomOnTickCallback: (editor: *Editor) {}
 
 // editorEmitEvent :: (editor: *Editor, $event: EditorEvent, node: *$T) {
 // 	p := editor.networkPanel;

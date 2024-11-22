@@ -12,6 +12,7 @@ NodesScene :: struct {
 	graph: CoreGraph;
 	time:Time=0;
 	timeGraphNode:TimeNode;
+	framesCount:FrameCount = 0;
 	// nodes: [..]*GeoNodeAny;
 	validNodes: Bit_Array;
 	nodes: [..]*BaseNodeAny;
@@ -59,34 +60,11 @@ newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 		memcpy(targetPtr, srPtr, size_of(CoreGraph));
 	}
 	scene.time = 0;
-	sceneInit(scene);
+	_sceneInit(scene);
 
 	return scene;
 }
-sceneInit :: (scene: *NodesScene) {
-	using scene;
-	nextNodeId = INIT_NEXT_NODE_ID;
-	// array_add(*nodes, null);
-	// bit_array_resize(*validNodeIds, 1);
-	// validNodeIds[0] = false;
-	// scene.allocator = allocator;
-	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
-	// sceneAllocatorPush(scene);
-	// array_init(*nodes);
-	array_init(*nodes, scene.allocator);
-	nodeConnectionListInit(*connections);
-	array_init(*nodeInputCookResults, scene.allocator);
-	array_init(*cookResults, scene.allocator);
-	array_init(*cooksCount, scene.allocator);
-	graphInit(*graph, scene);
-	// scene.timeGraphNode.type = TimeNode;
-	scene.timeGraphNode.name = "TimeNode";
-	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
-	scene.worldScene = newScene(scene);
-	scene.defaultMaterial = xx newMaterial(scene.worldScene, NormalMeshMaterial);
-
-}
 
 // sceneAllocatorPush :: (scene: *NodesScene) #expand #no_debug {
 // 	old_allocator := context.allocator;
@@ -116,3 +94,27 @@ sceneInit :: (scene: *NodesScene) {
 
 INIT_NEXT_NODE_ID :NodeId: 0;
 
+_sceneInit :: (scene: *NodesScene) {
+	using scene;
+	nextNodeId = INIT_NEXT_NODE_ID;
+	// array_add(*nodes, null);
+	// bit_array_resize(*validNodeIds, 1);
+	// validNodeIds[0] = false;
+	// scene.allocator = allocator;
+	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
+	// sceneAllocatorPush(scene);
+	// array_init(*nodes);
+	array_init(*nodes, scene.allocator);
+	nodeConnectionListInit(*connections);
+	array_init(*nodeInputCookResults, scene.allocator);
+	array_init(*cookResults, scene.allocator);
+	array_init(*cooksCount, scene.allocator);
+	graphInit(*graph, scene);
+	// scene.timeGraphNode.type = TimeNode;
+	scene.timeGraphNode.name = "TimeNode";
+	graphAddNode(*scene.graph, *scene.timeGraphNode);
+
+	scene.worldScene = newScene(scene);
+	scene.defaultMaterial = xx newMaterial(scene.worldScene, NormalMeshMaterial);
+
+}

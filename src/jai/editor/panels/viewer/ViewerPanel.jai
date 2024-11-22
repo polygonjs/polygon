@@ -1,23 +1,17 @@
 ViewerPanel :: struct {
+	#if USE_FLAT_POOL {
+		pool: Flat_Pool;
+	} else {
+		pool: Pool;
+	}
+	allocator: Allocator;
+	//
 	editor: *Editor;
 
 	camera: PerspectiveCamera;
 	cameraControls: OrbitControls;
 
-	renderer: Renderer = .{
-		name = "ViewerPanelRenderer",
-		full_screen = false,
-		viewport = .{
-			start = .{0,0},
-			size = .{200,200}
-		},
-		bgColor = DEFAULT_RENDERER_BG_COLOR,
-		use_msaa = true,
-		use_depth_buffer = true,
-		use_readback = false,
-		render_ui = true,
-		clear = true,
-	};
+	renderer: *Renderer;
 }
 
 newViewerPanel :: (editor: *Editor) -> *TYPE {
@@ -28,25 +22,27 @@ newViewerPanel :: (editor: *Editor) -> *TYPE {
 }
 viewerPanelDelete :: (panel: *TYPE) {
 	using panel;
+	rendererDelete(renderer);
+	allocatorReset(panel);
 	// object3DDelete(camera);
 	free(panel);
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	#if USE_IMGUI { renderer_init_ui(*renderer); }
-	renderer_init_pipelines(*renderer, editor.nodesScene.worldScene, *camera);
+	#if USE_IMGUI { renderer_init_ui(renderer); }
+	renderer_init_pipelines(renderer, editor.nodesScene.worldScene, *camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
 	cameraUniformsUpdate(*camera);
-	render(renderCollectionData, *renderer, editor.nodesScene.worldScene, *camera);
+	render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
-	renderer_destroy_buffers(*panel.renderer);
+	renderer_destroy_buffers(panel.renderer);
 }
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;
-	focused := element_focused(*renderer, eventsData);
+	focused := element_focused(renderer, eventsData);
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 }
 onResize :: (panel: *TYPE) {
@@ -70,6 +66,23 @@ TYPE :: ViewerPanel;
 viewerPanelInit :: (panel: *TYPE, _editor: *Editor) {
 
 	using panel;
+
+
+	renderer = newRenderer();
+
+	renderer.name = "ViewerPanelRenderer";
+	renderer.full_screen = false;
+	renderer.viewport = .{
+		start = .{0,0},
+		size = .{200,200}
+	};
+	renderer.bgColor = DEFAULT_RENDERER_BG_COLOR;
+	renderer.use_msaa = true;
+	renderer.use_depth_buffer = true;
+	renderer.use_readback = false;
+	renderer.render_ui = true;
+	renderer.clear = true;
+
 	editor = _editor;
 	camera.type = PerspectiveCamera;
 	object3DInit(*camera);

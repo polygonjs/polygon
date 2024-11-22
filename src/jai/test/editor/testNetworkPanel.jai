@@ -1,6 +1,6 @@
 testNetworkPanel :: () {
 	test("NetworkPanel", () {
-		nodesScene :*NodesScene = newNodesScene();
+		nodesScene := newNodesScene();
 		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
 		box1 := createNode(nodesScene, BoxGeoNode);
 		assertEqual(nodesScene.nodes.count, 1, "1 node in scene");
@@ -38,8 +38,3 @@ testNetworkPanel :: () {
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
 }
-
-
-
-
-

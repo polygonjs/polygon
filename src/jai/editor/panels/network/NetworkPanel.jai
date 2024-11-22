@@ -17,34 +17,8 @@ NetworkPanel :: struct {
 
 	basicMat: *MATERIAL_BASIC;
 
-	rendererColor: Renderer = .{
-		name = "NetworkPanelRenderer",
-		full_screen = false,
-		viewport = .{
-			start = .{600,0},
-			size = .{500,900}
-		},
-		bgColor = DEFAULT_RENDERER_BG_COLOR,
-		use_msaa = false,
-		use_depth_buffer = true,
-		use_readback = false,
-		render_ui = false,
-		clear = false,
-	};
-	rendererRaycast: Renderer = .{
-		name = "NetworkPanelRendererRaycast",
-		full_screen = false,
-		viewport = .{
-			start = .{600,0},
-			size = .{1,1}
-		},
-		bgColor = .{0,0,1,1},
-		use_msaa = false,
-		use_depth_buffer = true,
-		use_readback = true,
-		render_ui = false,
-		clear = false,
-	};
+	rendererColor: *Renderer;
+	rendererRaycast: *Renderer;
 }
 
 newNetworkPanel :: (editor: *Editor) -> *TYPE {
@@ -86,6 +60,8 @@ networkPanelDelete :: (panel: *TYPE) {
 	// 		}
 	// 	}
 	// }
+	rendererDelete(rendererColor);
+	rendererDelete(rendererRaycast);
 	worldObjectDelete(sceneWorld);
 	worldObjectDelete(sceneRaycast);
 	// for object,i : sceneRaycast.children {
@@ -107,28 +83,28 @@ networkPanelDelete :: (panel: *TYPE) {
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	renderer_init_pipelines(*rendererColor, sceneWorld, camera);
-	renderer_init_pipelines(*rendererRaycast, sceneRaycast, camera);
+	renderer_init_pipelines(rendererColor, sceneWorld, camera);
+	renderer_init_pipelines(rendererRaycast, sceneRaycast, camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
 	cameraUniformsUpdate(camera);
-	render(renderCollectionData, *rendererColor, sceneWorld, camera);
+	render(renderCollectionData, rendererColor, sceneWorld, camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
 	using panel;
-	renderer_destroy_buffers(*rendererColor);
+	renderer_destroy_buffers(rendererColor);
 }
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;
-	focused := element_focused(*rendererColor, eventsData);
+	focused := element_focused(rendererColor, eventsData);
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
-		result := read_pixel(*rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+		result := read_pixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
 		nodeId := meshIdMaterialUnpackId(result);
 		// node := sceneFindNodeById(editor.nodesScene, nodeId);
 		// if node != null {
-			print("nodeId: %\n", nodeId);
+			print("hovered nodeId: %\n", nodeId);
 		// }
 	}
 }
@@ -139,8 +115,8 @@ onResize :: (panel: *TYPE) {
 
 	rendererColor.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
 	rendererRaycast.viewport.start = rendererColor.viewport.start;
-	rendererSetSize(*rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
-	rendererCopySize(*rendererColor, *rendererRaycast);
+	rendererSetSize(rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
+	rendererCopySize(rendererColor, rendererRaycast);
 
 	if(rendererColor.full_screen == true) {
 		camera.aspect = newAspect;
@@ -256,6 +232,39 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 
 
 	using panel;
+
+	rendererColor = newRenderer();
+	rendererRaycast = newRenderer();
+
+	rendererColor.name = "NetworkPanelRenderer";
+	rendererColor.full_screen = false;
+	rendererColor.viewport = .{
+			start = .{600,0},
+			size = .{500,900}
+		};
+	rendererColor.bgColor = DEFAULT_RENDERER_BG_COLOR;
+	rendererColor.use_msaa = false;
+	rendererColor.use_depth_buffer = true;
+	rendererColor.use_readback = false;
+	rendererColor.render_ui = false;
+	rendererColor.clear = false;
+
+	rendererRaycast.name = "NetworkPanelRendererRaycast";
+	rendererRaycast.full_screen = false;
+	rendererRaycast.viewport = .{
+		start = .{600,0},
+		size = .{1,1}
+	};
+	rendererRaycast.bgColor = .{0,0,1,1};
+	rendererRaycast.use_msaa = false;
+	rendererRaycast.use_depth_buffer = true;
+	rendererRaycast.use_readback = true;
+	rendererRaycast.render_ui = false;
+	rendererRaycast.clear = false;
+
+	// allocatorAssign(rendererColor);
+	// allocatorAssign(rendererRaycast);
+	
 	objectIndex.allocator = panel.allocator;
 	editor = _editor;
 	sceneWorld = newScene(panel.allocator);

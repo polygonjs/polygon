@@ -25,19 +25,19 @@ PipelineController :: struct {
 	//
 	meshes: [..]*Mesh;
 	material: *Material;
-	meshes_draw_data:[..]MeshDrawData;
+	meshes_draw_data:[..]*MeshDrawData;
 	//
 	uniforms_dirty: bool=true;
 	buffers_to_destroy: [..]BufferContainer;
 };
 
-newPipelineController :: ($T: Type, material: *Material) -> *T {
-	pc: *T = alloc(size_of(T));
+newPipelineController :: (renderer: *Renderer, $T: Type, material: *Material) -> *T {
+	pc: *T = New(T,, renderer.allocator);
 	pc.type = T;
 
 	// pc.id = NEXT_PIPELINE_CONTROLLER_ID;
 	// NEXT_PIPELINE_CONTROLLER_ID+=1;
-
+	push_allocator(renderer.allocator);
 	array_init(*pc.vertex_buffer_layouts);
 	array_init(*pc.vertex_attributes);
 	array_init(*pc.meshes);
@@ -66,7 +66,10 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 	defer array_reset(*pc.vertex_buffer_layouts);
 	defer array_reset(*pc.vertex_attributes);
 
-	pc.pipeline_descriptor = .{label = to_c_string(tprint("% Pipeline", label))};
+	{
+		push_allocator(renderer.allocator);
+		pc.pipeline_descriptor = .{label = to_c_string(tprint("% Pipeline", label))};
+	}
 
 	pipeline_controller_pipeline_descriptor_layout_init(wgpu_context, *pc.pipeline_descriptor, first_mesh.material);
 	pipeline_controller_create_fragment_state_init(*pc.fragment_state, *pc.color_target_state, pc.shader_module, rendererFormat(renderer));
@@ -108,9 +111,9 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 
 	array_reset(*pc.meshes_draw_data);
 	for pc.meshes {
-		draw_data := draw_data_create(pc, it, scene);
+		drawData := newDrawData(renderer, pc, it, scene);
 
-		array_add(*pc.meshes_draw_data, draw_data);
+		array_add(*pc.meshes_draw_data, drawData);
 	}
 	renderer_scene_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.SCENE);
 	renderer_camera_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.CAMERA);
@@ -118,13 +121,13 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 	return pc;
 }
 
-pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene) {
-	// TODO: release old draw data buffers, using this [0] is not good, we should look up which index matches this mesh
-	draw_data_buffers_schedule_destroy(pc, *pc.meshes_draw_data[0]);
+// pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene) {
+// 	// TODO: release old draw data buffers, using this [0] is not good, we should look up which index matches this mesh
+// 	draw_data_buffers_schedule_destroy(pc, *pc.meshes_draw_data[0]);
 
-	draw_data := draw_data_create(pc, mesh, scene);
-	pc.meshes_draw_data[0] = draw_data;
-}
+// 	draw_data := drawDataCreate(pc, mesh, scene);
+// 	pc.meshes_draw_data[0] = draw_data;
+// }
 
 
 

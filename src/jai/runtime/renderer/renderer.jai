@@ -7,6 +7,14 @@ DEFAULT_RENDERER_BG_COLOR :Color: .{0.05, 0.05, 0.05, 1.0};
 
 Renderer :: struct {
 	#as using viewportContainer: ViewportContainer;
+
+	#if USE_FLAT_POOL {
+		pool: Flat_Pool;
+	} else {
+		pool: Pool;
+	}
+	allocator: Allocator;
+
 	name :string;
 	wgpu_context: *WGPUContext;
 	
@@ -35,6 +43,16 @@ Renderer :: struct {
 	readback_buffer: WGPUBuffer;
 	readback_texture: WGPUTexture;
 	readback_view: WGPUTextureView;
+}
+
+newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
+	renderer := New(Renderer);
+	if _allocator == null {
+		allocatorAssign(renderer);
+	} else {
+		renderer.allocator = _allocator;
+	}
+	return renderer;
 }
 
 rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
@@ -107,7 +125,10 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
 	renderer.wgpu_context = *WGPU_CONTEXT;
-	init(*renderer.pipelines_by_mat_type, 1);
+	{
+		push_allocator(renderer.allocator);
+		init(*renderer.pipelines_by_mat_type, 1);
+	}
 	renderer_scene_uniform_buffer_create(renderer, scene);
 	renderer_camera_uniform_buffer_create(renderer, camera);
 	
@@ -116,7 +137,7 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 			mesh := cast(*Mesh)child;
 			mat_id := mesh.material.id;
 			if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
-				pc :*PipelineController= newPipelineController(PipelineController, mesh.material);
+				pc :*PipelineController= newPipelineController(renderer, PipelineController, mesh.material);
 				array_add(*pc.meshes, mesh);
 				table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
 
@@ -184,7 +205,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	);
 	defer wgpuCommandEncoderRelease(cmd_encoder);
 
-	render_pass_descriptor_label := to_c_string(tprint("Render Pass 3D %", FRAMES_COUNT));
+	render_pass_descriptor_label := to_c_string(tprint("Render Pass 3D %", WGPU_CONTEXT.framesCount));
 	defer free(render_pass_descriptor_label);
 	render_pass_descriptor := WGPURenderPassDescriptor.{
 		label = render_pass_descriptor_label,
@@ -239,7 +260,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	}
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 
-	cmd_buffer1_label := to_c_string(tprint("% %", renderer.name, FRAMES_COUNT));
+	cmd_buffer1_label := to_c_string(tprint("% %", renderer.name, WGPU_CONTEXT.framesCount));
 	defer free(cmd_buffer1_label);
 	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
 	defer wgpuCommandBufferRelease(cmd_buffer1);
@@ -254,6 +275,12 @@ renderer_destroy_buffers :: (renderer:*Renderer){
 	}
 	// multisample_release(renderer);
 	// depth_release(renderer);
+}
+
+rendererDelete :: (renderer:*Renderer) {
+	renderer_destroy_buffers(renderer);
+	allocatorReset(renderer);
+	free(renderer);
 }
 
 #scope_file
