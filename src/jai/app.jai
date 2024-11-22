@@ -14,6 +14,8 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 
 	// paramSetValue(*box1.p.scale, 1.0);
+	print(">>>> remove compute here\n");
+	nodesSceneOutputNodesCompute(editor.nodesScene);
 
 	//
 	editorFlushCommands(editor);

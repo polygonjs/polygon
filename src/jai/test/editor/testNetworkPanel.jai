@@ -1,5 +1,5 @@
 testNetworkPanel :: () {
-	test("NetworkPanel", () {
+	test("NetworkPanel", (options:TestProcedureOptions) {
 		nodesScene := newNodesScene();
 		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
 		box1 := createNode(nodesScene, BoxGeoNode);

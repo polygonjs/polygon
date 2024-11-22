@@ -1,5 +1,5 @@
 testArray :: () {
-	test("Array", () {
+	test("Array", (options:TestProcedureOptions) {
 		arr :[..]Vector2Int;
 		array_add(*arr, .{1,2});
 		array_add(*arr, .{3,4});

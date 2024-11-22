@@ -19,13 +19,19 @@ runTests :: () {
 	} else {
 		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
 	}
+	windowCreated:bool = false;
+	testOptions:TestProcedureOptions;
 
 	testsCount := 0;
 	for test,i: NAMED_PROCEDURES {
 		found :bool= testNames.count == 0 || array_find(testNames, test.name);
 		if found {
+			if test.requiresWindow && windowCreated==false {
+				testOptions.window_size = windowInit();
+				windowCreated = true;
+			}
 			print("% TEST: %\n", tprintGreen(" "),test.name);
-			test.proc();
+			test.proc(testOptions);
 			testsCount += 1;
 			reset_temporary_storage();
 		} else {
@@ -36,29 +42,44 @@ runTests :: () {
 	print("---------TEST COMPLETED: (%)\n", testsCount);
 }
 
-test :: (name: string, procedure: SimpleProcedure) {
-	// ensure we don't already have a test with this name
+test :: (name: string, procedure: TestProcedure) {
+	_ensure_test_name_is_unique(name);
+	//
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWindow=false});
+}
+testWithWindow :: (name: string, procedure: TestProcedure) {
+	_ensure_test_name_is_unique(name);
+	//
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWindow=true});
+}
+
+TestProcedureOptions :: struct {
+	window_size: Vector2UInt;
+}
+TestProcedure :: #type (options: TestProcedureOptions) -> ();
+
+NamedProcedure :: struct {
+	name: string;
+	proc: TestProcedure;
+	requiresWindow: bool;
+}
+
+
+#scope_file
+
+getRegisteredTests :: ()->[..]NamedProcedure {
+	registerTests();
+	return NAMED_PROCEDURES_COMPILE_TIME;
+}
+
+NAMED_PROCEDURES_COMPILE_TIME :[..]NamedProcedure;
+NAMED_PROCEDURES :[]NamedProcedure: #run getRegisteredTests();
+
+_ensure_test_name_is_unique :: (name: string) {
 	for test,i: NAMED_PROCEDURES_COMPILE_TIME {
 		if test.name == name {
 			assert(false, tprint("TEST NAME ALREADY EXISTS (%)", test.name));
 		}
 	}
-	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name, procedure});
 }
-
-SimpleProcedure :: #type () -> ();
-
-NamedProcedure :: struct {
-	name: string;
-	proc: SimpleProcedure;
-}
-
-NAMED_PROCEDURES_COMPILE_TIME :[..]NamedProcedure;
-
-#scope_file
-
-
-NAMED_PROCEDURES :[]NamedProcedure: #run registerTests();
-
 

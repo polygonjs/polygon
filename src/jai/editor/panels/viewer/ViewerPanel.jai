@@ -1,7 +1,7 @@
 ViewerPanel :: struct {
 	#if USE_FLAT_POOL {
 		pool: Flat_Pool;
-	} else {
+	} else #if USE_POOL {
 		pool: Pool;
 	}
 	allocator: Allocator;
@@ -34,6 +34,7 @@ drawDataInit :: (panel: *TYPE) {
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
+	nodesSceneOutputNodesCompute(editor.nodesScene);
 	cameraUniformsUpdate(*camera);
 	render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
 }

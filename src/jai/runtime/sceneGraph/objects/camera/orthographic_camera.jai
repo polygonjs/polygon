@@ -9,11 +9,13 @@ object3DInit :: (camera: *OrthographicCamera) {
 
 	camera.size = DEFAULT_SIZE;
 
+	assert(camera.aspect != 0.0, "camera.aspect is 0.0");
 	cameraProjectionUpdate(camera);
 	cameraUniformsUpdate(camera);
 }
 
 cameraProjectionUpdate :: (camera:*OrthographicCamera) {
+	assert(camera.aspect != 0.0, "camera.aspect is 0.0");
 	camera.camera_matrices.projectionMatrix = orthographic_projection_matrix(
 		left   = -camera.size * camera.aspect,
 		right  = +camera.size * camera.aspect,

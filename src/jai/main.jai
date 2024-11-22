@@ -8,16 +8,15 @@ main :: () {
 			return;
 		}
 	}
-	NODES_SCENE = newNodesScene();
-	assert(NODES_SCENE.timeGraphNode.name == "TimeNode", "timeGraphNode not set up correctly (A)");
-	EDITOR := newEditor();
-	editorSetScene(EDITOR, NODES_SCENE);
-	assert(NODES_SCENE.timeGraphNode.name == "TimeNode", "timeGraphNode not set up correctly (B)");
-	appInit(NODES_SCENE, EDITOR);
+	APP.nodesScene = newNodesScene();
+	APP.editor = newEditor();
+	#if WASM==true assert(APP.editor!=null, "main: editor is null");
+	editorSetScene(APP.editor, APP.nodesScene);
+	appInit(APP.nodesScene, APP.editor);
 
 	#if WASM==false {
 		window_size := windowInit();
-		editorNativeStart(EDITOR, window_size);
+		editorStart(APP.editor, window_size);
 
 		reset_temporary_storage();
 		#if WASM==false && FREE_MEMORY_DEBUG==true defer report_memory_leaks();
@@ -25,24 +24,34 @@ main :: () {
 		printGreen("polygon quit\n");
 	}
 
+	#if WASM==true assert(APP.editor!=null, "main end: editor is null");
 }
 
 init_draw_data :: () {
 	#if WASM==true context = call_from_wasm_context;
+	#if WASM==true assert(APP.editor!=null, "init_draw_data: editor is null");
 
-	drawDataInit(EDITOR);
+	drawDataInit(APP.editor);
 
 }
 
 on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
 	#if WASM==true context = call_from_wasm_context;
+	#if WASM==true assert(APP.editor!=null, "on_request_animation_frame: editor is null");
 
-	editorOnTick(EDITOR, newTime, width, height);
+	editorOnTick(APP.editor, newTime, width, height);
 }
-
 
 #scope_file
 
+// in wasm, having editor and nodesScene as globals is not enough,
+// as they seem reset to null after main().
+// but wrapping them in a PolygonApp struct seems to fix the problem.
+PolygonApp :: struct {
+	editor:*Editor;
+	nodesScene:*NodesScene;
+}
+APP:PolygonApp;
 
 #load "config.jai";
 #load "globals.jai";

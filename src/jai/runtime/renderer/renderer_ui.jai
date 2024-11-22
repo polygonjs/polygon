@@ -1,5 +1,10 @@
 renderer_init_ui :: (renderer:*Renderer){
 	#if USE_IMGUI {
+		if IMGUI_INITIALIZED {
+			return;
+		}
+		IMGUI_INITIALIZED = true;
+
 		bd := *BD;
 		ImGui.CreateContext(null);
 
@@ -23,3 +28,7 @@ renderer_init_ui :: (renderer:*Renderer){
 		ImGui_ImplWGPU_Init(bd, imgui_init_info);
 	}
 }
+
+#scope_file
+
+IMGUI_INITIALIZED :bool = false;

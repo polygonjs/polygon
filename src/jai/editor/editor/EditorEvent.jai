@@ -74,7 +74,7 @@ doEditorNodeAddCommands :: (editor: *Editor, commands: *[..]EditorNodeAddCommand
 		}
 		nodePositions[node.nodeId] = .{0, 0};
 
-		networkPanelAddNode(editor.networkPanel, node);
+		#if HAS_NETWORK_PANEL networkPanelAddNode(editor.networkPanel, node);
 	}
 }
 doEditorNodeRemoveCommands :: (editor: *Editor, commands: *[..]EditorNodeRemoveCommand) {
@@ -83,7 +83,7 @@ doEditorNodeRemoveCommands :: (editor: *Editor, commands: *[..]EditorNodeRemoveC
 		node := cmd.node;
 		nodePositions[node.nodeId] = .{-1000000,-1000000};
 
-		networkPanelRemoveNode(editor.networkPanel, node);
+		#if HAS_NETWORK_PANEL networkPanelRemoveNode(editor.networkPanel, node);
 	}
 }
 doEditorNodeSetPositionCommands :: (editor: *Editor, commands: *[..]EditorNodeSetPositionCommand) {
@@ -92,7 +92,7 @@ doEditorNodeSetPositionCommands :: (editor: *Editor, commands: *[..]EditorNodeSe
 		node := cmd.node;
 		nodePositions[node.nodeId] = cmd.position;
 
-		networkPanelNodeSetPosition(editor.networkPanel, node, cmd.position);
+		#if HAS_NETWORK_PANEL networkPanelNodeSetPosition(editor.networkPanel, node, cmd.position);
 	}
 }
 doEditorNodeInputAddCommands :: (editor: *Editor, commands: *[..]EditorNodeInputAddCommand) {

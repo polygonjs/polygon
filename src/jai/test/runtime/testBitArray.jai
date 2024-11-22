@@ -1,6 +1,6 @@
 
 testBitArray :: () {
-	test("BitArray", (){
+	test("BitArray", (options:TestProcedureOptions){
 		dirty: Bit_Array;
 
 		assertEqual(bits_count(2), 1);

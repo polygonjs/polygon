@@ -10,7 +10,7 @@ Renderer :: struct {
 
 	#if USE_FLAT_POOL {
 		pool: Flat_Pool;
-	} else {
+	} else #if USE_POOL {
 		pool: Pool;
 	}
 	allocator: Allocator;
@@ -205,10 +205,11 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	);
 	defer wgpuCommandEncoderRelease(cmd_encoder);
 
-	render_pass_descriptor_label := to_c_string(tprint("Render Pass 3D %", WGPU_CONTEXT.framesCount));
-	defer free(render_pass_descriptor_label);
+	renderPassDescriptorLabel := tprint("Render Pass 3D %", WGPU_CONTEXT.framesCount);
+	renderPassDescriptorLabel_c := to_c_string(renderPassDescriptorLabel);
+	defer free(renderPassDescriptorLabel_c);
 	render_pass_descriptor := WGPURenderPassDescriptor.{
-		label = render_pass_descriptor_label,
+		label = renderPassDescriptorLabel_c,
 		colorAttachmentCount = 1,
 		colorAttachments = *colorAttachment,
 	};

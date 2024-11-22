@@ -1,6 +1,6 @@
 
 testMath :: () {
-	test("nextPowerOf2", () {
+	test("nextPowerOf2", (options:TestProcedureOptions) {
 		assertEqual(nextPowerOf2(0), 1);
 		assertEqual(nextPowerOf2(1), 1);
 		assertEqual(nextPowerOf2(2), 2);

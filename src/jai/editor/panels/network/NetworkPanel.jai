@@ -2,14 +2,14 @@
 NetworkPanel :: struct {
 	#if USE_FLAT_POOL {
 		pool: Flat_Pool;
-	} else {
+	} else #if USE_POOL {
 		pool: Pool;
 	}
 	allocator: Allocator;
 	//
 	editor: *Editor;
 	sceneWorld: *Scene;
-	sceneRaycast: *Scene;
+	#if USE_RAYCAST_RENDERER sceneRaycast: *Scene;
 	objectIndex: [..]u32;
 
 	camera: *OrthographicCamera;
@@ -18,7 +18,7 @@ NetworkPanel :: struct {
 	basicMat: *MATERIAL_BASIC;
 
 	rendererColor: *Renderer;
-	rendererRaycast: *Renderer;
+	#if USE_RAYCAST_RENDERER rendererRaycast: *Renderer;
 }
 
 newNetworkPanel :: (editor: *Editor) -> *TYPE {
@@ -61,9 +61,9 @@ networkPanelDelete :: (panel: *TYPE) {
 	// 	}
 	// }
 	rendererDelete(rendererColor);
-	rendererDelete(rendererRaycast);
+	#if USE_RAYCAST_RENDERER rendererDelete(rendererRaycast);
 	worldObjectDelete(sceneWorld);
-	worldObjectDelete(sceneRaycast);
+	#if USE_RAYCAST_RENDERER worldObjectDelete(sceneRaycast);
 	// for object,i : sceneRaycast.children {
 	// 	if object != null {
 	// 		mesh := cast(*Mesh)object;
@@ -83,8 +83,9 @@ networkPanelDelete :: (panel: *TYPE) {
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
+	#if USE_IMGUI && HAS_VIEWER_PANEL==false { renderer_init_ui(rendererColor); }
 	renderer_init_pipelines(rendererColor, sceneWorld, camera);
-	renderer_init_pipelines(rendererRaycast, sceneRaycast, camera);
+	#if USE_RAYCAST_RENDERER renderer_init_pipelines(rendererRaycast, sceneRaycast, camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
@@ -100,23 +101,33 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	focused := element_focused(rendererColor, eventsData);
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
-		result := read_pixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
-		nodeId := meshIdMaterialUnpackId(result);
-		// node := sceneFindNodeById(editor.nodesScene, nodeId);
-		// if node != null {
-			print("hovered nodeId: %\n", nodeId);
-		// }
+		#if WASM==false && USE_RAYCAST_RENDERER {
+			result := read_pixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+			nodeId := meshIdMaterialUnpackId(result);
+			if nodeId < editor.nodesScene.nodes.count {
+				node := editor.nodesScene.nodes[nodeId];
+				if node != null {
+					print("hovered nodeId: %, %\n", nodeId, node.type);
+				}
+			}
+		} else {
+			if READ_PIXEL_WARNING_PRINTED == false {
+				print("read_pixel not supported in WASM yet\n");
+				READ_PIXEL_WARNING_PRINTED = true;
+			}
+		}
 	}
 }
+READ_PIXEL_WARNING_PRINTED:=false;
 
 onResize :: (panel: *TYPE) {
 	using panel;
 	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
 
 	rendererColor.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
-	rendererRaycast.viewport.start = rendererColor.viewport.start;
+	#if USE_RAYCAST_RENDERER rendererRaycast.viewport.start = rendererColor.viewport.start;
 	rendererSetSize(rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
-	rendererCopySize(rendererColor, rendererRaycast);
+	#if USE_RAYCAST_RENDERER rendererCopySize(rendererColor, rendererRaycast);
 
 	if(rendererColor.full_screen == true) {
 		camera.aspect = newAspect;
@@ -168,7 +179,7 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 	geometry_box_update(geometry, segments=.{2,2,2});
 
 	_addMesh(panel, node, geometry, forRaycast=false);
-	_addMesh(panel, node, geometry, forRaycast=true);
+	#if USE_RAYCAST_RENDERER _addMesh(panel, node, geometry, forRaycast=true);
 }
 
 networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
@@ -194,7 +205,7 @@ networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
 		}
 	}
 	_removeNode(panel, node, forRaycast=false);
-	_removeNode(panel, node, forRaycast=true);
+	#if USE_RAYCAST_RENDERER _removeNode(panel, node, forRaycast=true);
 }
 networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 	_moveNode :: (panel:*TYPE, node:*T, $forRaycast:bool) {
@@ -213,7 +224,7 @@ networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 		}
 	}
 	_moveNode(panel, node, forRaycast=false);
-	_moveNode(panel, node, forRaycast=true);
+	#if USE_RAYCAST_RENDERER _moveNode(panel, node, forRaycast=true);
 }
 
 networkPanelSetScene :: (panel: *TYPE) {
@@ -225,7 +236,10 @@ networkPanelSetScene :: (panel: *TYPE) {
 TYPE :: NetworkPanel;
 MATERIAL_RAYCAST :: MeshIdMaterial;
 MATERIAL_BG :: BackgroundMeshMaterial;
-MATERIAL_BASIC :: BackgroundMeshMaterial;
+MATERIAL_BASIC :: BasicMeshMaterial;
+
+USE_RAYCAST_RENDERER :: true;
+
 
 networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	allocatorAssign(panel);
@@ -233,34 +247,38 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 
 	using panel;
 
-	rendererColor = newRenderer();
-	rendererRaycast = newRenderer();
-
-	rendererColor.name = "NetworkPanelRenderer";
-	rendererColor.full_screen = false;
-	rendererColor.viewport = .{
+	{
+		rendererColor = newRenderer();
+		rendererColor.name = "NetworkPanelRenderer";
+		rendererColor.full_screen = false;
+		rendererColor.viewport = .{
+				start = .{600,0},
+				size = .{500,900}
+			};
+		rendererColor.bgColor = DEFAULT_RENDERER_BG_COLOR;
+		rendererColor.use_msaa = false;
+		rendererColor.use_depth_buffer = true;
+		rendererColor.use_readback = false;
+		#if HAS_VIEWER_PANEL == true {rendererColor.render_ui = false;}
+		#if HAS_VIEWER_PANEL == false {rendererColor.render_ui = true;}
+		rendererColor.clear = false;
+	}
+	#if USE_RAYCAST_RENDERER {
+		rendererRaycast = newRenderer();
+		rendererRaycast.name = "NetworkPanelRendererRaycast";
+		rendererRaycast.full_screen = false;
+		rendererRaycast.viewport = .{
 			start = .{600,0},
-			size = .{500,900}
+			size = .{1,1}
 		};
-	rendererColor.bgColor = DEFAULT_RENDERER_BG_COLOR;
-	rendererColor.use_msaa = false;
-	rendererColor.use_depth_buffer = true;
-	rendererColor.use_readback = false;
-	rendererColor.render_ui = false;
-	rendererColor.clear = false;
+		rendererRaycast.bgColor = .{0,0,1,1};
+		rendererRaycast.use_msaa = false;
+		rendererRaycast.use_depth_buffer = true;
+		rendererRaycast.use_readback = true;
+		rendererRaycast.render_ui = false;
+		rendererRaycast.clear = false;
+	}
 
-	rendererRaycast.name = "NetworkPanelRendererRaycast";
-	rendererRaycast.full_screen = false;
-	rendererRaycast.viewport = .{
-		start = .{600,0},
-		size = .{1,1}
-	};
-	rendererRaycast.bgColor = .{0,0,1,1};
-	rendererRaycast.use_msaa = false;
-	rendererRaycast.use_depth_buffer = true;
-	rendererRaycast.use_readback = true;
-	rendererRaycast.render_ui = false;
-	rendererRaycast.clear = false;
 
 	// allocatorAssign(rendererColor);
 	// allocatorAssign(rendererRaycast);
@@ -268,7 +286,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	objectIndex.allocator = panel.allocator;
 	editor = _editor;
 	sceneWorld = newScene(panel.allocator);
-	sceneRaycast = newScene(panel.allocator);
+	#if USE_RAYCAST_RENDERER sceneRaycast = newScene(panel.allocator);
 	camera = newObject3D(sceneWorld, OrthographicCamera);
 	// camera.type = OrthographicCamera;
 	// object3DInit(*camera);
@@ -287,7 +305,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		sceneObjectAdd(scene, mesh0);
 	}
 	_addBgMesh(panel, sceneWorld, .{0.2, 0.2, 0.2, 1.0});
-	_addBgMesh(panel, sceneRaycast, .{0, 0, 0, 0});
+	#if USE_RAYCAST_RENDERER _addBgMesh(panel, sceneRaycast, .{0, 0, 0, 0});
 
 	cameraControlsCommit(*cameraControls);
 }

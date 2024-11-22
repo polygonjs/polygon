@@ -1,7 +1,7 @@
 #load "runtime/_index.jai";
 #load "editor/_index.jai";
 
-registerTests :: ()->[..]NamedProcedure {
+registerTests :: () {
 
 	// editor
 	testEditor();
@@ -14,6 +14,5 @@ registerTests :: ()->[..]NamedProcedure {
 	testNodesBasicDependency();
 	testPerlinNoise();
 
-	return NAMED_PROCEDURES_COMPILE_TIME;
 }
 

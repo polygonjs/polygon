@@ -1,12 +1,13 @@
 
-
+HAS_VIEWER_PANEL :: true;
+HAS_NETWORK_PANEL :: true;
 Editor :: struct {
 	exitRequested: bool=false;
 	nodesScene: *NodesScene;
 
 	windowSize: Vector2UInt64;
-	viewerPanel: *ViewerPanel;
-	networkPanel: *NetworkPanel;
+	#if HAS_VIEWER_PANEL viewerPanel: *ViewerPanel;
+	#if HAS_NETWORK_PANEL networkPanel: *NetworkPanel;
 
 	SceneUiData :: struct {
 		nodePositions:[..]Vector2;
@@ -24,8 +25,8 @@ newEditor :: ()->*Editor {
 editorInit :: (editor: *Editor) {
 	array_init(*editor.sceneUiData.nodePositions);
 
-	editor.viewerPanel = newViewerPanel(editor);
-	editor.networkPanel = newNetworkPanel(editor);
+	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor);
+	#if HAS_NETWORK_PANEL editor.networkPanel = newNetworkPanel(editor);
 }
 
 editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
@@ -37,11 +38,12 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 
 	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodes.count);
 
-	networkPanelSetScene(editor.networkPanel);
+	#if HAS_NETWORK_PANEL networkPanelSetScene(editor.networkPanel);
 	// for node, i: nodesScene.nodes {
 	// 	editor.sceneUiData.nodePositions[i] = .{0,0};
 	// }
 	//
+	assert(nodesScene.timeGraphNode.name == "TimeNode", "timeGraphNode not set up correctly");
 }
 editorRemoveScene :: (editor: *Editor) {
 	assert(editor.nodesScene!=null, "editor.nodesScene is null");
@@ -51,23 +53,26 @@ editorRemoveScene :: (editor: *Editor) {
 }
 editorDelete :: (editor: *Editor) {
 	using editor;
-	if(editor.nodesScene!=null) editorRemoveScene(editor);
+	if(nodesScene!=null) {
+		editorRemoveScene(editor);
+	}
 	array_reset(*sceneUiData.nodePositions);
 
-	viewerPanelDelete(viewerPanel);
-	networkPanelDelete(networkPanel);
+	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
+	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);
 
 	free(editor);
 }
 drawDataInit :: (editor: *Editor) {
-	drawDataInit(editor.viewerPanel);
-	drawDataInit(editor.networkPanel);
+	#if HAS_VIEWER_PANEL drawDataInit(editor.viewerPanel);
+	#if HAS_NETWORK_PANEL drawDataInit(editor.networkPanel);
 }
 editorRender :: (editor: *Editor) {
 	WGPU_CONTEXT.framesCount = editor.nodesScene.framesCount;
+	// print("-----------editorRender: %\n", editor.nodesScene.framesCount);
 	data :RenderCollectionData= rendererCollectionStart(*WGPU_CONTEXT);
-	render(editor.viewerPanel, *data);
-	render(editor.networkPanel, *data);
+	#if HAS_VIEWER_PANEL render(editor.viewerPanel, *data);
+	#if HAS_NETWORK_PANEL render(editor.networkPanel, *data);
 
 	rendererCollectionEnd(*WGPU_CONTEXT, data);
 	rendererDestroyBuffers(editor);
@@ -80,16 +85,16 @@ processEvent :: (editor: *Editor, eventsData:*EventsData) {
 	}
 }
 rendererDestroyBuffers :: (editor: *Editor) {
-	rendererDestroyBuffers(editor.viewerPanel);
-	rendererDestroyBuffers(editor.networkPanel);
+	#if HAS_VIEWER_PANEL rendererDestroyBuffers(editor.viewerPanel);
+	#if HAS_NETWORK_PANEL rendererDestroyBuffers(editor.networkPanel);
 }
 
 
 onResize :: (editor: *Editor, size:Vector2UInt64) {
 	if editor.windowSize == size {return;}
 	editor.windowSize = size;
-	onResize(editor.viewerPanel);
-	onResize(editor.networkPanel);
+	#if HAS_VIEWER_PANEL onResize(editor.viewerPanel);
+	#if HAS_NETWORK_PANEL onResize(editor.networkPanel);
 }
 editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 	onResize(editor, .{width, height});
@@ -104,15 +109,15 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 	} else {
 	}
 
+	// print("time:%\n", newTime / 1000.0);
 	sceneOnTick(editor.nodesScene, newTime / 1000.0);
+	editorFlushCommands(editor);
 	editorRender(editor);
 	reset_temporary_storage();
 	editor.nodesScene.framesCount += 1;
 	editor.onAfterTick(editor);
 
-	if(editor.exitRequested) {
-		editorRemoveScene(editor);
-	}
+
 	// if FRAMES_COUNT > 2 {do_exit = true;};
 }
 
@@ -143,6 +148,6 @@ DEFAULT_EDITOR_ON_TICK :EditorCustomOnTickCallback: (editor: *Editor) {}
 // }
 
 processEventPanels :: (editor: *Editor, eventsData:*EventsData) {
-	processEvent(editor.viewerPanel, eventsData);
-	processEvent(editor.networkPanel, eventsData);
+	#if HAS_VIEWER_PANEL processEvent(editor.viewerPanel, eventsData);
+	#if HAS_NETWORK_PANEL processEvent(editor.networkPanel, eventsData);
 }

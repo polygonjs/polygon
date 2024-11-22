@@ -60,6 +60,7 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 	// 	pc.meshes[i] = mesh;
 	// }
 	first_mesh := (pc.meshes)[0];
+	print("pipeline_controller_init: first_mesh.material: %\n", first_mesh.material.id);
 	// pc.material = first_mesh.material;
 	pc.shader_module = material_create_module(wgpu_context, pc.material);
 	geometry_attributes_to_vertex_buffer_layouts(pc, *first_mesh.geometry.attributes);
@@ -138,9 +139,8 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
 	// - ensure material uniforms is shared and triggers it
 	// if(!pc.uniforms_dirty) return;
 	// defer pc.uniforms_dirty = false;
-	for pc.meshes {
-		mesh := it;
-		draw_data := pc.meshes_draw_data[it_index];
+	for mesh, i: pc.meshes {
+		draw_data := pc.meshes_draw_data[i];
 		{
 			size := cast(u64) max( 16, size_of(TransformableUniforms));
 			buffer := draw_data.uniforms.object.buffer;

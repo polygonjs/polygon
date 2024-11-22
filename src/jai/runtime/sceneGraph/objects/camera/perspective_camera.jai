@@ -14,6 +14,7 @@ object3DInit :: (camera: *PerspectiveCamera) {
 }
 
 cameraProjectionUpdate :: (camera:*PerspectiveCamera) {
+	assert(camera.aspect != 0.0, "camera.aspect is 0.0");
 	camera.camera_matrices.projectionMatrix = make_projection_matrix(
 		deg_to_rad(camera.fov_in_degrees),
 		camera.aspect,

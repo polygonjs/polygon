@@ -1,6 +1,6 @@
 
 
-editorNativeStart :: (editor: *Editor, window_size :Vector2UInt) {
+editorStart :: (editor: *Editor, window_size :Vector2UInt) {
 	current_window_size :Vector2UInt = window_size;
 
 	#if USE_WGPU {
@@ -69,7 +69,7 @@ windowInit :: ()->Vector2UInt {
 		current_window_size = .{xx display_mode.w, xx display_mode.h};
 	}
 
-	window:*SDL_Window = SDL_CreateWindow("Polygon Compute",
+	window:*SDL_Window = SDL_CreateWindow("Polygon",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		xx current_window_size.x,

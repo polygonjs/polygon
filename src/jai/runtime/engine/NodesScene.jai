@@ -3,7 +3,7 @@
 NodesScene :: struct {
 	#if USE_FLAT_POOL {
 		pool: Flat_Pool;
-	} else {
+	} else #if USE_POOL {
 		pool: Pool;
 	}
 	allocator: Allocator;

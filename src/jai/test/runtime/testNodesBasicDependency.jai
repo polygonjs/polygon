@@ -1,5 +1,5 @@
 testNodesBasicDependency :: () {
-	test("NodesBasicDependency", (){
+	test("NodesBasicDependency", (options:TestProcedureOptions){
 		assertLeaksCount(0, "leaks on start");
 		nodesScene := newNodesScene();
 		null1 := createNode(nodesScene, NullGeoNode);

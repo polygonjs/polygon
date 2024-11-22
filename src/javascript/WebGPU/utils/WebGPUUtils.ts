@@ -26,78 +26,78 @@ export function stringFromBuffer(
 	return label;
 }
 
-export function u64Create(
-	u64: BigUint64Array,
-	pointer: bigint
-): (i: bigint) => bigint {
-	function _u64(elementOffset: bigint) {
-		const elementSize = WGPU_SIZE.u64;
-		const elementStart = (pointer + elementOffset) / elementSize;
-		const elementb = u64[Number(elementStart)];
-		return elementb;
-	}
-	return _u64;
-}
-export function f64Create(
-	u64: Float64Array,
-	pointer: bigint
-): (i: bigint) => number {
-	function _f64(elementOffset: bigint) {
-		const elementSize = WGPU_SIZE.u64;
-		const elementStart = (pointer + elementOffset) / elementSize;
-		const elementb = u64[Number(elementStart)];
-		return elementb;
-	}
-	return _f64;
-}
-export function f32Create(
-	u64: Float32Array,
-	pointer: bigint
-): (i: bigint) => number {
-	function _f32(elementOffset: bigint) {
-		const elementSize = WGPU_SIZE.float;
-		const elementStart = (pointer + elementOffset) / elementSize;
-		const elementb = u64[Number(elementStart)];
-		return elementb;
-	}
-	return _f32;
-}
-export function u32Create(
-	u32: Uint32Array,
-	pointer: bigint
-): (i: bigint) => number {
-	function _u32(elementOffset: bigint) {
-		const elementSize = WGPU_SIZE.u32;
-		const elementStart = (pointer + elementOffset) / elementSize;
-		const elementb = u32[Number(elementStart)];
-		return Number(elementb);
-	}
-	return _u32;
-}
-export function s32Create(
-	s32: Int32Array,
-	pointer: bigint
-): (i: bigint) => number {
-	function _s32(elementOffset: bigint) {
-		const elementSize = WGPU_SIZE.s32;
-		const elementStart = (pointer + elementOffset) / elementSize;
-		const elementb = s32[Number(elementStart)];
-		return Number(elementb);
-	}
-	return _s32;
-}
-export function u16Create(
-	u16: Uint16Array,
-	pointer: bigint
-): (i: bigint) => number {
-	function _u16(elementOffset: bigint) {
-		const elementSize = WGPU_SIZE.u16;
-		const elementStart = (pointer + elementOffset) / elementSize;
-		const elementb = u16[Number(elementStart)];
-		return Number(elementb);
-	}
-	return _u16;
-}
+// export function u64Create(
+// 	u64: BigUint64Array,
+// 	pointer: bigint
+// ): (i: bigint) => bigint {
+// 	function _u64(elementOffset: bigint) {
+// 		const elementSize = WGPU_SIZE.u64;
+// 		const elementStart = (pointer + elementOffset) / elementSize;
+// 		const elementb = u64[Number(elementStart)];
+// 		return elementb;
+// 	}
+// 	return _u64;
+// }
+// export function f64Create(
+// 	u64: Float64Array,
+// 	pointer: bigint
+// ): (i: bigint) => number {
+// 	function _f64(elementOffset: bigint) {
+// 		const elementSize = WGPU_SIZE.u64;
+// 		const elementStart = (pointer + elementOffset) / elementSize;
+// 		const elementb = u64[Number(elementStart)];
+// 		return elementb;
+// 	}
+// 	return _f64;
+// }
+// export function f32Create(
+// 	u64: Float32Array,
+// 	pointer: bigint
+// ): (i: bigint) => number {
+// 	function _f32(elementOffset: bigint) {
+// 		const elementSize = WGPU_SIZE.float;
+// 		const elementStart = (pointer + elementOffset) / elementSize;
+// 		const elementb = u64[Number(elementStart)];
+// 		return elementb;
+// 	}
+// 	return _f32;
+// }
+// export function u32Create(
+// 	u32: Uint32Array,
+// 	pointer: bigint
+// ): (i: bigint) => number {
+// 	function _u32(elementOffset: bigint) {
+// 		const elementSize = WGPU_SIZE.u32;
+// 		const elementStart = (pointer + elementOffset) / elementSize;
+// 		const elementb = u32[Number(elementStart)];
+// 		return Number(elementb);
+// 	}
+// 	return _u32;
+// }
+// export function s32Create(
+// 	s32: Int32Array,
+// 	pointer: bigint
+// ): (i: bigint) => number {
+// 	function _s32(elementOffset: bigint) {
+// 		const elementSize = WGPU_SIZE.s32;
+// 		const elementStart = (pointer + elementOffset) / elementSize;
+// 		const elementb = s32[Number(elementStart)];
+// 		return Number(elementb);
+// 	}
+// 	return _s32;
+// }
+// export function u16Create(
+// 	u16: Uint16Array,
+// 	pointer: bigint
+// ): (i: bigint) => number {
+// 	function _u16(elementOffset: bigint) {
+// 		const elementSize = WGPU_SIZE.u16;
+// 		const elementStart = (pointer + elementOffset) / elementSize;
+// 		const elementb = u16[Number(elementStart)];
+// 		return Number(elementb);
+// 	}
+// 	return _u16;
+// }
 
 export function _num(structPointer: bigint, memberInfo: MemberInfo): number {
 	return memberInfo.arrayView(

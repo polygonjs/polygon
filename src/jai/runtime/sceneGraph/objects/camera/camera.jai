@@ -14,7 +14,7 @@ Camera :: struct {
 
 	near: float32 = 0.1;
 	far: float32 = 100.0;
-	aspect: float32;
+	aspect: float32 = 1.0;
 	camera_matrices: CameraMatrices;
 	camera_uniforms: CameraUniforms;
 }

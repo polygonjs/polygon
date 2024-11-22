@@ -17,6 +17,8 @@ export function WGPUTextureDescriptorFromBuffer(
 	p: bigint
 ): GPUTextureDescriptor {
 	const m = WGPUTextureDescriptor.members;
+	const buffer = window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer;
+	const u32 = new Uint32Array(buffer);
 
 	const label = _label(p, m);
 	const usage = _num(p, m.usage);
@@ -41,10 +43,12 @@ export function WGPUTextureDescriptorFromBuffer(
 		itemSize: WGPU_SIZE.u32,
 		memberInfo: m.viewFormats,
 		callback: (itemPointer) => {
-			const itemFormatb = _pointerValue(itemPointer);
-			const itemFormat = textureFormatIntToGPUTextureFormat(
-				Number(itemFormatb)
-			);
+			// const itemFormatb = _pointerValue(itemPointer);
+			// const itemFormat = textureFormatIntToGPUTextureFormat(
+			// 	Number(itemFormatb)
+			// );
+			const itemFormatb = u32[Number(itemPointer / WGPU_SIZE.u32)];
+			const itemFormat = textureFormatIntToGPUTextureFormat(itemFormatb);
 			return itemFormat;
 		},
 	});

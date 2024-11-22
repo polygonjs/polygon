@@ -1,6 +1,6 @@
 testCoreGraph :: () {
 	#if FREE_MEMORY_DEBUG {
-		test("CoreGraphMemoryCleared", () {
+		test("CoreGraphMemoryCleared", (options:TestProcedureOptions) {
 			{
 				// empty scene
 				nodesScene := newNodesScene();
@@ -45,7 +45,7 @@ testCoreGraph :: () {
 			}
 		});
 	}
-	test("CoreGraphPreventCycleConnections", (){
+	test("CoreGraphPreventCycleConnections", (options:TestProcedureOptions){
 		nodesScene := newNodesScene();
 		defer sceneDelete(nodesScene);
 		box1 := createNode(nodesScene, BoxGeoNode);
@@ -57,7 +57,7 @@ testCoreGraph :: () {
 		assertTrue(setInput(box2, 0, null1));
 		assertFalse(setInput(null1, 0, box1));
 	});
-	test("CoreGraphNodeIdRecycle", (){
+	test("CoreGraphNodeIdRecycle", (options:TestProcedureOptions){
 		nodesScene := newNodesScene();
 		defer sceneDelete(nodesScene);
 		graph := *nodesScene.graph;
