@@ -1,12 +1,12 @@
 nodesSceneOutputNodesCompute :: (scene: *NodesScene) {
-	atLeastOneCompute := false;
+	// atLeastOneCompute := false;
 	for node, i: scene.nodes {
 		if node.type == OutputGeoNode && isDirty(node)==true {
-			print(">>>> compute output node: %\n", node.nodeId);
+			// print(">>>> compute output node: %\n", node.nodeId);
 			nodeCompute(scene, cast(*OutputGeoNode)node);
-			atLeastOneCompute = true;
+			// atLeastOneCompute = true;
 		}
 	}
-	if atLeastOneCompute
-	print(">>>> nodesSceneOutputNodesCompute :%\n", atLeastOneCompute);
+	// if atLeastOneCompute
+	// print(">>>> nodesSceneOutputNodesCompute :%\n", atLeastOneCompute);
 }

@@ -21,11 +21,13 @@ rendererCollectionStart :: (wgpu_context:*WGPUContext) -> RenderCollectionData {
 rendererCollectionEnd :: (wgpu_context:*WGPUContext, data: RenderCollectionData) {
 	defer wgpuTextureViewRelease(data.frame);
 
-	#if WASM == false {
-		wgpuSurfacePresent(wgpu_context.surface);
+	if wgpu_context.mode != .HEADLESS {
+		#if WASM == false {
+			wgpuSurfacePresent(wgpu_context.surface);
+		}
+		wgpuTextureRelease(wgpu_context.surface_texture.texture);
 	}
-	wgpuTextureRelease(wgpu_context.surface_texture.texture);
-	
+
 	#if USE_IMGUI imgui_gui_free();
-	
+
 }

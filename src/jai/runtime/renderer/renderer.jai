@@ -101,7 +101,16 @@ rendererFormat :: (renderer:*Renderer) -> WGPUTextureFormat {
 	}
 } else {
 	renderer_init_native :: (window: *SDL_Window, size: Vector2UInt){
-		surface_capabilities := wgpu_context_init(window, *WGPU_CONTEXT, size);
+		assert(WGPU_CONTEXT.mode == .UNSET, "WGPU_CONTEXT.mode is not .UNSET");
+		WGPU_CONTEXT.mode = .SURFACE;
+		/*surface_capabilities := */wgpu_context_init(window, *WGPU_CONTEXT, size);
+
+		// on_wgpu_device_ready(WGPU_CONTEXT.surface, WGPU_CONTEXT.device, WGPU_CONTEXT.queue, WGPU_CONTEXT.preferred_texture_format);
+	}
+	renderer_init_native_headless :: (size: Vector2UInt){
+		assert(WGPU_CONTEXT.mode == .UNSET, "WGPU_CONTEXT.mode is not .UNSET");
+		WGPU_CONTEXT.mode = .HEADLESS;
+		surface_capabilities := wgpu_context_init(*WGPU_CONTEXT, size);
 
 		// on_wgpu_device_ready(WGPU_CONTEXT.surface, WGPU_CONTEXT.device, WGPU_CONTEXT.queue, WGPU_CONTEXT.preferred_texture_format);
 	}

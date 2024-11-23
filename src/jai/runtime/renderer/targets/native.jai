@@ -21,9 +21,14 @@ print_c :: (format: string, args: ..Any, to_standard_error := false) #expand {
 	}
 } @PrintLike
 
-request_adapter :: (instance: WGPUInstance, surface: WGPUSurface, powerPreference: WGPUPowerPreference, forceFallbackAdapter := false) -> WGPUAdapter {
+request_adapter :: (instance: WGPUInstance, _surface: WGPUSurface, powerPreference: WGPUPowerPreference, forceFallbackAdapter := false, $headless := false) -> WGPUAdapter {
 	adapter: WGPUAdapter;
 
+	#if headless {
+		surface := null;
+	} else {
+		surface := _surface;
+	}
 	request_adapter_options := WGPURequestAdapterOptions.{
 		compatibleSurface = surface,
 		powerPreference = powerPreference,
@@ -118,7 +123,7 @@ webgpu_handle_resize :: (wgpu_context: *WGPUContext, size: Vector2UInt){
 	wgpuSurfaceConfigure(wgpu_context.surface, *wgpu_context.config);
 }
 
-wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vector2UInt)-> WGPUSurfaceCapabilities {
+wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vector2UInt) {
 
 	instance_desc: WGPUInstanceDescriptor;
 	wgpu_context.instance = wgpuCreateInstance(*instance_desc);
@@ -127,7 +132,7 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 	wgpu_context.surface = create_surface(wgpu_context.instance, window);
 	assert(wgpu_context.surface != null, "Surface is not created correctly");
 
-	wgpu_context.adapter = request_adapter(wgpu_context.instance, wgpu_context.surface, powerPreference = .HighPerformance);
+	wgpu_context.adapter = request_adapter(wgpu_context.instance, wgpu_context.surface, powerPreference = .HighPerformance, headless = false);
 	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
 
 	surface_capabilities :WGPUSurfaceCapabilities;
@@ -209,11 +214,51 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
 	}, null);
 
-	return surface_capabilities;
 }
 
+wgpu_context_init :: (wgpu_context: *WGPUContext, size: Vector2UInt) {
+	// Create instance
+	instance_desc: WGPUInstanceDescriptor;
+	wgpu_context.instance = wgpuCreateInstance(*instance_desc);
+	assert(wgpu_context.instance != null, "Instance is not created correctly");
 
+	// Request adapter without surface
+	wgpu_context.adapter = request_adapter(wgpu_context.instance, null, powerPreference = .HighPerformance, headless = true);
+	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
 
+	// Use a common format for off-screen rendering
+	wgpu_context.preferred_texture_format = .RGBA8Unorm;
+
+	wgpu_context.device = request_device(wgpu_context.adapter, size.x, size.y);
+	assert(wgpu_context.device != null, "Device is not created correctly");
+
+	wgpu_context.queue = wgpuDeviceGetQueue(wgpu_context.device);
+	assert(wgpu_context.queue != null, "Queue is not created correctly");
+
+	wgpuDeviceSetUncapturedErrorCallback(wgpu_context.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
+		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
+	}, null);
+
+	wgpu_context.surface_texture.texture = create_offscreen_texture(wgpu_context.device, size.x, size.y, wgpu_context.preferred_texture_format);
+
+}
+
+create_offscreen_texture :: (device: WGPUDevice, width: u32, height: u32, format: WGPUTextureFormat) -> WGPUTexture {
+	texture_desc := WGPUTextureDescriptor.{
+		size = .{
+			width = width,
+			height = height,
+			depthOrArrayLayers = 1
+		},
+		mipLevelCount = 1,
+		sampleCount = 1,
+		dimension = ._2D,
+		format = format,
+		usage = xx (WGPUTextureUsage.RenderAttachment | WGPUTextureUsage.CopySrc),
+	};
+
+	return wgpuDeviceCreateTexture(device, *texture_desc);
+}
 
 pipeline_descriptor_print :: (pipeline_descriptor: *WGPURenderPipelineDescriptor){
 	{

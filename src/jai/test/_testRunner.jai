@@ -26,8 +26,12 @@ runTests :: () {
 	for test,i: NAMED_PROCEDURES {
 		found :bool= testNames.count == 0 || array_find(testNames, test.name);
 		if found {
-			if test.requiresWindow && windowCreated==false {
-				testOptions.window_size = windowInit();
+			if test.requiresWGPU && windowCreated==false {
+				if test.headless {
+					testOptions.window_size = headlessInit();
+				} else {
+					testOptions.window_size = windowInit();
+				}
 				windowCreated = true;
 			}
 			print("% TEST: %\n", tprintGreen(" "),test.name);
@@ -45,12 +49,17 @@ runTests :: () {
 test :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWindow=false});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=false, headless=true});
 }
 testWithWindow :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWindow=true});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=true, headless=false});
+}
+testHeadless :: (name: string, procedure: TestProcedure) {
+	_ensure_test_name_is_unique(name);
+	//
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=true, headless=true});
 }
 
 TestProcedureOptions :: struct {
@@ -61,7 +70,8 @@ TestProcedure :: #type (options: TestProcedureOptions) -> ();
 NamedProcedure :: struct {
 	name: string;
 	proc: TestProcedure;
-	requiresWindow: bool;
+	requiresWGPU: bool;
+	headless: bool;
 }
 
 

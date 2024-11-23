@@ -105,6 +105,11 @@ windowInit :: ()->Vector2UInt {
 
 	return current_window_size;
 }
+headlessInit :: ()->Vector2UInt {
+	current_window_size := Vector2UInt.{4, 4};
+	renderer_init_native_headless(current_window_size);
+	return current_window_size;
+}
 
 #scope_file
 

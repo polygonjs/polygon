@@ -1,5 +1,5 @@
 testEditor :: () {
-	testWithWindow("Editor empty", (options:TestProcedureOptions) {
+	testHeadless("Editor empty", (options:TestProcedureOptions) {
 		nodesScene := newNodesScene();
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);
@@ -16,7 +16,7 @@ testEditor :: () {
 		assertLeaksCount(0, "no leaks when closing an empty editor");
 	});
 
-	testWithWindow("Editor with minimal scene", (options:TestProcedureOptions) {
+	testHeadless("Editor with minimal scene", (options:TestProcedureOptions) {
 		nodesScene := newNodesScene();
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);

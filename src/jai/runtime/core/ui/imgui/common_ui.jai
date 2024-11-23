@@ -2,6 +2,10 @@
 
 
 gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEncoder, wgpu_context: *WGPUContext ){
+	if wgpu_context.mode == .HEADLESS {
+		return;
+	}
+
 	bd := *BD;
 	iwc := *IWC;
 	ui_data: *UiData = *UI_DATA;
@@ -21,7 +25,10 @@ gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEnc
 	#if WASM {
 		ImGui_ImplWasm_NewFrame(events_data);
 	} else {
-		ImGui_ImplSdl_NewFrame(WINDOW_CONTEXT.window, events_data);
+		assert(wgpu_context.mode == .HEADLESS || WINDOW_CONTEXT.window != null, "WINDOW_CONTEXT.window is null");
+		if wgpu_context.mode == .SURFACE {
+			ImGui_ImplSdl_NewFrame(WINDOW_CONTEXT.window, events_data);
+		}
 	}
 	ImGui.NewFrame();
 	{

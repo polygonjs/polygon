@@ -25,8 +25,12 @@ wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureV
 		wgpu_context.surface_texture.texture = wgpuSurfaceGetCurrentTexture();
 		return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
 	} else {
-		wgpuSurfaceGetCurrentTexture(wgpu_context.surface, *(wgpu_context.surface_texture));
-		return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+		if wgpu_context.mode == .SURFACE {
+			wgpuSurfaceGetCurrentTexture(wgpu_context.surface, *(wgpu_context.surface_texture));
+			return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+		} else {
+			return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+		}
 	}
 }
 
