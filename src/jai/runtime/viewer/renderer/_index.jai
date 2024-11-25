@@ -1,0 +1,9 @@
+#load "draw_data.jai";
+#load "pipeline_controller.jai";
+#load "renderer.jai";
+#load "renderer_collection.jai";
+#load "renderer_read_pixel.jai";
+#load "renderer_ui.jai";
+#load "renderer_uniforms.jai";
+#load "renderer_viewport.jai";
+#load "RendererEvent.jai";
