@@ -29,13 +29,15 @@ editorFlushCommands :: (editor: *Editor) {
 	nodeInputAdd.count = 0;
 	nodeInputRemove.count = 0;
 }
-editorCommandsDelete :: (using commands: *EditorCommands) {
-	array_reset(*nodeAdd);
-	array_reset(*nodeBeforeRemove);
-	array_reset(*nodeSetPosition);
-	array_reset(*nodeInputAdd);
-	array_reset(*nodeInputRemove);
+editorCommandsSetAllocator :: (editor: *Editor) {
+	using editor.commands;
+	nodeAdd.allocator = editor.allocator;
+	nodeBeforeRemove.allocator = editor.allocator;
+	nodeSetPosition.allocator = editor.allocator;
+	nodeInputAdd.allocator = editor.allocator;
+	nodeInputRemove.allocator = editor.allocator;
 }
+
 
 EditorCommands :: struct {
 	nodeAdd :[..]EditorNodeAddCommand;

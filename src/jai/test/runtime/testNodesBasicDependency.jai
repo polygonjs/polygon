@@ -18,7 +18,7 @@ testNodesBasicDependency :: () {
 		assertNotNull(graph(box1.p.scale.graphId), "box1.scene.scale.graph not null");
 		
 		output1 := createNode(nodesScene, OutputGeoNode);
-		assertLeaksCount(.[21, 22, 25], "leaks after creating output node");
+		assertLeaksCount(.[21, 22, 25, 26], "leaks after creating output node");
 		// // assertNotEqual(cast(*void)box1.cook, cast(*void)output1.cook, "cook methods do not point to same method");
 
 		assertEqual(nodesScene.worldScene.children.count, 0);

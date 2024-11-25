@@ -2,6 +2,13 @@
 HAS_VIEWER_PANEL :: true;
 HAS_NETWORK_PANEL :: true;
 Editor :: struct {
+	#if USE_FLAT_POOL {
+		pool: Flat_Pool;
+	} else #if USE_POOL {
+		pool: Pool;
+	}
+	allocator: Allocator;
+	//
 	exitRequested: bool=false;
 	nodesScene: *NodesScene;
 
@@ -20,11 +27,13 @@ Editor :: struct {
 
 newEditor :: ()->*Editor {
 	editor := New(Editor);
+	allocatorAssign(editor);
 	editorInit(editor);
 	return editor;
 }
 editorInit :: (editor: *Editor) {
-	array_init(*editor.sceneUiData.nodePositions);
+	array_init(*editor.sceneUiData.nodePositions,, editor.allocator);
+	editorCommandsSetAllocator(editor);
 
 	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor);
 	#if HAS_NETWORK_PANEL editor.networkPanel = newNetworkPanel(editor);
@@ -57,7 +66,6 @@ editorRemoveScene :: (editor: *Editor) {
 }
 editorDelete :: (editor: *Editor) {
 	using editor;
-	array_reset(*sceneUiData.nodePositions);
 
 	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
 	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);
@@ -65,7 +73,7 @@ editorDelete :: (editor: *Editor) {
 		editorRemoveScene(editor);
 	}
 
-	editorCommandsDelete(*editor.commands);
+	allocatorReset(editor);
 	free(editor);
 }
 drawDataInit :: (editor: *Editor) {
