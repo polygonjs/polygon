@@ -4,8 +4,8 @@ testEditor :: () {
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);
 
-		editor.onAfterTick = (editor: *Editor) {
-			if editor.nodesScene.framesCount > 2 {
+		editor.onAfterTick = (using editor: *Editor) {
+			if nodesScene.framesCount > 2 {
 				editorRequestExit(editor);
 			}
 		};
@@ -38,8 +38,8 @@ testEditor :: () {
 		}
 
 		sceneInit(nodesScene, editor);
-		editor.onAfterTick = (editor: *Editor) {
-			if editor.nodesScene.framesCount > 2 {
+		editor.onAfterTick = (using editor: *Editor) {
+			if nodesScene.framesCount > 2 {
 				editorRequestExit(editor);
 			}
 		};

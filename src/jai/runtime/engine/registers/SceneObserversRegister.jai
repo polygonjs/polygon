@@ -1,88 +1,58 @@
 
-nodeSceneObserverOnNodeAdded :: (observer: Any, scene: *NodesScene, node:*$N) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_ADDED;
-	assert(false, tprint("nodeSceneObserverOnNodeAdded: node type '%' is not implemented", node.type));
+sceneObserverOnObjectAdded :: (observer: Any, scene: *Scene, object:*$O) {
+	#insert SCENE_OBSERVER_ON_OBJECT_ADDED;
+	assert(false, tprint("sceneObserverOnObjectAdded: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-nodeSceneObserverOnNodeBeforeRemove :: (observer: Any, scene: *NodesScene, node:*$N) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE;
-	assert(false, tprint("nodeSceneObserverOnNodeBeforeRemove: node type '%' is not implemented", node.type));
+sceneObserverOnObjectBeforeRemove :: (observer: Any, scene: *Scene, object:*$O) {
+	#insert SCENE_OBSERVER_ON_OBJECT_BEFORE_REMOVE;
+	assert(false, tprint("sceneObserverOnObjectBeforeRemove: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-nodeSceneObserverOnNodeInputAdded :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED;
-	assert(false, tprint("nodeSceneObserverOnNodeInputAdded: node type '%' is not implemented", node.type));
-}
-nodeSceneObserverOnNodeInputRemoved :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED;
-	assert(false, tprint("nodeSceneObserverOnNodeInputRemoved: node type '%' is not implemented", node.type));
-}
+
 
 
 #scope_file
 
 
-NODES_SCENE_OBSERVER_ON_NODE_ADDED,
-NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE,
-NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED,
-NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED :: #run registerNodesSceneObserver();
+SCENE_OBSERVER_ON_OBJECT_ADDED,
+SCENE_OBSERVER_ON_OBJECT_BEFORE_REMOVE :: #run registerSceneObserver();
 
-NODES_SCENE_OBSERVER_TYPES :[..]Type;
+SCENE_OBSERVER_TYPES :[..]Type;
 
-nodesSceneObserverRegister :: ($T:Type) {
-	array_add(*NODES_SCENE_OBSERVER_TYPES, T);
+sceneObserverRegister :: ($T:Type) {
+	array_add(*SCENE_OBSERVER_TYPES, T);
 }
 
-registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeBeforeRemove:string, onNodeInputAdded:string, onNodeInputRemoved:string {
-	nodesSceneObserverRegister(Editor);
+registerSceneObserver :: ()-> onObjectAdded:string, onObjectBeforeRemove:string {
+	sceneObserverRegister(Renderer);
 
 	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
 
 	SceneObserverGeneratedCode :: struct {
-		onNodeAdded: string;
-		onNodeBeforeRemove: string;
-		onNodeInputAdded: string;
-		onNodeInputRemoved: string;
+		onObjectAdded: string;
+		onObjectBeforeRemove: string;
 	}
 
 	generated: SceneObserverGeneratedCode;
 	{
 		builder: String_Builder;
 		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeAdded(cast(*%) observer.value_pointer, scene, node); return;\n", observerType, observerType));
+		for observerType: SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectAdded(cast(*%) observer.value_pointer, scene, object); return;\n", observerType, observerType));
 		}
 		print_to_builder(*builder, "}");
-		generated.onNodeAdded = builder_to_string(*builder);
+		generated.onObjectAdded = builder_to_string(*builder);
 	}
 	{
 		builder: String_Builder;
 		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
 		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeBeforeRemove(cast(*%) observer.value_pointer, scene, node); return;\n", observerType, observerType));
+		for observerType: SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectBeforeRemove(cast(*%) observer.value_pointer, scene, object); return;\n", observerType, observerType));
 		}
 		print_to_builder(*builder, "}");
-		generated.onNodeBeforeRemove = builder_to_string(*builder);
+		generated.onObjectBeforeRemove = builder_to_string(*builder);
 	}
-	{
-		builder: String_Builder;
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeInputAdded(cast(*%) observer.value_pointer, scene, node, inputIndex); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onNodeInputAdded = builder_to_string(*builder);
-	}
-	{
-		builder: String_Builder;
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeInputRemoved(cast(*%) observer.value_pointer, scene, node, inputIndex); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onNodeInputRemoved = builder_to_string(*builder);
-	}
-	return 	generated.onNodeAdded,
-			generated.onNodeBeforeRemove,
-			generated.onNodeInputAdded,
-			generated.onNodeInputRemoved;
+	
+	return 	generated.onObjectAdded,
+			generated.onObjectBeforeRemove;
 }

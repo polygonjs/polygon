@@ -15,6 +15,7 @@ Editor :: struct {
 	sceneUiData: SceneUiData;
 
 	onAfterTick: EditorCustomOnTickCallback=DEFAULT_EDITOR_ON_TICK;
+	commands: EditorCommands;
 }
 
 newEditor :: ()->*Editor {
@@ -34,11 +35,12 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 	editor.nodesScene = nodesScene;
 	editorAny: Any = <<editor;
 	// tis := cast(*Type_Info_Struct)editorAny.type;
-	sceneAddObserver(nodesScene, editorAny);
+	nodesSceneAddObserver(nodesScene, editorAny);
 
 	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodes.count);
 
-	#if HAS_NETWORK_PANEL networkPanelSetScene(editor.networkPanel);
+	#if HAS_NETWORK_PANEL panelSetScene(editor.networkPanel, editor.nodesScene);
+	#if HAS_VIEWER_PANEL panelSetScene(editor.viewerPanel, editor.nodesScene);
 	// for node, i: nodesScene.nodes {
 	// 	editor.sceneUiData.nodePositions[i] = .{0,0};
 	// }
@@ -48,19 +50,22 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 editorRemoveScene :: (editor: *Editor) {
 	assert(editor.nodesScene!=null, "editor.nodesScene is null");
 	editorAny: Any = <<editor;
-	sceneRemoveObserver(editor.nodesScene, editorAny);
+	nodesSceneRemoveObserver(editor.nodesScene, editorAny);
+	#if HAS_NETWORK_PANEL panelRemoveScene(editor.networkPanel, editor.nodesScene);
+	#if HAS_VIEWER_PANEL panelRemoveScene(editor.viewerPanel, editor.nodesScene);
 	editor.nodesScene = null;
 }
 editorDelete :: (editor: *Editor) {
 	using editor;
-	if(nodesScene!=null) {
-		editorRemoveScene(editor);
-	}
 	array_reset(*sceneUiData.nodePositions);
 
 	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
 	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);
+	if(nodesScene != null) {
+		editorRemoveScene(editor);
+	}
 
+	editorCommandsDelete(*editor.commands);
 	free(editor);
 }
 drawDataInit :: (editor: *Editor) {

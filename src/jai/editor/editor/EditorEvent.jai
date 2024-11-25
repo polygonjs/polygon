@@ -1,12 +1,12 @@
 
 onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
-	array_add(*EDITOR_NODE_ADD_COMMANDS, .{node=xx node});
+	array_add(*editor.commands.nodeAdd, .{node=xx node});
 }
 onNodeBeforeRemove :: (editor: *Editor, scene: *NodesScene, node: *$T) {
-	array_add(*EDITOR_NODE_REMOVE_COMMANDS, .{node=xx node});
+	array_add(*editor.commands.nodeBeforeRemove, .{node=xx node});
 }
 onNodeSetPosition :: (editor: *Editor, scene: *NodesScene, node: *$T, position:Vector2) {
-	array_add(*EDITOR_NODE_SET_POSITION_COMMANDS, .{node=xx node, position=position});
+	array_add(*editor.commands.nodeSetPosition, .{node=xx node, position=position});
 }
 onNodeInputAdded :: (editor: *Editor, scene: *NodesScene, node: *$T, inputIndex: u8) {
 	// print("onNodeInputAdded % %\n", node, inputIndex);
@@ -16,17 +16,33 @@ onNodeInputRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T, inputInde
 }
 
 editorFlushCommands :: (editor: *Editor) {
-	doEditorNodeAddCommands(editor, *EDITOR_NODE_ADD_COMMANDS);
-	doEditorNodeRemoveCommands(editor, *EDITOR_NODE_REMOVE_COMMANDS);
-	doEditorNodeSetPositionCommands(editor, *EDITOR_NODE_SET_POSITION_COMMANDS);
-	doEditorNodeInputAddCommands(editor, *EDITOR_NODE_INPUT_ADD_COMMANDS);
-	doEditorNodeInputRemoveCommands(editor, *EDITOR_NODE_INPUT_REMOVE_COMMANDS);
+	using editor.commands;
+	doEditorNodeAddCommands(editor, nodeAdd);
+	doEditorNodeBeforeRemoveCommands(editor, nodeBeforeRemove);
+	doEditorNodeSetPositionCommands(editor, nodeSetPosition);
+	doEditorNodeInputAddCommands(editor, nodeInputAdd);
+	doEditorNodeInputRemoveCommands(editor, nodeInputRemove);
 
-	EDITOR_NODE_ADD_COMMANDS.count = 0;
-	EDITOR_NODE_REMOVE_COMMANDS.count = 0;
-	EDITOR_NODE_SET_POSITION_COMMANDS.count = 0;
-	EDITOR_NODE_INPUT_ADD_COMMANDS.count = 0;
-	EDITOR_NODE_INPUT_REMOVE_COMMANDS.count = 0;
+	nodeAdd.count = 0;
+	nodeBeforeRemove.count = 0;
+	nodeSetPosition.count = 0;
+	nodeInputAdd.count = 0;
+	nodeInputRemove.count = 0;
+}
+editorCommandsDelete :: (using commands: *EditorCommands) {
+	array_reset(*nodeAdd);
+	array_reset(*nodeBeforeRemove);
+	array_reset(*nodeSetPosition);
+	array_reset(*nodeInputAdd);
+	array_reset(*nodeInputRemove);
+}
+
+EditorCommands :: struct {
+	nodeAdd :[..]EditorNodeAddCommand;
+	nodeBeforeRemove :[..]EditorNodeBeforeRemoveCommand;
+	nodeSetPosition :[..]EditorNodeSetPositionCommand;
+	nodeInputAdd :[..]EditorNodeInputAddCommand;
+	nodeInputRemove :[..]EditorNodeInputRemoveCommand;
 }
 
 #scope_file
@@ -42,7 +58,7 @@ EditorEvent :: enum u8 {
 EditorNodeAddCommand :: struct {
 	node: *BaseNodeAny;
 }
-EditorNodeRemoveCommand :: struct {
+EditorNodeBeforeRemoveCommand :: struct {
 	node: *BaseNodeAny;
 }
 EditorNodeSetPositionCommand :: struct {
@@ -58,16 +74,13 @@ EditorNodeInputRemoveCommand :: struct {
 	inputIndex: u8;
 }
 
-EDITOR_NODE_ADD_COMMANDS :[..]EditorNodeAddCommand;
-EDITOR_NODE_REMOVE_COMMANDS :[..]EditorNodeRemoveCommand;
-EDITOR_NODE_SET_POSITION_COMMANDS :[..]EditorNodeSetPositionCommand;
-EDITOR_NODE_INPUT_ADD_COMMANDS :[..]EditorNodeInputAddCommand;
-EDITOR_NODE_INPUT_REMOVE_COMMANDS :[..]EditorNodeInputRemoveCommand;
 
-doEditorNodeAddCommands :: (editor: *Editor, commands: *[..]EditorNodeAddCommand) {
+
+
+doEditorNodeAddCommands :: (editor: *Editor, commands: [..]EditorNodeAddCommand) {
 	using editor.sceneUiData;
 
-	for cmd: EDITOR_NODE_ADD_COMMANDS {
+	for cmd: commands {
 		node := cmd.node;
 		if nodePositions.count <= node.nodeId {
 			array_resize(*nodePositions, node.nodeId + 1);
@@ -77,27 +90,27 @@ doEditorNodeAddCommands :: (editor: *Editor, commands: *[..]EditorNodeAddCommand
 		#if HAS_NETWORK_PANEL networkPanelAddNode(editor.networkPanel, node);
 	}
 }
-doEditorNodeRemoveCommands :: (editor: *Editor, commands: *[..]EditorNodeRemoveCommand) {
+doEditorNodeBeforeRemoveCommands :: (editor: *Editor, commands: [..]EditorNodeBeforeRemoveCommand) {
 	using editor.sceneUiData;
-	for cmd: EDITOR_NODE_REMOVE_COMMANDS {
+	for cmd: commands {
 		node := cmd.node;
 		nodePositions[node.nodeId] = .{-1000000,-1000000};
 
 		#if HAS_NETWORK_PANEL networkPanelRemoveNode(editor.networkPanel, node);
 	}
 }
-doEditorNodeSetPositionCommands :: (editor: *Editor, commands: *[..]EditorNodeSetPositionCommand) {
+doEditorNodeSetPositionCommands :: (editor: *Editor, commands: [..]EditorNodeSetPositionCommand) {
 	using editor.sceneUiData;
-	for cmd: EDITOR_NODE_SET_POSITION_COMMANDS {
+	for cmd: commands {
 		node := cmd.node;
 		nodePositions[node.nodeId] = cmd.position;
 
 		#if HAS_NETWORK_PANEL networkPanelNodeSetPosition(editor.networkPanel, node, cmd.position);
 	}
 }
-doEditorNodeInputAddCommands :: (editor: *Editor, commands: *[..]EditorNodeInputAddCommand) {
+doEditorNodeInputAddCommands :: (editor: *Editor, commands: [..]EditorNodeInputAddCommand) {
 
 }
-doEditorNodeInputRemoveCommands :: (editor: *Editor, commands: *[..]EditorNodeInputRemoveCommand) {
+doEditorNodeInputRemoveCommands :: (editor: *Editor, commands: [..]EditorNodeInputRemoveCommand) {
 
 }

@@ -94,7 +94,7 @@ read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UIn
 	
 	renderer_scene_uniform_buffer_update(renderer, scene, scene.scene_uniforms);
 	renderer_camera_uniform_buffer_update(renderer, camera, camera.camera_uniforms);
-	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(renderer, it, render_pass_encoder);
+	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(it, render_pass_encoder);
 
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 

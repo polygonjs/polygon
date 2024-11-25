@@ -4,10 +4,11 @@ MeshDrawData :: struct {
 	uniforms:PipelineDataUniform;
 }
 
-newDrawData :: (renderer: *Renderer, pc: *PipelineController, mesh: *Mesh, scene:*Scene)-> *MeshDrawData {
-	wgpu_context := pc.wgpu_context;
+newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
+	renderer := pc.renderer;
+	wgpu_context := renderer.wgpu_context;
 	drawData :*MeshDrawData = New(MeshDrawData,, renderer.allocator);
-	push_allocator(renderer.allocator);
+	push_allocator(pc.renderer.allocator);
 	array_init(*drawData.vertex);
 
 	{
@@ -66,32 +67,33 @@ newDrawData :: (renderer: *Renderer, pc: *PipelineController, mesh: *Mesh, scene
 }
 
 
-draw_data_update :: (pc: *PipelineController, draw_data: *MeshDrawData, mesh: *Mesh) {
+draw_data_update :: (pc: *PipelineController, using draw_data: *MeshDrawData, mesh: *Mesh) {
 	// TODO: this is a duplication with the create function, refactor
+	queue := pc.renderer.wgpu_context.queue;
 	{
 		using mesh.geometry.attributes;
 		{
-			container := draw_data.vertex[0];
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, position.values.data, container.buffer_size);
+			container := vertex[0];
+			wgpuQueueWriteBuffer(queue, container.buffer, 0, position.values.data, container.buffer_size);
 		}
 		{
-			container := draw_data.vertex[1];
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, normal.values.data, container.buffer_size);
+			container := vertex[1];
+			wgpuQueueWriteBuffer(queue, container.buffer, 0, normal.values.data, container.buffer_size);
 		}
 		{
 			// container := draw_data.vertex[2];
 			// wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, color.values.data, container.buffer_size);
 		}
 		{
-			container := draw_data.vertex[2];
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, uv.values.data, container.buffer_size);
+			container := vertex[2];
+			wgpuQueueWriteBuffer(queue, container.buffer, 0, uv.values.data, container.buffer_size);
 		}
 	}
 
 	{
 		using mesh.geometry;
-		container := draw_data.index;
-		wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, indices.data, container.buffer_size);
+		container := index;
+		wgpuQueueWriteBuffer(queue, container.buffer, 0, indices.data, container.buffer_size);
 	}
 }
 

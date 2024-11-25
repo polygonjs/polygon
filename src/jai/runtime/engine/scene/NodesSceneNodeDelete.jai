@@ -2,7 +2,7 @@
 sceneDeleteNode :: (scene: *NodesScene, node: $T, $removeFromGraph:bool = true) {
 	nodeId := node.nodeId;
 	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, node);
+		nodesSceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, node);
 	}
 	using scene;
 	// found, index := array_find(nodes, cast(*GeoNodeAny)node);

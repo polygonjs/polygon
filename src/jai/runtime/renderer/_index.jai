@@ -16,6 +16,7 @@
 #load "renderer_ui.jai";
 #load "renderer_uniforms.jai";
 #load "renderer_viewport.jai";
+#load "RendererEvent.jai";
 
 #load "compute_controller.jai";
 #load "compute_controller_collection.jai";

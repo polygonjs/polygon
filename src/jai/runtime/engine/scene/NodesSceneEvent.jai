@@ -7,33 +7,33 @@ NodesSceneEvent :: enum u8 {
 }
 
 
-sceneAddObserver :: (scene: *NodesScene, observer: Any) {
+nodesSceneAddObserver :: (scene: *NodesScene, observer: Any) {
 	assert(scene.observer.value_pointer==null, "there is already an observer");
 	scene.observer = observer;
 	// array_add(*scene.observers, observer);
 }
-sceneRemoveObserver :: (scene: *NodesScene, observer: Any) {
+nodesSceneRemoveObserver :: (scene: *NodesScene, observer: Any) {
 	assert(scene.observer.value_pointer!=null && scene.observer.value_pointer==observer.value_pointer, tprint("observer not found: % %\n", scene.observer.value_pointer, <<observer.type));
 	scene.observer.value_pointer = null;
 	// array_remove(*scene.observers, observer);
 }
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
+nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		case NodesSceneEvent.NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, node);}
-		case NodesSceneEvent.NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
+		case .NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, node);}
+		case .NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
 	}
 }
-sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
+nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		case NodesSceneEvent.NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, node, inputIndex);}
-		case NodesSceneEvent.NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, node, inputIndex);}
+		case .NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, node, inputIndex);}
+		case .NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, node, inputIndex);}
 	}
 }

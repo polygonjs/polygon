@@ -23,6 +23,7 @@ Scene :: struct {
 	children: [..]*Object3D;
 
 	scene_uniforms: SceneUniforms;
+	observers:[..]Any;
 
 	// old
 	// object
@@ -43,13 +44,14 @@ newScene :: (allocator: Allocator) -> *TYPE {
 	allocatorAssign(scene);
 
 	object3DInit(scene);
+	array_init(*scene.children, scene.allocator);
+	array_init(*scene.observers, scene.allocator);
 
 	return scene;
 }
 
 object3DInit :: (scene: *TYPE) {
 	object3DInit(cast(*Object3D)scene);
-	array_init(*scene.children, temp);
 }
 
 sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
@@ -60,6 +62,7 @@ sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
 		}
 	}
 	array_add(*scene.children, object);
+	sceneEmitEvent(scene, .OBJECT_ADDED, object);
 }
 sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
 	for child, i: scene.children {

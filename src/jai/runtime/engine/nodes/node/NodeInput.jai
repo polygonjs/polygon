@@ -32,7 +32,7 @@ setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex
 	}
 
 	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
+		nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
 	}
 	return connectionCreated;
 }
@@ -52,7 +52,7 @@ removeInput :: (node: *BaseNode, inputIndex:u8=0) -> bool {
 		setDirty(node);
 
 		#if NODES_SCENE_EMIT_EVENTS {
-			sceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
+			nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
 		}
 		return true;
 

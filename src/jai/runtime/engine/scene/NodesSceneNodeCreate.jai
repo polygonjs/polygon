@@ -41,7 +41,7 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 	nodeParamsInit(node);
 
 	#if NODES_SCENE_EMIT_EVENTS {
-		sceneEmitEvent(scene, NodesSceneEvent.NODE_ADDED, node);
+		nodesSceneEmitEvent(scene, NodesSceneEvent.NODE_ADDED, node);
 	}
 
 	return node;

@@ -22,6 +22,7 @@ newViewerPanel :: (editor: *Editor) -> *TYPE {
 }
 viewerPanelDelete :: (panel: *TYPE) {
 	using panel;
+	if(editor.nodesScene != null) sceneRemoveObserver(editor.nodesScene.worldScene, renderer);
 	rendererDelete(renderer);
 	allocatorReset(panel);
 	// object3DDelete(camera);
@@ -30,11 +31,12 @@ viewerPanelDelete :: (panel: *TYPE) {
 drawDataInit :: (panel: *TYPE) {
 	using panel;
 	#if USE_IMGUI { renderer_init_ui(renderer); }
-	renderer_init_pipelines(renderer, editor.nodesScene.worldScene, *camera);
+	rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
 	nodesSceneOutputNodesCompute(editor.nodesScene);
+	rendererFlushCommands(renderer);
 	cameraUniformsUpdate(*camera);
 	render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
 }
@@ -60,6 +62,13 @@ onResize :: (panel: *TYPE) {
 	}
 	cameraProjectionUpdate(*camera);
 }
+panelSetScene :: (panel: *TYPE, nodesScene: *NodesScene) {
+	rendererAny: Any = <<panel.renderer;
+	sceneAddObserver(nodesScene.worldScene, rendererAny);
+}
+panelRemoveScene :: (panel: *TYPE, nodesScene: *NodesScene) {
+	sceneRemoveObserver(nodesScene.worldScene, panel.renderer);
+}
 #scope_file
 
 TYPE :: ViewerPanel;
@@ -71,7 +80,7 @@ viewerPanelInit :: (panel: *TYPE, _editor: *Editor) {
 
 	renderer = newRenderer();
 
-	renderer.name = "ViewerPanelRenderer";
+	renderer.label = "ViewerPanelRenderer";
 	renderer.full_screen = false;
 	renderer.viewport = .{
 		start = .{0,0},

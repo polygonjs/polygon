@@ -13,11 +13,12 @@ PipelineDataUniform :: struct {
 
 PipelineController :: struct {
 	type: Type;
+	renderer: *Renderer;
+	label: string;
 	// id: u32;
-	wgpu_context: *WGPUContext;
 	shader_module: WGPUShaderModule;
-	vertex_buffer_layouts:[..]WGPUVertexBufferLayout;
-	vertex_attributes:[..]WGPUVertexAttribute;
+	vertexBufferLayouts:[..]WGPUVertexBufferLayout;
+	vertexAttributes:[..]WGPUVertexAttribute;
 	pipeline_descriptor: WGPURenderPipelineDescriptor;
 	pipeline: WGPURenderPipeline;
 	fragment_state: WGPUFragmentState;
@@ -34,57 +35,59 @@ PipelineController :: struct {
 newPipelineController :: (renderer: *Renderer, $T: Type, material: *Material) -> *T {
 	pc: *T = New(T,, renderer.allocator);
 	pc.type = T;
+	pc.renderer = renderer;
 
 	// pc.id = NEXT_PIPELINE_CONTROLLER_ID;
 	// NEXT_PIPELINE_CONTROLLER_ID+=1;
 	push_allocator(renderer.allocator);
-	array_init(*pc.vertex_buffer_layouts);
-	array_init(*pc.vertex_attributes);
+	array_init(*pc.vertexBufferLayouts);
+	array_init(*pc.vertexAttributes);
 	array_init(*pc.meshes);
 	array_init(*pc.meshes_draw_data);
 	array_init(*pc.buffers_to_destroy);
 
 	pc.material = material;
+	pc.label = tprint("% PipelineController %", renderer.label, material.id);
+	pipelineControllerInit(pc);
 	
 	return pc;
 }
 
-pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_context: *WGPUContext, scene:*Scene, label: string)-> PipelineController {
-	assert(pc.meshes.count > 0, "meshes is empty");
+pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
+	// assert(pc.meshes.count > 0, "meshes is empty");
 	assert(pc.material != null, "pc.material is null");
 
-	pc.wgpu_context = wgpu_context;
+	wgpu_context := renderer.wgpu_context;
 	// array_resize(*pc.meshes, meshes.count, false);
 	// for mesh, i: <<meshes {
 	// 	assert(mesh.material != null, "mesh.material is null");
 	// 	pc.meshes[i] = mesh;
 	// }
-	first_mesh := (pc.meshes)[0];
-	print("pipeline_controller_init: first_mesh.material: %\n", first_mesh.material.id);
+	// first_mesh := (pc.meshes)[0];
 	// pc.material = first_mesh.material;
-	pc.shader_module = material_create_module(wgpu_context, pc.material);
-	geometry_attributes_to_vertex_buffer_layouts(pc, *first_mesh.geometry.attributes);
-	defer array_reset(*pc.vertex_buffer_layouts);
-	defer array_reset(*pc.vertex_attributes);
+	pc.shader_module = material_create_module(wgpu_context, material);
+	materialUpdatePipelineControllerLayout(material, pc);
+	defer array_reset(*vertexBufferLayouts);
+	defer array_reset(*vertexAttributes);
 
 	{
 		push_allocator(renderer.allocator);
-		pc.pipeline_descriptor = .{label = to_c_string(tprint("% Pipeline", label))};
+		pc.pipeline_descriptor = .{label = to_c_string(tprint("% Pipeline Descriptor", label))};
 	}
 
-	pipeline_controller_pipeline_descriptor_layout_init(wgpu_context, *pc.pipeline_descriptor, first_mesh.material);
-	pipeline_controller_create_fragment_state_init(*pc.fragment_state, *pc.color_target_state, pc.shader_module, rendererFormat(renderer));
-	pc.pipeline_descriptor.fragment = *pc.fragment_state;
+	pipeline_controller_pipeline_descriptor_layout_init(wgpu_context, *pipeline_descriptor, material);
+	pipeline_controller_create_fragment_state_init(*fragment_state, *color_target_state, shader_module, rendererFormat(renderer));
+	pc.pipeline_descriptor.fragment = *fragment_state;
 	// vertex
 	vertex_state: WGPUVertexState;
-	vertex_state.module = pc.shader_module ;
+	vertex_state.module = shader_module ;
 	vertex_state.entryPoint = "vertex";
-	vertex_state.bufferCount = xx pc.vertex_buffer_layouts.count;
-	vertex_state.buffers = pc.vertex_buffer_layouts.data;
+	vertex_state.bufferCount = xx vertexBufferLayouts.count;
+	vertex_state.buffers = pc.vertexBufferLayouts.data;
 
-	pc.pipeline_descriptor.vertex = vertex_state;
+	pipeline_descriptor.vertex = vertex_state;
 
-	pc.pipeline_descriptor.primitive = .{
+	pipeline_descriptor.primitive = .{
 		topology=.TriangleList,
 		stripIndexFormat=.Undefined,
 		// frontFace=.CCW,
@@ -94,7 +97,7 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 
 	wgpu_update_pipeline_descriptor_multisample(renderer, *pc.pipeline_descriptor);
 	depth_stencil_state: WGPUDepthStencilState;
-	wgpu_update_pipeline_descriptor_depth(renderer, *pc.pipeline_descriptor, *depth_stencil_state);
+	wgpu_update_pipeline_descriptor_depth(renderer, *pipeline_descriptor, *depth_stencil_state);
 
 	#if WASM {
 		if(depth_stencil_state.depthBias != 0){
@@ -107,19 +110,24 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 		}
 		assert(depth_stencil_state.depthBias == 0, "bias not correct: %\n", depth_stencil_state.depthBias);
 	}
-	pc.pipeline = wgpuDeviceCreateRenderPipeline(wgpu_context.device, *(pc.pipeline_descriptor));
-	assert(pc.pipeline != null, "Pipeline is not created correctly");
+	pipeline = wgpuDeviceCreateRenderPipeline(wgpu_context.device, *(pipeline_descriptor));
+	assert(pipeline != null, "Pipeline is not created correctly");
 
-	array_reset(*pc.meshes_draw_data);
-	for pc.meshes {
-		drawData := newDrawData(renderer, pc, it, scene);
+	
+	// for pc.meshes {
+	// 	drawData := newDrawData(renderer, pc, it);
 
-		array_add(*pc.meshes_draw_data, drawData);
-	}
-	renderer_scene_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.SCENE);
-	renderer_camera_uniform_buffer_assign(renderer, pc.pipeline, xx UniformBindingIndex.CAMERA);
+	// 	array_add(*pc.meshes_draw_data, drawData);
+	// }
+	renderer_scene_uniform_buffer_assign(renderer, pipeline, xx UniformBindingIndex.SCENE);
+	renderer_camera_uniform_buffer_assign(renderer, pipeline, xx UniformBindingIndex.CAMERA);
 
 	return pc;
+}
+pipelineControllerAddMesh :: (using pc: *PipelineController, mesh: *Mesh) {
+	drawData := newDrawData(pc, mesh);
+	array_add(*meshes, mesh);
+	array_add(*meshes_draw_data, drawData);
 }
 
 // pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene) {
@@ -132,19 +140,23 @@ pipeline_controller_init :: (pc: *PipelineController, renderer:*Renderer, wgpu_c
 
 
 
-pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
+pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
+	
+	wgpu_context := renderer.wgpu_context;
 	// using the dirty flag may need a bit more work:
 	// - ensure mesh uniforms trigger it
 	// - ensure camera uniforms is shared and triggers it
 	// - ensure material uniforms is shared and triggers it
 	// if(!pc.uniforms_dirty) return;
 	// defer pc.uniforms_dirty = false;
-	for mesh, i: pc.meshes {
-		draw_data := pc.meshes_draw_data[i];
+	assert(meshes.count > 0, "pc.meshes is empty");
+	assert(meshes.count == meshes_draw_data.count, "pc.meshes.count != pc.meshes_draw_data.count");
+	for mesh, i: meshes {
+		draw_data := meshes_draw_data[i];
 		{
 			size := cast(u64) max( 16, size_of(TransformableUniforms));
 			buffer := draw_data.uniforms.object.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *mesh.transformable_uniforms, size);
+			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *mesh.transformable_uniforms, size);
 		}
 		// {
 		// 	size := cast(u64) max( 16, size_of(CameraUniforms));
@@ -152,9 +164,9 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
 		// 	wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
 		// }
 		{
-			size := cast(u64) max( 16, pc.material.uniformTypeSize);
+			size := cast(u64) max( 16, material.uniformTypeSize);
 			buffer := draw_data.uniforms.material.buffer;
-			wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, *pc.material.uniforms, size);
+			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *material.uniforms, size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.object.buffer, *mesh);
 		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, scene_data);
@@ -162,9 +174,9 @@ pipeline_controller_update_uniform_buffers :: (pc: *PipelineController) {
 	}
 }
 
-pipeline_controller_update_render_pass :: (renderer:*Renderer, pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder) {
-	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pc.pipeline);
-	for draw_data: pc.meshes_draw_data {
+pipeline_controller_update_render_pass :: (using  pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder) {
+	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pipeline);
+	for draw_data: meshes_draw_data {
 		{
 			using draw_data.uniforms;
 			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.SCENE, renderer.scene_data.bind_group, 0, null);
@@ -179,16 +191,16 @@ pipeline_controller_update_render_pass :: (renderer:*Renderer, pc: *PipelineCont
 		}
 		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
 
-		mesh :*Mesh= pc.meshes[it_index];
+		mesh :*Mesh= meshes[it_index];
 		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(render_pass_encoder, xx (mesh.geometry.indices.count), 1, 0, 0, 0);
 	}
 }
 
-pipeline_controller_destroy_scheduled_buffers :: (pc: *PipelineController) {
-	for container: pc.buffers_to_destroy {
+pipeline_controller_destroy_scheduled_buffers :: (using pc: *PipelineController) {
+	for container: buffers_to_destroy {
 		wgpuBufferDestroy(container.buffer);
 	}
-	array_reset(*pc.buffers_to_destroy);
+	array_reset(*buffers_to_destroy);
 }
 
 

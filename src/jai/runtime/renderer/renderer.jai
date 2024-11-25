@@ -15,7 +15,7 @@ Renderer :: struct {
 	}
 	allocator: Allocator;
 
-	name :string;
+	label :string;
 	wgpu_context: *WGPUContext;
 	
 	pipelines_by_mat_type: Table(u64, *PipelineController);
@@ -43,6 +43,8 @@ Renderer :: struct {
 	readback_buffer: WGPUBuffer;
 	readback_texture: WGPUTexture;
 	readback_view: WGPUTextureView;
+	//
+	commands: RendererCommands;
 }
 
 newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
@@ -52,6 +54,7 @@ newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
 	} else {
 		renderer.allocator = _allocator;
 	}
+	rendererCommandsSetAllocator(renderer);
 	return renderer;
 }
 
@@ -121,7 +124,7 @@ rendererFormat :: (renderer:*Renderer) -> WGPUTextureFormat {
 
 
 
-renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
+rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 
 
 
@@ -141,25 +144,11 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	renderer_scene_uniform_buffer_create(renderer, scene);
 	renderer_camera_uniform_buffer_create(renderer, camera);
 	
-	for child: scene.children {
-		if child.type == Mesh {
-			mesh := cast(*Mesh)child;
-			mat_id := mesh.material.id;
-			if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
-				pc :*PipelineController= newPipelineController(renderer, PipelineController, mesh.material);
-				array_add(*pc.meshes, mesh);
-				table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
-
-				
-			} else {
-				pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
-				assert(found, "pipeline controller not found");
-				array_add(*pc.meshes, mesh);
-			}
-		}
-	}
+	// for object: scene.children {
+	// 	rendererObjectAdd(renderer, object);
+	// }
 	for pc: renderer.pipelines_by_mat_type {
-		pipeline_controller_init(pc, renderer, *WGPU_CONTEXT, scene, "render meshes 2");
+		// pipeline_controller_init(pc, renderer, *WGPU_CONTEXT, "render meshes 2");
 
 		compute_initialized := false;
 		for mesh: pc.meshes {
@@ -170,9 +159,23 @@ renderer_init_pipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 			}
 		}
 	}
-
-
-	
+}
+rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
+	if object.type != Mesh {
+		print("unknown object type\n");
+		return;
+	}
+	mesh := cast(*Mesh)object;
+	mat_id := mesh.material.id;
+	if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
+		pc :*PipelineController= newPipelineController(renderer, PipelineController, mesh.material);
+		pipelineControllerAddMesh(pc, mesh);
+		table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
+	} else {
+		pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
+		assert(found, "pipeline controller not found");
+		pipelineControllerAddMesh(pc, mesh);
+	}
 }
 // renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 // 	// #if WASM==true context = call_from_wasm_context;
@@ -262,7 +265,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	}
 
 
-	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(renderer, it, render_pass_encoder);
+	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(it, render_pass_encoder);
 	#if USE_IMGUI {
 		if renderer.render_ui {
 			gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
@@ -270,7 +273,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	}
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 
-	cmd_buffer1_label := to_c_string(tprint("% %", renderer.name, WGPU_CONTEXT.framesCount));
+	cmd_buffer1_label := to_c_string(tprint("% %", renderer.label, WGPU_CONTEXT.framesCount));
 	defer free(cmd_buffer1_label);
 	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
 	defer wgpuCommandBufferRelease(cmd_buffer1);
@@ -290,6 +293,7 @@ renderer_destroy_buffers :: (renderer:*Renderer){
 rendererDelete :: (renderer:*Renderer) {
 	renderer_destroy_buffers(renderer);
 	allocatorReset(renderer);
+	// rendererCommandsDelete(*renderer.commands);
 	free(renderer);
 }
 

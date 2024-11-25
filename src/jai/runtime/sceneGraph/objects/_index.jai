@@ -2,3 +2,4 @@
 #load "camera/_index.jai";
 #load "mesh.jai";
 #load "scene.jai";
+#load "SceneEvent.jai";
