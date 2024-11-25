@@ -165,7 +165,7 @@ generateSceneNodeDelete :: ()->string {
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
 		nodeType := nodeMetaData.type;
-		print_to_builder(*builder, tprint("\tcase %; sceneDeleteNode(scene, cast(*%) node, removeFromGraph);return;\n", nodeType, nodeType));
+		print_to_builder(*builder, tprint("\tcase %; _sceneDeleteNode_(scene, cast(*%) node, removeFromGraph);return;\n", nodeType, nodeType));
 	}
 	print_to_builder(*builder, "}");
 

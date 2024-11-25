@@ -47,9 +47,8 @@ RendererObjectBeforeRemoveCommand :: struct {
 }
 
 doRendererObjectAddCommands :: (renderer: *Renderer, commands: [..]RendererObjectAddCommand) {
-	for cmd: commands {
-		rendererObjectAdd(renderer, cmd.object);
-	}
+	for cmd: commands { rendererObjectAdd(renderer, cmd.object); }
 }
 doRendererObjectBeforeRemoveCommands :: (renderer: *Renderer, commands: [..]RendererObjectBeforeRemoveCommand) {
+	for cmd: commands { rendererObjectRemove(renderer, cmd.object); }
 }

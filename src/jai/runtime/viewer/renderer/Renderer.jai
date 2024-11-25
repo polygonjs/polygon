@@ -45,6 +45,7 @@ Renderer :: struct {
 	readback_view: WGPUTextureView;
 	//
 	commands: RendererCommands;
+	buffers_to_destroy: [..]BufferContainer;
 }
 
 newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
@@ -55,6 +56,7 @@ newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
 		renderer.allocator = _allocator;
 	}
 	rendererCommandsSetAllocator(renderer);
+	array_init(*renderer.buffers_to_destroy, renderer.allocator);
 	return renderer;
 }
 
@@ -166,15 +168,28 @@ rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
 		return;
 	}
 	mesh := cast(*Mesh)object;
-	mat_id := mesh.material.id;
-	if !table_contains(*renderer.pipelines_by_mat_type, mat_id) {
+	matId := mesh.material.id;
+	if !table_contains(*renderer.pipelines_by_mat_type, matId) {
 		pc :*PipelineController= newPipelineController(renderer, PipelineController, mesh.material);
 		pipelineControllerAddMesh(pc, mesh);
-		table_set(*renderer.pipelines_by_mat_type, mat_id, pc);
+		table_set(*renderer.pipelines_by_mat_type, matId, pc);
 	} else {
-		pc, found := table_find(*renderer.pipelines_by_mat_type, mat_id);
+		pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
 		assert(found, "pipeline controller not found");
 		pipelineControllerAddMesh(pc, mesh);
+	}
+}
+rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
+	if object.type != Mesh {
+		print("unknown object type\n");
+		return;
+	}
+	mesh := cast(*Mesh)object;
+	matId := mesh.material.id;
+
+	pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
+	if found {
+		pipelineControllerRemoveMesh(pc, mesh);
 	}
 }
 // renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
@@ -282,16 +297,20 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 
 }
 
-renderer_destroy_buffers :: (renderer:*Renderer){
-	for renderer.pipelines_by_mat_type {
-		pipeline_controller_destroy_scheduled_buffers(it);
+rendererDestroyBuffers :: (using renderer:*Renderer){
+	for container: buffers_to_destroy {
+		wgpuBufferDestroy(container.buffer);
 	}
+	buffers_to_destroy.count = 0;
+	// for renderer.pipelines_by_mat_type {
+	// 	pipelineControllerDestroyScheduledBuffers(it);
+	// }
 	// multisample_release(renderer);
 	// depth_release(renderer);
 }
 
 rendererDelete :: (renderer:*Renderer) {
-	renderer_destroy_buffers(renderer);
+	rendererDestroyBuffers(renderer);
 	allocatorReset(renderer);
 	// rendererCommandsDelete(*renderer.commands);
 	free(renderer);

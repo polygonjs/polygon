@@ -67,7 +67,8 @@ sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
 sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
 	for child, i: scene.children {
 		if child == object {
-			scene.children[i] = null;
+			sceneEmitEvent(scene, .OBJECT_BEFORE_REMOVE, object);
+			array_unordered_remove_by_index(*scene.children, i);
 			#if delete {
 				generatedWorldObjectDelete(object);
 			}

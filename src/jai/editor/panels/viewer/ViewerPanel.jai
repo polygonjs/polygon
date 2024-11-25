@@ -41,7 +41,7 @@ render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
-	renderer_destroy_buffers(panel.renderer);
+	rendererDestroyBuffers(panel.renderer);
 }
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;

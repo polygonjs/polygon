@@ -25,12 +25,12 @@ testNetworkPanel :: () {
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 
-		sceneDeleteNode(nodesScene, box3);
+		nodeDelete(box3);
 		editorFlushCommands(editor);
-		assertEqual(editor.networkPanel.sceneWorld.children[3], null);
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children[3], null);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
 		editorRemoveScene(editor);
 		sceneDelete(nodesScene);
@@ -55,6 +55,7 @@ testNetworkPanel :: () {
 					for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
 					assertEqual(meshesCount, 3);
 				}
+				// add a node
 				case 2; {
 					box3 := createNode(nodesScene, BoxGeoNode);
 				}
@@ -65,9 +66,19 @@ testNetworkPanel :: () {
 					for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
 					assertEqual(meshesCount, 4);
 				}
+				// remove a node
 				case 4; {
-					editorRequestExit(editor);
+					lastNode := nodesScene.nodes[nodesScene.nodes.count-1];
+					nodeDelete(lastNode);
 				}
+				case 5; {
+					assertEqual(networkPanel.sceneWorld.children.count, 3);
+					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
+					meshesCount := 0;
+					for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
+					assertEqual(meshesCount, 3);
+				}
+				case 6; { editorRequestExit(editor); }
 			}
 		};
 

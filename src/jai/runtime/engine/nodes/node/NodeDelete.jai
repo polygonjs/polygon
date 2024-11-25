@@ -1,3 +1,3 @@
 nodeDelete :: (node: *$T) {
-	sceneDeleteNode(graphNodeScene(node), node);
+	generatedSceneNodeDelete(graphNodeScene(node), node);
 }

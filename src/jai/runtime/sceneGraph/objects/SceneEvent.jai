@@ -5,15 +5,15 @@ SceneEvent :: enum u8 {
 
 
 sceneAddObserver :: (scene: *Scene, observer: Any) {
-	// assert(scene.observer.value_pointer==null, "there is already an observer");
-	// scene.observer = observer;
 	array_add(*scene.observers, observer);
 }
 sceneRemoveObserver :: (scene: *Scene, observer: Any) {
-	// assert(scene.observer.value_pointer!=null && scene.observer.value_pointer==observer.value_pointer, tprint("observer not found: % %\n", scene.observer.value_pointer, <<observer.type));
-	// scene.observer.value_pointer = null;
-	print("remove to be implemented\n");
-	// array_remove(*scene.observers, observer);
+	for o, i: scene.observers {
+		if o.value_pointer == observer.value_pointer {
+			array_unordered_remove_by_index(*scene.observers, i);
+			return;
+		}
+	}
 }
 sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T) {
 	using scene;

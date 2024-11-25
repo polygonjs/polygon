@@ -98,7 +98,8 @@ render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
 	using panel;
-	renderer_destroy_buffers(rendererColor);
+	rendererDestroyBuffers(rendererColor);
+	rendererDestroyBuffers(rendererRaycast);
 }
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	using panel;

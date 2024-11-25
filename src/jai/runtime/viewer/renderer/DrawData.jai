@@ -97,9 +97,9 @@ draw_data_update :: (pc: *PipelineController, using draw_data: *MeshDrawData, me
 	}
 }
 
-draw_data_buffers_schedule_destroy :: (pc: *PipelineController, draw_data: *MeshDrawData) {
-	for v: draw_data.vertex {
-		array_add(*pc.buffers_to_destroy, v);
+drawDataBuffersScheduleDestroy :: (using renderer: *Renderer, drawData: *MeshDrawData) {
+	for v: drawData.vertex {
+		array_add(*buffers_to_destroy, v);
 	}
-	array_add(*pc.buffers_to_destroy, draw_data.index);
+	array_add(*buffers_to_destroy, drawData.index);
 }

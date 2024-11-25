@@ -1,5 +1,6 @@
 
-sceneDeleteNode :: (scene: *NodesScene, node: $T, $removeFromGraph:bool = true) {
+// do not call directly without the right node type
+_sceneDeleteNode_ :: (scene: *NodesScene, node: $T, $removeFromGraph:bool = true) {
 	nodeId := node.nodeId;
 	#if NODES_SCENE_EMIT_EVENTS {
 		nodesSceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, node);

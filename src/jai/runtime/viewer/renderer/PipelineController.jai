@@ -29,7 +29,7 @@ PipelineController :: struct {
 	meshes_draw_data:[..]*MeshDrawData;
 	//
 	uniforms_dirty: bool=true;
-	buffers_to_destroy: [..]BufferContainer;
+	
 };
 
 newPipelineController :: (renderer: *Renderer, $T: Type, material: *Material) -> *T {
@@ -44,7 +44,7 @@ newPipelineController :: (renderer: *Renderer, $T: Type, material: *Material) ->
 	array_init(*pc.vertexAttributes);
 	array_init(*pc.meshes);
 	array_init(*pc.meshes_draw_data);
-	array_init(*pc.buffers_to_destroy);
+	
 
 	pc.material = material;
 	pc.label = tprint("% PipelineController %", renderer.label, material.id);
@@ -129,10 +129,20 @@ pipelineControllerAddMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 	array_add(*meshes, mesh);
 	array_add(*meshes_draw_data, drawData);
 }
+pipelineControllerRemoveMesh :: (using pc: *PipelineController, mesh: *Mesh) {
+	found, index := array_find(meshes, mesh);
+	if found {
+		array_unordered_remove_by_index(*meshes, index);
+		array_unordered_remove_by_index(*meshes_draw_data, index);
+	}
+	// drawData := newDrawData(pc, mesh);
+	// array_add(*meshes, mesh);
+	// array_add(*meshes_draw_data, drawData);
+}
 
 // pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene) {
 // 	// TODO: release old draw data buffers, using this [0] is not good, we should look up which index matches this mesh
-// 	draw_data_buffers_schedule_destroy(pc, *pc.meshes_draw_data[0]);
+// 	drawDataBuffersScheduleDestroy(pc.renderer, *pc.meshes_draw_data[0]);
 
 // 	draw_data := drawDataCreate(pc, mesh, scene);
 // 	pc.meshes_draw_data[0] = draw_data;
@@ -196,12 +206,7 @@ pipeline_controller_update_render_pass :: (using  pc: *PipelineController, rende
 	}
 }
 
-pipeline_controller_destroy_scheduled_buffers :: (using pc: *PipelineController) {
-	for container: buffers_to_destroy {
-		wgpuBufferDestroy(container.buffer);
-	}
-	array_reset(*buffers_to_destroy);
-}
+
 
 
 
