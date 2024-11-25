@@ -1,2 +1,3 @@
 #load "testEditor.jai";
-#load "testNetworkPanel.jai";
+#if HAS_NETWORK_PANEL == true #load "testNetworkPanel.jai";
+#load "testViewerPanel.jai";

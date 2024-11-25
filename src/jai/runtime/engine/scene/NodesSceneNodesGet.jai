@@ -1,9 +1,8 @@
-// sceneFindNodeById :: (scene: *NodesScene, nodeId: NodeId) -> *GeoNodeAny {
-// 	return scene.nodes[nodeId];
-// 	// for node: scene.nodes {
-// 	// 	if node != null && node.nodeId == nodeId {
-// 	// 		return node;
-// 	// 	}
-// 	// }
-// 	// return null;
-// }
+sceneFindNodeByType :: (scene: *NodesScene, $T:Type) -> *T {
+	for node: scene.nodes {
+		if node != null && node.type == T {
+			return cast(*T)node;
+		}
+	}
+	return null;
+}

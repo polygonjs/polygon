@@ -43,14 +43,11 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCo
 	inputResult := inputResults[inputIndex];
 	scene := graphNodeScene(node);
 	// scene := graphNodeScene(node);
-	// print("cook output:%\n", inputResult);
 	if inputResult != null {
-		array_set_count_and_maybe_grow(*scene.worldScene.children, 1);
-		scene.worldScene.children[0] = xx inputResult;
-		// print("set child\n");
+		sceneObjectsClear(scene.worldScene);
+		sceneObjectAdd(scene.worldScene, inputResult);
 	} else {
-		array_set_count_and_maybe_grow(*scene.worldScene.children, 0);
-		// print("set child to null\n");
+		sceneObjectsClear(scene.worldScene);
 	}
 
 	return inputResult;

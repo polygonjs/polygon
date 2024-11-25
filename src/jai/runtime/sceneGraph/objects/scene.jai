@@ -54,13 +54,11 @@ object3DInit :: (scene: *TYPE) {
 	object3DInit(cast(*Object3D)scene);
 }
 
+sceneObjectsClear :: (scene: *TYPE) {
+	sceneEmitEvent(scene, .OBJECTS_BEFORE_REMOVE, scene.children);
+	array_set_count_and_maybe_grow(*scene.children, 0);
+}
 sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
-	for child, i: scene.children {
-		if child == null {
-			scene.children[i] = object;
-			return;
-		}
-	}
 	array_add(*scene.children, object);
 	sceneEmitEvent(scene, .OBJECT_ADDED, object);
 }

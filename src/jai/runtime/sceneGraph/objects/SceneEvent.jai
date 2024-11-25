@@ -1,6 +1,7 @@
 SceneEvent :: enum u8 {
 	OBJECT_ADDED :: 0;
 	OBJECT_BEFORE_REMOVE;
+	OBJECTS_BEFORE_REMOVE;
 }
 
 
@@ -17,12 +18,25 @@ sceneRemoveObserver :: (scene: *Scene, observer: Any) {
 }
 sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T) {
 	using scene;
-	// if observer.value_pointer == null {
-	// 	return;
-	// }
 	if event == {
 		case .OBJECT_ADDED; 	{for o:observers sceneObserverOnObjectAdded(o, scene, object);}
 		case .OBJECT_BEFORE_REMOVE; 	{for o:observers sceneObserverOnObjectBeforeRemove(o, scene, object);}
+	}
+}
+sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
+	using scene;
+	if event == {
+		/*
+		if we send an event with scene.children as a list,
+		we 
+		*/
+		case .OBJECTS_BEFORE_REMOVE; {
+			push_allocator(temp);
+			objectsCopy := array_copy(objects);
+			for o:observers {
+				sceneObserverOnObjectsBeforeRemove(o, scene, objectsCopy);
+			}
+		}
 	}
 }
 // sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {

@@ -1,5 +1,6 @@
 testNetworkPanel :: () {
 	test("NetworkPanel update scene graph", (options:TestProcedureOptions) {
+		
 		nodesScene := newNodesScene();
 		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
 		box1 := createNode(nodesScene, BoxGeoNode);
@@ -38,6 +39,7 @@ testNetworkPanel :: () {
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
 	testHeadless("NetworkPanel update renderer", (options:TestProcedureOptions) {
+		#if HAS_NETWORK_PANEL == false {return;}
 		nodesScene := newNodesScene();
 		box1 := createNode(nodesScene, BoxGeoNode);
 		box2 := createNode(nodesScene, BoxGeoNode);

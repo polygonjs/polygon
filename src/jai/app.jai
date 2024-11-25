@@ -11,11 +11,11 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	icosahedron1 := createNode(nodesScene, IcosahedronGeoNode);
 	nodeSetPosition(editor, icosahedron1, .{-2,1});
+	setInput(output1, 1, icosahedron1);
 
 
-	// paramSetValue(*box1.p.scale, 1.0);
-	print(">>>> remove compute here\n");
-	nodesSceneOutputNodesCompute(editor.nodesScene);
+	paramSetValue(*box1.p.scale, 2.0);
+	paramSetValue(*output1.p.input, 1);
 
 	//
 	editorFlushCommands(editor);

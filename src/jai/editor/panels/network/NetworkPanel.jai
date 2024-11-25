@@ -114,6 +114,14 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 					node := editor.nodesScene.nodes[nodeId];
 					if node != null {
 						print("hovered nodeId: %, %\n", nodeId, node.type);
+						if(node.type != OutputGeoNode) {
+							output1 := sceneFindNodeByType(editor.nodesScene, OutputGeoNode);
+							if(node.type == BoxGeoNode) {
+								paramSetValue(*output1.p.input, 0);
+							} else {
+								paramSetValue(*output1.p.input, 1);
+							}
+						}
 						// nodeDelete(node);
 					}
 				}

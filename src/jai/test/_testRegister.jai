@@ -5,7 +5,8 @@ registerTests :: () {
 
 	// editor
 	testEditor();
-	testNetworkPanel();
+	#if HAS_NETWORK_PANEL == true testNetworkPanel();
+	testViewerPanel();
 	// runtime
 	testArray();
 	testBitArray();
