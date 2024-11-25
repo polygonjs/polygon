@@ -46,7 +46,8 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 	// tis := cast(*Type_Info_Struct)editorAny.type;
 	nodesSceneAddObserver(nodesScene, editorAny);
 
-	array_resize(*editor.sceneUiData.nodePositions, nodesScene.nodes.count);
+	editor.sceneUiData.nodePositions.count = nodesScene.nodes.count;
+	maybe_grow(*editor.sceneUiData.nodePositions);
 
 	#if HAS_NETWORK_PANEL panelSetScene(editor.networkPanel, editor.nodesScene);
 	#if HAS_VIEWER_PANEL panelSetScene(editor.viewerPanel, editor.nodesScene);

@@ -170,10 +170,7 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 		{
 			using panel;
 			#if forRaycast==false {
-				if objectIndex.count <= node.nodeId {
-					array_resize(*objectIndex, node.nodeId + 1);
-				}
-				objectIndex[node.nodeId] = xx scene.children.count;
+				array_insert_at(*objectIndex, xx scene.children.count, node.nodeId);
 			}
 			sceneObjectAdd(scene, mesh);
 		}
@@ -328,9 +325,8 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 networkPanelUpdateScenes :: (panel: *TYPE, nodesScene: *NodesScene) {
 	using panel.editor.sceneUiData;
 
-	if nodePositions.count < nodesScene.nodes.count {
-		array_resize(*nodePositions, nodesScene.nodes.count);
-	}
+	nodePositions.count = nodesScene.nodes.count;
+	maybe_grow(*nodePositions);
 
 	for node, i: nodesScene.nodes {
 		if node != null {

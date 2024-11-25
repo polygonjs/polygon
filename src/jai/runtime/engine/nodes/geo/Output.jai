@@ -45,11 +45,11 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCo
 	// scene := graphNodeScene(node);
 	// print("cook output:%\n", inputResult);
 	if inputResult != null {
-		array_resize(*scene.worldScene.children, 1);
+		array_set_count_and_maybe_grow(*scene.worldScene.children, 1);
 		scene.worldScene.children[0] = xx inputResult;
 		// print("set child\n");
 	} else {
-		array_resize(*scene.worldScene.children, 0);
+		array_set_count_and_maybe_grow(*scene.worldScene.children, 0);
 		// print("set child to null\n");
 	}
 

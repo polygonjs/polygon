@@ -84,10 +84,7 @@ doEditorNodeAddCommands :: (editor: *Editor, commands: [..]EditorNodeAddCommand)
 
 	for cmd: commands {
 		node := cmd.node;
-		if nodePositions.count <= node.nodeId {
-			array_resize(*nodePositions, node.nodeId + 1);
-		}
-		nodePositions[node.nodeId] = .{0, 0};
+		array_insert_at(*nodePositions, .{0, 0}, node.nodeId);
 
 		#if HAS_NETWORK_PANEL networkPanelAddNode(editor.networkPanel, node);
 	}

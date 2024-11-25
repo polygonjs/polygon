@@ -20,17 +20,16 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 
 	newSize := nextNodeId;
 	if newSize > nodes.count {
-		// array_resize(*nodes, xx (nextNodeId+1));
-		array_resize(*nodes, newSize);
-		array_resize(*nodeInputCookResults, newSize);
-		array_resize(*cookResults, newSize);
-		array_resize(*cooksCount, newSize);
+		array_set_count_and_maybe_grow(*nodes, newSize);
+		array_set_count_and_maybe_grow(*nodeInputCookResults, newSize);
+		array_set_count_and_maybe_grow(*cookResults, newSize);
+		array_set_count_and_maybe_grow(*cooksCount, newSize);
 		bit_array_resize(*validNodes, newSize);
 	}
 
 	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
 	nodeInputCookResults[node.nodeId].allocator = scene.allocator;
-	array_resize(*nodeInputCookResults[node.nodeId], maxInputsCount);
+	array_set_count_and_maybe_grow(*nodeInputCookResults[node.nodeId], maxInputsCount);
 
 	// nodes[node.nodeId] = xx node;
 	nodes[node.nodeId] = cast(*BaseNodeAny)node;

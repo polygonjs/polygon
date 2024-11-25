@@ -20,7 +20,7 @@ graphInit :: (graph: *CoreGraph, _scene: *NodesScene) {
 	graph.scene = _scene;
 	graph.graphId = NEXT_CORE_GRAPH_ID;
 	if graph.graphId >= xx CORE_GRAPHS.count {
-		array_resize(*CORE_GRAPHS, xx (graph.graphId + 1));
+		array_set_count_and_maybe_grow(*CORE_GRAPHS, xx (graph.graphId + 1));
 	}
 	CORE_GRAPHS[graph.graphId] = graph;
 	NEXT_CORE_GRAPH_ID += 1;
@@ -85,7 +85,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T/*, onDirtyCallback:CoreGraphN
 	}
 	newSize := nextGraphNodeId;
 	if newSize > nodes.count {
-		array_resize(*nodes, newSize);
+		array_set_count_and_maybe_grow(*nodes, newSize);
 		// array_resize(*onDirtyCallbacks, newSize);
 		array_resize(*predecessors, newSize);
 		array_resize(*successors, newSize);
@@ -113,10 +113,10 @@ graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
 	// array_reset_keeping_memory(*successors[graphNode.graphNodeId]);
 	// array_reset_keeping_memory(*allPredecessors[graphNode.graphNodeId]);
 	// array_reset_keeping_memory(*allSuccessors[graphNode.graphNodeId]);
-	array_resize(*predecessors[graphNode.graphNodeId], 0);
-	array_resize(*successors[graphNode.graphNodeId], 0);
-	array_resize(*allPredecessors[graphNode.graphNodeId], 0);
-	array_resize(*allSuccessors[graphNode.graphNodeId], 0);
+	array_set_count_and_maybe_grow(*predecessors[graphNode.graphNodeId], 0);
+	array_set_count_and_maybe_grow(*successors[graphNode.graphNodeId], 0);
+	array_set_count_and_maybe_grow(*allPredecessors[graphNode.graphNodeId], 0);
+	array_set_count_and_maybe_grow(*allSuccessors[graphNode.graphNodeId], 0);
 
 	if nextGraphNodeId > graphNode.graphNodeId {
 		nextGraphNodeId = graphNode.graphNodeId;

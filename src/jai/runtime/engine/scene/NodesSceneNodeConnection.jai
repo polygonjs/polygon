@@ -59,13 +59,12 @@ nodeConnectionInitForNode :: (list:*NodeConnectionList, nodeId:NodeId) {
 	if nodeId >= xx connectionIdBySrcNodeId.count {
 		array_resize(*connectionIdBySrcNodeId, xx nodeId+1);
 		array_resize(*connectionIdByDestNodeId, xx nodeId+1);
-		array_resize(*connections, xx nodeId+1);
+		array_set_count_and_maybe_grow(*connections, xx nodeId+1);
 		bit_array_resize(*validIndices, xx (nodeId+1));
 	}
 }
 nodeConnectionFindSuccessorConnectionIds :: (list:*NodeConnectionList, nodeId:NodeId)->[..]NodeConnectionId {
-	using list;
-	return connectionIdBySrcNodeId[nodeId];
+	return list.connectionIdBySrcNodeId[nodeId];
 	// target:[..]NodeConnectionId;
 	// // array_reset(target);
 	// if connectionIdBySrcNodeId.count <= nodeId {
@@ -121,7 +120,7 @@ nodeConnectionAdd :: (list:*NodeConnectionList, connection:NodeConnection) {
 			nextIndex += 1;
 		}
 	} else {
-		array_resize(*connections, xx (nextIndex+1));
+		array_set_count_and_maybe_grow(*connections, xx (nextIndex+1));
 		bit_array_resize(*validIndices, xx (nextIndex+1));
 		_addAtIndex(list, connection, nextIndex);
 		nextIndex += 1;

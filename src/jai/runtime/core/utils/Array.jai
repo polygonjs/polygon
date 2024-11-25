@@ -14,3 +14,16 @@ array_concat :: (array0: [$N] $T, array1: [$M] T)-> [..] T {
 	for item: array1 {array_add(*array, item);}
 	return array;
 }
+array_set_count_and_maybe_grow :: (array: *[..] $T, newCount: s64) #modify {
+	// tia := cast(*Type_Info_Array) T;
+	// print("e:%\n", tia.element_type.type);
+	// elementTypeInfo := tia.element_type.type;
+	// print("elementTypeInfo:%\n", elementTypeInfo);
+	// if elementTypeInfo == .STRUCT {
+
+	// }
+	return true;
+} {
+	array.count = newCount;
+	maybe_grow(array);
+}
