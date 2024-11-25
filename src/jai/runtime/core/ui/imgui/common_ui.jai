@@ -2,8 +2,10 @@
 
 
 gui_update :: ( renderer:*Renderer, scene:*Scene, render_pass: WGPURenderPassEncoder, wgpu_context: *WGPUContext ){
-	if wgpu_context.mode == .HEADLESS {
-		return;
+	#if WASM == false {
+		if wgpu_context.mode == .HEADLESS {
+			return;
+		}
 	}
 
 	bd := *BD;
