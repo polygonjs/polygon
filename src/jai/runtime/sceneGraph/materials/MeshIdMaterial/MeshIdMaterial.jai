@@ -11,12 +11,15 @@ materialInit :: (material: *MATERIAL_TYPE) {
 	material.shader = SHADER_RAW;
 	material.uniforms.id = 0;
 }
-meshIdMaterialUnpackId :: (color: [4]u8) -> u32 {
+meshIdMaterialUnpackId :: (color: [4]u8) -> found:bool, id:u32 {
+	if color[3] == 0 {
+		return false, 0;
+	}
 	r := cast(u32) (color[0] + 0.5);
 	g := cast(u32) (color[1] + 0.5);
 	b := cast(u32) (color[2] + 0.5);
 	
-	return (b << 16) | (g << 8) | r;
+	return true, (b << 16) | (g << 8) | r;
 }
 
 

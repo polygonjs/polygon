@@ -107,14 +107,20 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
 		#if WASM==false && NETWORK_PANEL_USE_RAYCAST_RENDERER {
-			result := read_pixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
-			nodeId := meshIdMaterialUnpackId(result);
-			if nodeId < editor.nodesScene.nodes.count {
-				node := editor.nodesScene.nodes[nodeId];
-				if node != null {
-					print("hovered nodeId: %, %\n", nodeId, node.type);
+			if eventsData.mouseButtonPressed.left == true {
+				result := read_pixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+				found, nodeId := meshIdMaterialUnpackId(result);
+				if found == true && nodeId < editor.nodesScene.nodes.count {
+					node := editor.nodesScene.nodes[nodeId];
+					if node != null {
+						print("hovered nodeId: %, %\n", nodeId, node.type);
+						// nodeDelete(node);
+					}
 				}
 			}
+			// if eventsData.mouseButtonPressed.middle == true {
+			// 	createNode(panel.editor.nodesScene, BoxGeoNode);
+			// }
 		} else {
 			if READ_PIXEL_WARNING_PRINTED == false {
 				print("read_pixel not supported in WASM yet\n");
@@ -277,7 +283,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 			start = .{600,0},
 			size = .{1,1}
 		};
-		rendererRaycast.bgColor = .{0,0,1,1};
+		rendererRaycast.bgColor = .{1,1,1,0};
 		rendererRaycast.use_msaa = false;
 		rendererRaycast.use_depth_buffer = true;
 		rendererRaycast.use_readback = true;

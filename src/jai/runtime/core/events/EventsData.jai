@@ -38,8 +38,7 @@ EventsData :: struct {
 	keys: [KEYS_COUNT]bool;
 };
 
-events_data_reset :: (events_data :*EventsData){
-	using events_data;
+events_data_reset :: (using eventsData :*EventsData){
 	wheel = 0;
 	modifiers = .{};
 	mouseButtonPressed.left = false;
@@ -50,9 +49,9 @@ events_data_reset :: (events_data :*EventsData){
 	// events_data.modifiers.ctrl = false;
 	// events_data.modifiers.shift = false;
 	// events_data.modifiers.meta = false;
-	memcpy(events_data.keys.data, KEYS_INIT.data, KEYS_COUNT);
+	memcpy(keys.data, KEYS_INIT.data, KEYS_COUNT);
 }
 EMPTY_TEXT :[TEXTINPUTEVENT_TEXT_SIZE] s8;
-events_data_clear_text :: (events_data :*EventsData){
-	memcpy(events_data.text.data, EMPTY_TEXT.data, TEXTINPUTEVENT_TEXT_SIZE);
+events_data_clear_text :: (eventsData :*EventsData){
+	memcpy(eventsData.text.data, EMPTY_TEXT.data, TEXTINPUTEVENT_TEXT_SIZE);
 }
