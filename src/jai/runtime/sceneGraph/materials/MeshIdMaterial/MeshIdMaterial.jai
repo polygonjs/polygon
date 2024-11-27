@@ -5,8 +5,11 @@ MeshIdMaterialUniforms :: struct {
 MeshIdMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
+registerMeshIdMaterial :: (){
+	materialRegister(TYPE, topology = .TriangleList);
+}
 
-materialInit :: (material: *MATERIAL_TYPE) {
+materialInit :: (material: *TYPE) {
 	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 	material.uniforms.id = 0;
@@ -27,8 +30,8 @@ meshIdMaterialUnpackId :: (color: [4]u8) -> found:bool, id:u32 {
 
 SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "MeshIdMaterial.wgsl"; };
-MATERIAL_TYPE :: MeshIdMaterial;
+TYPE :: MeshIdMaterial;
 UNIFORM_TYPE :: MeshIdMaterialUniforms;
-MATERIAL_NAME :: #run tprint("%", MATERIAL_TYPE);
+MATERIAL_NAME :: #run tprint("%", TYPE);
 
 

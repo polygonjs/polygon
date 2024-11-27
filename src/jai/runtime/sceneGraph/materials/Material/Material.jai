@@ -3,6 +3,7 @@ EmptyUniforms :: struct {};
 MaterialBase :: struct ($UniformType: Type) {
 	allocator: Allocator;
 	type: Type;
+	materialTypeId:u64;
 	uniformType: Type=UniformType;
 	uniformTypeSize: u32=size_of(UniformType);
 	id: u64;
@@ -22,6 +23,8 @@ newMaterial :: ($T: Type, allocator: Allocator) -> *T {
 	material.allocator = allocator;
 	material.type = T;
 
+	material.materialTypeId = getMaterialTypeId(T);
+
 	material.id = NEXT_MATERIAL_ID;
 	NEXT_MATERIAL_ID += 1;
 
@@ -31,6 +34,9 @@ newMaterial :: ($T: Type, allocator: Allocator) -> *T {
 }
 materialDelete :: (material: *$T) {
 	free(material,, material.allocator);
+}
+materialTopology :: (material: *$T) ->WGPUPrimitiveTopology{
+	return MATERIAL_METADATAS[material.materialTypeId].topology;
 }
 materialUpdatePipelineControllerLayout :: (material: *Material, pc : *PipelineController) {
 

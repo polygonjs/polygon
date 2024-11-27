@@ -5,12 +5,15 @@ RaymarchingMeshMaterialUniforms :: struct {
 RaymarchingMeshMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
+registerMeshRaymarchingMaterial :: (){
+	materialRegister(TYPE, topology = .TriangleList);
+}
 
 // uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
 // 	return cast(*UNIFORM_TYPE)material.uniforms;
 // }
 
-materialInit :: (material: *MATERIAL_TYPE) {
+materialInit :: (material: *TYPE) {
 	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 	material.uniforms.offset = .{0.0, 0.0, 0.0, 0.0};
@@ -22,9 +25,9 @@ materialInit :: (material: *MATERIAL_TYPE) {
 
 SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "RaymarchingMeshMaterial.wgsl"; };
-MATERIAL_TYPE :: RaymarchingMeshMaterial;
+TYPE :: RaymarchingMeshMaterial;
 UNIFORM_TYPE :: RaymarchingMeshMaterialUniforms;
-MATERIAL_NAME :: #run tprint("%", MATERIAL_TYPE);
+MATERIAL_NAME :: #run tprint("%", TYPE);
 
 
 
