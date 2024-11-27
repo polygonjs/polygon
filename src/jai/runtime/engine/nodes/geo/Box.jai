@@ -18,7 +18,8 @@ nodeInit :: (node: *TYPE) {
 
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
-	mesh := newMesh( graphNodeScene(node).worldScene, Mesh);
+	nodesScene := graphNodeScene(node);
+	mesh := newMesh( nodesScene.worldScene, Mesh);
 
 	using node.p;
 	geometry_box_attributes_set(mesh.geometry, .{
@@ -28,7 +29,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNode
 	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
-	mesh.material = xx graphNodeScene(node).defaultMaterial;
+	mesh.material = xx nodesScene.defaultMaterial.mesh;
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformable_update_matrix(mesh);
 

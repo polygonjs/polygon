@@ -24,7 +24,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCo
 	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
-	mesh.material = xx graphNodeScene(node).defaultMaterial;
+	mesh.material = xx graphNodeScene(node).defaultMaterial.mesh;
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformable_update_matrix(mesh);
 

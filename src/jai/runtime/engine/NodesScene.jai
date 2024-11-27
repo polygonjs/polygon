@@ -21,7 +21,11 @@ NodesScene :: struct {
 	cookResults:[..]GeoNodeCookOutput;
 	cooksCount:[..]u32;
 	connections: NodeConnectionList;
-	defaultMaterial: *Material;
+
+	DefaultMaterial :: struct {
+		mesh: *MeshBasicMaterial;
+	}
+	defaultMaterial:DefaultMaterial;
 
 	// #if NODES_SCENE_EMIT_EVENTS { // maybe let's keep this in the struct until we have tested serializing
 		// observers:[..]Any;
@@ -115,6 +119,6 @@ _sceneInit :: (scene: *NodesScene) {
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
 	scene.worldScene = newScene(scene);
-	scene.defaultMaterial = xx newMaterial(scene.worldScene, NormalMeshMaterial);
+	scene.defaultMaterial.mesh = xx newMaterial(scene.worldScene, MeshNormalMaterial);
 
 }

@@ -1,8 +1,8 @@
 #load "Material/Material.jai";
 
-#load "BackgroundMeshMaterial/BackgroundMeshMaterial.jai";
-#load "BasicMeshMaterial/BasicMeshMaterial.jai";
-#load "NormalMeshMaterial/NormalMeshMaterial.jai";
-#load "RaymarchingMeshMaterial/RaymarchingMeshMaterial.jai";
+#load "MeshBackgroundMaterial/MeshBackgroundMaterial.jai";
+#load "MeshBasicMaterial/MeshBasicMaterial.jai";
 #load "MeshIdMaterial/MeshIdMaterial.jai";
 #load "MeshIdU32Material/MeshIdU32Material.jai";
+#load "MeshNormalMaterial/MeshNormalMaterial.jai";
+#load "MeshRaymarchingMaterial/MeshRaymarchingMaterial.jai";

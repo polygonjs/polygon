@@ -1,16 +1,14 @@
-BasicMeshMaterialUniforms :: struct {
+MeshBackgroundMaterialUniforms :: struct {
 	color:Color;
 };
 
-BasicMeshMaterial :: struct {
+MeshBackgroundMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
-
-registerMeshBasicMaterial :: (){
+registerMeshBackgroundMaterial :: (){
 	materialRegister(TYPE, topology = .TriangleList);
 }
-
-// uniforms :: (material: *TYPE) -> *UNIFORM_TYPE {
+// uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
 // 	return cast(*UNIFORM_TYPE)material.uniforms;
 // }
 setColor :: (material: *TYPE, color: Color) {
@@ -19,16 +17,16 @@ setColor :: (material: *TYPE, color: Color) {
 materialInit :: (material: *TYPE) {
 	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
-	material.uniforms.color = .{1.0, 0.0, 0.0, 1.0};
+	material.uniforms.color = .{0.0, 0.0, 0.0, 1.0};
 }
 
 
 #scope_file
 
 SHADER_RAW :: #run import_shader();
-import_shader :: () -> string { return "BasicMeshMaterial.wgsl"; };
-TYPE :: BasicMeshMaterial;
-UNIFORM_TYPE :: BasicMeshMaterialUniforms;
+import_shader :: () -> string { return "MeshBackgroundMaterial.wgsl"; };
+TYPE :: MeshBackgroundMaterial;
+UNIFORM_TYPE :: MeshBackgroundMaterialUniforms;
 MATERIAL_NAME :: #run tprint("%", TYPE);
 
 

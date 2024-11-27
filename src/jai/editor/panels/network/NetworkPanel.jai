@@ -35,8 +35,7 @@ NETWORK_PANEL_MATERIAL_RAYCAST :: MeshIdMaterial;
 #scope_file
 
 TYPE :: NetworkPanel;
-MATERIAL_BG :: BackgroundMeshMaterial;
-MATERIAL_BASIC :: BasicMeshMaterial;
+MATERIAL_BASIC :: MeshBasicMaterial;
 
 
 
