@@ -27,6 +27,9 @@ nodeCompute :: (scene:*NodesScene, node: *TYPE, depth:u8=0) -> GeoNodeCookOutput
 	inputIndex := _inputIndex(node);
 
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+	if srcConnectionIds.count == 0 {
+		return null;
+	}
 	srcConnectionId := srcConnectionIds[inputIndex];
 	connection := connections.connections[srcConnectionId];
 	inputNodeId := connection.src.nodeId;

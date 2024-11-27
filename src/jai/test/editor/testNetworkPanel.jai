@@ -47,40 +47,44 @@ testNetworkPanel :: () {
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);
 
-
 		editor.onAfterTick = (using editor: *Editor) {
 			if nodesScene.framesCount == {
 				case 1; {
 					assertEqual(networkPanel.sceneWorld.children.count, 3);
 					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
-					meshesCount := 0;
-					for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
-					assertEqual(meshesCount, 3);
+					assertEqual(_meshesCount(networkPanel), 3);
 				}
 				// add a node
 				case 2; {
-					box3 := createNode(nodesScene, BoxGeoNode);
+					output1 := createNode(nodesScene, OutputGeoNode);
 				}
 				case 3; {
 					assertEqual(networkPanel.sceneWorld.children.count, 4);
 					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
-					meshesCount := 0;
-					for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
-					assertEqual(meshesCount, 4);
+					assertEqual(_meshesCount(networkPanel), 4);
 				}
+				// connect a node
+				// case 4; {
+				// 	output1 := sceneFindNodeByType(nodesScene, OutputGeoNode);
+				// 	box1 := sceneFindNodeByType(nodesScene, BoxGeoNode);
+				// 	setInput(output1, 0, box1);
+				// }
+				// case 5; {
+				// 	assertEqual(networkPanel.sceneWorld.children.count, 5);
+				// 	assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 3);
+				// 	assertEqual(_meshesCount(networkPanel), 5);
+				// }
 				// remove a node
-				case 4; {
+				case 6; {
 					lastNode := nodesScene.nodes[nodesScene.nodes.count-1];
 					nodeDelete(lastNode);
 				}
-				case 5; {
+				case 7; {
 					assertEqual(networkPanel.sceneWorld.children.count, 3);
 					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
-					meshesCount := 0;
-					for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
-					assertEqual(meshesCount, 3);
+					assertEqual(_meshesCount(networkPanel), 3);
 				}
-				case 6; { editorRequestExit(editor); }
+				case 8; { editorRequestExit(editor); }
 			}
 		};
 
@@ -88,4 +92,13 @@ testNetworkPanel :: () {
 		sceneDelete(nodesScene);
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
+}
+
+
+#scope_file
+
+_meshesCount :: (networkPanel: *NetworkPanel)->u64{
+	meshesCount :u64= 0;
+	for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += xx pc.meshes.count; }
+	return meshesCount;
 }
