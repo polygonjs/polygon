@@ -23,7 +23,9 @@ NodesScene :: struct {
 	connections: NodeConnectionList;
 
 	DefaultMaterial :: struct {
+		line: *LineBasicMaterial;
 		mesh: *MeshBasicMaterial;
+		point: *PointBasicMaterial;
 	}
 	defaultMaterial:DefaultMaterial;
 
@@ -119,6 +121,8 @@ _sceneInit :: (scene: *NodesScene) {
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
 	scene.worldScene = newScene(scene);
+	scene.defaultMaterial.line = xx newMaterial(scene.worldScene, LineBasicMaterial);
 	scene.defaultMaterial.mesh = xx newMaterial(scene.worldScene, MeshNormalMaterial);
+	scene.defaultMaterial.point = xx newMaterial(scene.worldScene, PointBasicMaterial);
 
 }

@@ -4,6 +4,8 @@ registerMaterials :: () {
 
 	array_reset(*TMP_METADATAS);
 
+	registerLineBasicMaterial();
+
 	registerMeshBasicMaterial();
 	registerMeshBackgroundMaterial();
 	registerMeshIdMaterial();
@@ -11,6 +13,7 @@ registerMaterials :: () {
 	registerMeshNormalMaterial();
 	registerMeshRaymarchingMaterial();
 
+	registerPointBasicMaterial();
 }
 materialsMetaDatasCount :: ()->u64{
 	registerMaterials();

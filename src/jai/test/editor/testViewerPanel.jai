@@ -3,11 +3,11 @@ testViewerPanel :: () {
 	testHeadless("ViewerPanel update renderer", (options:TestProcedureOptions) {
 		nodesScene := newNodesScene();
 		box1 := createNode(nodesScene, BoxGeoNode);
-		icosahedron1 := createNode(nodesScene, IcosahedronGeoNode);
+		line1 := createNode(nodesScene, LineGeoNode);
 		output1 := createNode(nodesScene, OutputGeoNode);
 		setInput(output1, 0, box1);
-		setInput(output1, 1, icosahedron1);
-		paramSetValue(*output1.p.input, cast(u8) 0);
+		setInput(output1, 1, line1);
+		paramSetValue(*output1.p.input, xx 0);
 
 		editor := newEditor();
 		editorSetScene(editor, nodesScene);
@@ -21,7 +21,9 @@ testViewerPanel :: () {
 					for pc: viewerPanel.renderer.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
 					assertEqual(meshesCount, 1);
 				}
-				case 2; { editorRequestExit(editor); }
+				case 2; { output1 := sceneFindNodeByType (editor.nodesScene, OutputGeoNode); paramSetValue(*output1.p.input, xx 1); }
+				case 3; { }
+				case 4; { editorRequestExit(editor); }
 			}
 		};
 

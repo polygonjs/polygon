@@ -128,8 +128,6 @@ rendererFormat :: (renderer:*Renderer) -> WGPUTextureFormat {
 
 rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 
-
-
 	// #if WASM==true context = call_from_wasm_context;
 	// device := WGPU_CONTEXT.device;
 	// #if WASM==true {
@@ -190,6 +188,10 @@ rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
 	pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
 	if found {
 		pipelineControllerRemoveMesh(pc, mesh);
+		if pc.meshes.count == 0 {
+			pipelineControllerDelete(pc);
+			table_remove(*renderer.pipelines_by_mat_type, matId);
+		}
 	}
 }
 // renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){

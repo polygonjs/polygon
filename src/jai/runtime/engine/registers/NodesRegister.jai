@@ -15,8 +15,10 @@ registerNodes :: () {
 
 	array_reset(*TMP_METADATAS);
 
+	registerAddGeoNode();
 	registerBoxGeoNode();
 	registerIcosahedronGeoNode();
+	registerLineGeoNode();
 	registerMergeGeoNode();
 	registerNullGeoNode();
 	registerOutputGeoNode();

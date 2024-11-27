@@ -52,6 +52,14 @@ newPipelineController :: (renderer: *Renderer, $T: Type, material: *Material) ->
 	
 	return pc;
 }
+pipelineControllerDelete :: (using pc: *PipelineController){
+	push_allocator(renderer.allocator);
+	array_init(*vertexBufferLayouts);
+	array_init(*vertexAttributes);
+	array_init(*meshes);
+	array_init(*meshes_draw_data);
+	free(label);
+}
 
 pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 	// assert(pc.meshes.count > 0, "meshes is empty");
