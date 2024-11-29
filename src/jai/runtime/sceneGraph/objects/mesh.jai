@@ -42,6 +42,7 @@ worldObjectDelete :: (object: *TYPE) {
 	}
 	worldObjectDelete(cast(*Object3D)object);
 }
+
 #scope_file
 
 TYPE :: Mesh;

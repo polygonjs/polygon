@@ -15,7 +15,11 @@ NetworkPanel :: struct {
 	camera: *OrthographicCamera;
 	cameraControls: PanControls;
 
-	basicMat: *MATERIAL_BASIC;
+	DefaultMaterial :: struct {
+		basic: *MATERIAL_BASIC;
+		nodeSelected: *MATERIAL_BASIC;
+	}
+	mat: DefaultMaterial;
 
 	rendererColor: *Renderer;
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast: *Renderer;
@@ -96,7 +100,11 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		sceneAddObserver(sceneRaycast, rendererRaycastAny);
 	}
 
-	basicMat = newMaterial(MATERIAL_BASIC, panel.allocator);
+	mat.basic = newMaterial(MATERIAL_BASIC, panel.allocator);
+	mat.nodeSelected = newMaterial(MATERIAL_BASIC, panel.allocator);
+	setColor(mat.basic, .{1.0, 0.5, 0.25, 1.0});
+	setColor(mat.nodeSelected, .{0, 1, 0, 1});
+
 	cameraControls.camera = camera;
 
 	networkPanelAddBgMesh(panel, sceneWorld, .{0.2, 0.2, 0.2, 1.0});

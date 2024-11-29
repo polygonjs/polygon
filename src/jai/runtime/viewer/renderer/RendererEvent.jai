@@ -8,6 +8,9 @@ onObjectBeforeRemove :: (renderer: *Renderer, scene: *Scene, object: *$T) {
 onObjectsBeforeRemove :: (renderer: *Renderer, scene: *Scene, objects: []*$T) {
 	array_add(*renderer.commands.objectsBeforeRemove, .{objects=xx objects});
 }
+onRenderableMaterialChanged :: (renderer: *Renderer, scene: *Scene, object: *$T, previousMaterial:*Material) {
+	array_add(*renderer.commands.renderableMaterialChanged, .{object=xx object, previousMaterial=previousMaterial});
+}
 
 
 rendererFlushCommands :: (renderer: *Renderer) {
@@ -16,16 +19,18 @@ rendererFlushCommands :: (renderer: *Renderer) {
 	doRendererObjectBeforeRemoveCommands(renderer, objectBeforeRemove);
 	doRendererObjectsBeforeRemoveCommands(renderer, objectsBeforeRemove);
 	doRendererObjectAddCommands(renderer, objectAdd);
-
+	doRendererRenderableMaterialChangedCommands(renderer, renderableMaterialChanged);
 	objectAdd.count = 0;
 	objectBeforeRemove.count = 0;
 	objectsBeforeRemove.count = 0;
+	renderableMaterialChanged.count = 0;
 }
 rendererCommandsSetAllocator :: (renderer: *Renderer) {
 	using renderer.commands;
 	objectAdd.allocator = renderer.allocator;
 	objectBeforeRemove.allocator = renderer.allocator;
 	objectsBeforeRemove.allocator = renderer.allocator;
+	renderableMaterialChanged.allocator = renderer.allocator;
 }
 // rendererCommandsDelete :: (using commands: *RendererCommands) {
 // 	array_reset(*objectAdd);
@@ -37,6 +42,7 @@ RendererCommands :: struct {
 	objectAdd :[..]RendererObjectAddCommand;
 	objectBeforeRemove :[..]RendererObjectBeforeRemoveCommand;
 	objectsBeforeRemove :[..]RendererObjectsBeforeRemoveCommand;
+	renderableMaterialChanged :[..]RendererRenderableMaterialChangedCommand;
 }
 
 
@@ -57,6 +63,10 @@ RendererObjectBeforeRemoveCommand :: struct {
 RendererObjectsBeforeRemoveCommand :: struct {
 	objects: []*Object3D;
 }
+RendererRenderableMaterialChangedCommand :: struct {
+	object: *Object3D;
+	previousMaterial: *Material;
+}
 
 doRendererObjectAddCommands :: (renderer: *Renderer, commands: [..]RendererObjectAddCommand) {
 	for cmd: commands { rendererObjectAdd(renderer, cmd.object); }
@@ -66,4 +76,7 @@ doRendererObjectBeforeRemoveCommands :: (renderer: *Renderer, commands: [..]Rend
 }
 doRendererObjectsBeforeRemoveCommands :: (renderer: *Renderer, commands: [..]RendererObjectsBeforeRemoveCommand) {
 	for cmd: commands { for o: cmd.objects { rendererObjectRemove(renderer, o); } }
+}
+doRendererRenderableMaterialChangedCommands :: (renderer: *Renderer, commands: [..]RendererRenderableMaterialChangedCommand) {
+	for cmd: commands { rendererRenderableMaterialChanged(renderer, cmd.object, cmd.previousMaterial); }
 }

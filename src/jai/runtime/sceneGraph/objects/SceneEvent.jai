@@ -2,6 +2,7 @@ SceneEvent :: enum u8 {
 	OBJECT_ADDED :: 0;
 	OBJECT_BEFORE_REMOVE;
 	OBJECTS_BEFORE_REMOVE;
+	RENDERABLE_MATERIAL_CHANGED;
 }
 
 
@@ -37,6 +38,12 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
 				sceneObserverOnObjectsBeforeRemove(o, scene, objectsCopy);
 			}
 		}
+	}
+}
+sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T, previousMaterial: *Material) {
+	using scene;
+	if event == {
+		case .RENDERABLE_MATERIAL_CHANGED; {for o:observers sceneObserverOnRenderableMaterialChanged(o, scene, object, previousMaterial);}
 	}
 }
 // sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {

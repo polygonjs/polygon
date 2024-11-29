@@ -13,15 +13,16 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 				if found == true && nodeId < editor.nodesScene.nodes.count {
 					node := editor.nodesScene.nodes[nodeId];
 					if node != null {
-						if(node.type != OutputGeoNode) {
-							output1 := sceneFindNodeByType(editor.nodesScene, OutputGeoNode);
-							paramSetValue(*output1.p.input, xx nodeId);
-							// if(node.type == BoxGeoNode) {
-							// 	paramSetValue(*output1.p.input, 0);
-							// } else {
-							// 	paramSetValue(*output1.p.input, 1);
-							// }
-						}
+						selectNode(panel.editor, node, .REPLACE);
+						// if(node.type != OutputGeoNode) {
+						// 	output1 := sceneFindNodeByType(editor.nodesScene, OutputGeoNode);
+						// 	paramSetValue(*output1.p.input, xx nodeId);
+						// 	// if(node.type == BoxGeoNode) {
+						// 	// 	paramSetValue(*output1.p.input, 0);
+						// 	// } else {
+						// 	// 	paramSetValue(*output1.p.input, 1);
+						// 	// }
+						// }
 						// nodeDelete(node);
 					}
 				}

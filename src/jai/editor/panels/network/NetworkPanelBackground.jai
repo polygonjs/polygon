@@ -1,12 +1,12 @@
 networkPanelAddBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
 	mat := newMaterial(scene, MATERIAL_BG);
 	setColor(mat, color);
-	mesh0 := newMesh(scene, Mesh);
-	assert(mesh0.geometry != null, "mesh0.geometry is null\n");
-	mesh0.material = xx mat;
-	geometry_plane_update(mesh0.geometry, size=.{2,2}, segments=.{1,1});
-	transformable_update_matrix(mesh0);
-	sceneObjectAdd(scene, mesh0);
+	mesh := newMesh(scene, Mesh);
+	assert(mesh.geometry != null, "mesh0.geometry is null\n");
+	meshSetMaterial(scene, mesh, xx mat);
+	geometry_plane_update(mesh.geometry, size=.{2,2}, segments=.{1,1});
+	transformable_update_matrix(mesh);
+	sceneObjectAdd(scene, mesh);
 }
 
 #scope_file

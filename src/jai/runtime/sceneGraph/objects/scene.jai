@@ -93,6 +93,15 @@ sceneUniformsUpdate :: (scene: *TYPE, time:Time) {
 	// update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
 	// update_sdf_uniforms(*scene_data.sdf_data, *scene_data.sdf_uniforms, scene_data.time);
 }
+meshSetMaterial :: (scene: *Scene, mesh: *Mesh, material: *Material) {
+	previousMaterial := mesh.material;
+	mesh.material = material;
+	if previousMaterial != null {
+		// I don't think we should send an event if the previous material is null
+		// since the mesh would then not be in any pipelineController of the renderer
+		sceneEmitEvent(scene, .RENDERABLE_MATERIAL_CHANGED, mesh, previousMaterial);
+	}
+}
 
 #scope_file
 

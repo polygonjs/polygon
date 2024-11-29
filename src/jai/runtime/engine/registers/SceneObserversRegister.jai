@@ -1,25 +1,29 @@
 
 sceneObserverOnObjectAdded :: (observer: Any, scene: *Scene, object:*$O) {
-	#insert SCENE_OBSERVER_ON_OBJECT_ADDED;
+	#insert ON_OBJECT_ADDED;
 	assert(false, tprint("sceneObserverOnObjectAdded: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
 sceneObserverOnObjectBeforeRemove :: (observer: Any, scene: *Scene, object:*$O) {
-	#insert SCENE_OBSERVER_ON_OBJECT_BEFORE_REMOVE;
+	#insert ON_OBJECT_BEFORE_REMOVE;
 	assert(false, tprint("sceneObserverOnObjectBeforeRemove: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
 sceneObserverOnObjectsBeforeRemove :: (observer: Any, scene: *Scene, objects: []*$O) {
-	#insert SCENE_OBSERVER_ON_OBJECTS_BEFORE_REMOVE;
+	#insert ON_OBJECTS_BEFORE_REMOVE;
 	assert(false, tprint("sceneObserverOnObjectsBeforeRemove: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
+}
+sceneObserverOnRenderableMaterialChanged :: (observer: Any, scene: *Scene, object:*$O, previousMaterial:*Material) {
+	#insert ON_RENDERABLE_MATERIAL_CHANGED;
+	assert(false, tprint("sceneObserverOnRenderableMaterialChanged: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
 
 
 
 #scope_file
 
-
-SCENE_OBSERVER_ON_OBJECT_ADDED,
-SCENE_OBSERVER_ON_OBJECT_BEFORE_REMOVE,
-SCENE_OBSERVER_ON_OBJECTS_BEFORE_REMOVE :: #run registerSceneObserver();
+ON_OBJECT_ADDED,
+ON_OBJECT_BEFORE_REMOVE,
+ON_OBJECTS_BEFORE_REMOVE,
+ON_RENDERABLE_MATERIAL_CHANGED :: #run registerSceneObserver();
 
 SCENE_OBSERVER_TYPES :[..]Type;
 
@@ -27,7 +31,12 @@ sceneObserverRegister :: ($T:Type) {
 	array_add(*SCENE_OBSERVER_TYPES, T);
 }
 
-registerSceneObserver :: ()-> onObjectAdded:string, onObjectBeforeRemove:string, onObjectsBeforeRemove:string {
+registerSceneObserver :: ()-> (
+	ON_OBJECT_ADDED:string,
+	ON_OBJECT_BEFORE_REMOVE:string,
+	ON_OBJECTS_BEFORE_REMOVE:string,
+	ON_RENDERABLE_MATERIAL_CHANGED:string
+) {
 	sceneObserverRegister(Renderer);
 
 	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
@@ -36,6 +45,7 @@ registerSceneObserver :: ()-> onObjectAdded:string, onObjectBeforeRemove:string,
 		onObjectAdded: string;
 		onObjectBeforeRemove: string;
 		onObjectsBeforeRemove: string;
+		onRenderableMaterialChanged: string;
 	}
 
 	generated: SceneObserverGeneratedCode;
@@ -68,8 +78,19 @@ registerSceneObserver :: ()-> onObjectAdded:string, onObjectBeforeRemove:string,
 		print_to_builder(*builder, "}");
 		generated.onObjectsBeforeRemove = builder_to_string(*builder);
 	}
+	{
+		builder: String_Builder;
+		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
+		print_to_builder(*builder, IF_FIRST_LINE);
+		for observerType: SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onRenderableMaterialChanged(cast(*%) observer.value_pointer, scene, object, previousMaterial); return;\n", observerType, observerType));
+		}
+		print_to_builder(*builder, "}");
+		generated.onRenderableMaterialChanged = builder_to_string(*builder);
+	}
 	
-	return 	generated.onObjectAdded,
-			generated.onObjectBeforeRemove,
-			generated.onObjectsBeforeRemove;
+	return generated.onObjectAdded,
+	generated.onObjectBeforeRemove,
+	generated.onObjectsBeforeRemove,
+	generated.onRenderableMaterialChanged;
 }

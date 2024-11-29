@@ -14,10 +14,9 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 		#if forRaycast {
 			material := newMaterial(MATERIAL_RAYCAST, panel.allocator);
 			material.uniforms.id = node.nodeId;
-			mesh.material = xx material;
+			meshSetMaterial(scene, mesh, xx material);
 		} else {
-			setColor(panel.basicMat, .{1.0, 0.5, 0.25, 1.0});
-			mesh.material = xx panel.basicMat;
+			meshSetMaterial(scene, mesh, xx panel.mat.basic);
 		}
 
 		pos := panel.editor.sceneUiData.nodePositions[node.nodeId];

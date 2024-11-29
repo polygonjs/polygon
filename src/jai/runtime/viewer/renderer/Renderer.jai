@@ -185,6 +185,28 @@ rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
 	mesh := cast(*Mesh)object;
 	matId := mesh.material.id;
 
+	pipelineControllerRemoveMeshAndDeleteIfEmpty(renderer, mesh, matId);
+	// pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
+	// if found {
+	// 	pipelineControllerRemoveMesh(pc, mesh);
+	// 	if pc.meshes.count == 0 {
+	// 		pipelineControllerDelete(pc);
+	// 		table_remove(*renderer.pipelines_by_mat_type, matId);
+	// 	}
+	// }
+}
+rendererRenderableMaterialChanged :: (renderer:*Renderer, object:*Object3D, previousMaterial:*Material) {
+	if object.type != Mesh {
+		print("unknown object type\n");
+		return;
+	}
+	mesh := cast(*Mesh)object;
+	previousMatId := previousMaterial.id;
+
+	pipelineControllerRemoveMeshAndDeleteIfEmpty(renderer, mesh, previousMatId);
+	rendererObjectAdd(renderer, object);
+}
+pipelineControllerRemoveMeshAndDeleteIfEmpty :: (renderer:*Renderer, mesh:*Mesh, matId:u64) {
 	pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
 	if found {
 		pipelineControllerRemoveMesh(pc, mesh);
