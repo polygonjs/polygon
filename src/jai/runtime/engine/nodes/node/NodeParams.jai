@@ -30,7 +30,7 @@ nodeParamsInit :: (node: *$N) {
 			assert(false, "*** handle_params: param.type is null\n");
 			// param.type = type;
 		}
-		initParamByType(param, node);
+		generatedParamInit(param, node);
 	}
 }
 
@@ -50,7 +50,8 @@ params :: (node: *$T, body: Code, flags: For_Flags) #expand {
 		paramPtr := (cast(*u8)node) + paramsField.offset_in_bytes + paramField.offset_in_bytes;
 		`it := cast(*BaseParamAny)paramPtr;
 		`it_index := i;
-		`type := paramType(member_tis.name);
+		// `type := paramType(member_tis.name);
+		`paramName := member.name;
 		#insert body;
 	}
 }

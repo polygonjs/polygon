@@ -1,6 +1,6 @@
 testViewerPanel :: () {
 	
-	testHeadless("ViewerPanel update renderer", (options:TestProcedureOptions) {
+	testHeadlessNoSceneOrEditor("ViewerPanel update renderer", (options:TestProcedureOptions) {
 		nodesScene := newNodesScene();
 		box1 := createNode(nodesScene, BoxGeoNode);
 		line1 := createNode(nodesScene, LineGeoNode);

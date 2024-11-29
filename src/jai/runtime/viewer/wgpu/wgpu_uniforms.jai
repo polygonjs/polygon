@@ -20,8 +20,8 @@ wgpu_uniform_to_buffer_with_size :: (
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
 	size := cast(u64) max( 16, uniformTypeSize);
 
-	buffer_label := to_c_string(label);
-	defer free(buffer_label);
+	buffer_label := to_c_string_temp(label);
+	// defer free(buffer_label);
 	buffer_desc: WGPUBufferDescriptor = .{
 		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
 		size = size,
@@ -39,9 +39,9 @@ wgpu_uniform_to_buffer_with_size :: (
 		offset=0,
 		buffer=buffer,
 	};
-	bind_group_descriptor_label := tprint("uniforms_bind_group/%", label);
-	bind_group_descriptor_label_c := to_c_string(bind_group_descriptor_label);
-	defer free(bind_group_descriptor_label_c);
+	bind_group_descriptor_label := tprint("uniforms_bind_group/%", label,, temp);
+	bind_group_descriptor_label_c := to_c_string_temp(bind_group_descriptor_label);
+	// defer free(bind_group_descriptor_label_c);
 	bind_group_descriptor := WGPUBindGroupDescriptor.{
 		label = bind_group_descriptor_label_c,
 		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, bind_group_layout_index),

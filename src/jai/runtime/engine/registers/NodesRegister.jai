@@ -5,10 +5,13 @@ generatedNodeCompute :: (scene: *NodesScene, inputNode: *$T, depth:u8=0)->GeoNod
 	assert(false, tprint("generatedNodeCompute: node type '%' is not implemented", inputNode.type));
 	return newObject3D(scene.worldScene, Mesh);
 }
-
 generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
 	assert(false, tprint("generatedSceneNodeDelete: node type '%' is not implemented", node.type));
+}
+generatedNodeParamsRenderUI :: (node: *$T) {
+	#insert GENERATED_CODE_PARAMS_RENDER_UI;
+	assert(false, tprint("generatedNodeParamsRenderUI: node type '%' is not implemented", node.type));
 }
 
 registerNodes :: () {
@@ -39,15 +42,21 @@ nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData {
 	return list;
 }
 
-registerNodesAndGenerateCode :: () -> (nodeCompute:string, sceneNodeDelete:string) {
+registerNodesAndGenerateCode :: () -> (
+	nodeCompute:string,
+	sceneNodeDelete:string,
+	paramsRenderUI:string
+) {
 
 	registerNodes();
 
 	nodeCompute := generateNodeComputes();
 	sceneNodeDelete := generateSceneNodeDelete();
+	paramsRenderUI := generateNodeParamsRenderUI();
 
 	return 	nodeCompute,
-	sceneNodeDelete;
+		sceneNodeDelete,
+	paramsRenderUI;
 }
 
 getNodeTypeId :: (T:Type)->u64 {
@@ -141,7 +150,8 @@ TMP_METADATAS: [..]NodeMetaData;
 
 
 GENERATED_CODE_NODE_COMPUTE,
-GENERATED_CODE_SCENE_NODE_DELETE :: #run registerNodesAndGenerateCode();
+GENERATED_CODE_SCENE_NODE_DELETE,
+GENERATED_CODE_PARAMS_RENDER_UI :: #run registerNodesAndGenerateCode();
 
 
 
@@ -168,6 +178,19 @@ generateSceneNodeDelete :: ()->string {
 	for nodeMetaData: NODE_METADATAS {
 		nodeType := nodeMetaData.type;
 		print_to_builder(*builder, tprint("\tcase %; _sceneDeleteNode_(scene, cast(*%) node, removeFromGraph);return;\n", nodeType, nodeType));
+	}
+	print_to_builder(*builder, "}");
+
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}
+generateNodeParamsRenderUI :: ()->string {
+	builder: String_Builder;
+	print_to_builder(*builder, "if node.type == {\n");
+	for nodeMetaData: NODE_METADATAS {
+		nodeType := nodeMetaData.type;
+		print_to_builder(*builder, tprint("\tcase %; for :params param: cast(*%)node { generatedParamRenderUI(param, paramName); };return;\n", nodeType, nodeType));
 	}
 	print_to_builder(*builder, "}");
 

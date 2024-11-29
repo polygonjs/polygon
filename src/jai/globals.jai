@@ -7,6 +7,5 @@
 	IWC:ImGui_WGPU_Common;
 }
 EVENTS_DATA:EventsData;
-UI_DATA:UiData;
 
 

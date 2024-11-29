@@ -11,4 +11,5 @@ processEvent :: (editor: *Editor, eventsData:*EventsData) {
 processEventPanels :: (editor: *Editor, eventsData:*EventsData) {
 	#if HAS_VIEWER_PANEL processEvent(editor.viewerPanel, eventsData);
 	#if HAS_NETWORK_PANEL processEvent(editor.networkPanel, eventsData);
+	processEvent(editor.paramsPanel, eventsData);
 }

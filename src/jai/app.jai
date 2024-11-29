@@ -17,7 +17,7 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 
 	paramSetValue(*box1.p.scale, 2.0);
-	paramSetValue(*output1.p.input, 3);
+	paramSetValue(*output1.p.input, 1);
 
 	nodeSetPosition(editor, output1, .{0,-2});
 

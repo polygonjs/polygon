@@ -1,7 +1,6 @@
 testOutputGeoNode :: () {
 	
-	test("geo/output basic", (options:TestProcedureOptions) {
-		nodesScene := newNodesScene();
+	testWithScene("geo/output basic", (using options:TestProcedureOptions) {
 		worldScene := nodesScene.worldScene;
 		output1 := createNode(nodesScene, OutputGeoNode);
 		nodesSceneOutputNodesCompute(nodesScene); // no crash if output has no input

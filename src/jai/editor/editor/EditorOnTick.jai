@@ -6,7 +6,7 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 		context = call_from_wasm_context;
 		events_data_update(*EVENTS_DATA);
 		time := performance_now();
-		compute_fps(editor.nodesScene, time, *UI_DATA);
+		computeFPS(editor.nodesScene, time);
 		processEvent(editor, *EVENTS_DATA);
 	} else {
 	}

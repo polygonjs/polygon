@@ -25,7 +25,6 @@ Renderer :: struct {
 	scene_data: RendererBufferData;
 	camera_data: RendererBufferData;
 
-	render_ui:bool=false;
 	clear:bool=true;
 	//
 	use_msaa: bool=true;
@@ -57,6 +56,7 @@ newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
 	}
 	rendererCommandsSetAllocator(renderer);
 	array_init(*renderer.buffers_to_destroy, renderer.allocator);
+	renderer.wgpu_context = *WGPU_CONTEXT;
 	return renderer;
 }
 
@@ -136,7 +136,6 @@ rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
-	renderer.wgpu_context = *WGPU_CONTEXT;
 	{
 		push_allocator(renderer.allocator);
 		init(*renderer.pipelines_by_mat_type, 1);
@@ -250,15 +249,17 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 
 	update_render_pass_descriptor_multisample(renderer, *colorAttachment, *data.frame);
 
+	cmdEncoderLabel := tprint("Command Encoder %", renderer.label,, temp);
+	cmdEncoderLabel_c := to_c_string_temp(cmdEncoderLabel);
 	cmd_encoder := wgpuDeviceCreateCommandEncoder(
 		WGPU_CONTEXT.device,
-		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Render"}),
+		*(WGPUCommandEncoderDescriptor.{label = cmdEncoderLabel_c}),
 	);
 	defer wgpuCommandEncoderRelease(cmd_encoder);
 
-	renderPassDescriptorLabel := tprint("Render Pass 3D %", WGPU_CONTEXT.framesCount);
-	renderPassDescriptorLabel_c := to_c_string(renderPassDescriptorLabel);
-	defer free(renderPassDescriptorLabel_c);
+	renderPassDescriptorLabel := tprint("Render Pass 3D %", WGPU_CONTEXT.framesCount,, temp);
+	renderPassDescriptorLabel_c := to_c_string_temp(renderPassDescriptorLabel);
+	// defer free(renderPassDescriptorLabel_c);
 	render_pass_descriptor := WGPURenderPassDescriptor.{
 		label = renderPassDescriptorLabel_c,
 		colorAttachmentCount = 1,
@@ -305,15 +306,15 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 
 
 	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(it, render_pass_encoder);
-	#if USE_IMGUI {
-		if renderer.render_ui {
-			gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
-		}
-	}
+	// #if USE_IMGUI {
+	// 	if renderer.render_ui {
+	// 		gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
+	// 	}
+	// }
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 
-	cmd_buffer1_label := to_c_string(tprint("% %", renderer.label, WGPU_CONTEXT.framesCount));
-	defer free(cmd_buffer1_label);
+	cmd_buffer1_label := to_c_string_temp(tprint("% %", renderer.label, WGPU_CONTEXT.framesCount));
+	// defer free(cmd_buffer1_label);
 	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
 	defer wgpuCommandBufferRelease(cmd_buffer1);
 

@@ -1,18 +1,14 @@
 createNode :: (scene: *NodesScene, $T:Type)->*T {
 	using scene;
 
-	// node.nodeId = nextNodeId;
 	nodeTypeId := getNodeTypeId(T);
-	// node:*BaseNode;
-	// {	
-		node := New(T,, scene.allocator);
-		node.type = T;
-		node.nodeId = nextNodeId;
-		node.nodeTypeId = nodeTypeId;
-		node.name = tprint("%",T);
-	// }
-	// onDirty := ON_DIRTY_METHODS[nodeTypeId];
+	node := New(T,, scene.allocator);
+	node.type = T;
+	node.nodeId = nextNodeId;
+	node.nodeTypeId = nodeTypeId;
+
 	
+
 	nextNodeId += 1;
 	while nextNodeId < nodes.count && validNodes[nextNodeId]==true {
 		nextNodeId += 1;
@@ -21,6 +17,7 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 	newSize := nextNodeId;
 	if newSize > nodes.count {
 		array_set_count_and_maybe_grow(*nodes, newSize);
+		array_set_count_and_maybe_grow(*nodeNames, newSize);
 		array_set_count_and_maybe_grow(*nodeInputCookResults, newSize);
 		array_set_count_and_maybe_grow(*cookResults, newSize);
 		array_set_count_and_maybe_grow(*cooksCount, newSize);
@@ -33,6 +30,13 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 
 	// nodes[node.nodeId] = xx node;
 	nodes[node.nodeId] = cast(*BaseNodeAny)node;
+	{
+		push_allocator(scene.allocator);
+		nodeNameBuilder: String_Builder;
+		print_to_builder(*nodeNameBuilder, tprint("%01",T,,temp));
+		nodeNames[node.nodeId] = builder_to_string(*nodeNameBuilder);
+	}
+
 	graphAddNode(*graph, node);
 	validNodes[node.nodeId] = true;
 	// validNodeIds[node.nodeId] = true;

@@ -1,6 +1,5 @@
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	#if USE_IMGUI && HAS_VIEWER_PANEL==false { renderer_init_ui(rendererColor); }
 	rendererInitPipelines(rendererColor, sceneWorld, camera);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererInitPipelines(rendererRaycast, sceneRaycast, camera);
 }

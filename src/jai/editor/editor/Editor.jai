@@ -15,6 +15,7 @@ Editor :: struct {
 	windowSize: Vector2UInt64;
 	#if HAS_VIEWER_PANEL viewerPanel: *ViewerPanel;
 	#if HAS_NETWORK_PANEL networkPanel: *NetworkPanel;
+	paramsPanel: *ParamsPanel;
 
 	SceneUiData :: struct {
 		nodePositions:[..]Vector2;
@@ -39,6 +40,7 @@ editorInit :: (editor: *Editor) {
 
 	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor);
 	#if HAS_NETWORK_PANEL editor.networkPanel = newNetworkPanel(editor);
+	editor.paramsPanel = newParamsPanel(editor);
 }
 
 
@@ -47,6 +49,7 @@ editorDelete :: (editor: *Editor) {
 
 	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
 	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);
+	paramsPanelDelete(paramsPanel);
 	if(nodesScene != null) {
 		editorRemoveScene(editor);
 	}

@@ -1,6 +1,7 @@
 drawDataInit :: (editor: *Editor) {
 	#if HAS_VIEWER_PANEL drawDataInit(editor.viewerPanel);
 	#if HAS_NETWORK_PANEL drawDataInit(editor.networkPanel);
+	drawDataInit(editor.paramsPanel);
 }
 editorRender :: (editor: *Editor) {
 	WGPU_CONTEXT.framesCount = editor.nodesScene.framesCount;
@@ -8,6 +9,7 @@ editorRender :: (editor: *Editor) {
 	data :RenderCollectionData= rendererCollectionStart(*WGPU_CONTEXT);
 	#if HAS_VIEWER_PANEL render(editor.viewerPanel, *data);
 	#if HAS_NETWORK_PANEL render(editor.networkPanel, *data);
+	render(editor.paramsPanel, *data);
 
 	rendererCollectionEnd(*WGPU_CONTEXT, data);
 	rendererDestroyBuffers(editor);
@@ -16,4 +18,5 @@ editorRender :: (editor: *Editor) {
 rendererDestroyBuffers :: (editor: *Editor) {
 	#if HAS_VIEWER_PANEL rendererDestroyBuffers(editor.viewerPanel);
 	#if HAS_NETWORK_PANEL rendererDestroyBuffers(editor.networkPanel);
+	rendererDestroyBuffers(editor.paramsPanel);
 }

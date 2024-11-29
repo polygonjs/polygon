@@ -1,6 +1,6 @@
 BindGroupLayoutDescContainer :: struct {
 	bind_group_layouts: []WGPUBindGroupLayout;
-	bind_group_layout_descs: []WGPUBindGroupLayoutDescriptor;
+	// bind_group_layout_descs: []WGPUBindGroupLayoutDescriptor;
 }
 
 material_create_module :: (wgpu_context: *WGPUContext, material: *Material)-> WGPUShaderModule {
@@ -26,7 +26,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 		};
 		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "scene uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
-		container.bind_group_layout_descs[groupIndex] = desc;
+		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
 	// group 1 (camera uniforms)
 	{
@@ -40,7 +40,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 		};
 		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "camera uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
-		container.bind_group_layout_descs[groupIndex] = desc;
+		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
 	// group 2 (object uniforms)
 	{
@@ -54,7 +54,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 		};
 		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "object uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
-		container.bind_group_layout_descs[groupIndex] = desc;
+		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
 	// group 3 (material uniforms)
 	{
@@ -68,7 +68,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 		};
 		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "material uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
-		container.bind_group_layout_descs[groupIndex] = desc;
+		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
 	//
 	pipeline_layout_descriptor.bindGroupLayoutCount = xx container.bind_group_layouts.count;
@@ -79,7 +79,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 
 wgpu_create_bind_group_layout :: (device: WGPUDevice, entryCount: s64, data: *WGPUBindGroupLayoutEntry, label:string) -> WGPUBindGroupLayout, WGPUBindGroupLayoutDescriptor {
 	desc :WGPUBindGroupLayoutDescriptor= .{
-		label = to_c_string(label),
+		label = to_c_string_temp(label),
 		entryCount = xx entryCount,
 		entries = data,
 	};
@@ -93,15 +93,15 @@ wgpu_create_shader_module :: (device: WGPUDevice, source: string, label: string)
 			next = null,
 			sType = .ShaderModuleWGSLDescriptor
 		},
-		code = to_c_string(source)
+		code = to_c_string_temp(source)
 	};
-	defer if FREE_MEMORY free(wgsl_descriptor.code);
+	// defer if FREE_MEMORY free(wgsl_descriptor.code);
 
 	shader_module_descriptor := WGPUShaderModuleDescriptor.{
 		nextInChain = xx *wgsl_descriptor,
-		label = to_c_string(label),
+		label = to_c_string_temp(label),
 	};
-	defer if FREE_MEMORY free(shader_module_descriptor.label);
+	// defer if FREE_MEMORY free(shader_module_descriptor.label);
 
 	return wgpuDeviceCreateShaderModule(device, *shader_module_descriptor);
 }

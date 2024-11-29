@@ -13,7 +13,7 @@ editorStart :: (editor: *Editor, window_size :Vector2UInt) {
 	while editor.exitRequested==false {
 
 		time := current_time_monotonic();
-		compute_fps(editor.nodesScene, time, *UI_DATA);
+		computeFPS(editor.nodesScene, time);
 		sdl_event: SDL_Event;
 		events_data_reset(*EVENTS_DATA);
 

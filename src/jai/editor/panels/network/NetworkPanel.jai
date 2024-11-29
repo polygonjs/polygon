@@ -54,15 +54,13 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		rendererColor.label = "NetworkPanelRendererColor";
 		rendererColor.full_screen = false;
 		rendererColor.viewport = .{
-				start = .{600,0},
-				size = .{500,900}
+				start = .{0,0},
+				size = .{1,1}
 			};
 		rendererColor.bgColor = DEFAULT_RENDERER_BG_COLOR;
 		rendererColor.use_msaa = false;
 		rendererColor.use_depth_buffer = true;
 		rendererColor.useReadback = false;
-		#if HAS_VIEWER_PANEL == true {rendererColor.render_ui = false;}
-		#if HAS_VIEWER_PANEL == false {rendererColor.render_ui = true;}
 		rendererColor.clear = false;
 	}
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
@@ -70,14 +68,13 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		rendererRaycast.label = "NetworkPanelRendererRaycast";
 		rendererRaycast.full_screen = false;
 		rendererRaycast.viewport = .{
-			start = .{600,0},
+			start = .{0,0},
 			size = .{1,1}
 		};
 		rendererRaycast.bgColor = .{1,1,1,0};
 		rendererRaycast.use_msaa = false;
 		rendererRaycast.use_depth_buffer = true;
 		rendererRaycast.useReadback = true;
-		rendererRaycast.render_ui = false;
 		rendererRaycast.clear = false;
 	}
 

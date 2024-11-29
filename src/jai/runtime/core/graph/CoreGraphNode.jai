@@ -12,7 +12,7 @@ CoreGraphNode :: struct ($T: Type) {
 	type: Type=T;
 	graphNodeId: CoreGraphNodeId;
 	graphId: CoreGraphId;
-	name: string;
+	// name: string;
 }
 CoreGraphNodeAny :: CoreGraphNode(Any);
 

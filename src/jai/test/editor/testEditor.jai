@@ -1,9 +1,5 @@
 testEditor :: () {
-	testHeadless("Editor empty", (options:TestProcedureOptions) {
-		nodesScene := newNodesScene();
-		editor := newEditor();
-		editorSetScene(editor, nodesScene);
-
+	testHeadless("Editor empty", (using options:TestProcedureOptions) {
 		editor.onAfterTick = (using editor: *Editor) {
 			if nodesScene.framesCount > 2 {
 				editorRequestExit(editor);
@@ -11,16 +7,9 @@ testEditor :: () {
 		};
 
 		editorStart(editor, options.window_size);
-		sceneDelete(nodesScene);
-		reset_temporary_storage();
-		assertLeaksCount(0, "no leaks when closing an empty editor");
 	});
 
-	testHeadless("Editor with minimal scene", (options:TestProcedureOptions) {
-		nodesScene := newNodesScene();
-		editor := newEditor();
-		editorSetScene(editor, nodesScene);
-
+	testHeadless("Editor with minimal scene", (using options:TestProcedureOptions) {
 		sceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
 			box1 := createNode(nodesScene, BoxGeoNode);
 			assert(graphNodeScene(box1)!=null, "scene can be found from node");
@@ -44,9 +33,6 @@ testEditor :: () {
 			}
 		};
 
-		editorStart(editor, options.window_size);
-		sceneDelete(nodesScene);
-		reset_temporary_storage();
-		assertLeaksCount(0, "no leaks when closing an empty editor");
+		editorStart(editor, window_size);
 	});
 }

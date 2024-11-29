@@ -79,8 +79,7 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 	defer array_reset(*vertexAttributes);
 
 	{
-		push_allocator(renderer.allocator);
-		pc.pipeline_descriptor = .{label = to_c_string(tprint("% Pipeline Descriptor", label))};
+		pc.pipeline_descriptor = .{label = to_c_string_temp(tprint("% Pipeline Descriptor", label))};
 	}
 
 	pipeline_controller_pipeline_descriptor_layout_init(wgpu_context, *pipeline_descriptor, material);
@@ -247,16 +246,16 @@ pipeline_controller_pipeline_descriptor_layout_init :: (wgpu_context: *WGPUConte
 
 
 	count := material_bind_group_layouts_count(material);
-	bind_group_layouts := NewArray(count, WGPUBindGroupLayout);
-	bind_group_layout_descs := NewArray(count, WGPUBindGroupLayoutDescriptor);
-	#if FREE_MEMORY defer {
-		for bind_group_layout_descs free(it.label);
-		array_reset(*bind_group_layouts);
-		array_reset(*bind_group_layout_descs);
-	}
+	bind_group_layouts := NewArray(count, WGPUBindGroupLayout,, temp);
+	// bind_group_layout_descs := NewArray(count, WGPUBindGroupLayoutDescriptor);
+	// #if FREE_MEMORY defer {
+	// 	// for bind_group_layout_descs free(it.label);
+	// 	// array_reset(*bind_group_layouts);
+	// 	// array_reset(*bind_group_layout_descs);
+	// }
 	container:BindGroupLayoutDescContainer= .{
 		bind_group_layouts = bind_group_layouts,
-		bind_group_layout_descs = bind_group_layout_descs,
+		// bind_group_layout_descs = bind_group_layout_descs,
 	};
 
 	material_apply_to_pipeline_descriptor(wgpu_context, *pipeline_layout_descriptor, material, *container);

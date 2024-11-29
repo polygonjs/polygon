@@ -30,11 +30,13 @@ nodeCompute :: (scene:*NodesScene, node: *TYPE, depth:u8=0) -> GeoNodeCookOutput
 	if srcConnectionIds.count == 0 {
 		return null;
 	}
-	srcConnectionId := srcConnectionIds[inputIndex];
+	srcConnectionId := ifx inputIndex < srcConnectionIds.count then
+		srcConnectionIds[inputIndex]
+	else
+		xx (srcConnectionIds.count - 1);
 	connection := connections.connections[srcConnectionId];
 	inputNodeId := connection.src.nodeId;
 	inputNode := nodes[inputNodeId];
-	// inputIndex := connection.dest.inputIndex;
 	nodeInputCookResults[node.nodeId][inputIndex] = generatedNodeCompute(scene, inputNode, depth+1);
 	result := cook(node, nodeInputCookResults[node.nodeId]);//cookMethod(scene, nodeId, nodeInputCookResults[node.nodeId]);
 	postCook(scene, node, result, storeResult=false);

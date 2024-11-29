@@ -1,3 +1,10 @@
+WGPUColor32 :: struct {
+	r: float;
+	g: float;
+	b: float;
+	a: float;
+}
+
 wgpu_color_32_create :: (color:Color)->WGPUColor32 {
 	return .{
 		r = xx color.r,

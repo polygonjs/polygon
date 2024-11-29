@@ -6,7 +6,7 @@ ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_Shad
 	iwc_shader_module.wgsl_desc.code = wgsl_source.data;
 
 	iwc_shader_module.desc = .{
-		label = to_c_string(label),
+		label = to_c_string_temp(label),
 		nextInChain = xx (*(iwc_shader_module.wgsl_desc)),//cast(*WGPUChainedStruct) wgsl_desc;
 	};
 
@@ -14,7 +14,7 @@ ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_Shad
 		module = wgpuDeviceCreateShaderModule(bd.wgpuDevice, *iwc_shader_module.desc),
 		entryPoint = "main",
 	};
-	#if FREE_MEMORY free(iwc_shader_module.desc.label);
+	// #if FREE_MEMORY free(iwc_shader_module.desc.label);
 	return iwc_shader_module.stage_desc;
 }
 

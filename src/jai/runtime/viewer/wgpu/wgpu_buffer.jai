@@ -18,8 +18,7 @@ wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *
 	// 	}
 	// }
 	current_label := tprint("%-%",label, wgpu_context.framesCount);
-	buffer_label := to_c_string(current_label);
-	defer free(buffer_label);
+	buffer_label := to_c_string_temp(current_label);
 	desc:WGPUBufferDescriptor = .{
 		usage = usage,
 		size=size,

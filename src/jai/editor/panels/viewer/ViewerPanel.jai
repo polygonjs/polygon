@@ -30,7 +30,6 @@ viewerPanelDelete :: (panel: *TYPE) {
 }
 drawDataInit :: (panel: *TYPE) {
 	using panel;
-	#if USE_IMGUI { renderer_init_ui(renderer); }
 	rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
@@ -84,13 +83,12 @@ viewerPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	renderer.full_screen = false;
 	renderer.viewport = .{
 		start = .{0,0},
-		size = .{200,200}
+		size = .{1,1}
 	};
 	renderer.bgColor = DEFAULT_RENDERER_BG_COLOR;
 	renderer.use_msaa = true;
 	renderer.use_depth_buffer = true;
 	renderer.useReadback = false;
-	renderer.render_ui = true;
 	renderer.clear = true;
 
 	editor = _editor;

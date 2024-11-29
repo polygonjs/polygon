@@ -49,8 +49,8 @@ request_adapter :: (instance: WGPUInstance, _surface: WGPUSurface, powerPreferen
 
 create_surface :: (instance: WGPUInstance, window: *SDL_Window, label := "Main Surface") -> WGPUSurface {
 	surface_desc: WGPUSurfaceDescriptor;
-	surface_desc.label = to_c_string(label);
-	#if FREE_MEMORY defer free(surface_desc.label);
+	surface_desc.label = to_c_string_temp(label);
+	// #if FREE_MEMORY defer free(surface_desc.label);
 
 	#if OS == .WINDOWS {
 		sdl_info: SDL_SysWMinfo;

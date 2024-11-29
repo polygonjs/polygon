@@ -122,23 +122,23 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 	// work_groups_count_total :u32= cast(u32)(work_groups_count.x)*cast(u32)(work_groups_count.y)*cast(u32)(work_groups_count.z);
 	shader_compute := build_compute_shader(shader, controller.work_group_size);
 	defer free(shader_compute);
-	entry_point_c := to_c_string(entry_point);
-	defer free(entry_point_c);
+	entry_point_c := to_c_string_temp(entry_point);
+	// defer free(entry_point_c);
 
 	// create shader module
 	wgslDescriptor: WGPUShaderModuleWGSLDescriptor;
 	wgslDescriptor.chain.next = null;
 	wgslDescriptor.chain.sType=.ShaderModuleWGSLDescriptor;
-	wgslDescriptor.code = to_c_string(shader_compute);
-	#if FREE_MEMORY defer free(wgslDescriptor.code);
+	wgslDescriptor.code = to_c_string_temp(shader_compute);
+	// #if FREE_MEMORY defer free(wgslDescriptor.code);
 
 	// shaderModuleDescriptor: WGPUShaderModuleDescriptor = .{
 	// 	label = "compute shader"
 	// };
 	label := "compute shader";
 	shaderModuleDescriptor: WGPUShaderModuleDescriptor;
-	shaderModuleDescriptor.label = to_c_string(label);
-	#if FREE_MEMORY defer free(shaderModuleDescriptor.label);
+	shaderModuleDescriptor.label = to_c_string_temp(label);
+	// #if FREE_MEMORY defer free(shaderModuleDescriptor.label);
 	shaderModuleDescriptor.nextInChain = xx *wgslDescriptor;
 	shader_module := wgpuDeviceCreateShaderModule(wgpu_context.device, *shaderModuleDescriptor);
 
@@ -169,8 +169,8 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 		}));
 	}
 	// group 1
-	bind_group_layout_entries1 := NewArray(attributes_bind_groups_count, WGPUBindGroupLayoutEntry);
-	#if FREE_MEMORY defer array_reset(*bind_group_layout_entries1);
+	bind_group_layout_entries1 := NewArray(attributes_bind_groups_count, WGPUBindGroupLayoutEntry,, temp);
+	// #if FREE_MEMORY defer array_reset(*bind_group_layout_entries1);
 	{
 		for 0..(attributes_bind_groups_count-1){
 			bind_group_layout_entries1[it] = WGPUBindGroupLayoutEntry.{
@@ -194,7 +194,7 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 	compute_layout_desc.bindGroupLayouts = bind_group_layouts.data;
 	compute_layout := wgpuDeviceCreatePipelineLayout(wgpu_context.device, *compute_layout_desc);
 	pipeline_descriptor: WGPUComputePipelineDescriptor = .{
-		label = to_c_string(compute_controller_label),
+		label = to_c_string_temp(compute_controller_label),
 		layout = compute_layout,
 		compute = compute_descriptor,
 	};

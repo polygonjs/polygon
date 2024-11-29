@@ -13,9 +13,10 @@ NodesScene :: struct {
 	time:Time=0;
 	timeGraphNode:TimeNode;
 	framesCount:FrameCount = 0;
-	// nodes: [..]*GeoNodeAny;
+	fps:FrameCount = 0;
 	validNodes: Bit_Array;
 	nodes: [..]*BaseNodeAny;
+	nodeNames: [..]string;
 	worldScene: *Scene;
 	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;
@@ -111,13 +112,14 @@ _sceneInit :: (scene: *NodesScene) {
 	// sceneAllocatorPush(scene);
 	// array_init(*nodes);
 	array_init(*nodes, scene.allocator);
+	array_init(*nodeNames, scene.allocator);
 	nodeConnectionListInit(*connections);
 	array_init(*nodeInputCookResults, scene.allocator);
 	array_init(*cookResults, scene.allocator);
 	array_init(*cooksCount, scene.allocator);
 	graphInit(*graph, scene);
 	// scene.timeGraphNode.type = TimeNode;
-	scene.timeGraphNode.name = "TimeNode";
+	// scene.timeGraphNode.name = "TimeNode";
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
 	scene.worldScene = newScene(scene);

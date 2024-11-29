@@ -6,3 +6,8 @@ indent :: inline (level: u8) -> string {
 	reset(*builder);
 	return word;
 }
+
+to_c_string_temp :: (str: string) -> *u8 {
+	push_allocator(temp);
+	return to_c_string(str);
+}
