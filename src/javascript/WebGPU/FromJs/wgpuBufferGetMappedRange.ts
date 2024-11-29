@@ -1,3 +1,4 @@
+import { EVENTS_DATA } from "../../EventsController";
 import { heapGet } from "../../WasmHeap";
 
 export function wgpuBufferGetMappedRange(
@@ -6,7 +7,12 @@ export function wgpuBufferGetMappedRange(
 	size: bigint
 ) {
 	const buffer = heapGet<GPUBuffer>(bufferHeapIndex)!;
-	console.log(buffer, offset, size);
-	return buffer.getMappedRange(Number(offset), Number(size));
+	const result = buffer.getMappedRange(Number(offset), Number(size));
+	const uint8 = new Uint8Array(result);
+	EVENTS_DATA.readPixelValue[0] = uint8[0];
+	EVENTS_DATA.readPixelValue[1] = uint8[1];
+	EVENTS_DATA.readPixelValue[2] = uint8[2];
+	EVENTS_DATA.readPixelValue[3] = uint8[3];
+	return BigInt(0);
 }
 

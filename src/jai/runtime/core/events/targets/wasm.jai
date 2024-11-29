@@ -18,11 +18,12 @@ events_data_update :: (events_data :*EventsData){
 		*(events_data.modifiers.ctrl),
 		*(events_data.modifiers.meta),
 		*(events_data.modifiers.shift),
-		events_data.keys.data
+		events_data.keys.data,
+		*events_data.readPixelValue
 	);
 }
 
-eventsDataUpdate :: (ww:*u32, wh:*u32, mx: *u32, my: *u32, lmb: *bool, mmb: *bool, rmb: *bool,lmb_pressed: *bool, mmb_pressed: *bool, rmb_pressed: *bool, wheel: *float, text: *s8, text_size: u32, alt: *bool, ctrl: *bool, meta: *bool, shift: *bool, keys: *bool) -> void #foreign;
+eventsDataUpdate :: (ww:*u32, wh:*u32, mx: *u32, my: *u32, lmb: *bool, mmb: *bool, rmb: *bool,lmb_pressed: *bool, mmb_pressed: *bool, rmb_pressed: *bool, wheel: *float, text: *s8, text_size: u32, alt: *bool, ctrl: *bool, meta: *bool, shift: *bool, keys: *bool, readPixelValue: *READ_PIXEL_RESULT) -> void #foreign;
 eventsSetCursor :: (cursor:u32)->void #foreign;
 
 performance_now :: ()->u64 #foreign;

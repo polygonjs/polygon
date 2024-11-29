@@ -104,6 +104,7 @@ interface EventsData {
 		shift: boolean;
 	};
 	keys: boolean[];
+	readPixelValue: Int8Array;
 }
 export const EVENTS_DATA: EventsData = {
 	cursor: { x: 0, y: 0 },
@@ -126,6 +127,7 @@ export const EVENTS_DATA: EventsData = {
 		shift: false,
 	},
 	keys: new Array(666),
+	readPixelValue: new Int8Array(4),
 };
 
 export function addEvents(canvas: HTMLCanvasElement) {
@@ -240,7 +242,9 @@ export function eventsDataUpdate(
 	metaPointer: bigint,
 	shiftPointer: bigint,
 	// keys
-	keysPointer: bigint
+	keysPointer: bigint,
+	// readPixelValue
+	readPixelValuePointer: bigint
 ) {
 	// window
 	setU32(Number(windowWidthPointer), window.WebGPUCanvas.width);
@@ -278,6 +282,11 @@ export function eventsDataUpdate(
 	for (let i = BigInt(0); i < KEYS_COUNT; i++) {
 		setBoolean(Number(keysPointer + i), EVENTS_DATA.keys[Number(i)]);
 	}
+	// readPixelValue
+	setU8(Number(readPixelValuePointer), EVENTS_DATA.readPixelValue[0]);
+	setU8(Number(readPixelValuePointer) + 1, EVENTS_DATA.readPixelValue[1]);
+	setU8(Number(readPixelValuePointer) + 2, EVENTS_DATA.readPixelValue[2]);
+	setU8(Number(readPixelValuePointer) + 3, EVENTS_DATA.readPixelValue[3]);
 }
 
 export function eventsSetCursor(cursor: number) {

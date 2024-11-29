@@ -56,7 +56,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		rendererColor.bgColor = DEFAULT_RENDERER_BG_COLOR;
 		rendererColor.use_msaa = false;
 		rendererColor.use_depth_buffer = true;
-		rendererColor.use_readback = false;
+		rendererColor.useReadback = false;
 		#if HAS_VIEWER_PANEL == true {rendererColor.render_ui = false;}
 		#if HAS_VIEWER_PANEL == false {rendererColor.render_ui = true;}
 		rendererColor.clear = false;
@@ -72,7 +72,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		rendererRaycast.bgColor = .{1,1,1,0};
 		rendererRaycast.use_msaa = false;
 		rendererRaycast.use_depth_buffer = true;
-		rendererRaycast.use_readback = true;
+		rendererRaycast.useReadback = true;
 		rendererRaycast.render_ui = false;
 		rendererRaycast.clear = false;
 	}

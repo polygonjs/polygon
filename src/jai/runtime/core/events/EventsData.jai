@@ -36,6 +36,7 @@ EventsData :: struct {
 	text: [TEXTINPUTEVENT_TEXT_SIZE] s8;
 	modifiers: EventsDataModifiers;
 	keys: [KEYS_COUNT]bool;
+	readPixelValue: READ_PIXEL_RESULT;
 };
 
 events_data_reset :: (using eventsData :*EventsData){

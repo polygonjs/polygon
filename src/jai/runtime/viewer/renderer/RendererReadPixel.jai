@@ -7,7 +7,7 @@ READ_PIXEL_TEXTURE_DESC := WGPUTextureDescriptor.{
 	},
 };
 READ_PIXEL_TEXTURE_VIEW_DESCRIPTOR :: WGPUTextureViewDescriptor.{
-	label = "read_pixel_texture_view_descriptor",
+	label = "readPixel_texture_view_descriptor",
 	mipLevelCount = 1,
 	arrayLayerCount = 1,
 };
@@ -16,7 +16,7 @@ READ_PIXEL_BUFFER_DESC :: WGPUBufferDescriptor.{
 	usage = xx (WGPUBufferUsage.CopyDst | WGPUBufferUsage.MapRead),
 	mappedAtCreation = xx false,
 };
-create_pixel_readback_resources :: (renderer: *Renderer)->bool {
+createPixelReadbackResources :: (renderer: *Renderer)->bool {
 
 	device := WGPU_CONTEXT.device;
 
@@ -47,11 +47,14 @@ create_pixel_readback_resources :: (renderer: *Renderer)->bool {
 	renderer.readback_buffer = wgpuDeviceCreateBuffer(device, *READ_PIXEL_BUFFER_DESC);
 	return true;
 }
-read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UInt) -> READ_PIXEL_RESULT {
-	if renderer.use_readback {
-		creation_success := create_pixel_readback_resources(renderer);
-		if !creation_success {
-			return .[0,0,0,0];
+rendererReadPixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UInt) {
+	if WAITING_FOR_BUFFER_MAPPED_STATE == true {
+		return;
+	}
+	if renderer.useReadback {
+		creationSuccess := createPixelReadbackResources(renderer);
+		if !creationSuccess {
+			return;
 		}
 	}
 
@@ -120,19 +123,49 @@ read_pixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vector2UIn
 	copy_size := WGPUExtent3D.{width = 1, height = 1, depthOrArrayLayers = 1};
 	wgpuCommandEncoderCopyTextureToBuffer(cmd_encoder, *copy_texture, *copy_buffer, *copy_size);
 
-	cmd_buffer := wgpuCommandEncoderFinish(cmd_encoder, null);
+	cmdBufferDesc := WGPUCommandBufferDescriptor.{label = "read pixel encoder"};
+	cmd_buffer := wgpuCommandEncoderFinish(cmd_encoder, *cmdBufferDesc);
 	wgpuQueueSubmit(WGPU_CONTEXT.queue, 1, *cmd_buffer);
 
 	wgpuBufferMapAsync(renderer.readback_buffer, xx WGPUMapMode.Read, 0, READ_DATA_SIZE, wgpu_render_pixel_async_callback, renderer);
-	wgpuDevicePoll(device, xx true, null);
+	WAITING_FOR_BUFFER_MAPPED_STATE = true;
+	// wgpuDevicePoll(device, xx true, null);
 
-	data := cast(*READ_PIXEL_RESULT)wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
-	result := data.*;
+	// data := cast(*READ_PIXEL_RESULT)wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
+	// result := data.*;
 
-	wgpuBufferUnmap(renderer.readback_buffer);
-	return result;
+	// wgpuBufferUnmap(renderer.readback_buffer);
+	// return result;
+}
+readPixelIfMapped :: (renderer: *Renderer) -> (buffer_ready:bool, result:READ_PIXEL_RESULT) {
+	if WAITING_FOR_BUFFER_MAPPED_STATE == false {
+		return false, .[0,0,0,0];
+	}
+	device := WGPU_CONTEXT.device;
+
+	#if WASM {
+		if wgpuBufferGetMapState(renderer.readback_buffer) == .Mapped {
+			// data := cast(*READ_PIXEL_RESULT)wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
+			wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
+			wgpuBufferUnmap(renderer.readback_buffer);
+			WAITING_FOR_BUFFER_MAPPED_STATE = false;
+			events_data_update(*EVENTS_DATA); // TODO: it would be preferrable to only request the readPixelValue and not all other events data.
+			return true, EVENTS_DATA.readPixelValue;
+		}
+		return false, .[0,0,0,0];
+	} else {
+		wgpuDevicePoll(device, xx true, null);
+
+		data := cast(*READ_PIXEL_RESULT)wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
+		result := data.*;
+
+		wgpuBufferUnmap(renderer.readback_buffer);
+		WAITING_FOR_BUFFER_MAPPED_STATE = false;
+		return true, result;
+	}
 }
 
+READ_PIXEL_RESULT :: [COMPONENTS_COUNT]DATA_TYPE;
 
 #scope_file
 
@@ -140,7 +173,7 @@ READ_PIXEL_BUFFER_SIZE :: 256;
 READ_DATA_SIZE :: 4;
 COMPONENTS_COUNT :: 4;
 DATA_TYPE :: u8;
-READ_PIXEL_RESULT :: [COMPONENTS_COUNT]DATA_TYPE;
+WAITING_FOR_BUFFER_MAPPED_STATE := false;
 
 wgpu_render_pixel_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {
 	if(status!=WGPUBufferMapAsyncStatus.Success){

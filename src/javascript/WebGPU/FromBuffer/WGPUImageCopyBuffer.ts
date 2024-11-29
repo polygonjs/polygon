@@ -21,7 +21,6 @@ export function WGPUImageCopyBufferFromBuffer(p: bigint): GPUImageCopyBuffer {
 		buffer,
 		// layout,
 	};
-	console.log({ imageCopyBuffer });
 	return imageCopyBuffer;
 }
 

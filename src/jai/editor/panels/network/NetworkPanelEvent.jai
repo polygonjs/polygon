@@ -3,14 +3,16 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 	focused := element_focused(rendererColor, eventsData);
 	camera_controls_process_event(*cameraControls, eventsData, focused);
 	if (focused){
-		#if WASM==false && NETWORK_PANEL_USE_RAYCAST_RENDERER {
-			if eventsData.mouseButtonPressed.left == true {
-				result := read_pixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
+			if eventsData.mouseButtonPressed.left { /* using "== true" will fail in WASM, not yet sure why, possibly because the setBoolean in Common.ts is incorrectly implemented */
+				rendererReadPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+			}
+			success, result := readPixelIfMapped(rendererRaycast);
+			if success == true {
 				found, nodeId := meshIdMaterialUnpackId(result);
 				if found == true && nodeId < editor.nodesScene.nodes.count {
 					node := editor.nodesScene.nodes[nodeId];
 					if node != null {
-						print("hovered nodeId: %, %\n", nodeId, node.type);
 						if(node.type != OutputGeoNode) {
 							output1 := sceneFindNodeByType(editor.nodesScene, OutputGeoNode);
 							paramSetValue(*output1.p.input, xx nodeId);
@@ -29,7 +31,7 @@ processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 			// }
 		} else {
 			if READ_PIXEL_WARNING_PRINTED == false {
-				print("read_pixel not supported in WASM yet\n");
+				print("readPixel deactivated\n");
 				READ_PIXEL_WARNING_PRINTED = true;
 			}
 		}

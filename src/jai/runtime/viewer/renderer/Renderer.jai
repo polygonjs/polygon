@@ -30,7 +30,7 @@ Renderer :: struct {
 	//
 	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
-	use_readback: bool=false;
+	useReadback: bool=false;
 	//
 	multisample_texture_descriptor : WGPUTextureDescriptor;
 	multisample_texture: WGPUTexture;
@@ -72,15 +72,15 @@ rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
 rendererSetSize :: (renderer:*Renderer, size: Vector2UInt64){
 	renderer.viewport.size = size;
 
-	if renderer.use_readback {
-		create_pixel_readback_resources(renderer);
+	if renderer.useReadback {
+		createPixelReadbackResources(renderer);
 	}
 }
 rendererCopySize :: (src:*Renderer, target: *Renderer){
 	rendererSetSize(target, src.viewport.size);
 }
 rendererTargetSize :: (renderer:*Renderer) -> Vector2UInt64 {
-	if renderer.use_readback {
+	if renderer.useReadback {
 		return renderer.viewport.size;
 	} else {
 		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
@@ -89,7 +89,7 @@ rendererTargetSize :: (renderer:*Renderer) -> Vector2UInt64 {
 	}
 }
 rendererFormat :: (renderer:*Renderer) -> WGPUTextureFormat {
-	if renderer.use_readback {
+	if renderer.useReadback {
 		return .BGRA8Unorm; // .RGBA32Uint; // could potentially work with RGBA32Float
 	} else {
 		return WGPU_CONTEXT.preferred_texture_format;

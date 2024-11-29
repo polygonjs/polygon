@@ -35,6 +35,7 @@ wgpuBindGroupLayoutRelease :: (bindGroupLayout: WGPUBindGroupLayout) -> void #fo
 wgpuBufferDestroy :: (buffer: WGPUBuffer) -> void #foreign;
 // wgpuBufferRelease :: (buffer: WGPUBuffer) -> void #foreign;
 wgpuBufferGetMappedRange :: (buffer: WGPUBuffer, offset: u64, size: u64) -> *void #foreign;
+wgpuBufferGetMapState :: (buffer: WGPUBuffer) -> WGPUBufferMapState #foreign;
 wgpuBufferMapAsync :: (buffer: WGPUBuffer, mode: WGPUMapModeFlags, offset: u64, size: u64, callback: WGPUBufferMapCallback, userdata: *void) -> void #foreign;
 wgpuBufferUnmap :: (buffer: WGPUBuffer) -> void #foreign;
 

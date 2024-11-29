@@ -89,7 +89,7 @@ viewerPanelInit :: (panel: *TYPE, _editor: *Editor) {
 	renderer.bgColor = DEFAULT_RENDERER_BG_COLOR;
 	renderer.use_msaa = true;
 	renderer.use_depth_buffer = true;
-	renderer.use_readback = false;
+	renderer.useReadback = false;
 	renderer.render_ui = true;
 	renderer.clear = true;
 

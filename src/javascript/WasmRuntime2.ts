@@ -89,6 +89,7 @@ import {
 } from "./EventsController";
 import { wgpuCommandEncoderCopyBufferToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyBufferToBuffer";
 import { wgpuBufferGetMappedRange } from "./WebGPU/FromJs/wgpuBufferGetMappedRange";
+import { wgpuBufferGetMapState } from "./WebGPU/FromJs/wgpuBufferGetMapState";
 import { wgpuBufferMapAsync } from "./WebGPU/FromJs/wgpuBufferMapAsync";
 import { wgpuBufferUnmap } from "./WebGPU/FromJs/wgpuBufferUnmap";
 import { wgpuDevicePoll } from "./WebGPU/FromJs/wgpuDevicePoll";
@@ -150,6 +151,7 @@ export function loadWasm(): Promise<void> {
 		js_wgpu_texture_get_height_surface,
 		wgpuCommandEncoderCopyBufferToBuffer,
 		wgpuBufferGetMappedRange,
+		wgpuBufferGetMapState,
 		wgpuBufferMapAsync,
 		wgpuBufferUnmap,
 		wgpuDevicePoll,
