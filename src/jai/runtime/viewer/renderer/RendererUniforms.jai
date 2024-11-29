@@ -42,7 +42,7 @@ renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*Camera, u
 
 renderer_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipeline, buffer_data:*RendererBufferData, bind_group_layout_index: u32, label: string) {
 	assert(buffer_data.buffer_container.buffer_size>0, tprint("% buffer_size is 0\n", label));
-	entries := NewArray(1, WGPUBindGroupEntry,, renderer.allocator);
+	entries := NewArray(1, WGPUBindGroupEntry,, temp);
 	entries[0] = WGPUBindGroupEntry.{
 		binding=0,
 		size=buffer_data.buffer_container.buffer_size,

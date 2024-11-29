@@ -31,7 +31,15 @@ geometry_polyhedron_attributes_set :: (geometry: *Geometry, params: PolyhedronGe
 Vector3Array :: [..]Vector3;
 Vector3ArrayArray :: []*Vector3Array;
 
+
 subdivide :: (geometry: *Geometry, params: PolyhedronGeometryParams) {
+
+	SUBDIVIDE_POOL:Pool;
+	new_context := context;
+	new_context.allocator.proc = pool_allocator_proc;
+	new_context.allocator.data = *SUBDIVIDE_POOL;
+	set_allocators(*SUBDIVIDE_POOL);
+
 	i:=0;
 	while i <= params.indices.count-1 {
 		a := params.positions[params.indices[i]];
@@ -40,11 +48,13 @@ subdivide :: (geometry: *Geometry, params: PolyhedronGeometryParams) {
 		subdivide_face(geometry, a, b, c, params.detail);
 		i+=3;
 	}
+
+	release(*SUBDIVIDE_POOL);
 }
 
 subdivide_face :: (geometry: *Geometry, a: Vector3, b: Vector3, c: Vector3, detail: u32) {
 	cols := detail + 1;
-	v :Vector3ArrayArray= NewArray(cols+1, *Vector3Array,,temp);
+	v :Vector3ArrayArray= NewArray(cols+1, *Vector3Array);
 	for i:0..cols {
 
 		rows := cols - i;
@@ -78,6 +88,11 @@ subdivide_face :: (geometry: *Geometry, a: Vector3, b: Vector3, c: Vector3, deta
 			}
 		}
 	}
+	// #if WASM {reset(*SUBDIVIDE_POOL);}
+	// for vi:v {
+	// 	array_reset(vi);
+	// }
+	// array_reset(*v);
 }
 
 push_vertex :: (geometry: *Geometry, vertex: Vector3) {

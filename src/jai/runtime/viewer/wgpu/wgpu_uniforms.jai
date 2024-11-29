@@ -32,7 +32,7 @@ wgpu_uniform_to_buffer_with_size :: (
 
 	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, uniforms, size);
 
-	entries := NewArray(1, WGPUBindGroupEntry);
+	entries := NewArray(1, WGPUBindGroupEntry,, temp);
 	entries[0] = WGPUBindGroupEntry.{
 		binding=0,
 		size=size,
