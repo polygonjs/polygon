@@ -9,14 +9,9 @@ CopyGeoNode :: struct {
 	#as using geoNode: GeoNode(CopyGeoNode, CopyGeoParams);
 };
 
-
 registerCopyGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
 }
-
-nodeInit :: (node: *TYPE) {
-}
-
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
 	nodesScene := graphNodeScene(node);

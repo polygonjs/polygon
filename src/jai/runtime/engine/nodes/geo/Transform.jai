@@ -1,4 +1,3 @@
-
 TransformGeoParams :: struct {
 	t: Vector3Param = .{value=.{0,0,0}};
 	r: Vector3Param = .{value=.{0,0,0}};
@@ -9,12 +8,8 @@ TransformGeoNode :: struct {
 	#as using geoNode: GeoNode(TransformGeoNode, TransformGeoParams);
 };
 
-
 registerTransformGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=1);
-}
-
-nodeInit :: (node: *TYPE) {
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCookOutput {
@@ -33,8 +28,6 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCo
 
 	return completeGeoCookWithObjects(nodesScene, xx node, inputResult0);
 }
-
-
 
 #scope_file
 

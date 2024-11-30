@@ -4,8 +4,7 @@ MergeGeoParams :: struct {
 MergeGeoNode :: struct {
 	#as using geoNode: GeoNode(MergeGeoNode, MergeGeoParams);
 };
-nodeInit :: (node: *TYPE) {
-}
+
 registerMergeGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=128);
 }

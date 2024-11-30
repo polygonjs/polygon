@@ -1,11 +1,9 @@
-
 NullGeoParams :: struct {
 }
 NullGeoNode :: struct {
 	#as using geoNode: GeoNode(NullGeoNode, MergeGeoParams);
 };
-nodeInit :: (node: *TYPE) {
-}
+
 registerNullGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=1);
 }

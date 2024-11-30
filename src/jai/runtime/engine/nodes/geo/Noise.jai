@@ -8,12 +8,8 @@ NoiseGeoNode :: struct {
 	#as using geoNode: GeoNode(NoiseGeoNode, NoiseGeoParams);
 };
 
-
 registerNoiseGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=1);
-}
-
-nodeInit :: (node: *TYPE) {
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCookOutput {

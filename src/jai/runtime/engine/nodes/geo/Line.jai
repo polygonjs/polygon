@@ -9,14 +9,9 @@ LineGeoNode :: struct {
 	#as using geoNode: GeoNode(LineGeoNode, LineGeoParams);
 };
 
-
 registerLineGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
 }
-
-nodeInit :: (node: *TYPE) {
-}
-
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
 	nodesScene := graphNodeScene(node);

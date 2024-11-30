@@ -5,12 +5,8 @@ SwitchGeoNode :: struct {
 	#as using geoNode: GeoNode(SwitchGeoNode, SwitchGeoParams);
 };
 
-
 registerSwitchGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=MAX_INPUTS_COUNT);
-}
-
-nodeInit :: (node: *TYPE) {
 }
 
 nodeCompute :: (scene:*NodesScene, node: *TYPE, depth:u8=0) -> GeoNodeCookOutput {

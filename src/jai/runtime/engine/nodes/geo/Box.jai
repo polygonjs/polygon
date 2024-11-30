@@ -8,14 +8,9 @@ BoxGeoNode :: struct {
 	#as using geoNode: GeoNode(BoxGeoNode, BoxGeoParams);
 };
 
-
 registerBoxGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
 }
-
-nodeInit :: (node: *TYPE) {
-}
-
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
 	nodesScene := graphNodeScene(node);

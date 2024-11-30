@@ -6,21 +6,16 @@ AddGeoNode :: struct {
 	#as using geoNode: GeoNode(AddGeoNode, AddGeoParams);
 };
 
-
 registerAddGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
 }
-
-nodeInit :: (node: *TYPE) {
-}
-
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
 	nodesScene := graphNodeScene(node);
 	mesh := newMesh( nodesScene.worldScene, Mesh);
 
 	using node.p;
-	
+
 	geometry := mesh.geometry;
 	array_reset(*geometry.attributes.position.values);
 	array_reset(*geometry.attributes.normal.values);

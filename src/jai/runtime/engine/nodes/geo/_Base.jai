@@ -1,43 +1,13 @@
 Object3DArray :: [..]*Object3D;
 GeoNodeCookOutput :: *Object3DArray;
 GeoNodeCookInput  :: [..]GeoNodeCookOutput;
-// GeoNodeCookMethod :: #type (node: *$T, inputs:GeoNodeCookInput) -> GeoNodeCookOutput;
 GeoNodeCookMethod :: #type (nodeId: $T, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput;
-// GeoNode :: struct ($geoNodeT: Type, $geoParamsType: Type, $minInputs: u8=0, $maxInputs: u8=1) {
-// 	#as using baseNode: BaseNode(geoNodeT, NodeContext.GEOMETRY, geoParamsType, minInputs, maxInputs);
-// 	// baseNode.ctx = NodeContext.GEOMETRY;
-// 	// baseNode.init_context_node = init_geo_node;
 
-// 	// p: Params;
-// 	// baseNode.onDirty = onGeoNodeDirty;
-	
-// };
-// GeoNodeAny :: GeoNode(Any, Any);
 GeoNode :: struct ($GeoNodeType: Type, $geoParamsType: Type){
 	#as using baseNode: BaseNode(GeoNodeType, geoParamsType);
-	// #as using baseNode: BaseNode(geoNodeT, NodeContext.GEOMETRY, geoParamsType, minInputs, maxInputs);
-	// baseNode.ctx = NodeContext.GEOMETRY;
-	// baseNode.init_context_node = init_geo_node;
-
-	// p: Params;
-	// baseNode.onDirty = onGeoNodeDirty;
-	
 };
 GeoNodeAny :: GeoNode;
 
-
-
-// geo_node_to_type_node :: (node: *GeoNodeAny) -> *Any {
-// 	if node.type == {
-// 		case BoxGeoNode; return cast(*BoxGeoNode)node;
-// 	}
-// 	return null;
-// }
-
-geoNodeInit :: (node: *$N) {
-	geoNode := cast(*TYPE)node;
-	// print("init_geo_node geo_node\n");
-}
 geoNodeCookOutputClone :: (output: GeoNodeCookOutput)->GeoNodeCookOutput {
 	clone :GeoNodeCookOutput = New(Object3DArray,,temp);
 	clone.allocator = temp;
@@ -53,19 +23,3 @@ geoNodeCookOutputClone :: (output: GeoNodeCookOutput)->GeoNodeCookOutput {
 
 TYPE :: GeoNodeAny;
 
-// onGeoNodeDirty :CoreGraphNodeOnDirtyMethod: (coreGraphNode: *CoreGraphNode) {
-// 	// node := cast(*GeoNodeAny)coreGraphNode;
-// 	// print("init_geo_node geo_node\n");
-// }
-
-
-
-// cook :GeoNodeCookMethod: (node: *Any, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
-// 	mesh := newObject3D(Mesh);
-// 	assert(false, "geo cook should not be used");
-// 	return mesh;
-// }
-
-// nodeCompute :NodeComputeMethod: (node: *Any, depth:u8=0)->GeoNodeCookOutput {
-// 	return nodeCompute(cast(*TYPE)node, depth);
-// }
