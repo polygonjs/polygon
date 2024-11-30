@@ -40,13 +40,15 @@ subdivide :: (geometry: *Geometry, params: PolyhedronGeometryParams) {
 	new_context.allocator.data = *SUBDIVIDE_POOL;
 	set_allocators(*SUBDIVIDE_POOL);
 
-	i:=0;
-	while i <= params.indices.count-1 {
-		a := params.positions[params.indices[i]];
-		b := params.positions[params.indices[i+1]];
-		c := params.positions[params.indices[i+2]];
-		subdivide_face(geometry, a, b, c, params.detail);
-		i+=3;
+	push_context new_context {
+		i:=0;
+		while i <= params.indices.count-1 {
+			a := params.positions[params.indices[i]];
+			b := params.positions[params.indices[i+1]];
+			c := params.positions[params.indices[i+2]];
+			subdivide_face(geometry, a, b, c, params.detail);
+			i+=3;
+		}
 	}
 
 	release(*SUBDIVIDE_POOL);

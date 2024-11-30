@@ -20,6 +20,7 @@ NodesScene :: struct {
 	worldScene: *Scene;
 	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;
+	cookResultsToDispose:[..]*Object3D;
 	cooksCount:[..]u32;
 	connections: NodeConnectionList;
 
@@ -117,6 +118,7 @@ _sceneInit :: (scene: *NodesScene) {
 	array_init(*nodeInputCookResults, scene.allocator);
 	array_init(*cookResults, scene.allocator);
 	array_init(*cooksCount, scene.allocator);
+	array_init(*cookResultsToDispose, scene.allocator);
 	graphInit(*graph, scene);
 	// scene.timeGraphNode.type = TimeNode;
 	// scene.timeGraphNode.name = "TimeNode";

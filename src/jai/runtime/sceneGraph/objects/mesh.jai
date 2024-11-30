@@ -23,6 +23,12 @@ newMesh :: (scene:*Scene, $T: Type, geometry: *Geometry=null, material: *Materia
 
 	return object;
 }
+worldObjectClone :: (object: *TYPE)->*TYPE {
+	clone := New(TYPE,, object.allocator);
+	memcpy(clone, object, size_of(TYPE));
+	clone.geometry = geometryClone(object.geometry);
+	return clone;
+}
 
 // object3DInit :: (mesh: *TYPE) {
 // 	object3DInit(mesh, null, null);

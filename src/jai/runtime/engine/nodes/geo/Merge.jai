@@ -17,7 +17,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCo
 
 	print("MergeGeoNode::cook not implemented\n");
 
-	return mesh;
+	return completeGeoCookWithObject(nodesScene, xx node, mesh);
 }
 
 

@@ -5,7 +5,7 @@ BufferContainer :: struct {
 }
 
 wgpu_buffer_from_geometry_attribute :: (wgpu_context: *WGPUContext, attribute: *GeometryAttribute, $T: Type ,label: string/*, compute:bool=false*/) -> BufferContainer {
-	assert(attribute.values.count > 0, "Attribute values count is 0");
+	assert(attribute.values.count > 0, tprint("Attribute (%) values count is 0", label));
 	size := cast(u64) attribute.values.count * size_of(T);
 
 

@@ -10,3 +10,10 @@ nodesSceneOutputNodesCompute :: (scene: *NodesScene) {
 	// if atLeastOneCompute
 	// print(">>>> nodesSceneOutputNodesCompute :%\n", atLeastOneCompute);
 }
+
+nodesSceneDisposeCookResults :: (scene: *NodesScene) {
+	for object: scene.cookResultsToDispose {
+		generatedWorldObjectDelete(object);
+	}
+	scene.cookResultsToDispose.count = 0;
+}

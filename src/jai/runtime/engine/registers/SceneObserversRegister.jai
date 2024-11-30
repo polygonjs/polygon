@@ -3,6 +3,10 @@ sceneObserverOnObjectAdded :: (observer: Any, scene: *Scene, object:*$O) {
 	#insert ON_OBJECT_ADDED;
 	assert(false, tprint("sceneObserverOnObjectAdded: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
+sceneObserverOnObjectsAdded :: (observer: Any, scene: *Scene, objects: []*$O) {
+	#insert ON_OBJECTS_ADDED;
+	assert(false, tprint("sceneObserverOnObjectsAdded: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
+}
 sceneObserverOnObjectBeforeRemove :: (observer: Any, scene: *Scene, object:*$O) {
 	#insert ON_OBJECT_BEFORE_REMOVE;
 	assert(false, tprint("sceneObserverOnObjectBeforeRemove: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
@@ -21,6 +25,7 @@ sceneObserverOnRenderableMaterialChanged :: (observer: Any, scene: *Scene, objec
 #scope_file
 
 ON_OBJECT_ADDED,
+ON_OBJECTS_ADDED,
 ON_OBJECT_BEFORE_REMOVE,
 ON_OBJECTS_BEFORE_REMOVE,
 ON_RENDERABLE_MATERIAL_CHANGED :: #run registerSceneObserver();
@@ -33,6 +38,7 @@ sceneObserverRegister :: ($T:Type) {
 
 registerSceneObserver :: ()-> (
 	ON_OBJECT_ADDED:string,
+	ON_OBJECTS_ADDED:string,
 	ON_OBJECT_BEFORE_REMOVE:string,
 	ON_OBJECTS_BEFORE_REMOVE:string,
 	ON_RENDERABLE_MATERIAL_CHANGED:string
@@ -43,6 +49,7 @@ registerSceneObserver :: ()-> (
 
 	SceneObserverGeneratedCode :: struct {
 		onObjectAdded: string;
+		onObjectsAdded: string;
 		onObjectBeforeRemove: string;
 		onObjectsBeforeRemove: string;
 		onRenderableMaterialChanged: string;
@@ -57,6 +64,16 @@ registerSceneObserver :: ()-> (
 		}
 		print_to_builder(*builder, "}");
 		generated.onObjectAdded = builder_to_string(*builder);
+	}
+	{
+		builder: String_Builder;
+		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
+		print_to_builder(*builder, IF_FIRST_LINE);
+		for observerType: SCENE_OBSERVER_TYPES {
+			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectsAdded(cast(*%) observer.value_pointer, scene, objects); return;\n", observerType, observerType));
+		}
+		print_to_builder(*builder, "}");
+		generated.onObjectsAdded = builder_to_string(*builder);
 	}
 	{
 		builder: String_Builder;
@@ -90,6 +107,7 @@ registerSceneObserver :: ()-> (
 	}
 	
 	return generated.onObjectAdded,
+	generated.onObjectsAdded,
 	generated.onObjectBeforeRemove,
 	generated.onObjectsBeforeRemove,
 	generated.onRenderableMaterialChanged;

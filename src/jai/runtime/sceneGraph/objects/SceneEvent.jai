@@ -1,5 +1,6 @@
 SceneEvent :: enum u8 {
 	OBJECT_ADDED :: 0;
+	OBJECTS_ADDED :: 0;
 	OBJECT_BEFORE_REMOVE;
 	OBJECTS_BEFORE_REMOVE;
 	RENDERABLE_MATERIAL_CHANGED;
@@ -29,8 +30,15 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
 	if event == {
 		/*
 		if we send an event with scene.children as a list,
-		we 
+		the list will probably be modified before the event is processed.
 		*/
+		case .OBJECTS_ADDED; {
+			push_allocator(temp);
+			objectsCopy := array_copy(objects);
+			for o:observers {
+				sceneObserverOnObjectsAdded(o, scene, objectsCopy);
+			}
+		}
 		case .OBJECTS_BEFORE_REMOVE; {
 			push_allocator(temp);
 			objectsCopy := array_copy(objects);

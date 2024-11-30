@@ -49,6 +49,11 @@ newScene :: (allocator: Allocator) -> *TYPE {
 
 	return scene;
 }
+worldObjectClone :: (object: *TYPE)->*TYPE {
+	clone := New(TYPE,, object.allocator);
+	assert(false, "worldObjectClone is not implemented for Scene\n");
+	return clone;
+}
 
 object3DInit :: (scene: *TYPE) {
 	object3DInit(cast(*Object3D)scene);
@@ -61,6 +66,10 @@ sceneObjectsClear :: (scene: *TYPE) {
 sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
 	array_add(*scene.children, object);
 	sceneEmitEvent(scene, .OBJECT_ADDED, object);
+}
+sceneObjectsAdd :: (scene: *TYPE, objects: [..]*Object3D) {
+	for object: objects array_add(*scene.children, object);
+	sceneEmitEvent(scene, .OBJECTS_ADDED, objects);
 }
 sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
 	for child, i: scene.children {

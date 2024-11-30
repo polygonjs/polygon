@@ -34,6 +34,7 @@ drawDataInit :: (panel: *TYPE) {
 }
 render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	using panel;
+	nodesSceneDisposeCookResults(editor.nodesScene);
 	nodesSceneOutputNodesCompute(editor.nodesScene);
 	rendererFlushCommands(renderer);
 	cameraUniformsUpdate(*camera);

@@ -3,7 +3,8 @@
 generatedNodeCompute :: (scene: *NodesScene, inputNode: *$T, depth:u8=0)->GeoNodeCookOutput {
 	#insert GENERATED_CODE_NODE_COMPUTE;
 	assert(false, tprint("generatedNodeCompute: node type '%' is not implemented", inputNode.type));
-	return newObject3D(scene.worldScene, Mesh);
+	dummy: GeoNodeCookOutput;
+	return dummy;
 }
 generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
@@ -20,11 +21,15 @@ registerNodes :: () {
 
 	registerAddGeoNode();
 	registerBoxGeoNode();
+	registerCopyGeoNode();
 	registerIcosahedronGeoNode();
 	registerLineGeoNode();
 	registerMergeGeoNode();
+	registerNoiseGeoNode();
 	registerNullGeoNode();
 	registerOutputGeoNode();
+	registerSwitchGeoNode();
+	registerTransformGeoNode();
 	
 }
 nodesMetaDatasCount :: ()->u64{

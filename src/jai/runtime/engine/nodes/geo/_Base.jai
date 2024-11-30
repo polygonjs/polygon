@@ -1,4 +1,5 @@
-GeoNodeCookOutput :: *Object3D;
+Object3DArray :: [..]*Object3D;
+GeoNodeCookOutput :: *Object3DArray;
 GeoNodeCookInput  :: [..]GeoNodeCookOutput;
 // GeoNodeCookMethod :: #type (node: *$T, inputs:GeoNodeCookInput) -> GeoNodeCookOutput;
 GeoNodeCookMethod :: #type (nodeId: $T, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput;
@@ -37,6 +38,16 @@ geoNodeInit :: (node: *$N) {
 	geoNode := cast(*TYPE)node;
 	// print("init_geo_node geo_node\n");
 }
+geoNodeCookOutputClone :: (output: GeoNodeCookOutput)->GeoNodeCookOutput {
+	clone :GeoNodeCookOutput = New(Object3DArray,,temp);
+	clone.allocator = temp;
+	array_resize(clone, output.count);
+	for object, i: <<output {
+		(<<clone)[i] = generatedWorldObjectClone(object);
+	}
+	return clone;
+}
+
 
 #scope_file
 

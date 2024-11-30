@@ -15,7 +15,9 @@ registerTests :: () {
 	testNodesBasicDependency();
 	testPerlinNoise();
 	// nodes
+	testNoiseGeoNode();
 	testOutputGeoNode();
+	testTransformGeoNode();
 
 }
 

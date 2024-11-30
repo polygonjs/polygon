@@ -6,13 +6,13 @@ runTests :: () {
 
 	args := get_command_line_arguments();
 	this_allocation_is_not_a_leak(args.data);
-	testNames :[..]string;
+	requestedTestNames :[..]string;
 	for arg,i: args {
 		if i > 0 {
-			array_add(*testNames, arg);
+			array_add(*requestedTestNames, arg);
 		}
 	}
-	this_allocation_is_not_a_leak(testNames.data);
+	this_allocation_is_not_a_leak(requestedTestNames.data);
 
 	#if WASM {
 		#assert(FREE_MEMORY_DEBUG==false); // set FREE_MEMORY_DEBUG :: false in config.jai
@@ -24,7 +24,7 @@ runTests :: () {
 	testsCount := 0;
 	windowSize :Vector2UInt;
 	for test,i: NAMED_PROCEDURES {
-		found :bool= testNames.count == 0 || array_find(testNames, test.name);
+		found :bool= requestedTestNames.count == 0 || _isRequestedTestName(test.name, requestedTestNames);
 		if found {
 			testOptions:TestProcedureOptions;
 			print("% TEST: %\n", tprintGreen(" "),test.name);
@@ -68,8 +68,11 @@ runTests :: () {
 			print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
 		}
 	}
-
-	print("---------TEST COMPLETED: (%)\n", testsCount);
+	if testsCount == 0 {
+		printRed("---------NO TESTS WERE EXECUTED\n");
+	} else {
+		print("---------TEST COMPLETED: (%)\n", testsCount);
+	}
 }
 
 test :: (name: string, procedure: TestProcedure) {
@@ -133,3 +136,12 @@ _ensure_test_name_is_unique :: (name: string) {
 	}
 }
 
+_isRequestedTestName :: (testName: string, requestedTestNames: []string)->bool {
+	// return array_find(requestedTestNames, test.name);
+	for requestedTestName,i: requestedTestNames {
+		if contains(testName, requestedTestName) {
+			return true;
+		}
+	}
+	return false;
+}

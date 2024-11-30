@@ -34,6 +34,11 @@ object3DAllocate :: ($T: Type, allocator: Allocator)-> *T {
 	init_transformable(object);
 	return object;
 }
+worldObjectClone :: (object: *TYPE)->*TYPE {
+	clone := New(TYPE,, object.allocator);
+	memcpy(clone, object, size_of(TYPE));
+	return clone;
+}
 object3DInit :: (object: *TYPE) {
 	assert(cast(*void)object.type != null, "object.type is null\n");
 	init_transformable(object);
@@ -42,7 +47,7 @@ worldObjectDelete :: (object: *TYPE) {
 	free(object,, object.allocator);
 }
 
-init_transformable :: (object: *Object3D) {
+init_transformable :: (object: *TYPE) {
 	// object.position = .{x = 0.0, y = 0.0, z = 0.0};
 	object.quaternion = .{x = 0.0, y = 0.0, z = 0.0, w = 1.0};
 	object.scale = .{x = 1.0, y = 1.0, z = 1.0};
@@ -58,7 +63,7 @@ init_transformable :: (object: *Object3D) {
 
 
 
-transformable_update_matrix :: (object: *Object3D) {
+transformable_update_matrix :: (object: *TYPE) {
 	identity(*object.matrix);
 	translate(*object.matrix, object.position);
 	object.matrix = rotate(object.matrix, object.quaternion);
@@ -66,7 +71,7 @@ transformable_update_matrix :: (object: *Object3D) {
 	transformable_uniforms_update(object);
 }
 
-transformable_uniforms_update :: (object: *Object3D) {
+transformable_uniforms_update :: (object: *TYPE) {
 	transposedMatrix := transpose(object.matrix);
 	matrix4x4_to_buffer(*transposedMatrix, *object.transformable_uniforms.transformMatrix);
 }

@@ -1,35 +1,37 @@
-// // SwitchGeoType :: struct {}
-// SwitchGeoParams :: struct {
-// 	input: UIntegerParam;
-// }
-// SwitchGeoNode :: struct {
-// 	#as using geoNode: GeoNode(SwitchGeoParams, init, cook, nodeCompute);
-// 	// geoNode.initTypedNode = initSwitchGeoNode;
-// };
+SwitchGeoParams :: struct {
+	input: UInt8Param = .{value=0,min=0,max=MAX_INPUTS_COUNT};
+}
+SwitchGeoNode :: struct {
+	#as using geoNode: GeoNode(SwitchGeoNode, SwitchGeoParams);
+};
 
-// #scope_file
 
-// NODE_TYPE :: SwitchGeoNode;
+registerSwitchGeoNode :: (){
+	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=MAX_INPUTS_COUNT);
+}
 
-// init :: (_node: *BaseNodeAny) {
-// 	node := cast(*SwitchGeoNode)_node;
-// 	// print("init_switch_geo_node\n");
-// 	// init_geo_node(node);
-// }
-// nodeCompute :NodeComputeMethod: (node: *$T, depth:u8=0)->GeoNodeCookOutput {
-// 	return nodeCompute(cast(*TYPE)node, depth);
-// }
+nodeInit :: (node: *TYPE) {
+}
 
-// cook :GeoNodeCookMethod: (node: *NODE_TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {
-// 	selectedIndex := ifx node.p.input.value < inputs.count then node.p.input.value else inputs.count - 1;
-// 	input := inputs[selectedIndex];
+nodeCompute :: (scene:*NodesScene, node: *TYPE, depth:u8=0) -> GeoNodeCookOutput {
+	return nodeComputeOnlyFromInputParam(scene, node, depth);
+}
 
-// 	if input != null {
-// 		array_resize(*node.scene.worldScene.children, 1);
-// 		node.scene.worldScene.children[0] = xx input;
-// 	} else {
-// 		array_resize(*node.scene.worldScene.children, 0);
-// 	}
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCookOutput {
+	inputIndex := inputIndexFromInputParam(node);
+	inputResult := inputResults[inputIndex];
+	nodesScene := graphNodeScene(node);
 
-// 	return input;
-// }
+	return completeGeoCookWithObjects(nodesScene, xx node, inputResult, storeResult=false);
+}
+
+
+
+#scope_file
+
+TYPE :: SwitchGeoNode;
+MAX_INPUTS_COUNT :: 16;
+
+
+
+

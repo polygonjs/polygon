@@ -2,6 +2,9 @@
 onObjectAdded :: (renderer: *Renderer, scene: *Scene, object: *$T) {
 	array_add(*renderer.commands.objectAdd, .{object=xx object});
 }
+onObjectsAdded :: (renderer: *Renderer, scene: *Scene, objects: []*$T) {
+	for o: objects array_add(*renderer.commands.objectAdd, .{object=xx o});
+}
 onObjectBeforeRemove :: (renderer: *Renderer, scene: *Scene, object: *$T) {
 	array_add(*renderer.commands.objectBeforeRemove, .{object=xx object});
 }

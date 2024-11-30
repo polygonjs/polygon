@@ -14,6 +14,12 @@ geometryAttributesSetAllocator :: (attributes: *GeometryAttributes, allocator: A
 	geometryAttributeSetAllocator(*attributes.normal, allocator);
 	geometryAttributeSetAllocator(*attributes.uv, allocator);
 }
+geometryAttributesCopy :: (src: *GeometryAttributes, target: *GeometryAttributes) {
+	geometryAttributesSetAllocator(target, src.allocator);
+	geometryAttributeCopy(*src.position, *target.position);
+	geometryAttributeCopy(*src.normal, *target.normal);
+	geometryAttributeCopy(*src.uv, *target.uv);
+}
 geometryAttributesDelete :: (attributes: *GeometryAttributes) {
 	using attributes;
 	geometryAttributeDelete(*position);
