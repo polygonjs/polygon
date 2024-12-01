@@ -21,10 +21,14 @@ ComputeControllerTranslate :: struct {
 	#if MAP_BUFFER {
 		attributesMapped: ComputeControllerTranslateAttributesMapped;
 	}
-	init :ComputeControllerInitMethod= init_translate;
+	// init :ComputeControllerInitMethod= init_translate;
 }
 TranslateComputeControllerParams :: struct {
 	translate: Vector3=.{0.0, 0.0, 0.0};
+}
+
+registerComputeControllerTranslate :: () {
+	computeControllerRegister(CONTROLLER_TYPE);
 }
 
 compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, position_in: *BufferContainer, position_out: *BufferContainer) {
@@ -61,6 +65,39 @@ compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, positi
 }
 
 
+setBindGroup :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
+	wgpuComputePassEncoderSetBindGroup(<<compute_pass_encoder, 1, controller.bind_group.attributes, 0, null);
+
+	#if MAP_BUFFER {
+		// Encode a command to copy the results to a mappable buffer.
+		wgpuCommandEncoderCopyBufferToBuffer(<<command_encoder, controller.attributes.position.buffer, 0, controller.attributesMapped.position, 0, controller.attributes.position.buffer_size);
+	}
+}
+handleMappedBuffers :: (controller: *CONTROLLER_TYPE) {
+	#if MAP_BUFFER {
+		wgpuBufferMapAsync(controller.attributesMapped.position, xx WGPUMapMode.Read, 0, controller.attributes.position.buffer_size, wgpu_compute_buffer_map_async_callback, null);
+		wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
+		// result_values := /*cast(ResultType)*/ 
+		wgpuBufferGetMappedRange(controller.attributesMapped.position, 0, controller.attributes.position.buffer_size);
+
+		//
+		// print_green(tprint("pipeline created:%\n", controller.pipeline));
+		// print("result_values:%\n", cast([64]float)result_values);
+
+		wgpuBufferUnmap(controller.attributesMapped.position);
+	}
+}
+entitiesCount :: (controller: *CONTROLLER_TYPE)-> u64 {
+	return controller.attributes.position_in.buffer_size / size_of(Vector3);
+}
+
+updateBuffer :: (controller:*CONTROLLER_TYPE, params:*TranslateComputeControllerParams){
+	{
+		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
+		// print("size_float:%\n",scene_data.translate.x);
+		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *params.translate, controller.params.translate.buffer_size);
+	}
+};
 
 
 
@@ -74,19 +111,18 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "translate.wgsl"; };
 
 
-init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene) {
-	controller := cast(*CONTROLLER_TYPE) _controller;
+computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext) {
 	compute_controller_init(
 		controller = controller,
 		wgpu_context = wgpu_context,
 		shader = SHADER_RAW,
 		entry_point = SHADER_ENTRY_POINT,
-		methods = .{
-			update_buffer = xx update_buffer,
-			set_bind_group = xx set_bind_group,
-			handle_mapped_buffers = xx handle_mapped_buffers,
-			entities_count = xx entities_count,
-		},
+		// methods = .{
+		// 	// update_buffer = xx update_buffer,
+		// 	set_bind_group = xx set_bind_group,
+		// 	handle_mapped_buffers = xx handle_mapped_buffers,
+		// 	entities_count = xx entities_count,
+		// },
 		attributes_bind_groups_count = 2,
 		compute_controller_label = "compute controller translate"
 	);
@@ -140,39 +176,6 @@ init_translate :: (_controller: *ComputeController, wgpu_context: *WGPUContext, 
 		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
 	}
 
-	controller.update_buffer(controller, scene);
+	// controller.update_buffer(controller, scene);
 }
 
-update_buffer :: (controller:*CONTROLLER_TYPE, params:*TranslateComputeControllerParams){
-	{
-		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
-		// print("size_float:%\n",scene_data.translate.x);
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *params.translate, controller.params.translate.buffer_size);
-	}
-};
-
-set_bind_group :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder){
-	wgpuComputePassEncoderSetBindGroup(<<compute_pass_encoder, 1, controller.bind_group.attributes, 0, null);
-
-	#if MAP_BUFFER {
-		// Encode a command to copy the results to a mappable buffer.
-		wgpuCommandEncoderCopyBufferToBuffer(<<command_encoder, controller.attributes.position.buffer, 0, controller.attributesMapped.position, 0, controller.attributes.position.buffer_size);
-	}
-}
-handle_mapped_buffers :: (controller: *CONTROLLER_TYPE) {
-	#if MAP_BUFFER {
-		wgpuBufferMapAsync(controller.attributesMapped.position, xx WGPUMapMode.Read, 0, controller.attributes.position.buffer_size, wgpu_compute_buffer_map_async_callback, null);
-		wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
-		// result_values := /*cast(ResultType)*/ 
-		wgpuBufferGetMappedRange(controller.attributesMapped.position, 0, controller.attributes.position.buffer_size);
-
-		//
-		// print_green(tprint("pipeline created:%\n", controller.pipeline));
-		// print("result_values:%\n", cast([64]float)result_values);
-
-		wgpuBufferUnmap(controller.attributesMapped.position);
-	}
-}
-entities_count :: (controller: *CONTROLLER_TYPE)-> u64 {
-	return controller.attributes.position_in.buffer_size / size_of(Vector3);
-}

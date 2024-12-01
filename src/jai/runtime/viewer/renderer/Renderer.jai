@@ -146,18 +146,19 @@ rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// for object: scene.children {
 	// 	rendererObjectAdd(renderer, object);
 	// }
-	for pc: renderer.pipelines_by_mat_type {
-		// pipeline_controller_init(pc, renderer, *WGPU_CONTEXT, "render meshes 2");
+	// print("rendererInitPipelines\n");
+	// for pc: renderer.pipelines_by_mat_type {
+	// 	// pipeline_controller_init(pc, renderer, *WGPU_CONTEXT, "render meshes 2");
 
-		compute_initialized := false;
-		for mesh: pc.meshes {
-			if compute_initialized==false && mesh.use_compute {
-				compute_initialized=true;
-				renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
-				pipeline_controller_update(pc, *renderer.computes);
-			}
-		}
-	}
+	// 	compute_initialized := false;
+	// 	for mesh: pc.meshes {
+	// 		if compute_initialized==false && mesh.use_compute {
+	// 			compute_initialized=true;
+	// 			renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
+	// 			pipeline_controller_update(pc, *renderer.computes);
+	// 		}
+	// 	}
+	// }
 }
 rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
 	if object.type != Mesh {

@@ -2,25 +2,11 @@ ComputeControllerCollection :: struct {
 	controllers: [..]*ComputeController;
 }
 
-compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene:*Scene) -> ComputeControllerCollection {
+compute_controller_collection_create :: (wgpu_context: *WGPUContext, mesh:*Mesh) -> ComputeControllerCollection {
 	ccc :ComputeControllerCollection;
-	print("beware the hard coded value\n");
-	// points_count :u64= 150;//6534;
-	// index_count :u64= 576;
-	// points_count:u64=486;
-	// index_count:u64=2304;
-	// points_count :u64= 99846;//6534;
-	// index_count :u64= 589824;
-	// points_count:u64=16641;
-	// index_count:u64=98304;
-	// points_count:u64=2562;
-	// index_count:u32=15360;
-	// points_count:u64=10242;
-	// index_count:u32=61440;
-	// points_count:u64=40962;
-	// index_count:u32=245760;
-	points_count:u64=3612;
-	index_count:u64=21660;
+
+	points_count:u64=xx mesh.geometry.attributes.position.values.count;
+	index_count:u64=xx mesh.geometry.indices.count;
 	position_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position_in");
 	normal_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_in");
 	index_in := wgpu_buffer_for_compute(wgpu_context, index_count * size_of(VertexIndex), "index_in");
@@ -28,38 +14,28 @@ compute_controller_collection_create :: (wgpu_context: *WGPUContext, scene:*Scen
 	normal_tmp := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_tmp");
 	normal_out := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_out");
 
-	// box_create_controller := heap_compute_controller(ComputeControllerBoxCreate);
-	// compute_controller_box_create_init( box_create_controller, wgpu_context, position_in, scene_data );
-
-	// {
-	// 	controller := heap_compute_controller(ComputeControllerTranslate);
-	// 	compute_controller_translate_init( controller, wgpu_context, scene_data );
-	// 	compute_controller_translate_set_buffer( controller, *position_in, *position_out );
-	// 	array_add(*ccc.controllers, controller);
-	// }
-
 	{
 		controller := newComputeController(ComputeControllerNoise);
-		controller.init( controller, wgpu_context, scene );
-		controller.set_buffers( controller, *position_in, *normal_in, *position_out );
+		computeControllerInit( controller, wgpu_context );
+		computeControllerSetBuffers( controller, *position_in, *normal_in, *position_out );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerAttributeSet);
-		controller.init( controller, wgpu_context, scene );
-		controller.set_buffers( controller, *normal_tmp );
+		computeControllerInit( controller, wgpu_context );
+		computeControllerSetBuffers( controller, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerComputeNormals);
-		controller.init( controller, wgpu_context, scene );
-		controller.set_buffers( controller, *position_out, *index_in, *normal_tmp );
+		computeControllerInit( controller, wgpu_context );
+		computeControllerSetBuffers( controller, *position_out, *index_in, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerAttributeNormalize);
-		controller.init( controller, wgpu_context, scene );
-		controller.set_buffers( controller, *normal_tmp, *normal_out );
+		computeControllerInit( controller, wgpu_context );
+		computeControllerSetBuffers( controller, *normal_tmp, *normal_out );
 		array_add(*ccc.controllers, controller);
 	}
 

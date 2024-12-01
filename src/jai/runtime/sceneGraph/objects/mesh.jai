@@ -27,6 +27,7 @@ worldObjectClone :: (object: *TYPE)->*TYPE {
 	clone := New(TYPE,, object.allocator);
 	memcpy(clone, object, size_of(TYPE));
 	clone.geometry = geometryClone(object.geometry);
+	clone.use_compute = object.use_compute;
 	return clone;
 }
 

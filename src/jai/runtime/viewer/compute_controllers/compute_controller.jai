@@ -1,18 +1,18 @@
 // TODO: there are lots of wgpu things to release here
 
 
-ComputeControllerInitMethod :: #type (controller: *ComputeController, wgpu_context: *WGPUContext, scene: *Scene);
-UpdateBufferMethod :: #type (controller:*ComputeController, scene:*Scene);
-SetBindGroupMethod :: #type (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder);
-HandleMappedBuffersMethod :: #type (controller:*ComputeController);
-EntitiesCountMethod :: #type (controller:*ComputeController)->u64;
+// ComputeControllerInitMethod :: #type (controller: *ComputeController, wgpu_context: *WGPUContext);
+// UpdateBufferMethod :: #type (controller:*ComputeController, scene:*Scene);
+// SetBindGroupMethod :: #type (controller:*ComputeController, compute_pass_encoder: *WGPUComputePassEncoder, command_encoder: *WGPUCommandEncoder);
+// HandleMappedBuffersMethod :: #type (controller:*ComputeController);
+// EntitiesCountMethod :: #type (controller:*ComputeController)->u64;
 
-ComputeControllerMethods :: struct {
-	update_buffer: UpdateBufferMethod;
-	set_bind_group: SetBindGroupMethod;
-	handle_mapped_buffers: HandleMappedBuffersMethod;
-	entities_count:EntitiesCountMethod;
-}
+// ComputeControllerMethods :: struct {
+// 	// update_buffer: UpdateBufferMethod;
+// 	set_bind_group: SetBindGroupMethod;
+// 	handle_mapped_buffers: HandleMappedBuffersMethod;
+// 	entities_count:EntitiesCountMethod;
+// }
 
 ComputeController :: struct {
 	type: Type;
@@ -35,17 +35,17 @@ ComputeController :: struct {
 	// #if MAP_BUFFER {
 	// 	vertex_buffer_map: WGPUBuffer;
 	// }
-	using methods: ComputeControllerMethods;
+	// using methods: ComputeControllerMethods;
 }
 
 newComputeController :: ($T: Type) -> *T {  // Return a pointer to a heap-allocated Document of the appropriate type.
-	compute_controller: *T = alloc(size_of(T));  // alloc returns us a pointer to a series of contiguous bytes allocated on the heap.
-	compute_controller.type = T;
+	computeController: *T = alloc(size_of(T));  // alloc returns us a pointer to a series of contiguous bytes allocated on the heap.
+	computeController.type = T;
 	// we need to create a ComputeController on the stack in order to know its init method.
 	tmp :T;
-	compute_controller.init = tmp.init;
+	// computeController.init = tmp.init;
 
-	return compute_controller;
+	return computeController;
 }
 
 // this is an alternative version to replace() from the String module,
@@ -99,7 +99,7 @@ build_compute_shader :: (shader0:string, work_group_size:Vector3) -> string {
 // InputType :: [3]float;
 // ResultType :: [64]float;
 
-compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUContext, shader: string, entry_point:string, methods: ComputeControllerMethods, work_group_size:Vector3=.{256,1,1}, params_bind_groups_count:u32=1, attributes_bind_groups_count:u32=1, compute_controller_label:string="unnamed compute controller") {
+compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUContext, shader: string, entry_point:string, work_group_size:Vector3=.{256,1,1}, params_bind_groups_count:u32=1, attributes_bind_groups_count:u32=1, compute_controller_label:string="unnamed compute controller") {
 	// controller: ComputeController = .{
 	// 	wgpu_context = wgpu_context,
 	// 	// queue = queue,
@@ -110,10 +110,10 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 	controller.wgpu_context = wgpu_context;
 	controller.work_group_size = work_group_size;
 
-	controller.update_buffer = methods.update_buffer;
-	controller.set_bind_group = methods.set_bind_group;
-	controller.handle_mapped_buffers = methods.handle_mapped_buffers;
-	controller.entities_count = methods.entities_count;
+	// controller.update_buffer = methods.update_buffer;
+	// controller.set_bind_group = methods.set_bind_group;
+	// controller.handle_mapped_buffers = methods.handle_mapped_buffers;
+	// controller.entities_count = methods.entities_count;
 
 	// print("entry_point:%\n", entry_point);
 	// print("shader_compute_raw:%\n", shader_compute_raw);
@@ -199,7 +199,6 @@ compute_controller_init :: (controller: *ComputeController, wgpu_context: *WGPUC
 		compute = compute_descriptor,
 	};
 	controller.pipeline = wgpuDeviceCreateComputePipeline(wgpu_context.device, *pipeline_descriptor);
-	free(pipeline_descriptor.label);
 
 
 	//
@@ -292,8 +291,8 @@ compute_controller_compute :: (controller:*ComputeController, command_encoder : 
 
 	wgpuComputePassEncoderSetPipeline(compute_pass_encoder, controller.pipeline);
 	wgpuComputePassEncoderSetBindGroup(compute_pass_encoder, 0, controller.data_bind_group_size, 0, null);
-	controller.set_bind_group(controller, *compute_pass_encoder, *command_encoder);
-	entities_count := controller.entities_count(controller);
+	generatedSetBindGroup(controller, *compute_pass_encoder, *command_encoder);
+	entities_count := generatedEntitiesCount(controller);
 	workgroup_size_x := controller.work_group_size.x;
 	workgroups_x :u32= xx ((entities_count + workgroup_size_x - 1) / workgroup_size_x);
 	// print("%:%,%,%\n", controller.type, entities_count, workgroups_x, workgroups_x*workgroup_size_x);

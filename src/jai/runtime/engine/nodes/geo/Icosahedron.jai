@@ -14,6 +14,7 @@ registerIcosahedronGeoNode :: (){
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCookOutput {
 	nodesScene := graphNodeScene(node);
 	mesh := newMesh(nodesScene.worldScene, Mesh);
+	// mesh.use_compute = true;
 
 	using node.p;
 	geometry_icosahedron_attributes_set(mesh.geometry, .{

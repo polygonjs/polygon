@@ -135,6 +135,11 @@ pipelineControllerAddMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 	drawData := newDrawData(pc, mesh);
 	array_add(*meshes, mesh);
 	array_add(*meshes_draw_data, drawData);
+
+	if mesh.use_compute {
+		renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, mesh);
+		pipeline_controller_update(pc, *pc.renderer.computes);
+	}
 }
 pipelineControllerRemoveMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 	found, index := array_find(meshes, mesh);

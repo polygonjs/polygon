@@ -1,4 +1,5 @@
 #load "CamerasRegister.jai";
+#load "ComputeControllersRegister.jai";
 #load "MaterialsRegister.jai";
 #load "NodesRegister.jai";
 #load "NodesSceneObserversRegister.jai";
