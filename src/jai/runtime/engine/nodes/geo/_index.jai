@@ -3,6 +3,7 @@
 #load "Add.jai";
 #load "Box.jai";
 #load "Copy.jai";
+#load "FileSTL.jai";
 #load "Icosahedron.jai";
 #load "Line.jai";
 #load "Merge.jai";

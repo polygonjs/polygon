@@ -1,6 +1,7 @@
 
 appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
+	fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
 	add1 := createNode(nodesScene, AddGeoNode);
 	box1 := createNode(nodesScene, BoxGeoNode);
 	line1 := createNode(nodesScene, LineGeoNode);
@@ -11,12 +12,13 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	assert(graphNodeScene(box1)!=null, "scene can be found from node");
 	output1 := createNode(nodesScene, OutputGeoNode);
 
-
+	paramSetValue(*fileSTL1.p.path, tprint("%/models/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
 
 	setInput(output1, 0, add1);
 	setInput(output1, 1, box1);
 	setInput(output1, 2, line1);
 	setInput(output1, 3, icosahedron1);
+	setInput(output1, 4, fileSTL1);
 	// setInput(output1, 3, transform2);
 	// setInput(transform1, 0, box1);
 	// setInput(transform2, 0, transform1);
@@ -26,7 +28,7 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 
 	paramSetValue(*box1.p.scale, 2.0);
-	paramSetValue(*output1.p.input, 3);
+	paramSetValue(*output1.p.input, 4);
 	paramSetValue(*icosahedron1.p.detail, 40);
 
 	nodeSetPosition(editor, output1, .{0,-4});
@@ -35,6 +37,7 @@ appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	nodeSetPosition(editor, box1, .{-2,2});
 	nodeSetPosition(editor, icosahedron1, .{0,2});
 	nodeSetPosition(editor, line1, .{2,2});
+	nodeSetPosition(editor, fileSTL1, .{4,2});
 
 	// nodeSetPosition(editor, transform1, .{0,0});
 	// nodeSetPosition(editor, transform2, .{0,-2});

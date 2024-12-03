@@ -18,6 +18,7 @@ registerParams :: () {
 	array_reset(*TMP_METADATAS);
 
 	paramRegisterFloatParam();
+	paramRegisterStringParam();
 	paramRegisterUInt8Param();
 	paramRegisterUIntegerParam();
 	paramRegisterVector3Param();

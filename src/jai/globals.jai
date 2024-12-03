@@ -8,4 +8,4 @@
 }
 EVENTS_DATA:EventsData;
 
-
+TEST_ASSETS :: "/home/gui/work/web/games/polygon-next-assets/";

@@ -22,6 +22,7 @@ registerNodes :: () {
 	registerAddGeoNode();
 	registerBoxGeoNode();
 	registerCopyGeoNode();
+	registerFileSTLGeoNode();
 	registerIcosahedronGeoNode();
 	registerLineGeoNode();
 	registerMergeGeoNode();
@@ -30,7 +31,7 @@ registerNodes :: () {
 	registerOutputGeoNode();
 	registerSwitchGeoNode();
 	registerTransformGeoNode();
-	
+
 }
 nodesMetaDatasCount :: ()->u64{
 	registerNodes();
