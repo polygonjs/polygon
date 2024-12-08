@@ -18,8 +18,8 @@ NodesScene :: struct {
 	nodes: [..]*BaseNodeAny;
 	nodeNames: [..]string;
 	worldScene: *Scene;
-	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResults:[..]GeoNodeCookOutput;
+	nodeInputCookResults:[..]GeoNodeCookInput;
 	cookResultsToDispose:[..]*Object3D;
 	cooksCount:[..]u32;
 	connections: NodeConnectionList;
@@ -37,6 +37,9 @@ NodesScene :: struct {
 	// }
 	// allocator: Allocator;
 	// temporary_storage: Temporary_Storage;
+
+	computablesTree:ComputablesTree;
+	nodeRequests:[..]NodeSceneRequest;
 }
 
 
@@ -123,6 +126,13 @@ _sceneInit :: (scene: *NodesScene) {
 	// scene.timeGraphNode.type = TimeNode;
 	// scene.timeGraphNode.name = "TimeNode";
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
+
+	array_init(*computablesTree.cookingNodeIds, scene.allocator);
+	array_init(*computablesTree.inputs, scene.allocator);
+	array_init(*computablesTree.outputs, scene.allocator);
+	array_init(*computablesTree.leaves, scene.allocator);
+
+	array_init(*nodeRequests, scene.allocator);
 
 	scene.worldScene = newScene(scene);
 	scene.defaultMaterial.line = xx newMaterial(scene.worldScene, LineBasicMaterial);

@@ -2,6 +2,7 @@
 #load "NodesSceneCompute.jai";
 #load "NodesSceneDelete.jai";
 #load "NodesSceneEvent.jai";
+#load "NodesSceneRequest.jai";
 #load "NodesSceneTime.jai";
 #load "NodesSceneUniforms.jai";
 // node

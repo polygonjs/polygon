@@ -11,7 +11,7 @@ registerIcosahedronGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
 }
 
-cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCookOutput {
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 	mesh := newMesh(nodesScene.worldScene, Mesh);
 	// mesh.use_compute = true;
@@ -28,7 +28,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput)->GeoNodeCo
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformable_update_matrix(mesh);
 
-	return completeGeoCookWithObject(nodesScene, xx node, mesh);
+	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }
 
 

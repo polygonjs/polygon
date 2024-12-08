@@ -23,7 +23,7 @@ selectNode :: (editor: *Editor, node: *BaseNodeAny, mode:NodeSelectionMode=.REPL
 	}
 }
 deselectNode :: (editor: *Editor, node: *BaseNodeAny) {
-	array_unordered_remove_by_value(*editor.sceneUiData.selectedNodeIds, node.nodeId);
+	array_unordered_remove_by_value(*editor.sceneUiData.selectedNodeIds, node.nodeId, stop_after_first=true);
 	onNodeSelectionRemoved(editor, editor.nodesScene, node);
 }
 isNodeSelected :: (editor: *Editor, nodeId: NodeId)->bool {

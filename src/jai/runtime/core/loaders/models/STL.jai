@@ -1,3 +1,4 @@
+
 parseSTL :: (nodesScene:*NodesScene, fileContent: string)->*Mesh {
 	mesh := newMesh( nodesScene.worldScene, Mesh);
 
@@ -17,7 +18,7 @@ parseSTL :: (nodesScene:*NodesScene, fileContent: string)->*Mesh {
 	facesCount := <<facesCountP;
 	pointsCount := facesCount * 3;
 	indicesCount := facesCount * 3;
-	print("facesCount %\n", facesCount);
+	// print("facesCount %, pointsCount %\n", facesCount, pointsCount);
 
 	{
 		using mesh.geometry;

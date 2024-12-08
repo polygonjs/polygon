@@ -38,14 +38,11 @@ testNetworkPanel :: () {
 		editorDelete(editor);
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
-	testHeadlessNoSceneOrEditor("NetworkPanel update renderer", (options:TestProcedureOptions) {
+	testHeadless("NetworkPanel update renderer", (using options:TestProcedureOptions) {
 		#if HAS_NETWORK_PANEL == false {return;}
-		nodesScene := newNodesScene();
+		// nodesScene := newNodesScene();
 		box1 := createNode(nodesScene, BoxGeoNode);
 		box2 := createNode(nodesScene, BoxGeoNode);
-
-		editor := newEditor();
-		editorSetScene(editor, nodesScene);
 
 		editor.onAfterTick = (using editor: *Editor) {
 			if nodesScene.framesCount == {
@@ -89,8 +86,8 @@ testNetworkPanel :: () {
 		};
 
 		editorStart(editor, options.window_size);
-		sceneDelete(nodesScene);
-		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
+		// sceneDelete(nodesScene);
+		// assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});
 }
 

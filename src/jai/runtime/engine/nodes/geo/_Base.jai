@@ -1,7 +1,7 @@
 Object3DArray :: [..]*Object3D;
 GeoNodeCookOutput :: *Object3DArray;
 GeoNodeCookInput  :: [..]GeoNodeCookOutput;
-GeoNodeCookMethod :: #type (nodeId: $T, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput;
+GeoNodeCookMethod :: #type (nodeId: $T, inputResults:GeoNodeCookInput);
 
 GeoNode :: struct ($GeoNodeType: Type, $geoParamsType: Type){
 	#as using baseNode: BaseNode(GeoNodeType, geoParamsType);

@@ -27,3 +27,11 @@ eventsDataUpdate :: (ww:*u32, wh:*u32, mx: *u32, my: *u32, lmb: *bool, mmb: *boo
 eventsSetCursor :: (cursor:u32)->void #foreign;
 
 performance_now :: ()->u64 #foreign;
+
+fetchUrl :: (nodeId:NodeId, url: string) {
+	fetchUrl(nodeId, url.data, url.count);
+}
+
+fetchUrl :: (nodeId:NodeId, data: *u8, size: s64) #foreign;
+
+onAllocateReady :: (nodeId:NodeId, data: *u8, size: u64) #foreign;

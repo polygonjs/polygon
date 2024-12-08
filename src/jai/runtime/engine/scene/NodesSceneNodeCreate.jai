@@ -22,6 +22,15 @@ createNode :: (scene: *NodesScene, $T:Type)->*T {
 		array_set_count_and_maybe_grow(*cookResults, newSize);
 		array_set_count_and_maybe_grow(*cooksCount, newSize);
 		bit_array_resize(*validNodes, newSize);
+
+		array_set_count_and_maybe_grow(*computablesTree.inputs, newSize);
+		array_set_count_and_maybe_grow(*computablesTree.outputs, newSize);
+
+		push_allocator(scene.allocator);
+		cookResults[node.nodeId] = New(Object3DArray,,scene.allocator);
+		array_init(cookResults[node.nodeId], scene.allocator);
+		array_init(*computablesTree.inputs[node.nodeId], scene.allocator);
+		array_init(*computablesTree.outputs[node.nodeId], scene.allocator);
 	}
 
 	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;

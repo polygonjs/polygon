@@ -1,36 +1,95 @@
-
-nodeCompute :: (scene:*NodesScene, node: *$T, depth:u8=0) -> GeoNodeCookOutput {
+nodeComputeInputs :: (scene:*NodesScene, node: *$T, target:*[..]NodeId) {
 	using scene;
+	target.count = 0;
 	if isDirty(*graph, node.graphNodeId) == false {
-		result := cookResults[node.nodeId];
-		if result != null {
-			return result;
-		}
+		return;
 	}
-	// TODO: no need to check input connections if node has max inputs count at 0
+	if NODE_METADATAS[node.nodeTypeId].inputsCount.max == 0 {
+		return;
+	}
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
 	for srcConnectionId: srcConnectionIds {
 		if srcConnectionId != 0 {
 			connection := connections.connections[srcConnectionId];
 			inputNodeId := connection.src.nodeId;
 			inputNode := nodes[inputNodeId];
-			inputIndex := connection.dest.inputIndex;
-			inputCookResult := generatedNodeCompute(scene, inputNode, depth+1);
-			clonedInputCookResult := geoNodeCookOutputClone(inputCookResult);
-			nodeInputCookResults[node.nodeId][inputIndex] = clonedInputCookResult;
+			if isDirty(*graph, inputNode.graphNodeId) {
+				array_add_if_unique(target, inputNodeId);
+			}
 		}
 	}
-	result := cook(node, nodeInputCookResults[node.nodeId]);
-	postCook(scene, node, result, storeResult=true);
-	return result;
 }
-nodeComputeOnlyFromInputParam :: (scene:*NodesScene, node: *$T, depth:u8=0) -> GeoNodeCookOutput {
+nodePrepareInputCookResults :: (using scene:*NodesScene, node: *$T) {
+	_nodePrepareInputCookResultsWithClonedFirstInput(scene, node);
+}
+_nodePrepareInputCookResultsWithClonedFirstInput :: (using scene:*NodesScene, node: *$T) {
+	if NODE_METADATAS[node.nodeTypeId].inputsCount.max == 0 {
+		return;
+	}
+	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+	for srcConnectionId: srcConnectionIds {
+		if srcConnectionId != 0 {
+			connection := connections.connections[srcConnectionId];
+			inputNodeId := connection.src.nodeId;
+			inputIndex := connection.dest.inputIndex;
+			inputCookResult := cookResults[inputNodeId];
+			if inputIndex == 0 {
+				nodeInputCookResults[node.nodeId][inputIndex] = geoNodeCookOutputClone(inputCookResult);
+			} else {
+				nodeInputCookResults[node.nodeId][inputIndex] = inputCookResult;
+			}
+		}
+	}
+}
+_nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T) {
+	if NODE_METADATAS[node.nodeTypeId].inputsCount.max == 0 {
+		return;
+	}
+	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+	for srcConnectionId: srcConnectionIds {
+		if srcConnectionId != 0 {
+			connection := connections.connections[srcConnectionId];
+			inputNodeId := connection.src.nodeId;
+			inputIndex := connection.dest.inputIndex;
+			inputCookResult := cookResults[inputNodeId];
+			nodeInputCookResults[node.nodeId][inputIndex] = inputCookResult;
+		}
+	}
+}
+// nodeCompute :: (scene:*NodesScene, node: *$T, depth:u8=0) -> GeoNodeCookOutput {
+// 	using scene;
+// 	if isDirty(*graph, node.graphNodeId) == false {
+// 		result := cookResults[node.nodeId];
+// 		if result != null {
+// 			return result;
+// 		}
+// 	}
+// 	if NODE_METADATAS[node.nodeTypeId].inputsCount.max > 0 {
+// 		srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+// 		for inputNodeId: inputIds {
+// 			if srcConnectionId != 0 {
+// 				connection := connections.connections[srcConnectionId];
+// 				inputNodeId := connection.src.nodeId;
+// 				inputNode := nodes[inputNodeId];
+// 				inputIndex := connection.dest.inputIndex;
+// 				inputCookResult := generatedNodeCompute(scene, inputNode, depth+1);
+// 				clonedInputCookResult := geoNodeCookOutputClone(inputCookResult);
+// 				nodeInputCookResults[node.nodeId][inputIndex] = clonedInputCookResult;
+// 			}
+// 		}
+// 	}
+// 	result := cook(node, nodeInputCookResults[node.nodeId]);
+// 	postCook(scene, node, result, storeResult=true);
+// 	return result;
+// }
+nodeComputeInputsOnlyFromInputParam :: (scene:*NodesScene, node: *$T, target:*[..]NodeId) {
 	using scene;
+	target.count = 0;
 	inputIndex := inputIndexFromInputParam(node);
 
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
 	if srcConnectionIds.count == 0 {
-		return null;
+		return;
 	}
 	srcConnectionId := ifx inputIndex < srcConnectionIds.count then
 		srcConnectionIds[inputIndex]
@@ -39,43 +98,71 @@ nodeComputeOnlyFromInputParam :: (scene:*NodesScene, node: *$T, depth:u8=0) -> G
 	connection := connections.connections[srcConnectionId];
 	inputNodeId := connection.src.nodeId;
 	inputNode := nodes[inputNodeId];
-	nodeInputCookResults[node.nodeId][inputIndex] = generatedNodeCompute(scene, inputNode, depth+1);
-	result := cook(node, nodeInputCookResults[node.nodeId]);
-	postCook(scene, node, result, storeResult=false);
-	return result;
-}
-postCook :: (scene:*NodesScene, node: *$T, result: GeoNodeCookOutput, $storeResult:bool) {
-	using scene;
-	cooksCount[node.nodeId] += 1;
-	unSetDirty(*graph, node.graphNodeId);
-
-	// #if storeResult {
-	// 	previousResult := cookResults[node.nodeId];
-	// 	if previousResult != null {
-	// 		array_add_if_unique(*cookResultsToDispose, previousResult);
-	// 	}
-	// 	cookResults[node.nodeId] = result;
-	// }
-}
-completeGeoCookWithObject :: (nodesScene:*NodesScene, node: *BaseNodeAny, object: *Object3D) -> GeoNodeCookOutput {
-	return _storeResult(nodesScene, node, .[object]);
-}
-completeGeoCookWithObjects :: (nodesScene:*NodesScene, node: *BaseNodeAny, objects: GeoNodeCookOutput, $storeResult:bool=true) -> GeoNodeCookOutput {
-	#if storeResult {
-		_storeResult(nodesScene, node, <<objects);
+	if isDirty(*graph, inputNode.graphNodeId) {
+		array_add(target, inputNodeId);
 	}
-	return objects;
 }
-_storeResult :: (using nodesScene:*NodesScene, node: *BaseNodeAny, objects: []*Object3D) -> GeoNodeCookOutput {
+nodeDisposePreviousCookResults :: (using scene:*NodesScene, node: *$T) {
 	previousObjects := cookResults[node.nodeId];
-	if previousObjects == null {
-		cookResults[node.nodeId] = New(Object3DArray,,nodesScene.allocator);
-		array_init(cookResults[node.nodeId], nodesScene.allocator);
-	} else {
-		for o: <<previousObjects array_add_if_unique(*cookResultsToDispose, o);
-	}
+	for o: <<previousObjects array_add_if_unique(*cookResultsToDispose, o);
+}
+// nodeComputeOnlyFromInputParam :: (scene:*NodesScene, node: *$T, depth:u8=0) -> GeoNodeCookOutput {
+// 	using scene;
+// 	inputIndex := inputIndexFromInputParam(node);
+
+// 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+// 	if srcConnectionIds.count == 0 {
+// 		return null;
+// 	}
+// 	srcConnectionId := ifx inputIndex < srcConnectionIds.count then
+// 		srcConnectionIds[inputIndex]
+// 	else
+// 		xx (srcConnectionIds.count - 1);
+// 	connection := connections.connections[srcConnectionId];
+// 	inputNodeId := connection.src.nodeId;
+// 	inputNode := nodes[inputNodeId];
+// 	nodeInputCookResults[node.nodeId][inputIndex] = generatedNodeCompute(scene, inputNode, depth+1);
+// 	result := cook(node, nodeInputCookResults[node.nodeId]);
+// 	postCook(scene, node, result, storeResult=false);
+// 	return result;
+// }
+// completeCookWithResult :: (scene:*NodesScene, node: *$T, result: GeoNodeCookOutput, $storeResult:bool) {
+// 	using scene;
+// 	cooksCount[node.nodeId] += 1;
+// 	unSetDirty(*graph, node.graphNodeId);
+
+// 	// #if storeResult {
+// 	// 	previousResult := cookResults[node.nodeId];
+// 	// 	if previousResult != null {
+// 	// 		array_add_if_unique(*cookResultsToDispose, previousResult);
+// 	// 	}
+// 	// 	cookResults[node.nodeId] = result;
+// 	// }
+// }
+completeGeoCookWithObject :: (nodesScene:*NodesScene, node: *BaseNodeAny, object: *Object3D) {
+	// _storeResult(nodesScene, node, .[object]);
+	// nodeOutput :[..]*Object3D;
+	// array_init(nodeOutput, temp);
+	// array_add(nodeOutput, object);
+	completeCookWithResult(nodesScene, node, object);
+}
+completeGeoCookWithObjects :: (nodesScene:*NodesScene, node: *BaseNodeAny, objects: GeoNodeCookOutput) {
+	completeCookWithResult(nodesScene, node, objects);
+	// #if storeResult {
+		// _storeResult(nodesScene, node, <<objects);
+	// }
+	// return objects;
+}
+_storeResult :: (using nodesScene:*NodesScene, node: *BaseNodeAny, objects: []*Object3D) {
+	previousObjects := cookResults[node.nodeId];
+	// if previousObjects == null {
+	// 	cookResults[node.nodeId] = New(Object3DArray,,nodesScene.allocator);
+	// 	array_init(cookResults[node.nodeId], nodesScene.allocator);
+	// } else {
+	for o: <<previousObjects array_add_if_unique(*cookResultsToDispose, o);
+	// }
 	array_copy(cookResults[node.nodeId], objects);
-	return cookResults[node.nodeId];
+	// return cookResults[node.nodeId];
 }
 
 nodeCooksCount :: (node: *$T)->u32 {

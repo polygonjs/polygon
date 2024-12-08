@@ -10,13 +10,25 @@ registerFileSTLGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
 }
 
-cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 
-	fileContent, success := read_entire_file(node.p.path.value,, temp);
+	urlOrPath := node.p.path.value;
+	#if WASM {
+		sceneAddNodeRequest(nodesScene, node, urlOrPath);
+	} else {
+		fileContent, success := read_entire_file(urlOrPath,, temp);
+		parseData( node, fileContent);
+	}
 
+}
+
+parseData :: (node:*TYPE, fileContent: string) {
+	nodesScene := graphNodeScene(node);
 	mesh := parseSTL( nodesScene, fileContent);
+	// print("parseData done\n");
 
+	using node.p;
 	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
@@ -24,7 +36,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNode
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformable_update_matrix(mesh);
 
-	return completeGeoCookWithObject(nodesScene, xx node, mesh);
+	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }
 
 
@@ -33,4 +45,3 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNode
 TYPE :: FileSTLGeoNode;
 
 
-#import "File";

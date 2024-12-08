@@ -1,10 +1,12 @@
 import {
 	AllocatedMemory,
+	RequestAllocationFunction,
 	InitDrawDataFunction,
 	OnRequestAnimationFrameFunction,
 	OnWebGPUReadyFunction,
 	QSortFunction,
 	USELESS_ARG0,
+	OnAllocatedMemoryWrittenFunction,
 } from "./Common";
 import {
 	jsStringFromJaiString,
@@ -87,6 +89,7 @@ import {
 	eventsSetCursor,
 	performance_now,
 } from "./EventsController";
+import { fetchUrl, onAllocateReady } from "./NodesSceneRequest";
 import { wgpuCommandEncoderCopyBufferToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyBufferToBuffer";
 import { wgpuBufferGetMappedRange } from "./WebGPU/FromJs/wgpuBufferGetMappedRange";
 import { wgpuBufferGetMapState } from "./WebGPU/FromJs/wgpuBufferGetMapState";
@@ -202,7 +205,16 @@ export function loadWasm(): Promise<void> {
 		eventsDataUpdate,
 		eventsSetCursor,
 		performance_now,
+		fetchUrl,
+		onAllocateReady,
 	};
+	const _dummy = (dummyName: string) => {
+		return () => {
+			console.log(dummyName);
+		};
+	};
+	const dummyRequestAllocation = _dummy("requestAllocation");
+	const dummyOnAllocatedMemoryWritten = _dummy("onAllocatedMemoryWritten");
 	window.wasmFunctions = {
 		onWebGPUReady: () => {},
 		initDrawData: () => {},
@@ -217,6 +229,8 @@ export function loadWasm(): Promise<void> {
 				d
 			);
 		},
+		requestAllocation: dummyRequestAllocation,
+		onAllocatedMemoryWritten: dummyOnAllocatedMemoryWritten,
 	};
 	const WRAPPERS_BY_NAMES: Record<string | symbol, Function> = {
 		qsort: window.wasmFunctions.qsortWrapper,
@@ -353,6 +367,32 @@ export function loadWasm(): Promise<void> {
 						if (methodName.startsWith("qsort")) {
 							window.wasmFunctions.qsort =
 								method as QSortFunction;
+						}
+						if (methodName.startsWith("requestAllocation")) {
+							if (
+								window.wasmFunctions.requestAllocation ==
+								dummyRequestAllocation
+							) {
+								window.wasmFunctions.requestAllocation =
+									method as RequestAllocationFunction;
+							} else {
+								console.warn(
+									"requestAllocation already linked"
+								);
+							}
+						}
+						if (methodName.startsWith("onAllocatedMemoryWritten")) {
+							if (
+								window.wasmFunctions.onAllocatedMemoryWritten ==
+								dummyOnAllocatedMemoryWritten
+							) {
+								window.wasmFunctions.onAllocatedMemoryWritten =
+									method as OnAllocatedMemoryWrittenFunction;
+							} else {
+								console.warn(
+									"onAllocatedMemoryWritten already linked"
+								);
+							}
 						}
 					}
 				}

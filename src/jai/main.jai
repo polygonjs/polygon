@@ -35,11 +35,23 @@ init_draw_data :: () {
 
 }
 
-on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
+on_request_animation_frame :: ( newTime: u64,	 width: u64, height: u64 ) {
 	#if WASM==true context = call_from_wasm_context;
 	#if WASM==true assert(APP.editor!=null, "on_request_animation_frame: editor is null");
 
 	editorOnTick(APP.editor, newTime, width, height);
+}
+
+#if WASM==true {
+	requestAllocation :: (nodeId: NodeId, size: u64) {
+		#if WASM==true context = call_from_wasm_context;
+		__requestAllocation(APP.editor.nodesScene, nodeId, size);
+		// print("Z\n");
+	}
+	onAllocatedMemoryWritten :: (nodeId: NodeId) {
+		#if WASM==true context = call_from_wasm_context;
+		__onAllocatedMemoryWritten(APP.editor.nodesScene, nodeId);
+	}
 }
 
 #scope_file
@@ -73,6 +85,7 @@ else #import "Basic";
 else              #import "wgpu";
 #if WASM == false {
 	#import "SDL";
+	#import "File";
 }
 
 #load "app.jai";

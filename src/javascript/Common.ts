@@ -32,6 +32,15 @@ export type QSortFunctionWrapper = (
 	size: number,
 	comparePointer: bigint
 ) => void;
+export type RequestAllocationFunction = (
+	uselessArg0: bigint,
+	nodeId: bigint,
+	size: bigint
+) => void;
+export type OnAllocatedMemoryWrittenFunction = (
+	uselessArg0: bigint,
+	nodeId: bigint
+) => void;
 
 export interface Vector2 {
 	x: number;
@@ -49,6 +58,8 @@ interface WasmFunctions {
 	onRequestAnimationFrame: OnRequestAnimationFrameFunction;
 	qsort: QSortFunction;
 	qsortWrapper: QSortFunctionWrapper;
+	requestAllocation: RequestAllocationFunction;
+	onAllocatedMemoryWritten: OnAllocatedMemoryWrittenFunction;
 }
 declare global {
 	interface Window {

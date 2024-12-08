@@ -13,12 +13,10 @@ registerCopyGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
 }
 
-cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 	mesh := newMesh( nodesScene.worldScene, Mesh);
-
-
-	return completeGeoCookWithObject(nodesScene, xx node, mesh);
+	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }
 
 

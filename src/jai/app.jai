@@ -1,18 +1,23 @@
 
 appInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
-	fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
 	add1 := createNode(nodesScene, AddGeoNode);
 	box1 := createNode(nodesScene, BoxGeoNode);
 	line1 := createNode(nodesScene, LineGeoNode);
 	icosahedron1 := createNode(nodesScene, IcosahedronGeoNode);
+	fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
 	// transform1 := createNode(nodesScene, TransformGeoNode);
 	// transform2 := createNode(nodesScene, TransformGeoNode);
 	// noise1 := createNode(nodesScene, NoiseGeoNode);
 	assert(graphNodeScene(box1)!=null, "scene can be found from node");
 	output1 := createNode(nodesScene, OutputGeoNode);
 
-	paramSetValue(*fileSTL1.p.path, tprint("%/models/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+	#if WASM {
+		// paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+	} else {
+		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+	}
 
 	setInput(output1, 0, add1);
 	setInput(output1, 1, box1);

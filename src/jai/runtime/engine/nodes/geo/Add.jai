@@ -10,7 +10,7 @@ registerAddGeoNode :: (){
 	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
 }
 
-cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNodeCookOutput {
+cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 	mesh := newMesh( nodesScene.worldScene, Mesh);
 
@@ -33,7 +33,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) -> GeoNode
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformable_update_matrix(mesh);
 
-	return completeGeoCookWithObject(nodesScene, xx node, mesh);
+	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }
 
 

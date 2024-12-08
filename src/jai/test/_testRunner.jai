@@ -62,7 +62,7 @@ runTests :: () {
 				sceneDelete(testOptions.nodesScene);
 			}
 			reset_temporary_storage();
-			assertLeaksCount(0, "no leaks when closing an empty editor");
+			assertLeaksCount(0, "no leaks");
 			reset_temporary_storage();
 		} else {
 			print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
