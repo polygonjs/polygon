@@ -3,7 +3,7 @@
 #load "Renderer.jai";
 #load "RendererCollection.jai";
 #load "RendererReadPixel.jai";
-#load "RendererUI.jai";
+#if USE_IMGUI #load "RendererUI.jai";
 #load "RendererUniforms.jai";
 #load "RendererViewport.jai";
 #load "RendererEvent.jai";

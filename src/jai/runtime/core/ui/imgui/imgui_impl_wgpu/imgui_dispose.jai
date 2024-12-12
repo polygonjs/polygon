@@ -1,5 +1,5 @@
-ImGui_ImplWGPU_InvalidateDeviceObjects :: () {
-	bd :*ImGui_ImplWGPU_Data= ImGui_ImplWGPU_GetBackendData();
+ImGui_ImplWGPU_InvalidateDeviceObjects :: (bd:*ImGui_ImplWGPU_Data) {
+	// bd :*ImGui_ImplWGPU_Data= ImGui_ImplWGPU_GetBackendData();
 	if (bd.wgpuDevice==null){
 		return;
 	}
@@ -17,12 +17,12 @@ ImGui_ImplWGPU_InvalidateDeviceObjects :: () {
 
 
 
-ImGui_ImplWGPU_Shutdown :: () {
-	bd := ImGui_ImplWGPU_GetBackendData();
+ImGui_ImplWGPU_Shutdown :: (bd:*ImGui_ImplWGPU_Data) {
+	// bd := ImGui_ImplWGPU_GetBackendData();
 	assert(bd != null, "No renderer backend to shutdown, or already shutdown?");
 	io := ImGui.GetIO();
 
-	ImGui_ImplWGPU_InvalidateDeviceObjects();
+	ImGui_ImplWGPU_InvalidateDeviceObjects(bd);
 	// delete[] bd->pFrameResources;
 	// free(bd.pFrameResources);
 	// for *bd.pFrameResources free(it);
@@ -40,10 +40,9 @@ ImGui_ImplWGPU_Shutdown :: () {
 	// free(bd); // IM_DELETE(bd);
 }
 
-imgui_gui_free :: (){
+imgui_gui_free :: (imguiContext: *Imgui_Context){
 	#if FREE_MEMORY {
-		iwc:*ImGui_WGPU_Common= *IWC;
-		array_reset(*iwc.draw.vertices);
-		array_reset(*iwc.draw.indices);
+		array_reset(*imguiContext.iwc.draw.vertices);
+		array_reset(*imguiContext.iwc.draw.indices);
 	}
 }

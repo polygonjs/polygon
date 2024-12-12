@@ -4,8 +4,7 @@ ASSERTIONS_COUNT :u32= 0;
 
 assertEqual ::  (actual: $T, expected: T, name: string="assertEqual") {
 	if(actual != expected) {
-		print("actual: %\n", actual);
-		print("expected: %\n", expected);
+		print("actual: %, expected=%, (%)\n", actual, expected, name);
 		assert(false, name);
 	}
 	ASSERTIONS_COUNT += 1;

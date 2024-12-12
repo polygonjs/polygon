@@ -30,10 +30,10 @@ testNodesBasicDependency :: () {
 		nodesSceneOutputNodesCompute(nodesScene);
 		// report_memory_leaks();
 		// assertEqual(leaksCount(), 0, "leaks on first cook");
-		assertEqual(nodeCooksCount(output1), 1);
-		assertEqual(nodeCooksCount(box1), 1);
+		assertEqual(nodeCooksCount(output1), 1, "output1 cooks count");
+		assertEqual(nodeCooksCount(box1), 1, "box1 cooks count");
 		assertEqual(nodeCooksCount(icosahedron1), 0, "icosahedron1 has not yet cooked");
-		assertEqual(nodesScene.worldScene.children.count, 1);
+		assertEqual(nodesScene.worldScene.children.count, 1, "worldScene children count");
 		// // onBoxDirty :CoreGraphNodeOnDirtyMethod: (node: *CoreGraphNode) {
 		// // 	result = nodeCompute(box1);
 		// // }
@@ -104,7 +104,9 @@ testNodesBasicDependency :: () {
 		// report_memory_leaks();
 		assertLeaksCount(0, "no leak after scene delete");
 	});
-
+	test("when nodes finish cooking, they check if a dirty has been triggered since", (options:TestProcedureOptions){
+		// this should be easier to test in wasm, where loading a file is async
+	});
 }
 
 // #scope_file

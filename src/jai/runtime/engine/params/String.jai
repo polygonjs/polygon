@@ -13,7 +13,7 @@ paramSetValue :: (param: *TYPE, value: VALUE_TYPE) {
 paramRenderUI :: (param: *TYPE, paramName:string) {
 	{
 		paramValueStr := to_c_string_temp(param.value);
-		ImGui.Text_CFormat(paramValueStr);
+		#if USE_IMGUI ImGui.Text_CFormat(paramValueStr);
 	}
 	// tmpValue :s32= xx param.value;
 	// initValue := tmpValue;

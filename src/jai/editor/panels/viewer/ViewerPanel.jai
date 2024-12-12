@@ -42,11 +42,7 @@ render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 rendererDestroyBuffers :: (panel: *TYPE) {
 	rendererDestroyBuffers(panel.renderer);
 }
-processEvent :: (panel: *TYPE, eventsData:*EventsData) {
-	using panel;
-	focused := element_focused(renderer, eventsData);
-	camera_controls_process_event(*cameraControls, eventsData, focused);
-}
+
 onResize :: (panel: *TYPE) {
 	using panel;
 	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);

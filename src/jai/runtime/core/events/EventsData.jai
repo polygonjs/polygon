@@ -53,6 +53,6 @@ events_data_reset :: (using eventsData :*EventsData){
 	memcpy(keys.data, KEYS_INIT.data, KEYS_COUNT);
 }
 EMPTY_TEXT :[TEXTINPUTEVENT_TEXT_SIZE] s8;
-events_data_clear_text :: (eventsData :*EventsData){
+eventsDataClearText :: (eventsData :*EventsData){
 	memcpy(eventsData.text.data, EMPTY_TEXT.data, TEXTINPUTEVENT_TEXT_SIZE);
 }

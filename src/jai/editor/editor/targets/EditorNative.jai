@@ -15,11 +15,11 @@ editorStart :: (editor: *Editor, window_size :Vector2UInt) {
 		time := current_time_monotonic();
 		computeFPS(editor.nodesScene, time);
 		sdl_event: SDL_Event;
-		events_data_reset(*EVENTS_DATA);
+		events_data_reset(*editor.eventsData);
 
 		while SDL_PollEvent(*sdl_event) {
-			events_data_update(*EVENTS_DATA, *sdl_event);
-			processEvent(editor, *EVENTS_DATA);
+			eventsDataUpdate(*editor.eventsData, *sdl_event);
+			processEvent(editor, *editor.eventsData);
 
 			if sdl_event.type == {
 				case SDL_QUIT; {editor.exitRequested = true;}
@@ -58,7 +58,7 @@ editorStart :: (editor: *Editor, window_size :Vector2UInt) {
 	editorDelete(editor);
 }
 
-windowInit :: ()->Vector2UInt {
+windowInit :: (editor: *Editor)->Vector2UInt {
 	SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
 	current_window_size :Vector2UInt = .{1280, 720};
 
@@ -86,7 +86,7 @@ windowInit :: ()->Vector2UInt {
 	// 	SDL_SetWindowFullscreen(*window, xx SDL_WINDOW_RESIZABLE);
 	// }
 	#if USE_IMGUI {
-		WINDOW_CONTEXT.window = window;
+		editor.imguiContext.windowContext.window = window;
 
 		imgui_context := ImGui.CreateContext();
 		sdl_init_success := ImGui_ImplSdl_Init(window);

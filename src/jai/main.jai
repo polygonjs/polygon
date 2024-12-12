@@ -15,7 +15,7 @@ main :: () {
 	appInit(APP.nodesScene, APP.editor);
 
 	#if WASM==false {
-		window_size := windowInit();
+		window_size := windowInit(APP.editor);
 		editorStart(APP.editor, window_size);
 
 		reset_temporary_storage();
@@ -35,7 +35,7 @@ init_draw_data :: () {
 
 }
 
-on_request_animation_frame :: ( newTime: u64,	 width: u64, height: u64 ) {
+on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
 	#if WASM==true context = call_from_wasm_context;
 	#if WASM==true assert(APP.editor!=null, "on_request_animation_frame: editor is null");
 

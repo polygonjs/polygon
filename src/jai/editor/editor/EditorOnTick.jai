@@ -4,10 +4,10 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 	if USE_IMGUI_DEBUG return;
 	#if WASM {
 		context = call_from_wasm_context;
-		events_data_update(*EVENTS_DATA);
+		eventsDataPpdate(*editor.eventsData);
 		time := performance_now();
 		computeFPS(editor.nodesScene, time);
-		processEvent(editor, *EVENTS_DATA);
+		processEvent(editor, *editor.eventsData);
 	} else {
 	}
 

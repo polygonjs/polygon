@@ -48,7 +48,7 @@ ImGui_ImplWGPU_Data :: struct {
 };
 ImGui_ImplWGPU_InitInfo :: struct {
 	// Device:WGPUDevice;
-	NumFramesInFlight:u8 = 3;
+	NumFramesInFlight:u8= 3;
 	RenderTargetFormat:WGPUTextureFormat = WGPUTextureFormat.Undefined;
 	DepthStencilFormat:WGPUTextureFormat = WGPUTextureFormat.Undefined;
 	PipelineMultisampleState:WGPUMultisampleState = .{
@@ -104,4 +104,10 @@ ImGui_WGPU_Common :: struct {
 	font_texture: ImGui_WGPU_Common_FontTexture;
 	uniforms: ImGui_WGPU_Common_Uniforms;
 	draw: ImGui_WGPU_Common_Draw;
+}
+
+Imgui_Context :: struct {
+	windowContext:WindowContext;
+	bd:ImGui_ImplWGPU_Data;
+	iwc:ImGui_WGPU_Common;
 }

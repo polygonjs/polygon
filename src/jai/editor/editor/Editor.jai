@@ -11,6 +11,11 @@ Editor :: struct {
 	//
 	exitRequested: bool=false;
 	nodesScene: *NodesScene;
+	eventsData:EventsData;
+
+	#if USE_IMGUI {
+		imguiContext: Imgui_Context;
+	}
 
 	windowSize: Vector2UInt64;
 	#if HAS_VIEWER_PANEL viewerPanel: *ViewerPanel;

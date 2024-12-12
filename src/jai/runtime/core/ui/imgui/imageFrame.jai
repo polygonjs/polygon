@@ -1,40 +1,34 @@
 
-renderUIFrameStart :: (renderer:*Renderer){
-	bd := *BD;
-	iwc := *IWC;
+renderUIFrameStart :: (renderer:*Renderer, eventsData: EventsData, imguiContext: *Imgui_Context){
 	// ui_data: *UiData = *UI_DATA;
-	events_data: *EventsData = *EVENTS_DATA;
 
 	width := wgpu_texture_get_width_surface(renderer.wgpu_context);
 	height := wgpu_texture_get_height_surface(renderer.wgpu_context);
-	if (bd.resolution.width != width || bd.resolution.height != height || bd.pipeline==null) {
+	if (imguiContext.bd.resolution.width != width || imguiContext.bd.resolution.height != height || imguiContext.bd.pipeline==null) {
 		// print_yellow(tprint("invalidate and create START: %x% -> %x%\n", bd.resolution.width, bd.resolution.height, width, height));
-		ImGui_ImplWGPU_InvalidateDeviceObjects();
-		ImGui_ImplWGPU_CreateDeviceObjects(bd, iwc, renderer);
+		ImGui_ImplWGPU_InvalidateDeviceObjects(*imguiContext.bd);
+		ImGui_ImplWGPU_CreateDeviceObjects(*imguiContext.bd, *imguiContext.iwc, renderer);
 		// print_yellow("invalidate and create DONE");
-		bd.resolution.width = width;
-		bd.resolution.height = height;
+		imguiContext.bd.resolution.width = width;
+		imguiContext.bd.resolution.height = height;
 	}
 
 	#if WASM {
-		ImGui_ImplWasm_NewFrame(events_data);
+		ImGui_ImplWasm_NewFrame(eventsData);
 	} else {
-		assert(renderer.wgpu_context.mode == .HEADLESS || WINDOW_CONTEXT.window != null, "WINDOW_CONTEXT.window is null");
+		assert(renderer.wgpu_context.mode == .HEADLESS || imguiContext.windowContext.window != null, "imguiContext.windowContext.window is null");
 		if renderer.wgpu_context.mode == .SURFACE {
-			ImGui_ImplSdl_NewFrame(WINDOW_CONTEXT.window, events_data);
+			ImGui_ImplSdl_NewFrame(imguiContext.windowContext.window, eventsData);
 		}
 	}
 	ImGui.NewFrame();
 }
-renderUIFrameEnd :: (render_pass: WGPURenderPassEncoder){
-	iwc := *IWC;
-	events_data: *EventsData = *EVENTS_DATA;
-
+renderUIFrameEnd :: (render_pass: WGPURenderPassEncoder, imguiContext: *Imgui_Context){
 	ImGui.EndFrame();
 	ImGui.Render();
 	draw_data := ImGui.GetDrawData();
-	ImGui_ImplWGPU_RenderDrawData(*iwc.draw, draw_data, render_pass);
-	events_data_clear_text(events_data);
+	ImGui_ImplWGPU_RenderDrawData(*imguiContext.bd, *imguiContext.iwc.draw, draw_data, render_pass);
+	
 }
 
 // gui_update :: ( renderer:*Renderer, render_pass: WGPURenderPassEncoder ){

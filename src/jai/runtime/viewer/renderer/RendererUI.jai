@@ -1,11 +1,10 @@
-rendererInitUI :: (use_depth_buffer:bool){
+rendererInitUI :: (imguiContext: *Imgui_Context, use_depth_buffer:bool){
 	#if USE_IMGUI {
 		if IMGUI_INITIALIZED {
 			return;
 		}
 		IMGUI_INITIALIZED = true;
 
-		bd := *BD;
 		ImGui.CreateContext(null);
 
 		#if WASM {
@@ -18,14 +17,19 @@ rendererInitUI :: (use_depth_buffer:bool){
 		// imgui_style.AntiAliasedLinesUseTex = false;
 		// ImGui.StyleColorsLight();
 
-		bd.wgpuDevice = WGPU_CONTEXT.device;
+		imguiContext.bd.wgpuDevice = WGPU_CONTEXT.device;
 		imgui_init_info := ImGui_ImplWGPU_InitInfo.{
 			// Device = wgpu_context.device,
 			NumFramesInFlight = 3,
 			RenderTargetFormat = WGPU_CONTEXT.preferred_texture_format,
 			DepthStencilFormat = ifx use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
 		};
-		ImGui_ImplWGPU_Init(bd, imgui_init_info);
+		ImGui_ImplWGPU_Init(*imguiContext.bd, imgui_init_info);
+	}
+}
+rendererUIDestroy :: (imguiContext: *Imgui_Context) {
+	#if USE_IMGUI {
+		ImGui_ImplWGPU_Shutdown(*imguiContext.bd);
 	}
 }
 

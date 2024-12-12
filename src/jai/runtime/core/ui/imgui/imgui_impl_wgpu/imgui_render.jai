@@ -1,5 +1,5 @@
-ImGui_ImplWGPU_SetupRenderState :: ( draw_data: *ImDrawData, ctx: WGPURenderPassEncoder, fr: *FrameResources) {
-	bd := ImGui_ImplWGPU_GetBackendData();
+ImGui_ImplWGPU_SetupRenderState :: (bd:*ImGui_ImplWGPU_Data, draw_data: *ImDrawData, ctx: WGPURenderPassEncoder, fr: *FrameResources) {
+	// bd := ImGui_ImplWGPU_GetBackendData();
 
 	// Setup orthographic projection matrix into our constant buffer
 	// Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right).
@@ -85,7 +85,7 @@ ImGui_ImplWGPU_SetupRenderState :: ( draw_data: *ImDrawData, ctx: WGPURenderPass
 
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
+ImGui_ImplWGPU_RenderDrawData :: (bd:*ImGui_ImplWGPU_Data, iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
 	// print("ImGui_ImplWGPU_RenderDrawData: quick return\n");
 	// if(1+1)return;
 	// print_yellow("ImGui_ImplWGPU_RenderDrawData START\n");
@@ -99,7 +99,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 
 	// FIXME: Assuming that this only gets called once per frame!
 	// If not, we can't just re-allocate the IB or VB, we'll have to do a proper allocator.
-	bd := ImGui_ImplWGPU_GetBackendData();
+	// bd := ImGui_ImplWGPU_GetBackendData();
 	bd.frameIndex = bd.frameIndex + 1;
 	frame_index := bd.frameIndex % bd.numFramesInFlight;
 	fr := *(bd.pFrameResources[frame_index]);
@@ -186,7 +186,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 
 	// Setup desired render state
 	fr2 := bd.pFrameResources[frame_index];
-	ImGui_ImplWGPU_SetupRenderState(draw_data, pass_encoder, *fr2);
+	ImGui_ImplWGPU_SetupRenderState(bd, draw_data, pass_encoder, *fr2);
 
 	// Render command lists
 	// (Because we merged all buffers into a single one, we maintain our own offset into them)
@@ -204,7 +204,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 				// User callback, registered via ImDrawList::AddCallback()
 				// (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
 				// if (pcmd.UserCallback == ImDrawCallback.ResetRenderState)
-					ImGui_ImplWGPU_SetupRenderState(draw_data, pass_encoder, *fr2);
+					ImGui_ImplWGPU_SetupRenderState(bd, draw_data, pass_encoder, *fr2);
 				// else
 				// pcmd.UserCallback(cmd_list, *pcmd);
 				print("UserCallback DONE\n");
@@ -216,7 +216,7 @@ ImGui_ImplWGPU_RenderDrawData :: ( iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*
 				if (bind_group) {
 					wgpuRenderPassEncoderSetBindGroup(pass_encoder, 1, bind_group, 0, null);
 				} else {
-					image_bind_group:WGPUBindGroup = ImGui_ImplWGPU_CreateImageBindGroup(bd.renderResources.ImageBindGroupLayout, cast(WGPUTextureView)tex_id);
+					image_bind_group:WGPUBindGroup = ImGui_ImplWGPU_CreateImageBindGroup(bd, bd.renderResources.ImageBindGroupLayout, cast(WGPUTextureView)tex_id);
 					bd.renderResources.ImageBindGroups.SetVoidPtr(*bd.renderResources.ImageBindGroups, tex_id_hash, image_bind_group);
 					wgpuRenderPassEncoderSetBindGroup(pass_encoder, 1, image_bind_group, 0, null);
 				}

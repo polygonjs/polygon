@@ -24,27 +24,27 @@ ImGui_ImplWasm_Init :: () {
 }
 
 last_cursor:ImGuiMouseCursor;
-ImGui_ImplWasm_NewFrame :: (events_data: *EventsData) {
+ImGui_ImplWasm_NewFrame :: (eventsData: EventsData) {
 	io := ImGui.GetIO();
 
-	io.DisplaySize = .{xx events_data.windowSize.w, xx events_data.windowSize.h};
+	io.DisplaySize = .{xx eventsData.windowSize.w, xx eventsData.windowSize.h};
 	io.DisplayFramebufferScale = .{xx 1, xx 1};
 
-	io.MousePos.x = xx events_data.cursor.x;
-	io.MousePos.y = xx events_data.cursor.y;
-	io.MouseDown[0] = events_data.mouseButton.left;
-	io.MouseDown[1] = events_data.mouseButton.right;
-	io.MouseDown[2] = events_data.mouseButton.middle;
-	io.MouseWheel = events_data.wheel;
-	io.KeyShift = events_data.modifiers.shift;
-	io.KeyCtrl  = events_data.modifiers.ctrl;
-	io.KeyAlt   = events_data.modifiers.alt;
-	io.KeySuper = events_data.modifiers.meta;
+	io.MousePos.x = xx eventsData.cursor.x;
+	io.MousePos.y = xx eventsData.cursor.y;
+	io.MouseDown[0] = eventsData.mouseButton.left;
+	io.MouseDown[1] = eventsData.mouseButton.right;
+	io.MouseDown[2] = eventsData.mouseButton.middle;
+	io.MouseWheel = eventsData.wheel;
+	io.KeyShift = eventsData.modifiers.shift;
+	io.KeyCtrl  = eventsData.modifiers.ctrl;
+	io.KeyAlt   = eventsData.modifiers.alt;
+	io.KeySuper = eventsData.modifiers.meta;
 
 	// we don't need to copy the full io.KeysDown for now
-	memcpy(io.KeysDown.data, events_data.keys.data, 18);
+	memcpy(io.KeysDown.data, eventsData.keys.data, 18);
 
-	io.AddInputCharactersUTF8(io, xx events_data.text.data);
+	io.AddInputCharactersUTF8(io, xx eventsData.text.data);
 
 	cursor := ImGui.GetMouseCursor();
 	if(cursor != last_cursor) {

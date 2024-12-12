@@ -147,7 +147,7 @@ ImGui_ImplSdl_Shutdown :: () {
 	ImGui_ImplSdl_InvalidateDeviceObjects();
 }
 
-ImGui_ImplSdl_NewFrame :: (window: *SDL_Window, events_data: *EventsData) {
+ImGui_ImplSdl_NewFrame :: (window: *SDL_Window, eventsData: EventsData) {
 	// if !g_FontTexture ImGui_ImplSdl_CreateDeviceObjects();
 	
 	io := ImGui.GetIO();
@@ -183,15 +183,15 @@ ImGui_ImplSdl_NewFrame :: (window: *SDL_Window, events_data: *EventsData) {
 		io.MousePos = .{-FLOAT32_MAX,-FLOAT32_MAX};
 	}
 
-	io.MouseDown[0] = events_data.mouseButton.left;//(g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0);      // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-	io.MouseDown[1] = events_data.mouseButton.right;//(g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0);
-	io.MouseDown[2] = events_data.mouseButton.middle;//(g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
+	io.MouseDown[0] = eventsData.mouseButton.left;//(g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0);      // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+	io.MouseDown[1] = eventsData.mouseButton.right;//(g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0);
+	io.MouseDown[2] = eventsData.mouseButton.middle;//(g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);
 	// g_MousePressed[0], g_MousePressed[1], g_MousePressed[2] = false, false, false;
 
-	io.MouseWheel = events_data.wheel;
+	io.MouseWheel = eventsData.wheel;
 	// g_MouseWheel = 0.0;
 
-	io.AddInputCharactersUTF8(io, xx events_data.text.data);
+	io.AddInputCharactersUTF8(io, xx eventsData.text.data);
 
 	// Hide OS mouse cursor if ImGui is drawing it
 	SDL_ShowCursor(xx (io.MouseDrawCursor == false));

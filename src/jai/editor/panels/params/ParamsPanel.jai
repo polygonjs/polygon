@@ -18,6 +18,7 @@ newParamsPanel :: (editor: *Editor) -> *TYPE {
 	return panel;
 }
 paramsPanelDelete :: (using panel: *TYPE) {
+	rendererUIDestroy(*panel.editor.imguiContext);
 	rendererDelete(renderer);
 	allocatorReset(panel);
 	free(panel);
@@ -28,7 +29,7 @@ drawDataInit :: (using panel: *TYPE) {
 	// 		return;
 	// 	}
 	// }
-	#if USE_IMGUI rendererInitUI(renderer.use_depth_buffer);
+	#if USE_IMGUI rendererInitUI(*panel.editor.imguiContext, renderer.use_depth_buffer);
 	// rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
 }
 render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
@@ -40,9 +41,9 @@ render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	// #if USE_IMGUI renderUI(renderCollectionData, renderer);
 	#if USE_IMGUI {
 		cmdEncoder, renderPassEncoder := renderUIStart(renderCollectionData, renderer);
-		renderUIFrameStart(renderer);
+		renderUIFrameStart(renderer, panel.editor.eventsData, *editor.imguiContext);
 		paramsRender(panel);
-		renderUIFrameEnd(renderPassEncoder);
+		renderUIFrameEnd(renderPassEncoder, *panel.editor.imguiContext);
 		renderUIEnd(renderCollectionData, renderer, cmdEncoder, renderPassEncoder);
 	}
 	// nodesSceneOutputNodesCompute(editor.nodesScene);
@@ -64,6 +65,7 @@ onResize :: (using panel: *TYPE) {
 	renderer.viewport.start = .{ editor.windowSize.x*0, xx (0.5 * xx editor.windowSize.y) };
 	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.5), xx(cast(float32)editor.windowSize.y*0.5) };
 }
+#if USE_IMGUI {
 paramsRender :: (using panel: *TYPE) {
 	ImGui.SetNextWindowSize(.{xx renderer.viewport.size.x, xx renderer.viewport.size.y}, .Always);
 	ImGui.SetNextWindowPos(.{xx renderer.viewport.start.x, xx renderer.viewport.start.y}, .Always);
@@ -95,6 +97,10 @@ paramsRender :: (using panel: *TYPE) {
 
 	ImGui.End();
 
+}
+}
+else {
+	paramsRender :: (using panel: *TYPE) {}
 }
 // panelSetScene :: (panel: *TYPE, nodesScene: *NodesScene) {
 // 	rendererAny: Any = <<panel.renderer;

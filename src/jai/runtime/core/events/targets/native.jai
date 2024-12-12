@@ -17,8 +17,8 @@
 
 
 
-events_data_update :: (events_data :*EventsData, sdl_event :*SDL_Event){
-	using events_data;
+eventsDataUpdate :: (eventsData :*EventsData, sdl_event :*SDL_Event){
+	using eventsData;
 	if sdl_event.type == {
 		case SDL_MOUSEBUTTONDOWN; {
 			if (sdl_event.button.button == SDL_BUTTON_LEFT) {

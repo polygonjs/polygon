@@ -30,6 +30,4 @@ rendererCollectionEnd :: (wgpu_context:*WGPUContext, data: RenderCollectionData)
 		}
 	}
 
-	#if USE_IMGUI imgui_gui_free();
-
 }

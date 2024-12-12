@@ -46,8 +46,12 @@ runTests :: () {
 						}
 					}
 				} else {
+					testOptions.editor = newEditor();
+					if testOptions.nodesScene != null {
+						editorSetScene(testOptions.editor, testOptions.nodesScene);
+					}
 					if windowCreated==false {
-						testOptions.window_size = windowInit();
+						testOptions.window_size = windowInit(testOptions.editor);
 						windowSize = testOptions.window_size;
 					} else {
 						testOptions.window_size = windowSize;

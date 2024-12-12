@@ -137,7 +137,7 @@ rendererReadPixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vec
 	// wgpuBufferUnmap(renderer.readback_buffer);
 	// return result;
 }
-readPixelIfMapped :: (renderer: *Renderer) -> (buffer_ready:bool, result:READ_PIXEL_RESULT) {
+readPixelIfMapped :: (renderer: *Renderer, eventsData: *EventsData) -> (buffer_ready:bool, result:READ_PIXEL_RESULT) {
 	if WAITING_FOR_BUFFER_MAPPED_STATE == false {
 		return false, .[0,0,0,0];
 	}
@@ -149,8 +149,8 @@ readPixelIfMapped :: (renderer: *Renderer) -> (buffer_ready:bool, result:READ_PI
 			wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
 			wgpuBufferUnmap(renderer.readback_buffer);
 			WAITING_FOR_BUFFER_MAPPED_STATE = false;
-			events_data_update(*EVENTS_DATA); // TODO: it would be preferrable to only request the readPixelValue and not all other events data.
-			return true, EVENTS_DATA.readPixelValue;
+			eventsDataPpdate(eventsData); // TODO: it would be preferrable to only request the readPixelValue and not all other events data.
+			return true, eventsData.readPixelValue;
 		}
 		return false, .[0,0,0,0];
 	} else {

@@ -17,7 +17,7 @@ paramRenderUI :: (param: *TYPE, paramName:string) {
 	tmpValue[1] = initValue.y;
 	tmpValue[2] = initValue.z;
 	paramNameStr := to_c_string_temp(paramName);
-	ImGui.SliderFloat3(paramNameStr, *tmpValue, 0., 10.);
+	#if USE_IMGUI ImGui.SliderFloat3(paramNameStr, *tmpValue, 0., 10.);
 	if valueEquals(tmpValue, initValue)==false {
 		initValue.x = tmpValue[0];
 		initValue.y = tmpValue[1];

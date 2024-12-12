@@ -1,5 +1,5 @@
 
-events_data_update :: (events_data :*EventsData){
+eventsDataPpdate :: (events_data :*EventsData){
 	eventsDataUpdate(
 		*(events_data.windowSize.w),
 		*(events_data.windowSize.h),

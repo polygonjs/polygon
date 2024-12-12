@@ -1,5 +1,5 @@
-ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_ShaderModule, wgsl_source: *string, label:string) -> WGPUProgrammableStageDescriptor {
-	bd := ImGui_ImplWGPU_GetBackendData();
+ImGui_ImplWGPU_CreateShaderModule :: (bd:*ImGui_ImplWGPU_Data, iwc_shader_module: *ImGui_WGPU_Common_ShaderModule, wgsl_source: *string, label:string) -> WGPUProgrammableStageDescriptor {
+	// bd := ImGui_ImplWGPU_GetBackendData();
 
 	iwc_shader_module.wgsl_desc = .{};
 	iwc_shader_module.wgsl_desc.chain.sType = WGPUSType.ShaderModuleWGSLDescriptor;
@@ -18,8 +18,8 @@ ImGui_ImplWGPU_CreateShaderModule :: (iwc_shader_module: *ImGui_WGPU_Common_Shad
 	return iwc_shader_module.stage_desc;
 }
 
-ImGui_ImplWGPU_CreateImageBindGroup::(layout: WGPUBindGroupLayout, texture_view: WGPUTextureView) -> WGPUBindGroup {
-	bd := ImGui_ImplWGPU_GetBackendData();
+ImGui_ImplWGPU_CreateImageBindGroup::(bd:*ImGui_ImplWGPU_Data, layout: WGPUBindGroupLayout, texture_view: WGPUTextureView) -> WGPUBindGroup {
+	// bd := ImGui_ImplWGPU_GetBackendData();
 	image_bg_entries: [1]WGPUBindGroupEntry;
 	image_bg_entries[0] = .{ textureView = texture_view };
 
@@ -30,9 +30,9 @@ ImGui_ImplWGPU_CreateImageBindGroup::(layout: WGPUBindGroupLayout, texture_view:
 	return wgpuDeviceCreateBindGroup(bd.wgpuDevice, *image_bg_descriptor);
 }
 
-ImGui_ImplWGPU_CreateFontsTexture :: (iwc_font_tex: *ImGui_WGPU_Common_FontTexture) {
+ImGui_ImplWGPU_CreateFontsTexture :: (bd:*ImGui_ImplWGPU_Data, iwc_font_tex: *ImGui_WGPU_Common_FontTexture) {
 	// Build texture atlas
-	bd := ImGui_ImplWGPU_GetBackendData();
+	// bd := ImGui_ImplWGPU_GetBackendData();
 	io := ImGui.GetIO();
 	// font_atlas: ImFontAtlas;
 	// pixels:[..]u8;
@@ -175,7 +175,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.graphics_pipeline_desc.layout = wgpuDeviceCreatePipelineLayout(bd.wgpuDevice, *iwc.layout_desc);
 
 	// Create the vertex shader
-	iwc.vertex_shader_desc = ImGui_ImplWGPU_CreateShaderModule(*iwc.vert, *__shader_vert_wgsl, "imgui_vertex");
+	iwc.vertex_shader_desc = ImGui_ImplWGPU_CreateShaderModule(bd, *iwc.vert, *__shader_vert_wgsl, "imgui_vertex");
 	iwc.graphics_pipeline_desc.vertex.module = iwc.vertex_shader_desc.module;
 	iwc.graphics_pipeline_desc.vertex.entryPoint = iwc.vertex_shader_desc.entryPoint;
 
@@ -190,7 +190,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.graphics_pipeline_desc.vertex.buffers = iwc.buffer_layouts.data;
 
 	// Create the pixel shader
-	iwc.pixel_shader_desc = ImGui_ImplWGPU_CreateShaderModule(*iwc.frag, *__shader_frag_wgsl, "imgui_fragment");
+	iwc.pixel_shader_desc = ImGui_ImplWGPU_CreateShaderModule(bd, *iwc.frag, *__shader_frag_wgsl, "imgui_fragment");
 
 	// Create the blending setup
 	iwc.blend_state.alpha.operation = WGPUBlendOperation.Add;
@@ -224,7 +224,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 
 	bd.pipeline = wgpuDeviceCreateRenderPipeline(bd.wgpuDevice, *iwc.graphics_pipeline_desc);
 
-	ImGui_ImplWGPU_CreateFontsTexture(*iwc.font_texture);
+	ImGui_ImplWGPU_CreateFontsTexture(bd, *iwc.font_texture);
 	ImGui_ImplWGPU_CreateUniformBuffer(*iwc.uniforms);
 
 	// Create resource bind group
@@ -240,7 +240,7 @@ ImGui_ImplWGPU_CreateDeviceObjects :: (
 	iwc.common_bg_descriptor.entries = iwc.common_bg_entries.data;
 	bd.renderResources.CommonBindGroup = wgpuDeviceCreateBindGroup(bd.wgpuDevice, *iwc.common_bg_descriptor);
 
-	iwc.image_bind_group = ImGui_ImplWGPU_CreateImageBindGroup(iwc.bg_layouts[1], bd.renderResources.FontTextureView);
+	iwc.image_bind_group = ImGui_ImplWGPU_CreateImageBindGroup(bd, iwc.bg_layouts[1], bd.renderResources.FontTextureView);
 	bd.renderResources.ImageBindGroup = iwc.image_bind_group;
 	bd.renderResources.ImageBindGroupLayout = iwc.bg_layouts[1];
 	text_id_hash := ImHashData(bd.renderResources.FontTextureView, xx size_of(ImTextureID), 0);

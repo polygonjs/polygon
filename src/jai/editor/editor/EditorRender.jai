@@ -10,9 +10,12 @@ editorRender :: (editor: *Editor) {
 	#if HAS_VIEWER_PANEL render(editor.viewerPanel, *data);
 	#if HAS_NETWORK_PANEL render(editor.networkPanel, *data);
 	render(editor.paramsPanel, *data);
+	eventsDataClearText(*editor.eventsData);
+
 
 	rendererCollectionEnd(*WGPU_CONTEXT, data);
 	rendererDestroyBuffers(editor);
+	#if USE_IMGUI imgui_gui_free(*editor.imguiContext);
 }
 
 rendererDestroyBuffers :: (editor: *Editor) {

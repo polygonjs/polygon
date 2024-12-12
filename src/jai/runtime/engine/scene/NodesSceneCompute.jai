@@ -4,21 +4,40 @@ ComputablesTree :: struct {
 	outputs: [..][..]NodeId;
 	leaves: [..]NodeId;
 }
-
+nodesSceneFindFirstOutputNode :: (scene: *NodesScene) -> *OutputGeoNode {
+	for node, i: scene.nodes {
+		if node.type == OutputGeoNode {
+			return cast(*OutputGeoNode)node;
+		}
+	}
+	return null;
+}
 nodesSceneOutputNodesCompute :: (scene: *NodesScene) {
 	nodesSceneDisposeCookResults(scene);
 
-	// atLeastOneCompute := false;
-	for node, i: scene.nodes {
-		if node.type == OutputGeoNode {
-			// print(">>>> compute output node: %\n", node.nodeId);
-			buildAndComputeComputableTree(scene, cast(*OutputGeoNode)node);
-			return;
-			// atLeastOneCompute = true;
-		}
+	outputNode := nodesSceneFindFirstOutputNode(scene);
+	if outputNode != null {
+		buildAndComputeComputableTree(scene, outputNode);
+		return;
 	}
+	// // atLeastOneCompute := false;
+	// for node, i: scene.nodes {
+	// 	if node.type == OutputGeoNode {
+	// 		// print(">>>> compute output node: %\n", node.nodeId);
+	// 		buildAndComputeComputableTree(scene, cast(*OutputGeoNode)node);
+	// 		return;
+	// 		// atLeastOneCompute = true;
+	// 	}
+	// }
 	// if atLeastOneCompute
 	// print(">>>> nodesSceneOutputNodesCompute :%\n", atLeastOneCompute);
+}
+nodesSceneSetFirstOutputNodeInput :: (scene: *NodesScene, input: u8) {
+	outputNode := nodesSceneFindFirstOutputNode(scene);
+	if outputNode == null {
+		return;
+	}
+	paramSetValue(*outputNode.p.input, input);
 }
 
 nodesSceneDisposeCookResults :: (scene: *NodesScene) {
