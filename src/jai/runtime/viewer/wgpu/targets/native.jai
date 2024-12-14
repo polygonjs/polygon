@@ -2,13 +2,13 @@
 
 
 
-wgpu_texture_get_width_surface :: (wgpu_context: *WGPUContext) -> u32 {
-	assert(wgpu_context.surface_texture.texture != null, "surface_texture.texture is null\n");
-	return wgpuTextureGetWidth(wgpu_context.surface_texture.texture);
+wgpu_texture_get_width_surface :: (wgpuContext: *WGPUContext) -> u32 {
+	assert(wgpuContext.surface_texture.texture != null, "surface_texture.texture is null\n");
+	return wgpuTextureGetWidth(wgpuContext.surface_texture.texture);
 }
-wgpu_texture_get_height_surface :: (wgpu_context: *WGPUContext) -> u32 {
-	assert(wgpu_context.surface_texture.texture != null, "surface_texture.texture is null\n");
-	return wgpuTextureGetHeight(wgpu_context.surface_texture.texture);
+wgpu_texture_get_height_surface :: (wgpuContext: *WGPUContext) -> u32 {
+	assert(wgpuContext.surface_texture.texture != null, "surface_texture.texture is null\n");
+	return wgpuTextureGetHeight(wgpuContext.surface_texture.texture);
 }
 
 
@@ -117,49 +117,64 @@ request_device :: (adapter: WGPUAdapter, width:int, height:int) -> WGPUDevice {
 
 	return device;
 }
-webgpu_handle_resize :: (wgpu_context: *WGPUContext, size: Vector2UInt){
-	wgpu_context.config.width = size.x;
-	wgpu_context.config.height = size.y;
-	wgpuSurfaceConfigure(wgpu_context.surface, *wgpu_context.config);
+wgpuContextResize :: (wgpuContext: *WGPUContext, size: Vector2UInt){
+	wgpuContext.config.width = size.x;
+	wgpuContext.config.height = size.y;
+	wgpuSurfaceConfigure(wgpuContext.surface, *wgpuContext.config);
+	wgpuContext.windowSize = size;
 }
 
-wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vector2UInt) {
+wgpuContextInitHeadless :: (wgpuContext: *WGPUContext, size: Vector2UInt){
+	assert(wgpuContext.mode == .UNSET, "wgpuContext.mode is not .UNSET");
+	wgpuContext.mode = .HEADLESS;
+	surface_capabilities := wgpuContextInit(wgpuContext, size);
+	// on_wgpu_device_ready(wgpuContext.surface, wgpuContext.device, wgpuContext.queue, wgpuContext.preferred_texture_format);
+}
+wgpuContextInitIfAllowed :: (wgpuContext: *WGPUContext, window: *SDL_Window, size: Vector2UInt){
+		assert(wgpuContext.mode == .UNSET, "wgpuContext.mode is not .UNSET");
+		wgpuContext.mode = .SURFACE;
+		/*surface_capabilities := */wgpuContextInit(window, wgpuContext, size);
+
+		// on_wgpu_device_ready(wgpuContext.surface, wgpuContext.device, wgpuContext.queue, wgpuContext.preferred_texture_format);
+	}
+
+wgpuContextInit :: (window: *SDL_Window, wgpuContext: *WGPUContext, size: Vector2UInt) {
 
 	instance_desc: WGPUInstanceDescriptor;
-	wgpu_context.instance = wgpuCreateInstance(*instance_desc);
-	assert(wgpu_context.instance != null, "Instance is not created correctly");
+	wgpuContext.instance = wgpuCreateInstance(*instance_desc);
+	assert(wgpuContext.instance != null, "Instance is not created correctly");
 
-	wgpu_context.surface = create_surface(wgpu_context.instance, window);
-	assert(wgpu_context.surface != null, "Surface is not created correctly");
+	wgpuContext.surface = create_surface(wgpuContext.instance, window);
+	assert(wgpuContext.surface != null, "Surface is not created correctly");
 
-	wgpu_context.adapter = request_adapter(wgpu_context.instance, wgpu_context.surface, powerPreference = .HighPerformance, headless = false);
-	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
+	wgpuContext.adapter = request_adapter(wgpuContext.instance, wgpuContext.surface, powerPreference = .HighPerformance, headless = false);
+	assert(wgpuContext.adapter != null, "Adapter is not created correctly");
 
 	surface_capabilities :WGPUSurfaceCapabilities;
-	wgpuSurfaceGetCapabilities(wgpu_context.surface, wgpu_context.adapter, *surface_capabilities);
+	wgpuSurfaceGetCapabilities(wgpuContext.surface, wgpuContext.adapter, *surface_capabilities);
 
 	#if COLOR_SPACE_LINEAR {
-		linearFormatIfAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, wgpu_context:*WGPUContext)->WGPUTextureFormat {
+		linearFormatIfAvailable :: (surface_capabilities :*WGPUSurfaceCapabilities, wgpuContext:*WGPUContext)->WGPUTextureFormat {
 			for i:0..(surface_capabilities.formatCount-1) {
 				if( surface_capabilities.formats[i] == .BGRA8Unorm){
 					return surface_capabilities.formats[i];
 				}
 				
 			}
-			preferred_format := wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+			preferred_format := wgpuSurfaceGetPreferredFormat(wgpuContext.surface, wgpuContext.adapter);
 			print("linear format not available, using device preferred format: %\n", preferred_format);
-			return wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+			return wgpuSurfaceGetPreferredFormat(wgpuContext.surface, wgpuContext.adapter);
 		}
-		wgpu_context.preferred_texture_format = linearFormatIfAvailable(*surface_capabilities, wgpu_context);
+		wgpuContext.preferred_texture_format = linearFormatIfAvailable(*surface_capabilities, wgpuContext);
 	} else {
-		wgpu_context.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpu_context.surface, wgpu_context.adapter);
+		wgpuContext.preferred_texture_format = wgpuSurfaceGetPreferredFormat(wgpuContext.surface, wgpuContext.adapter);
 	}
 
-	wgpu_context.device = request_device(wgpu_context.adapter, size.x, size.y);
-	assert(wgpu_context.device != null, "Device is not created correctly");
+	wgpuContext.device = request_device(wgpuContext.adapter, size.x, size.y);
+	assert(wgpuContext.device != null, "Device is not created correctly");
 
-	wgpu_context.queue = wgpuDeviceGetQueue(wgpu_context.device);
-	assert(wgpu_context.queue != null, "Queue is not created correctly");
+	wgpuContext.queue = wgpuDeviceGetQueue(wgpuContext.device);
+	assert(wgpuContext.queue != null, "Queue is not created correctly");
 
 	// printFormats :: (surface_capabilities :*WGPUSurfaceCapabilities) {
 	// 	for 0..(surface_capabilities.formatCount-1) {
@@ -199,48 +214,50 @@ wgpu_context_init :: (window: *SDL_Window, wgpu_context: *WGPUContext, size: Vec
 	}
 	
 	present_mode := get_present_mode(*surface_capabilities);
-	wgpu_context.config = WGPUSurfaceConfiguration.{
-		device = wgpu_context.device,
+	wgpuContext.config = WGPUSurfaceConfiguration.{
+		device = wgpuContext.device,
 		usage = xx WGPUTextureUsage.RenderAttachment|WGPUTextureUsage.CopySrc,
-		format = wgpu_context.preferred_texture_format,
+		format = wgpuContext.preferred_texture_format,
 		presentMode = present_mode,
 		alphaMode = surface_capabilities.alphaModes[0],
 		width = size.x,
 		height = size.y,
 	};
-	wgpuSurfaceConfigure(wgpu_context.surface, *wgpu_context.config);
+	wgpuSurfaceConfigure(wgpuContext.surface, *wgpuContext.config);
 
-	wgpuDeviceSetUncapturedErrorCallback(wgpu_context.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
+	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
 		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
 	}, null);
 
+	wgpuContext.windowSize = size;
 }
 
-wgpu_context_init :: (wgpu_context: *WGPUContext, size: Vector2UInt) {
+wgpuContextInit :: (wgpuContext: *WGPUContext, size: Vector2UInt) {
 	// Create instance
 	instance_desc: WGPUInstanceDescriptor;
-	wgpu_context.instance = wgpuCreateInstance(*instance_desc);
-	assert(wgpu_context.instance != null, "Instance is not created correctly");
+	wgpuContext.instance = wgpuCreateInstance(*instance_desc);
+	assert(wgpuContext.instance != null, "Instance is not created correctly");
 
 	// Request adapter without surface
-	wgpu_context.adapter = request_adapter(wgpu_context.instance, null, powerPreference = .HighPerformance, headless = true);
-	assert(wgpu_context.adapter != null, "Adapter is not created correctly");
+	wgpuContext.adapter = request_adapter(wgpuContext.instance, null, powerPreference = .HighPerformance, headless = true);
+	assert(wgpuContext.adapter != null, "Adapter is not created correctly");
 
 	// Use a common format for off-screen rendering
-	wgpu_context.preferred_texture_format = .RGBA8Unorm;
+	wgpuContext.preferred_texture_format = .RGBA8Unorm;
 
-	wgpu_context.device = request_device(wgpu_context.adapter, size.x, size.y);
-	assert(wgpu_context.device != null, "Device is not created correctly");
+	wgpuContext.device = request_device(wgpuContext.adapter, size.x, size.y);
+	assert(wgpuContext.device != null, "Device is not created correctly");
 
-	wgpu_context.queue = wgpuDeviceGetQueue(wgpu_context.device);
-	assert(wgpu_context.queue != null, "Queue is not created correctly");
+	wgpuContext.queue = wgpuDeviceGetQueue(wgpuContext.device);
+	assert(wgpuContext.queue != null, "Queue is not created correctly");
 
-	wgpuDeviceSetUncapturedErrorCallback(wgpu_context.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
+	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
 		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
 	}, null);
 
-	wgpu_context.surface_texture.texture = create_offscreen_texture(wgpu_context.device, size.x, size.y, wgpu_context.preferred_texture_format);
+	wgpuContext.surface_texture.texture = create_offscreen_texture(wgpuContext.device, size.x, size.y, wgpuContext.preferred_texture_format);
 
+	wgpuContext.windowSize = size;
 }
 
 create_offscreen_texture :: (device: WGPUDevice, width: u32, height: u32, format: WGPUTextureFormat) -> WGPUTexture {

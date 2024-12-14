@@ -1,4 +1,5 @@
-ImGui_ImplWasm_Init :: () {
+ImGui_ImplWasm_Init :: (imguiPolygonContext: *ImguiPolygonContext) {
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	io := ImGui.GetIO();
 	io.KeyMap[ImGuiKey.LeftArrow] = 0;
 	io.KeyMap[ImGuiKey.RightArrow] = 1;
@@ -24,7 +25,8 @@ ImGui_ImplWasm_Init :: () {
 }
 
 last_cursor:ImGuiMouseCursor;
-ImGui_ImplWasm_NewFrame :: (eventsData: EventsData) {
+ImGui_ImplWasm_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: EventsData) {
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	io := ImGui.GetIO();
 
 	io.DisplaySize = .{xx eventsData.windowSize.w, xx eventsData.windowSize.h};

@@ -11,9 +11,9 @@ UniformBindingIndex :: enum u8 {
 	MATERIAL :: 3;
 };
 
-wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureView {
+wgpu_surface_create_current_view :: (wgpuContext: *WGPUContext) -> WGPUTextureView {
 	current_view_descriptor := WGPUTextureViewDescriptor.{
-		format = wgpu_context.preferred_texture_format,
+		format = wgpuContext.preferred_texture_format,
 		dimension = WGPUTextureViewDimension._2D,
 		aspect = WGPUTextureAspect.All,
 		baseMipLevel = 0,
@@ -22,14 +22,14 @@ wgpu_surface_create_current_view :: (wgpu_context: *WGPUContext) -> WGPUTextureV
 		arrayLayerCount = 1,
 	};
 	#if WASM {
-		wgpu_context.surface_texture.texture = wgpuSurfaceGetCurrentTexture();
-		return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+		wgpuContext.surface_texture.texture = wgpuSurfaceGetCurrentTexture();
+		return wgpuTextureCreateView(wgpuContext.surface_texture.texture, *current_view_descriptor);
 	} else {
-		if wgpu_context.mode == .SURFACE {
-			wgpuSurfaceGetCurrentTexture(wgpu_context.surface, *(wgpu_context.surface_texture));
-			return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+		if wgpuContext.mode == .SURFACE {
+			wgpuSurfaceGetCurrentTexture(wgpuContext.surface, *(wgpuContext.surface_texture));
+			return wgpuTextureCreateView(wgpuContext.surface_texture.texture, *current_view_descriptor);
 		} else {
-			return wgpuTextureCreateView(wgpu_context.surface_texture.texture, *current_view_descriptor);
+			return wgpuTextureCreateView(wgpuContext.surface_texture.texture, *current_view_descriptor);
 		}
 	}
 }

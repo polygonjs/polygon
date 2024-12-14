@@ -65,7 +65,7 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 	// assert(pc.meshes.count > 0, "meshes is empty");
 	assert(pc.material != null, "pc.material is null");
 
-	wgpu_context := renderer.wgpu_context;
+	wgpuContext := renderer.wgpuContext;
 	// array_resize(*pc.meshes, meshes.count, false);
 	// for mesh, i: <<meshes {
 	// 	assert(mesh.material != null, "mesh.material is null");
@@ -73,7 +73,7 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 	// }
 	// first_mesh := (pc.meshes)[0];
 	// pc.material = first_mesh.material;
-	pc.shader_module = material_create_module(wgpu_context, material);
+	pc.shader_module = material_create_module(wgpuContext, material);
 	materialUpdatePipelineControllerLayout(material, pc);
 	defer array_reset(*vertexBufferLayouts);
 	defer array_reset(*vertexAttributes);
@@ -82,7 +82,7 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 		pc.pipeline_descriptor = .{label = to_c_string_temp(tprint("% Pipeline Descriptor", label))};
 	}
 
-	pipeline_controller_pipeline_descriptor_layout_init(wgpu_context, *pipeline_descriptor, material);
+	pipeline_controller_pipeline_descriptor_layout_init(wgpuContext, *pipeline_descriptor, material);
 	pipeline_controller_create_fragment_state_init(*fragment_state, *color_target_state, shader_module, rendererFormat(renderer));
 	pc.pipeline_descriptor.fragment = *fragment_state;
 	// vertex
@@ -117,7 +117,7 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 		}
 		assert(depth_stencil_state.depthBias == 0, "bias not correct: %\n", depth_stencil_state.depthBias);
 	}
-	pipeline = wgpuDeviceCreateRenderPipeline(wgpu_context.device, *(pipeline_descriptor));
+	pipeline = wgpuDeviceCreateRenderPipeline(wgpuContext.device, *(pipeline_descriptor));
 	assert(pipeline != null, "Pipeline is not created correctly");
 
 	
@@ -137,7 +137,7 @@ pipelineControllerAddMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 	array_add(*meshes_draw_data, drawData);
 
 	if mesh.use_compute {
-		renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, mesh);
+		renderer.computes = compute_controller_collection_create(pc.renderer.wgpuContext, mesh);
 		pipeline_controller_update(pc, *pc.renderer.computes);
 	}
 }
@@ -164,7 +164,7 @@ pipelineControllerRemoveMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 
 pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
 	
-	wgpu_context := renderer.wgpu_context;
+	wgpuContext := renderer.wgpuContext;
 	// using the dirty flag may need a bit more work:
 	// - ensure mesh uniforms trigger it
 	// - ensure camera uniforms is shared and triggers it
@@ -178,21 +178,21 @@ pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
 		{
 			size := cast(u64) max( 16, size_of(TransformableUniforms));
 			buffer := draw_data.uniforms.object.buffer;
-			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *mesh.transformable_uniforms, size);
+			wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *mesh.transformable_uniforms, size);
 		}
 		// {
 		// 	size := cast(u64) max( 16, size_of(CameraUniforms));
 		// 	buffer := draw_data.uniforms.camera.buffer;
-		// 	wgpuQueueWriteBuffer(pc.wgpu_context.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
+		// 	wgpuQueueWriteBuffer(pc.wgpuContext.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
 		// }
 		{
 			size := cast(u64) max( 16, material.uniformTypeSize);
 			buffer := draw_data.uniforms.material.buffer;
-			wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, *material.uniforms, size);
+			wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *material.uniforms, size);
 		}
-		// update_object_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.object.buffer, *mesh);
-		// update_camera_uniforms_to_buffer(pc.wgpu_context, draw_data.uniforms.camera.buffer, scene_data);
-		// update_sdf_uniforms_to_buffer(wgpu_context, draw_data.uniforms.material.buffer, scene_data);
+		// update_object_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.object.buffer, *mesh);
+		// update_camera_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.camera.buffer, scene_data);
+		// update_sdf_uniforms_to_buffer(wgpuContext, draw_data.uniforms.material.buffer, scene_data);
 	}
 }
 
@@ -246,7 +246,7 @@ pipeline_controller_create_fragment_state_init :: (fragment_state: *WGPUFragment
 }
 
 
-pipeline_controller_pipeline_descriptor_layout_init :: (wgpu_context: *WGPUContext, pipeline_descriptor: *WGPURenderPipelineDescriptor, material: *Material) {
+pipeline_controller_pipeline_descriptor_layout_init :: (wgpuContext: *WGPUContext, pipeline_descriptor: *WGPURenderPipelineDescriptor, material: *Material) {
 	pipeline_layout_descriptor: WGPUPipelineLayoutDescriptor;
 
 
@@ -263,7 +263,7 @@ pipeline_controller_pipeline_descriptor_layout_init :: (wgpu_context: *WGPUConte
 		// bind_group_layout_descs = bind_group_layout_descs,
 	};
 
-	material_apply_to_pipeline_descriptor(wgpu_context, *pipeline_layout_descriptor, material, *container);
+	material_apply_to_pipeline_descriptor(wgpuContext, *pipeline_layout_descriptor, material, *container);
 
 	// count := 2;
 	// bind_group_layouts := NewArray(count, WGPUBindGroupLayout);
@@ -318,6 +318,6 @@ pipeline_controller_pipeline_descriptor_layout_init :: (wgpu_context: *WGPUConte
 	// pipeline_layout_descriptor.bindGroupLayoutCount = xx bind_group_layouts.count;
 	// pipeline_layout_descriptor.bindGroupLayouts = bind_group_layouts.data;
 
-	pipeline_descriptor.layout = wgpuDeviceCreatePipelineLayout(wgpu_context.device, *pipeline_layout_descriptor);
+	pipeline_descriptor.layout = wgpuDeviceCreatePipelineLayout(wgpuContext.device, *pipeline_layout_descriptor);
 }
 

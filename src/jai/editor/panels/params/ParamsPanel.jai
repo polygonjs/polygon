@@ -11,39 +11,39 @@ ParamsPanel :: struct {
 	renderer: *Renderer;
 }
 
-newParamsPanel :: (editor: *Editor) -> *TYPE {
+newParamsPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
 	panel: *TYPE = New(TYPE);
-	paramsPanelInit(panel, editor);
+	paramsPanelInit(panel, editor, ensureWGPUContextValid);
 
 	return panel;
 }
 paramsPanelDelete :: (using panel: *TYPE) {
-	rendererUIDestroy(*panel.editor.imguiContext);
+	#if USE_IMGUI rendererUIDestroy(*panel.editor.imguiPolygonContext);
 	rendererDelete(renderer);
 	allocatorReset(panel);
 	free(panel);
 }
 drawDataInit :: (using panel: *TYPE) {
 	// #if WASM == false {
-	// 	if renderer.wgpu_context.mode == .HEADLESS {
+	// 	if renderer.wgpuContext.mode == .HEADLESS {
 	// 		return;
 	// 	}
 	// }
-	#if USE_IMGUI rendererInitUI(*panel.editor.imguiContext, renderer.use_depth_buffer);
+	#if USE_IMGUI rendererInitUI(*panel.editor.wgpuContext, *panel.editor.imguiPolygonContext, renderer.use_depth_buffer);
 	// rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
 }
 render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	#if WASM == false {
-		if renderer.wgpu_context.mode == .HEADLESS {
+		if renderer.wgpuContext.mode == .HEADLESS {
 			return;
 		}
 	}
 	// #if USE_IMGUI renderUI(renderCollectionData, renderer);
 	#if USE_IMGUI {
 		cmdEncoder, renderPassEncoder := renderUIStart(renderCollectionData, renderer);
-		renderUIFrameStart(renderer, panel.editor.eventsData, *editor.imguiContext);
+		renderUIFrameStart(renderer, panel.editor.eventsData, *panel.editor.imguiPolygonContext);
 		paramsRender(panel);
-		renderUIFrameEnd(renderPassEncoder, *panel.editor.imguiContext);
+		renderUIFrameEnd(renderPassEncoder, *panel.editor.imguiPolygonContext);
 		renderUIEnd(renderCollectionData, renderer, cmdEncoder, renderPassEncoder);
 	}
 	// nodesSceneOutputNodesCompute(editor.nodesScene);
@@ -113,9 +113,9 @@ else {
 
 TYPE :: ParamsPanel;
 
-paramsPanelInit :: (using panel: *TYPE, _editor: *Editor) {
+paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 
-	renderer = newRenderer();
+	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 
 	renderer.label = "ParamsPanelRenderer";
 	renderer.full_screen = false;

@@ -2,45 +2,45 @@ ComputeControllerCollection :: struct {
 	controllers: [..]*ComputeController;
 }
 
-compute_controller_collection_create :: (wgpu_context: *WGPUContext, mesh:*Mesh) -> ComputeControllerCollection {
+compute_controller_collection_create :: (wgpuContext: *WGPUContext, mesh:*Mesh) -> ComputeControllerCollection {
 	ccc :ComputeControllerCollection;
 
 	points_count:u64=xx mesh.geometry.attributes.position.values.count;
 	index_count:u64=xx mesh.geometry.indices.count;
-	position_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position_in");
-	normal_in := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_in");
-	index_in := wgpu_buffer_for_compute(wgpu_context, index_count * size_of(VertexIndex), "index_in");
-	position_out := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "position_out");
-	normal_tmp := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_tmp");
-	normal_out := wgpu_buffer_for_compute(wgpu_context, points_count * size_of(Vector3), "normal_out");
+	position_in := wgpu_buffer_for_compute(wgpuContext, points_count * size_of(Vector3), "position_in");
+	normal_in := wgpu_buffer_for_compute(wgpuContext, points_count * size_of(Vector3), "normal_in");
+	index_in := wgpu_buffer_for_compute(wgpuContext, index_count * size_of(VertexIndex), "index_in");
+	position_out := wgpu_buffer_for_compute(wgpuContext, points_count * size_of(Vector3), "position_out");
+	normal_tmp := wgpu_buffer_for_compute(wgpuContext, points_count * size_of(Vector3), "normal_tmp");
+	normal_out := wgpu_buffer_for_compute(wgpuContext, points_count * size_of(Vector3), "normal_out");
 
 	{
 		controller := newComputeController(ComputeControllerNoise);
-		computeControllerInit( controller, wgpu_context );
+		computeControllerInit( controller, wgpuContext );
 		computeControllerSetBuffers( controller, *position_in, *normal_in, *position_out );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerAttributeSet);
-		computeControllerInit( controller, wgpu_context );
+		computeControllerInit( controller, wgpuContext );
 		computeControllerSetBuffers( controller, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerComputeNormals);
-		computeControllerInit( controller, wgpu_context );
+		computeControllerInit( controller, wgpuContext );
 		computeControllerSetBuffers( controller, *position_out, *index_in, *normal_tmp );
 		array_add(*ccc.controllers, controller);
 	}
 	{
 		controller := newComputeController(ComputeControllerAttributeNormalize);
-		computeControllerInit( controller, wgpu_context );
+		computeControllerInit( controller, wgpuContext );
 		computeControllerSetBuffers( controller, *normal_tmp, *normal_out );
 		array_add(*ccc.controllers, controller);
 	}
 
 	// offset_controller := compute_controller_create(
-	// 	wgpu_context,
+	// 	wgpuContext,
 	// 	SHADER_COMPUTE_OFFSET,
 	// 	"geometryOffset",
 	// 	buffer_container
@@ -60,7 +60,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 
 	// 	commands_count :u64= 1;
 	// 	command_encoder := wgpuDeviceCreateCommandEncoder(
-	// 		translate_controller.wgpu_context.device,
+	// 		translate_controller.wgpuContext.device,
 	// 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder pipeline_controller_update"}),
 	// 	);
 	// 	defer wgpuCommandEncoderRelease(command_encoder);
@@ -71,7 +71,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 
 	// 	command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer pipeline_controller_update"}));
 	// 	defer wgpuCommandBufferRelease(command_buffer);
-	// 	wgpuQueueSubmit(translate_controller.wgpu_context.queue, commands_count, *command_buffer);
+	// 	wgpuQueueSubmit(translate_controller.wgpuContext.queue, commands_count, *command_buffer);
 	// }
 
 	// {
@@ -80,7 +80,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 
 	// 	commands_count :u64= 1;
 	// 	command_encoder := wgpuDeviceCreateCommandEncoder(
-	// 		controller.wgpu_context.device,
+	// 		controller.wgpuContext.device,
 	// 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder pipeline_controller_update"}),
 	// 	);
 	// 	defer wgpuCommandEncoderRelease(command_encoder);
@@ -92,7 +92,7 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 
 	// 	command_buffer := wgpuCommandEncoderFinish(command_encoder, *(WGPUCommandBufferDescriptor.{label = "Cmd Buffer pipeline_controller_update"}));
 	// 	defer wgpuCommandBufferRelease(command_buffer);
-	// 	wgpuQueueSubmit(controller.wgpu_context.queue, commands_count, *command_buffer);
+	// 	wgpuQueueSubmit(controller.wgpuContext.queue, commands_count, *command_buffer);
 	// }
 
 	{
@@ -106,8 +106,8 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 		controller_normals := cast(*ComputeControllerComputeNormals) ccc.controllers[2];
 		controller_attribute_normalize := cast(*ComputeControllerAttributeNormalize) ccc.controllers[3];
 
-		device := controller_noise.wgpu_context.device;
-		queue := controller_noise.wgpu_context.queue;
+		device := controller_noise.wgpuContext.device;
+		queue := controller_noise.wgpuContext.queue;
 
 		commands_count :u64= 1;
 		command_encoder := wgpuDeviceCreateCommandEncoder(
@@ -150,11 +150,11 @@ pipeline_controller_update :: (pc: *PipelineController, ccc: *ComputeControllerC
 compute_controller_collection_compute :: (ccc: *ComputeControllerCollection) {
 	// compute_controller_update_buffer(ccc.controllers[0], scene_data);
 	// compute_controller_update_buffer(*ccc.controllers[1], *SCENE_DATA.offset);
-	if(ccc.controllers.count == 0)return;
+	if(ccc.controllers.count == 0) return;
 
 	first_controller := ccc.controllers[0];
-	device := first_controller.wgpu_context.device;
-	queue := first_controller.wgpu_context.queue;
+	device := first_controller.wgpuContext.device;
+	queue := first_controller.wgpuContext.queue;
 
 	commands_count :u64= 1;
 	command_encoder := wgpuDeviceCreateCommandEncoder(

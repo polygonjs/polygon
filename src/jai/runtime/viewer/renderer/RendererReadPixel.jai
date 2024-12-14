@@ -18,10 +18,10 @@ READ_PIXEL_BUFFER_DESC :: WGPUBufferDescriptor.{
 };
 createPixelReadbackResources :: (renderer: *Renderer)->bool {
 
-	device := WGPU_CONTEXT.device;
+	device := renderer.wgpuContext.device;
 
-	assert(WGPU_CONTEXT.preferred_texture_format != WGPUTextureFormat.Undefined, "preferred_texture_format is undefined");
-	assert(cast(*void)WGPU_CONTEXT.preferred_texture_format != null, "preferred_texture_format is null");
+	assert(renderer.wgpuContext.preferred_texture_format != WGPUTextureFormat.Undefined, "preferred_texture_format is undefined");
+	assert(cast(*void)renderer.wgpuContext.preferred_texture_format != null, "preferred_texture_format is null");
 
 	rtSize := rendererTargetSize(renderer);
 	if rtSize.x<=1 || rtSize.y<=1 {
@@ -36,7 +36,7 @@ createPixelReadbackResources :: (renderer: *Renderer)->bool {
 		using READ_PIXEL_TEXTURE_DESC;
 		size.width = xx rtSize.x;
 		size.height = xx rtSize.y;
-		format = rendererFormat(renderer);//.RGBA32Uint; // WGPU_CONTEXT.preferred_texture_format;
+		format = rendererFormat(renderer);//.RGBA32Uint; // renderer.wgpuContext.preferred_texture_format;
 		usage = xx (WGPUTextureUsage.RenderAttachment | WGPUTextureUsage.CopySrc);
 		dimension = WGPUTextureDimension._2D;
 		mipLevelCount = 1;
@@ -60,7 +60,7 @@ rendererReadPixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vec
 
 	// create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
-	device := WGPU_CONTEXT.device;
+	device := renderer.wgpuContext.device;
 	colorAttachment := WGPURenderPassColorAttachment.{
 		view = renderer.readback_view,
 		loadOp = ifx renderer.clear then WGPULoadOp.Clear else WGPULoadOp.Load,
@@ -125,7 +125,7 @@ rendererReadPixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vec
 
 	cmdBufferDesc := WGPUCommandBufferDescriptor.{label = "read pixel encoder"};
 	cmd_buffer := wgpuCommandEncoderFinish(cmd_encoder, *cmdBufferDesc);
-	wgpuQueueSubmit(WGPU_CONTEXT.queue, 1, *cmd_buffer);
+	wgpuQueueSubmit(renderer.wgpuContext.queue, 1, *cmd_buffer);
 
 	wgpuBufferMapAsync(renderer.readback_buffer, xx WGPUMapMode.Read, 0, READ_DATA_SIZE, wgpu_render_pixel_async_callback, renderer);
 	WAITING_FOR_BUFFER_MAPPED_STATE = true;
@@ -141,7 +141,7 @@ readPixelIfMapped :: (renderer: *Renderer, eventsData: *EventsData) -> (buffer_r
 	if WAITING_FOR_BUFFER_MAPPED_STATE == false {
 		return false, .[0,0,0,0];
 	}
-	device := WGPU_CONTEXT.device;
+	device := renderer.wgpuContext.device;
 
 	#if WASM {
 		if wgpuBufferGetMapState(renderer.readback_buffer) == .Mapped {

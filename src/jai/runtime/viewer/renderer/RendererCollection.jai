@@ -3,13 +3,13 @@ RenderCollectionData :: struct {
 	frame: WGPUTextureView;
 }
 
-rendererCollectionStart :: (wgpu_context:*WGPUContext) -> RenderCollectionData {
-	frame := wgpu_surface_create_current_view( wgpu_context );
+rendererCollectionStart :: (wgpuContext:*WGPUContext) -> RenderCollectionData {
+	frame := wgpu_surface_create_current_view( wgpuContext );
 
 	#if WASM {
-		queue := wgpu_context.queue;
+		queue := wgpuContext.queue;
 	} else {
-		queue := wgpuDeviceGetQueue(wgpu_context.device);
+		queue := wgpuDeviceGetQueue(wgpuContext.device);
 		assert(queue != null, "Queue is not created correctly");
 	}
 
@@ -18,15 +18,15 @@ rendererCollectionStart :: (wgpu_context:*WGPUContext) -> RenderCollectionData {
 }
 
 
-rendererCollectionEnd :: (wgpu_context:*WGPUContext, data: RenderCollectionData) {
+rendererCollectionEnd :: (wgpuContext:*WGPUContext, data: RenderCollectionData) {
 	defer wgpuTextureViewRelease(data.frame);
 
 	#if WASM {
-		wgpuTextureRelease(wgpu_context.surface_texture.texture);
+		wgpuTextureRelease(wgpuContext.surface_texture.texture);
 	} else {
-		if wgpu_context.mode != .HEADLESS {
-			wgpuSurfacePresent(wgpu_context.surface);
-			wgpuTextureRelease(wgpu_context.surface_texture.texture);
+		if wgpuContext.mode != .HEADLESS {
+			wgpuSurfacePresent(wgpuContext.surface);
+			wgpuTextureRelease(wgpuContext.surface_texture.texture);
 		}
 	}
 

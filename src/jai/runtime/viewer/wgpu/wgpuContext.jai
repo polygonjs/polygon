@@ -17,4 +17,5 @@ WGPUContext :: struct {
 		adapter: WGPUAdapter; // only useful to keep around when releasing it
 		config: WGPUSurfaceConfiguration;
 	}
+	windowSize: Vector2UInt;
 };

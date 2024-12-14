@@ -1,13 +1,13 @@
 
 
-editorStart :: (editor: *Editor, window_size :Vector2UInt) {
-	current_window_size :Vector2UInt = window_size;
+editorStart :: (editor: *Editor) {
+	assert(editor.wgpuContext.windowSize.x > 0, "editor.wgpuContext.windowSize.x is zero");
+	assert(editor.wgpuContext.windowSize.y > 0, "editor.wgpuContext.windowSize.y is zero");
+	assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
+	assert(editor.wgpuContext.queue != null, "editor.wgpuContext.device is null");
 
 	#if USE_WGPU {
 		drawDataInit(editor);
-	}
-	#if USE_IMGUI {
-		io := ImGui.GetIO();
 	}
 
 	while editor.exitRequested==false {
@@ -28,16 +28,16 @@ editorStart :: (editor: *Editor, window_size :Vector2UInt) {
 						new_width := sdl_event.window.data1;
 						new_height := sdl_event.window.data2;
 						if(new_width > 0 && new_height > 0){
-							current_window_size = .{xx new_width, xx new_height};
+							newWindowSize :Vector2UInt= .{xx new_width, xx new_height};
 							#if USE_WGPU {
-								renderer_resize_native(current_window_size);
+								wgpuContextResize(*editor.wgpuContext, newWindowSize);
 							}
 						}
 					}
 				}
 				case SDL_KEYDOWN; {
 					#if USE_IMGUI {
-						if(io.WantCaptureKeyboard == false){
+						if(ImGui.GetIO().WantCaptureKeyboard == false){
 							if sdl_event.key.keysym.sym == SDLK_ESCAPE {
 								editor.exitRequested = true;
 							}
@@ -52,28 +52,28 @@ editorStart :: (editor: *Editor, window_size :Vector2UInt) {
 		}
 
 		// editor.exitRequested = true;
-		editorOnTick(editor, xx to_microseconds(time), current_window_size.x, current_window_size.y);
+		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.windowSize.x, editor.wgpuContext.windowSize.y);
 
 	}
 	editorDelete(editor);
 }
 
-windowInit :: (editor: *Editor)->Vector2UInt {
+windowInit :: (editor: *Editor) {
 	SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
-	current_window_size :Vector2UInt = .{1280, 720};
+	currentWindowSize :Vector2UInt = .{1280, 720};
 
 	display_mode: SDL_DisplayMode;
 	get_display_mode_result := SDL_GetDesktopDisplayMode(0, *display_mode);
 	if(get_display_mode_result == 0){
 		display_name :string= to_string(SDL_GetDisplayName(0));
-		current_window_size = .{xx display_mode.w, xx display_mode.h};
+		currentWindowSize = .{xx display_mode.w, xx display_mode.h};
 	}
 
 	window:*SDL_Window = SDL_CreateWindow("Polygon",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
-		xx current_window_size.x,
-		xx current_window_size.y,
+		xx currentWindowSize.x,
+		xx currentWindowSize.y,
 		SDL_WINDOW_ALLOW_HIGHDPI
 		|SDL_WINDOW_RESIZABLE
 		|SDL_WINDOW_MAXIMIZED
@@ -86,10 +86,10 @@ windowInit :: (editor: *Editor)->Vector2UInt {
 	// 	SDL_SetWindowFullscreen(*window, xx SDL_WINDOW_RESIZABLE);
 	// }
 	#if USE_IMGUI {
-		editor.imguiContext.windowContext.window = window;
+		editor.imguiPolygonContext.windowContext.window = window;
+		imguiPolygonContextInit(*editor.imguiPolygonContext);
 
-		imgui_context := ImGui.CreateContext();
-		sdl_init_success := ImGui_ImplSdl_Init(window);
+		sdl_init_success := ImGui_ImplSdl_Init(*editor.imguiPolygonContext, window);
 		assert(sdl_init_success, "ImGui_ImplSdl_Init returns false");
 		// imgui_style := ImGui.GetStyle(); // ImGuiStyle
 		// imgui_style.AntiAliasedLinesUseTex = false;
@@ -100,15 +100,14 @@ windowInit :: (editor: *Editor)->Vector2UInt {
 	wgpuSetLogLevel(.Error); //(.Warn);
 
 	#if USE_WGPU {
-		renderer_init_native(window, current_window_size);
+		wgpuContextInitIfAllowed(*editor.wgpuContext, window, currentWindowSize);
 	}
 
-	return current_window_size;
 }
-headlessInit :: ()->Vector2UInt {
-	current_window_size := Vector2UInt.{4, 4};
-	renderer_init_native_headless(current_window_size);
-	return current_window_size;
+headlessInit :: (wgpuContext: *WGPUContext, windowSize: Vector2UInt) {
+	// currentWindowSize := Vector2UInt.{4, 4};
+	wgpuContextInitHeadless(wgpuContext, windowSize);
+	// return currentWindowSize;
 }
 
 #scope_file

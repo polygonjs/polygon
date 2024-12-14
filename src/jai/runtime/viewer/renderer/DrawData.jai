@@ -6,7 +6,7 @@ MeshDrawData :: struct {
 
 newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 	renderer := pc.renderer;
-	wgpu_context := renderer.wgpu_context;
+	wgpuContext := renderer.wgpuContext;
 	drawData :*MeshDrawData = New(MeshDrawData,, renderer.allocator);
 	push_allocator(pc.renderer.allocator);
 	array_init(*drawData.vertex);
@@ -14,36 +14,36 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 	{
 		using mesh.geometry.attributes;
 		// if pc.compute_shader_controllers.count > 0 {
-		// 	// buffer_container := wgpu_geometry_attribute_to_buffer(wgpu_context, *mesh.geometry.attributes.position, Vector3);
-		// 	buffer_container := wgpu_buffer_from_geometry_attribute(wgpu_context, *attributes.position, Vector3, compute=true);
+		// 	// buffer_container := wgpu_geometry_attribute_to_buffer(wgpuContext, *mesh.geometry.attributes.position, Vector3);
+		// 	buffer_container := wgpu_buffer_from_geometry_attribute(wgpuContext, *attributes.position, Vector3, compute=true);
 		// 	for pc.compute_shader_controllers {
 
 		// 		box_controller = compute_shader_controller_create(
-		// 			wgpu_context,
+		// 			wgpuContext,
 		// 			SHADER_COMPUTE_BOX,
 		// 			"boxCompute",
 		// 			buffer_container
 		// 		);
 
 		// 		offset_controller = compute_shader_controller_create(
-		// 			wgpu_context,
+		// 			wgpuContext,
 		// 			SHADER_COMPUTE_OFFSET,
 		// 			"boxOffsetCompute",
 		// 			buffer_container
 		// 		);
 		// 	}
 		// } else {
-			array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *position, Vector3, "position"));
+			array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *position, Vector3, "position"));
 		// }
-		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *normal, Vector3, "normal"));
-		// array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *color, Vector3, "color"));
-		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpu_context, *uv, Vector2, "uv"));
+		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *normal, Vector3, "normal"));
+		// array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *color, Vector3, "color"));
+		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *uv, Vector2, "uv"));
 	}
 
 	{
 		using drawData.index;
 		buffer,
-		buffer_size = wgpu_index_array_to_buffer(wgpu_context, mesh.geometry.indices);
+		buffer_size = wgpu_index_array_to_buffer(wgpuContext, mesh.geometry.indices);
 	}
 
 	{
@@ -52,13 +52,13 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 			using object;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer(wgpu_context, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformable_uniforms, "object");
+			bind_group_entries = wgpu_uniform_to_buffer(wgpuContext, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformable_uniforms, "object");
 		}
 		{
 			using material;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer_with_size(wgpu_context, pc.pipeline, xx UniformBindingIndex.MATERIAL, *pc.material.uniforms, pc.material.uniformTypeSize, "material");
+			bind_group_entries = wgpu_uniform_to_buffer_with_size(wgpuContext, pc.pipeline, xx UniformBindingIndex.MATERIAL, *pc.material.uniforms, pc.material.uniformTypeSize, "material");
 		}
 	}
 
@@ -69,7 +69,7 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 
 draw_data_update :: (pc: *PipelineController, using draw_data: *MeshDrawData, mesh: *Mesh) {
 	// TODO: this is a duplication with the create function, refactor
-	queue := pc.renderer.wgpu_context.queue;
+	queue := pc.renderer.wgpuContext.queue;
 	{
 		using mesh.geometry.attributes;
 		{
@@ -82,7 +82,7 @@ draw_data_update :: (pc: *PipelineController, using draw_data: *MeshDrawData, me
 		}
 		{
 			// container := draw_data.vertex[2];
-			// wgpuQueueWriteBuffer(pc.wgpu_context.queue, container.buffer, 0, color.values.data, container.buffer_size);
+			// wgpuQueueWriteBuffer(pc.wgpuContext.queue, container.buffer, 0, color.values.data, container.buffer_size);
 		}
 		{
 			container := vertex[2];

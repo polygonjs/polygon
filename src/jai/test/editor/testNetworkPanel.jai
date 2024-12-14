@@ -9,6 +9,7 @@ testNetworkPanel :: () {
 		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
 
 		editor := newEditor();
+		editorInit(editor, ensureWGPUContextValid=false);
 		editorSetScene(editor, nodesScene);
 		assertNotNull(editor.networkPanel.sceneWorld);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertNotNull(editor.networkPanel.sceneRaycast);
@@ -85,7 +86,7 @@ testNetworkPanel :: () {
 			}
 		};
 
-		editorStart(editor, options.window_size);
+		editorStart(editor);
 		// sceneDelete(nodesScene);
 		// assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});

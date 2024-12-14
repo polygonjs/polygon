@@ -60,7 +60,7 @@ compute_controller_translate_set_buffer :: (controller: *CONTROLLER_TYPE, positi
 			entryCount = xx bind_group_vertex_entries.count,
 			entries = bind_group_vertex_entries.data
 		};
-		controller.bind_group.attributes = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
+		controller.bind_group.attributes = wgpuDeviceCreateBindGroup(controller.wgpuContext.device, *bind_group_descriptor);
 	}
 }
 
@@ -76,7 +76,7 @@ setBindGroup :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComput
 handleMappedBuffers :: (controller: *CONTROLLER_TYPE) {
 	#if MAP_BUFFER {
 		wgpuBufferMapAsync(controller.attributesMapped.position, xx WGPUMapMode.Read, 0, controller.attributes.position.buffer_size, wgpu_compute_buffer_map_async_callback, null);
-		wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
+		wgpuDevicePoll(controller.wgpuContext.device, xx true, null);
 		// result_values := /*cast(ResultType)*/ 
 		wgpuBufferGetMappedRange(controller.attributesMapped.position, 0, controller.attributes.position.buffer_size);
 
@@ -95,7 +95,7 @@ updateBuffer :: (controller:*CONTROLLER_TYPE, params:*TranslateComputeController
 	{
 		// size_float: [3]float = .[scene_data.translate.x, scene_data.translate.y, scene_data.translate.z];
 		// print("size_float:%\n",scene_data.translate.x);
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.translate.buffer, 0, *params.translate, controller.params.translate.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpuContext.queue, controller.params.translate.buffer, 0, *params.translate, controller.params.translate.buffer_size);
 	}
 };
 
@@ -111,10 +111,10 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "translate.wgsl"; };
 
 
-computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext) {
+computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpuContext: *WGPUContext) {
 	compute_controller_init(
 		controller = controller,
-		wgpu_context = wgpu_context,
+		wgpuContext = wgpuContext,
 		shader = SHADER_RAW,
 		entry_point = SHADER_ENTRY_POINT,
 		// methods = .{
@@ -129,7 +129,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 
 	// controller.attributes.position = buffer_container;
 	#if MAP_BUFFER {
-		controller.attributesMapped.position = wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
+		controller.attributesMapped.position = wgpuDeviceCreateBuffer(wgpuContext.device, *(WGPUBufferDescriptor.{
 			label = "vertex buffer",
 			usage = xx (WGPUBufferUsage.MapRead | WGPUBufferUsage.CopyDst),
 			size = controller.attributes.position_in.buffer_size
@@ -146,7 +146,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 	// input and output
 	//
 	//
-	translate_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
+	translate_buffer := wgpuDeviceCreateBuffer(wgpuContext.device,*(WGPUBufferDescriptor.{
 		label = "translate",
 		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
 		size = translate_buffer_size
@@ -173,7 +173,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 			entryCount = xx bind_group_params_entries.count,
 			entries = bind_group_params_entries.data
 		};
-		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
+		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(wgpuContext.device, *bind_group_descriptor);
 	}
 
 	// controller.update_buffer(controller, scene);

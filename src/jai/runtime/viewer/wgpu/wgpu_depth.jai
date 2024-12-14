@@ -41,7 +41,7 @@ wgpu_update_pipeline_descriptor_depth :: (renderer:*Renderer, pipeline_descripto
 
 
 create_depth_texture_if_needed :: ( renderer: *Renderer ) {
-	assert(renderer.wgpu_context!=null, "renderer.wgpu_context is null\n");
+	assert(renderer.wgpuContext!=null, "renderer.wgpuContext is null\n");
 	size := rendererTargetSize(renderer);
 
 	if( renderer.depth_texture != null) {
@@ -76,7 +76,7 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 		viewFormatCount = viewFormats.count,
 		viewFormats = viewFormats.data,
 	};
-	renderer.depth_texture = wgpuDeviceCreateTexture(renderer.wgpu_context.device, *texture_descriptor);
+	renderer.depth_texture = wgpuDeviceCreateTexture(renderer.wgpuContext.device, *texture_descriptor);
 
 	renderer.depth_texture_view = wgpuTextureCreateView(renderer.depth_texture, *depth_texture_view_descriptor);
 	renderer.depth_texture_stencil_attachment = WGPURenderPassDepthStencilAttachment.{

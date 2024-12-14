@@ -106,8 +106,43 @@ ImGui_WGPU_Common :: struct {
 	draw: ImGui_WGPU_Common_Draw;
 }
 
-Imgui_Context :: struct {
+ImguiPolygonContext :: struct {
 	windowContext:WindowContext;
 	bd:ImGui_ImplWGPU_Data;
 	iwc:ImGui_WGPU_Common;
+	imguiContext :*ImGuiContext=null;
+	io: *ImGuiIO=null;
+	wgpuInitialized:bool=false;
+}
+
+imguiPolygonContextInit :: (imguiPolygonContext: *ImguiPolygonContext) {
+	if(imguiPolygonContext.io != null){
+		return;
+	}
+	
+	#if WASM {
+		imguiPolygonContext.imguiContext = ImGui.CreateContext(null);
+		imguiPolygonContext.io = ImGui.GetIO();
+		assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
+		imguiPolygonContext.io.IniFilename = null;
+		ImGui_ImplWasm_Init(imguiPolygonContext);
+	} else {
+		imguiPolygonContext.imguiContext = ImGui.CreateContext();
+		imguiPolygonContext.io = ImGui.GetIO();
+	}
+	
+}
+imguiPolygonContextWGPUInit :: (imguiPolygonContext: *ImguiPolygonContext, wgpuContext: *WGPUContext, useDepthBuffer:bool) {
+	if(imguiPolygonContext.wgpuInitialized){
+		return;
+	}
+	imguiPolygonContext.bd.wgpuDevice = wgpuContext.device;
+	imguiInitInfo := ImGui_ImplWGPU_InitInfo.{
+		// Device = wgpuContext.device,
+		NumFramesInFlight = 3,
+		RenderTargetFormat = wgpuContext.preferred_texture_format,
+		DepthStencilFormat = ifx useDepthBuffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
+	};
+	ImGui_ImplWGPU_Init(imguiPolygonContext, imguiInitInfo);
+	imguiPolygonContext.wgpuInitialized = true;
 }

@@ -1,16 +1,16 @@
 wgpu_uniform_to_buffer :: (
-	wgpu_context: *WGPUContext,
+	wgpuContext: *WGPUContext,
 	pipeline: WGPURenderPipeline,
 	bind_group_layout_index: u32,
 	uniforms: $UniformType,
 	label: string
 ) -> WGPUBuffer, WGPUBindGroup, []WGPUBindGroupEntry {
-	buffer, bind_group, entries := wgpu_uniform_to_buffer_with_size(wgpu_context, pipeline, bind_group_layout_index, *uniforms, size_of(UniformType), label);
+	buffer, bind_group, entries := wgpu_uniform_to_buffer_with_size(wgpuContext, pipeline, bind_group_layout_index, *uniforms, size_of(UniformType), label);
 	return buffer, bind_group, entries;
 }
 
 wgpu_uniform_to_buffer_with_size :: (
-	wgpu_context: *WGPUContext,
+	wgpuContext: *WGPUContext,
 	pipeline: WGPURenderPipeline,
 	bind_group_layout_index: u32,
 	uniforms: *void,
@@ -27,10 +27,10 @@ wgpu_uniform_to_buffer_with_size :: (
 		size = size,
 		label = buffer_label,
 	};
-	buffer := wgpuDeviceCreateBuffer(wgpu_context.device, *buffer_desc);
+	buffer := wgpuDeviceCreateBuffer(wgpuContext.device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	wgpuQueueWriteBuffer(wgpu_context.queue, buffer, 0, uniforms, size);
+	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, uniforms, size);
 
 	entries := NewArray(1, WGPUBindGroupEntry,, temp);
 	entries[0] = WGPUBindGroupEntry.{
@@ -48,7 +48,7 @@ wgpu_uniform_to_buffer_with_size :: (
 		entryCount = xx entries.count,
 		entries = entries.data
 	};
-	bind_group := wgpuDeviceCreateBindGroup(wgpu_context.device, *bind_group_descriptor);
+	bind_group := wgpuDeviceCreateBindGroup(wgpuContext.device, *bind_group_descriptor);
 
 	return buffer, bind_group, entries;
 }

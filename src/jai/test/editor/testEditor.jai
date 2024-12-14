@@ -6,7 +6,7 @@ testEditor :: () {
 			}
 		};
 
-		editorStart(editor, options.window_size);
+		editorStart(editor);
 	});
 
 	testHeadless("Editor with minimal scene", (using options:TestProcedureOptions) {
@@ -33,6 +33,6 @@ testEditor :: () {
 			}
 		};
 
-		editorStart(editor, window_size);
+		editorStart(editor);
 	});
 }

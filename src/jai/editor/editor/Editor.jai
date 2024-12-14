@@ -14,7 +14,10 @@ Editor :: struct {
 	eventsData:EventsData;
 
 	#if USE_IMGUI {
-		imguiContext: Imgui_Context;
+		imguiPolygonContext: ImguiPolygonContext;
+	}
+	#if USE_WGPU {
+		wgpuContext: WGPUContext;
 	}
 
 	windowSize: Vector2UInt64;
@@ -35,17 +38,21 @@ Editor :: struct {
 newEditor :: ()->*Editor {
 	editor := New(Editor);
 	allocatorAssign(editor);
-	editorInit(editor);
+	// editorInit(editor);
 	return editor;
 }
-editorInit :: (editor: *Editor) {
+editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
+	#if ensureWGPUContextValid {
+		assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
+		assert(editor.wgpuContext.queue != null, "editor.wgpuContext.queue is null");
+	}
 	array_init(*editor.sceneUiData.nodePositions,, editor.allocator);
 	array_init(*editor.sceneUiData.selectedNodeIds,, editor.allocator);
 	editorCommandsSetAllocator(editor);
 
-	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor);
-	#if HAS_NETWORK_PANEL editor.networkPanel = newNetworkPanel(editor);
-	editor.paramsPanel = newParamsPanel(editor);
+	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor, ensureWGPUContextValid);
+	#if HAS_NETWORK_PANEL editor.networkPanel = newNetworkPanel(editor, ensureWGPUContextValid);
+	editor.paramsPanel = newParamsPanel(editor, ensureWGPUContextValid);
 }
 
 

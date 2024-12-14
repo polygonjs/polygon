@@ -25,10 +25,10 @@ NetworkPanel :: struct {
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast: *Renderer;
 }
 
-newNetworkPanel :: (editor: *Editor) -> *TYPE {
+newNetworkPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
 	panel: *TYPE = New(TYPE);
 
-	networkPanelInit(panel, editor);
+	networkPanelInit(panel, editor, ensureWGPUContextValid);
 
 	return panel;
 }
@@ -43,14 +43,14 @@ MATERIAL_BASIC :: MeshBasicMaterial;
 
 
 
-networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
+networkPanelInit :: (panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	allocatorAssign(panel);
 
 
 	using panel;
 
 	{
-		rendererColor = newRenderer();
+		rendererColor = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 		rendererColor.label = "NetworkPanelRendererColor";
 		rendererColor.full_screen = false;
 		rendererColor.viewport = .{
@@ -64,7 +64,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor) {
 		rendererColor.clear = false;
 	}
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
-		rendererRaycast = newRenderer();
+		rendererRaycast = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 		rendererRaycast.label = "NetworkPanelRendererRaycast";
 		rendererRaycast.full_screen = false;
 		rendererRaycast.viewport = .{

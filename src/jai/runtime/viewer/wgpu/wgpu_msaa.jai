@@ -17,10 +17,10 @@ wgpu_update_pipeline_descriptor_multisample :: (renderer: *Renderer, pipeline_de
 }
 
 create_multi_sample_texture_if_needed :: ( renderer: *Renderer )  {
-	assert(renderer.wgpu_context!=null, "renderer.wgpu_context is null\n");
+	assert(renderer.wgpuContext!=null, "renderer.wgpuContext is null\n");
 	size := rendererTargetSize(renderer);
-	// width := wgpu_texture_get_width_surface(renderer.wgpu_context);
-	// height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+	// width := wgpu_texture_get_width_surface(renderer.wgpuContext);
+	// height := wgpu_texture_get_height_surface(renderer.wgpuContext);
 	// size := renderer_size(renderer);
 
 	if( renderer.multisample_texture != null){
@@ -43,13 +43,13 @@ create_multi_sample_texture_if_needed :: ( renderer: *Renderer )  {
 		depthOrArrayLayers = 1
 	};
 	texture_descriptor.sampleCount = MULTISAMPLE_SAMPLES_COUNT;
-	texture_descriptor.format = renderer.wgpu_context.preferred_texture_format;
+	texture_descriptor.format = renderer.wgpuContext.preferred_texture_format;
 	texture_descriptor.usage = xx WGPUTextureUsage.RenderAttachment;
 	texture_descriptor.dimension = WGPUTextureDimension._2D;
 	texture_descriptor.mipLevelCount = 1;
-	renderer.multisample_texture = wgpuDeviceCreateTexture(renderer.wgpu_context.device, texture_descriptor);
+	renderer.multisample_texture = wgpuDeviceCreateTexture(renderer.wgpuContext.device, texture_descriptor);
 
-	multisample_texture_view_descriptor.format = renderer.wgpu_context.preferred_texture_format;
+	multisample_texture_view_descriptor.format = renderer.wgpuContext.preferred_texture_format;
 	multisample_texture_view_descriptor.dimension = WGPUTextureViewDimension._2D;
 	renderer.multisample_texture_view = wgpuTextureCreateView(renderer.multisample_texture, *multisample_texture_view_descriptor);
 }
@@ -72,7 +72,7 @@ update_render_pass_descriptor_multisample :: (
 	frame: *WGPUTextureView
 ) #expand {
 	if( renderer.use_msaa == true){
-		// wgpu_context := renderer.wgpu_context;
+		// wgpuContext := renderer.wgpuContext;
 		// if(colorAttachment.view){
 		// 	wgpuTextureViewRelease((<<colorAttachment).view);
 		// }

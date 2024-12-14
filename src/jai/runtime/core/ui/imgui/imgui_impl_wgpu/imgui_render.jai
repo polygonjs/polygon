@@ -85,7 +85,9 @@ ImGui_ImplWGPU_SetupRenderState :: (bd:*ImGui_ImplWGPU_Data, draw_data: *ImDrawD
 
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-ImGui_ImplWGPU_RenderDrawData :: (bd:*ImGui_ImplWGPU_Data, iwc_draw:*ImGui_WGPU_Common_Draw, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
+ImGui_ImplWGPU_RenderDrawData :: (imguiPolygonContext: *ImguiPolygonContext, draw_data:*ImDrawData, pass_encoder: WGPURenderPassEncoder) {
+	bd:*ImGui_ImplWGPU_Data=*imguiPolygonContext.bd;
+	iwc_draw:*ImGui_WGPU_Common_Draw =*imguiPolygonContext.iwc.draw;
 	// print("ImGui_ImplWGPU_RenderDrawData: quick return\n");
 	// if(1+1)return;
 	// print_yellow("ImGui_ImplWGPU_RenderDrawData START\n");

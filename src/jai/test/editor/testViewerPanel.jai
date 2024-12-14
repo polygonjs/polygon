@@ -10,6 +10,8 @@ testViewerPanel :: () {
 		paramSetValue(*output1.p.input, xx 0);
 
 		editor := newEditor();
+		editor.wgpuContext = options.headlessWGPUContext;
+		editorInit(editor, ensureWGPUContextValid=false);
 		editorSetScene(editor, nodesScene);
 
 
@@ -27,7 +29,7 @@ testViewerPanel :: () {
 			}
 		};
 
-		editorStart(editor, options.window_size);
+		editorStart(editor);
 		sceneDelete(nodesScene);
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 	});

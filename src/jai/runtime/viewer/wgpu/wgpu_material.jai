@@ -3,15 +3,15 @@ BindGroupLayoutDescContainer :: struct {
 	// bind_group_layout_descs: []WGPUBindGroupLayoutDescriptor;
 }
 
-material_create_module :: (wgpu_context: *WGPUContext, material: *Material)-> WGPUShaderModule {
-	return wgpu_create_shader_module(wgpu_context.device, material.shader, xx tprint("% Shader", material.name));
+material_create_module :: (wgpuContext: *WGPUContext, material: *Material)-> WGPUShaderModule {
+	return wgpu_create_shader_module(wgpuContext.device, material.shader, xx tprint("% Shader", material.name));
 }
 
 material_bind_group_layouts_count :: (material: *Material)->u32 {
 	return 4;
 }
 
-material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_layout_descriptor: *WGPUPipelineLayoutDescriptor, material: *Material, container: *BindGroupLayoutDescContainer) {
+material_apply_to_pipeline_descriptor :: (wgpuContext: *WGPUContext, pipeline_layout_descriptor: *WGPUPipelineLayoutDescriptor, material: *Material, container: *BindGroupLayoutDescContainer) {
 	// pipeline_layout_descriptor: WGPUPipelineLayoutDescriptor;
 
 	// group 0 (scene uniforms)
@@ -24,7 +24,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "scene uniforms");
+		layout, desc := wgpu_create_bind_group_layout(wgpuContext.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "scene uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
 		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
@@ -38,7 +38,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "camera uniforms");
+		layout, desc := wgpu_create_bind_group_layout(wgpuContext.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "camera uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
 		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
@@ -52,7 +52,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 			visibility = xx WGPUShaderStage.Vertex,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "object uniforms");
+		layout, desc := wgpu_create_bind_group_layout(wgpuContext.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "object uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
 		// container.bind_group_layout_descs[groupIndex] = desc;
 	}
@@ -66,7 +66,7 @@ material_apply_to_pipeline_descriptor :: (wgpu_context: *WGPUContext, pipeline_l
 			visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
 			buffer = .{ type = WGPUBufferBindingType.Uniform },
 		};
-		layout, desc := wgpu_create_bind_group_layout(wgpu_context.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "material uniforms");
+		layout, desc := wgpu_create_bind_group_layout(wgpuContext.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "material uniforms");
 		container.bind_group_layouts[groupIndex] = layout;
 		// container.bind_group_layout_descs[groupIndex] = desc;
 	}

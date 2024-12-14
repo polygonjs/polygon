@@ -41,35 +41,36 @@ ImGui_ImplSdl_SetClipboardText :: (data: *void, text: *u8) #c_call {
 // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
 // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
 // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-ImGui_ImplSdl_ProcessEvent :: (event: *SDL_Event) -> bool {
-	io := ImGui.GetIO();
-	if event.type == {
-		// case SDL_MOUSEWHEEL;
-		// 	if event.wheel.y > 0 g_MouseWheel = 1;
-		// 	if event.wheel.y < 0 g_MouseWheel = -1;
-		// 	return true;
-		// case SDL_MOUSEBUTTONDOWN;
-		// 	if event.button.button == SDL_BUTTON_LEFT   g_MousePressed[0] = true;
-		// 	if event.button.button == SDL_BUTTON_RIGHT  g_MousePressed[1] = true;
-		// 	if event.button.button == SDL_BUTTON_MIDDLE g_MousePressed[2] = true;
-		// 	return true;
-		case SDL_TEXTINPUT;
-			// io.AddInputCharactersUTF8(io, xx event.text.text.data);
-			return true;
-		case SDL_KEYDOWN; #through;
-		case SDL_KEYUP;
-			//@@key := event.key.keysym.sym & ~SDLK_SCANCODE_MASK;
-			key := event.key.keysym.sym & (xx ~(1<<30));
-			io.KeysDown[key] = (event.type == SDL_KEYDOWN);
-			kmod := SDL_GetModState();
-			io.KeyShift = ((kmod & KMOD_SHIFT) != 0);
-			io.KeyCtrl = ((kmod & KMOD_CTRL) != 0);
-			io.KeyAlt = ((kmod & KMOD_ALT) != 0);
-			io.KeySuper = ((kmod & KMOD_GUI) != 0);
-			return true;
-	}
-	return false;
-}
+// ImGui_ImplSdl_ProcessEvent :: (imguiPolygonContext: *ImguiPolygonContext, event: *SDL_Event) -> bool {
+// 	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
+// 	io := ImGui.GetIO();
+// 	if event.type == {
+// 		// case SDL_MOUSEWHEEL;
+// 		// 	if event.wheel.y > 0 g_MouseWheel = 1;
+// 		// 	if event.wheel.y < 0 g_MouseWheel = -1;
+// 		// 	return true;
+// 		// case SDL_MOUSEBUTTONDOWN;
+// 		// 	if event.button.button == SDL_BUTTON_LEFT   g_MousePressed[0] = true;
+// 		// 	if event.button.button == SDL_BUTTON_RIGHT  g_MousePressed[1] = true;
+// 		// 	if event.button.button == SDL_BUTTON_MIDDLE g_MousePressed[2] = true;
+// 		// 	return true;
+// 		case SDL_TEXTINPUT;
+// 			// io.AddInputCharactersUTF8(io, xx event.text.text.data);
+// 			return true;
+// 		case SDL_KEYDOWN; #through;
+// 		case SDL_KEYUP;
+// 			//@@key := event.key.keysym.sym & ~SDLK_SCANCODE_MASK;
+// 			key := event.key.keysym.sym & (xx ~(1<<30));
+// 			io.KeysDown[key] = (event.type == SDL_KEYDOWN);
+// 			kmod := SDL_GetModState();
+// 			io.KeyShift = ((kmod & KMOD_SHIFT) != 0);
+// 			io.KeyCtrl = ((kmod & KMOD_CTRL) != 0);
+// 			io.KeyAlt = ((kmod & KMOD_ALT) != 0);
+// 			io.KeySuper = ((kmod & KMOD_GUI) != 0);
+// 			return true;
+// 	}
+// 	return false;
+// }
 
 
 ImGui_ImplSdl_InvalidateDeviceObjects :: () {
@@ -80,7 +81,8 @@ ImGui_ImplSdl_InvalidateDeviceObjects :: () {
 	// }
 }
 
-ImGui_ImplSdl_Init :: (window: *SDL_Window) -> bool {
+ImGui_ImplSdl_Init :: (imguiPolygonContext: *ImguiPolygonContext, window: *SDL_Window) -> bool {
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	io := ImGui.GetIO();
 	io.KeyMap[ImGuiKey.Tab] = xx SDLK_TAB;                     // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
 	io.KeyMap[ImGuiKey.LeftArrow] = xx SDL_SCANCODE_LEFT;
@@ -147,9 +149,12 @@ ImGui_ImplSdl_Shutdown :: () {
 	ImGui_ImplSdl_InvalidateDeviceObjects();
 }
 
-ImGui_ImplSdl_NewFrame :: (window: *SDL_Window, eventsData: EventsData) {
+ImGui_ImplSdl_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: EventsData) {
+	assert(imguiPolygonContext.windowContext.window != null, "imguiPolygonContext.windowContext.window is null");
+	window :*SDL_Window = imguiPolygonContext.windowContext.window;
 	// if !g_FontTexture ImGui_ImplSdl_CreateDeviceObjects();
 	
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	io := ImGui.GetIO();
 
 	// Setup display size (every frame to accommodate for window resizing)

@@ -1,4 +1,4 @@
-ImGui_ImplWGPU_GetBackendData :: ()-> *ImGui_ImplWGPU_Data {
+ImGui_ImplWGPU_GetBackendData :: (imguiPolygonContext: *ImguiPolygonContext)-> *ImGui_ImplWGPU_Data {
 	// print("-- ImGui_ImplWGPU_GetBackendData:%\n", debug_message);
 	// if (ImGui.GetCurrentContext()){
 	// 	bdpv := ImGui.GetIO().BackendRendererUserData;
@@ -9,15 +9,19 @@ ImGui_ImplWGPU_GetBackendData :: ()-> *ImGui_ImplWGPU_Data {
 	// } else {
 	// 	return null;
 	// }
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
+
 	return ifx ImGui.GetCurrentContext() then cast(*ImGui_ImplWGPU_Data) ImGui.GetIO().BackendRendererUserData else null;
 }
 
 // device: WGPUDevice, num_frames_in_flight:u64, rt_format:WGPUTextureFormat, depth_format: WGPUTextureFormat
 ImGui_ImplWGPU_Init :: (
-	bd:*ImGui_ImplWGPU_Data,
+	imguiPolygonContext: *ImguiPolygonContext,
 	info: ImGui_ImplWGPU_InitInfo
 ) -> bool {
-	io := ImGui.GetIO();
+	bd:*ImGui_ImplWGPU_Data = *imguiPolygonContext.bd;
+	io := imguiPolygonContext.io;
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	//IM_ASSERT(io.BackendRendererUserData == nullptr && "Already initialized a renderer backend!");
 	assert(io.BackendRendererUserData == null, "Already initialized a renderer backend!");
 

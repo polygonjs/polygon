@@ -17,10 +17,11 @@ ImGui_ImplWGPU_InvalidateDeviceObjects :: (bd:*ImGui_ImplWGPU_Data) {
 
 
 
-ImGui_ImplWGPU_Shutdown :: (bd:*ImGui_ImplWGPU_Data) {
+ImGui_ImplWGPU_Shutdown :: (imguiPolygonContext: *ImguiPolygonContext) {
+	bd:*ImGui_ImplWGPU_Data=*imguiPolygonContext.bd;
 	// bd := ImGui_ImplWGPU_GetBackendData();
 	assert(bd != null, "No renderer backend to shutdown, or already shutdown?");
-	io := ImGui.GetIO();
+	
 
 	ImGui_ImplWGPU_InvalidateDeviceObjects(bd);
 	// delete[] bd->pFrameResources;
@@ -34,15 +35,18 @@ ImGui_ImplWGPU_Shutdown :: (bd:*ImGui_ImplWGPU_Data) {
 	bd.numFramesInFlight = 0;
 	bd.frameIndex = U64_MAX;
 
-	io.BackendRendererName = null;
-	io.BackendRendererUserData = null;
-	io.BackendFlags &= ~ImGuiBackendFlags.RendererHasVtxOffset;
+	if(imguiPolygonContext.io != null){
+		io := ImGui.GetIO();
+		io.BackendRendererName = null;
+		io.BackendRendererUserData = null;
+		io.BackendFlags &= ~ImGuiBackendFlags.RendererHasVtxOffset;
+	}
 	// free(bd); // IM_DELETE(bd);
 }
 
-imgui_gui_free :: (imguiContext: *Imgui_Context){
+imgui_gui_free :: (imguiPolygonContext: *ImguiPolygonContext){
 	#if FREE_MEMORY {
-		array_reset(*imguiContext.iwc.draw.vertices);
-		array_reset(*imguiContext.iwc.draw.indices);
+		array_reset(*imguiPolygonContext.iwc.draw.vertices);
+		array_reset(*imguiPolygonContext.iwc.draw.indices);
 	}
 }

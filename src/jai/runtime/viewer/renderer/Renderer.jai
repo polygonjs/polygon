@@ -16,7 +16,7 @@ Renderer :: struct {
 	allocator: Allocator;
 
 	label :string;
-	wgpu_context: *WGPUContext;
+	wgpuContext: *WGPUContext;
 	
 	pipelines_by_mat_type: Table(u64, *PipelineController);
 	computes: ComputeControllerCollection;
@@ -47,7 +47,7 @@ Renderer :: struct {
 	buffers_to_destroy: [..]BufferContainer;
 }
 
-newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
+newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true, _allocator: *Allocator=null) -> *Renderer {
 	renderer := New(Renderer);
 	if _allocator == null {
 		allocatorAssign(renderer);
@@ -56,14 +56,18 @@ newRenderer :: (_allocator: *Allocator=null) -> *Renderer {
 	}
 	rendererCommandsSetAllocator(renderer);
 	array_init(*renderer.buffers_to_destroy, renderer.allocator);
-	renderer.wgpu_context = *WGPU_CONTEXT;
+	renderer.wgpuContext = wgpuContext;
+	#if ensureWGPUContextValid {
+		assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");
+		assert(renderer.wgpuContext.queue != null, "renderer.wgpuContext.queue is null");
+	}
 	return renderer;
 }
 
 rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
 	if renderer.full_screen {
-		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
-		height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+		width := wgpu_texture_get_width_surface(renderer.wgpuContext);
+		height := wgpu_texture_get_height_surface(renderer.wgpuContext);
 		return .{xx width, xx height};
 	} else {
 		return renderer.viewport.size;
@@ -83,8 +87,8 @@ rendererTargetSize :: (renderer:*Renderer) -> Vector2UInt64 {
 	if renderer.useReadback {
 		return renderer.viewport.size;
 	} else {
-		width := wgpu_texture_get_width_surface(renderer.wgpu_context);
-		height := wgpu_texture_get_height_surface(renderer.wgpu_context);
+		width := wgpu_texture_get_width_surface(renderer.wgpuContext);
+		height := wgpu_texture_get_height_surface(renderer.wgpuContext);
 		return .{xx width, xx height};
 	}
 }
@@ -92,48 +96,22 @@ rendererFormat :: (renderer:*Renderer) -> WGPUTextureFormat {
 	if renderer.useReadback {
 		return .BGRA8Unorm; // .RGBA32Uint; // could potentially work with RGBA32Float
 	} else {
-		return WGPU_CONTEXT.preferred_texture_format;
+		return renderer.wgpuContext.preferred_texture_format;
 	}
 }
 
 
-#if WASM {
-	renderer_init_wasm :: (canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQueue, preferred_texture_format: WGPUTextureFormat){
-		WGPU_CONTEXT.surface = canvas;
-		WGPU_CONTEXT.device = device;
-		WGPU_CONTEXT.queue = queue;
-		WGPU_CONTEXT.preferred_texture_format = preferred_texture_format;
-	}
-} else {
-	renderer_init_native :: (window: *SDL_Window, size: Vector2UInt){
-		assert(WGPU_CONTEXT.mode == .UNSET, "WGPU_CONTEXT.mode is not .UNSET");
-		WGPU_CONTEXT.mode = .SURFACE;
-		/*surface_capabilities := */wgpu_context_init(window, *WGPU_CONTEXT, size);
-
-		// on_wgpu_device_ready(WGPU_CONTEXT.surface, WGPU_CONTEXT.device, WGPU_CONTEXT.queue, WGPU_CONTEXT.preferred_texture_format);
-	}
-	renderer_init_native_headless :: (size: Vector2UInt){
-		assert(WGPU_CONTEXT.mode == .UNSET, "WGPU_CONTEXT.mode is not .UNSET");
-		WGPU_CONTEXT.mode = .HEADLESS;
-		surface_capabilities := wgpu_context_init(*WGPU_CONTEXT, size);
-
-		// on_wgpu_device_ready(WGPU_CONTEXT.surface, WGPU_CONTEXT.device, WGPU_CONTEXT.queue, WGPU_CONTEXT.preferred_texture_format);
-	}
-	renderer_resize_native :: (size: Vector2UInt){
-		webgpu_handle_resize(*WGPU_CONTEXT, size);
-	}
-}
 
 
 
 rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 
 	// #if WASM==true context = call_from_wasm_context;
-	// device := WGPU_CONTEXT.device;
+	// device := renderer.wgpuContext.device;
 	// #if WASM==true {
-	// 	queue := WGPU_CONTEXT.queue;
+	// 	queue := renderer.wgpuContext.queue;
 	// } else {
-	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
+	// 	queue := wgpuDeviceGetQueue(renderer.wgpuContext.device);
 	// 	assert(queue != null, "Queue is not created correctly");
 	// }
 	{
@@ -148,13 +126,13 @@ rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	// }
 	// print("rendererInitPipelines\n");
 	// for pc: renderer.pipelines_by_mat_type {
-	// 	// pipeline_controller_init(pc, renderer, *WGPU_CONTEXT, "render meshes 2");
+	// 	// pipeline_controller_init(pc, renderer, renderer.wgpuContext, "render meshes 2");
 
 	// 	compute_initialized := false;
 	// 	for mesh: pc.meshes {
 	// 		if compute_initialized==false && mesh.use_compute {
 	// 			compute_initialized=true;
-	// 			renderer.computes = compute_controller_collection_create(*WGPU_CONTEXT, scene);
+	// 			renderer.computes = compute_controller_collection_create(renderer.wgpuContext, scene);
 	// 			pipeline_controller_update(pc, *renderer.computes);
 	// 		}
 	// 	}
@@ -218,18 +196,18 @@ pipelineControllerRemoveMeshAndDeleteIfEmpty :: (renderer:*Renderer, mesh:*Mesh,
 }
 // renderer_init_pipelines_nodes :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 // 	// #if WASM==true context = call_from_wasm_context;
-// 	// device := WGPU_CONTEXT.device;
+// 	// device := renderer.wgpuContext.device;
 // 	// #if WASM==true {
-// 	// 	queue := WGPU_CONTEXT.queue;
+// 	// 	queue := renderer.wgpuContext.queue;
 // 	// } else {
-// 	// 	queue := wgpuDeviceGetQueue(WGPU_CONTEXT.device);
+// 	// 	queue := wgpuDeviceGetQueue(renderer.wgpuContext.device);
 // 	// 	assert(queue != null, "Queue is not created correctly");
 // 	// }
 // 	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
 // 	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
-// 	// pipeline_controller_init(*pipeline_controller0, *WGPU_CONTEXT, *SCENE_DATA.meshes0, "render meshes 0");
-// 	// pipeline_controller_init(*pipeline_controller1, *WGPU_CONTEXT, *SCENE_DATA.meshes1, "render meshes 1");
-// 	pipeline_controller_init(pipeline_controller, renderer, *WGPU_CONTEXT, scene, *scene.children, "render meshes 0");
+// 	// pipeline_controller_init(*pipeline_controller0, renderer.wgpuContext, *SCENE_DATA.meshes0, "render meshes 0");
+// 	// pipeline_controller_init(*pipeline_controller1, renderer.wgpuContext, *SCENE_DATA.meshes1, "render meshes 1");
+// 	pipeline_controller_init(pipeline_controller, renderer, renderer.wgpuContext, scene, *scene.children, "render meshes 0");
 // 	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller0);
 // 	// array_add(*PIPELINE_CONTROLLERS, pipeline_controller1);
 // 	array_add(*renderer.pipelines.pipelines, pipeline_controller);
@@ -240,7 +218,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	
 	create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
-	device := WGPU_CONTEXT.device;
+	device := renderer.wgpuContext.device;
 
 	colorAttachment := WGPURenderPassColorAttachment.{
 		loadOp = ifx renderer.clear then WGPULoadOp.Clear else WGPULoadOp.Load,
@@ -253,12 +231,12 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	cmdEncoderLabel := tprint("Command Encoder %", renderer.label,, temp);
 	cmdEncoderLabel_c := to_c_string_temp(cmdEncoderLabel);
 	cmd_encoder := wgpuDeviceCreateCommandEncoder(
-		WGPU_CONTEXT.device,
+		device,
 		*(WGPUCommandEncoderDescriptor.{label = cmdEncoderLabel_c}),
 	);
 	defer wgpuCommandEncoderRelease(cmd_encoder);
 
-	renderPassDescriptorLabel := tprint("Render Pass 3D %", WGPU_CONTEXT.framesCount,, temp);
+	renderPassDescriptorLabel := tprint("Render Pass 3D %", renderer.wgpuContext.framesCount,, temp);
 	renderPassDescriptorLabel_c := to_c_string_temp(renderPassDescriptorLabel);
 	// defer free(renderPassDescriptorLabel_c);
 	render_pass_descriptor := WGPURenderPassDescriptor.{
@@ -309,12 +287,12 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(it, render_pass_encoder);
 	// #if USE_IMGUI {
 	// 	if renderer.render_ui {
-	// 		gui_update(renderer, scene, render_pass_encoder, *WGPU_CONTEXT);
+	// 		gui_update(renderer, scene, render_pass_encoder, *rendererwgpuContext);
 	// 	}
 	// }
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 
-	cmd_buffer1_label := to_c_string_temp(tprint("% %", renderer.label, WGPU_CONTEXT.framesCount));
+	cmd_buffer1_label := to_c_string_temp(tprint("% %", renderer.label, renderer.wgpuContext.framesCount));
 	// defer free(cmd_buffer1_label);
 	cmd_buffer1 := wgpuCommandEncoderFinish(cmd_encoder, *(WGPUCommandBufferDescriptor.{label = cmd_buffer1_label}));
 	defer wgpuCommandBufferRelease(cmd_buffer1);

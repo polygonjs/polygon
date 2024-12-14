@@ -1,5 +1,5 @@
 
-appInit :: (nodesScene: *NodesScene, editor: *Editor) {
+appSceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	add1 := createNode(nodesScene, AddGeoNode);
 	box1 := createNode(nodesScene, BoxGeoNode);

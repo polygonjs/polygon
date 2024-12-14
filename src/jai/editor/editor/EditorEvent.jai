@@ -1,6 +1,8 @@
 processEvent :: (editor: *Editor, eventsData:*EventsData) {
 	#if USE_IMGUI {
-		if(ImGui.GetIO().WantCaptureMouse == false) processEventPanels(editor, eventsData);
+		if(editor.imguiPolygonContext.io != null){
+			if(ImGui.GetIO().WantCaptureMouse == false) processEventPanels(editor, eventsData);
+		}
 	} else {
 		processEventPanels(editor, eventsData);
 	}

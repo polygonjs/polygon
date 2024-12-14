@@ -36,10 +36,10 @@ registerComputeControllerBoxCreate :: () {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 
-computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUContext) {
+computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpuContext: *WGPUContext) {
 	compute_controller_init(
 		controller = controller,
-		wgpu_context = wgpu_context,
+		wgpuContext = wgpuContext,
 		shader = SHADER_RAW,
 		entry_point = SHADER_ENTRY_POINT,
 		// methods = .{
@@ -53,7 +53,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 
 	// controller.attributes.position = buffer_container;
 	#if MAP_BUFFER {
-		controller.attributesMapped.position = wgpuDeviceCreateBuffer(wgpu_context.device, *(WGPUBufferDescriptor.{
+		controller.attributesMapped.position = wgpuDeviceCreateBuffer(wgpuContext.device, *(WGPUBufferDescriptor.{
 			label = "vertex buffer",
 			usage = xx (WGPUBufferUsage.MapRead | WGPUBufferUsage.CopyDst),
 			size = controller.attributes.position.buffer_size
@@ -72,7 +72,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 	// input and output
 	//
 	//
-	box_size_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
+	box_size_buffer := wgpuDeviceCreateBuffer(wgpuContext.device,*(WGPUBufferDescriptor.{
 		label = "box size",
 		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
 		size = box_size_buffer_size
@@ -80,7 +80,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 	controller.params.size.buffer = box_size_buffer;
 	controller.params.size.buffer_size = box_size_buffer_size;
 	
-	box_segments_buffer := wgpuDeviceCreateBuffer(wgpu_context.device,*(WGPUBufferDescriptor.{
+	box_segments_buffer := wgpuDeviceCreateBuffer(wgpuContext.device,*(WGPUBufferDescriptor.{
 		label = "box segments",
 		usage = xx (WGPUBufferUsage.Storage | WGPUBufferUsage.CopySrc | WGPUBufferUsage.CopyDst),
 		size = box_segments_buffer_size
@@ -112,7 +112,7 @@ computeControllerInit :: (controller: *CONTROLLER_TYPE, wgpu_context: *WGPUConte
 			entryCount = xx bind_group_params_entries.count,
 			entries = bind_group_params_entries.data
 		};
-		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
+		controller.data_bind_group_size = wgpuDeviceCreateBindGroup(controller.wgpuContext.device, *bind_group_descriptor);
 	}
 
 	// controller.update_buffer(controller, scene);
@@ -132,7 +132,7 @@ computeControllerSetBuffers :: (controller: *CONTROLLER_TYPE, buffer_container: 
 			entryCount = xx bind_group_vertex_entries.count,
 			entries = bind_group_vertex_entries.data
 		};
-		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(controller.wgpu_context.device, *bind_group_descriptor);
+		controller.bind_group.vertex = wgpuDeviceCreateBindGroup(controller.wgpuContext.device, *bind_group_descriptor);
 	}
 
 }
@@ -149,7 +149,7 @@ setBindGroup :: (controller: *CONTROLLER_TYPE, compute_pass_encoder: *WGPUComput
 handleMappedBuffers :: (controller: *CONTROLLER_TYPE) {
 	#if MAP_BUFFER {
 		wgpuBufferMapAsync(controller.attributesMapped.position, xx WGPUMapMode.Read, 0, controller.attributes.position.buffer_size, wgpu_compute_buffer_map_async_callback, null);
-		wgpuDevicePoll(controller.wgpu_context.device, xx true, null);
+		wgpuDevicePoll(controller.wgpuContext.device, xx true, null);
 		// result_values := /*cast(ResultType)*/ 
 		wgpuBufferGetMappedRange(controller.attributesMapped.position, 0, controller.attributes.position.buffer_size);
 
@@ -167,12 +167,12 @@ entitiesCount :: (controller: *CONTROLLER_TYPE)-> u64 {
 updateBuffer :: (controller:*CONTROLLER_TYPE, params:*BoxCreateComputeControllerParams){
 	{
 		// size_float: [3]float = .[scene_data.box_size.x, scene_data.box_size.y, scene_data.box_size.z];
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.size.buffer, 0, *params.size, controller.params.size.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpuContext.queue, controller.params.size.buffer, 0, *params.size, controller.params.size.buffer_size);
 	}
 
 	{
 		// segments_float: [3]float = .[xx scene_data.segments.x, xx scene_data.segments.y, xx scene_data.segments.z];
-		wgpuQueueWriteBuffer(controller.wgpu_context.queue, controller.params.segments.buffer, 0, *params.segments, controller.params.segments.buffer_size);
+		wgpuQueueWriteBuffer(controller.wgpuContext.queue, controller.params.segments.buffer, 0, *params.segments, controller.params.segments.buffer_size);
 	}
 };
 

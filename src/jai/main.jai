@@ -10,13 +10,13 @@ main :: () {
 	}
 	APP.nodesScene = newNodesScene();
 	APP.editor = newEditor();
+
 	#if WASM==true assert(APP.editor!=null, "main: editor is null");
-	editorSetScene(APP.editor, APP.nodesScene);
-	appInit(APP.nodesScene, APP.editor);
 
 	#if WASM==false {
-		window_size := windowInit(APP.editor);
-		editorStart(APP.editor, window_size);
+		windowInit(APP.editor);
+		initSceneAndAttachToEditor(*APP);
+		editorStart(APP.editor);
 
 		reset_temporary_storage();
 		#if WASM==false && FREE_MEMORY_DEBUG==true defer report_memory_leaks();
@@ -27,22 +27,32 @@ main :: () {
 	#if WASM==true assert(APP.editor!=null, "main end: editor is null");
 }
 
-init_draw_data :: () {
-	#if WASM==true context = call_from_wasm_context;
-	#if WASM==true assert(APP.editor!=null, "init_draw_data: editor is null");
 
-	drawDataInit(APP.editor);
-
-}
-
-on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
-	#if WASM==true context = call_from_wasm_context;
-	#if WASM==true assert(APP.editor!=null, "on_request_animation_frame: editor is null");
-
-	editorOnTick(APP.editor, newTime, width, height);
-}
 
 #if WASM==true {
+	on_wgpu_device_ready :: (
+		canvas: WGPUSurface,
+		device: WGPUDevice,
+		queue: WGPUQueue,
+		preferred_texture_format: WGPUTextureFormat
+	) {
+		if USE_IMGUI_DEBUG return;
+
+		context = call_from_wasm_context;
+		wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format);
+	}
+	init_draw_data :: () {
+		context = call_from_wasm_context;
+		assert(APP.editor!=null, "init_draw_data: editor is null");
+		initSceneAndAttachToEditor(*APP);
+		drawDataInit(APP.editor);
+	}
+	on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
+		#if WASM==true context = call_from_wasm_context;
+		#if WASM==true assert(APP.editor!=null, "on_request_animation_frame: editor is null");
+
+		editorOnTick(APP.editor, newTime, width, height);
+	}
 	requestAllocation :: (nodeId: NodeId, size: u64) {
 		#if WASM==true context = call_from_wasm_context;
 		__requestAllocation(APP.editor.nodesScene, nodeId, size);
@@ -64,6 +74,12 @@ PolygonApp :: struct {
 	nodesScene:*NodesScene;
 }
 APP:PolygonApp;
+
+initSceneAndAttachToEditor :: (app: *PolygonApp) {
+	editorInit(app.editor);
+	editorSetScene(app.editor, app.nodesScene);
+	appSceneInit(app.nodesScene, app.editor);
+}
 
 #load "config.jai";
 #load "globals.jai";

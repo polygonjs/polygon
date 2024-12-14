@@ -1,42 +1,19 @@
-rendererInitUI :: (imguiContext: *Imgui_Context, use_depth_buffer:bool){
+rendererInitUI :: (wgpuContext: *WGPUContext, imguiPolygonContext: *ImguiPolygonContext, useDepthBuffer:bool){
 	#if USE_IMGUI {
-		if IMGUI_INITIALIZED {
-			return;
-		}
-		IMGUI_INITIALIZED = true;
-
-		ImGui.CreateContext(null);
-
-		#if WASM {
-			io := ImGui.GetIO();
-			io.IniFilename = null;
-			ImGui_ImplWasm_Init();
-		}
-
-		// imgui_style := ImGui.GetStyle();
-		// imgui_style.AntiAliasedLinesUseTex = false;
-		// ImGui.StyleColorsLight();
-
-		imguiContext.bd.wgpuDevice = WGPU_CONTEXT.device;
-		imgui_init_info := ImGui_ImplWGPU_InitInfo.{
-			// Device = wgpu_context.device,
-			NumFramesInFlight = 3,
-			RenderTargetFormat = WGPU_CONTEXT.preferred_texture_format,
-			DepthStencilFormat = ifx use_depth_buffer then DEPTH_TEXTURE_FORMAT else WGPUTextureFormat.Undefined,
-		};
-		ImGui_ImplWGPU_Init(*imguiContext.bd, imgui_init_info);
+		imguiPolygonContextInit(imguiPolygonContext);
+		imguiPolygonContextWGPUInit(imguiPolygonContext, wgpuContext, useDepthBuffer);
 	}
 }
-rendererUIDestroy :: (imguiContext: *Imgui_Context) {
+rendererUIDestroy :: (imguiPolygonContext: *ImguiPolygonContext) {
 	#if USE_IMGUI {
-		ImGui_ImplWGPU_Shutdown(*imguiContext.bd);
+		ImGui_ImplWGPU_Shutdown(imguiPolygonContext);
 	}
 }
 
 renderUIStart :: (data:*RenderCollectionData, renderer: *Renderer)->(cmdEncoder:WGPUCommandEncoder, renderPassEncoder:WGPURenderPassEncoder) {
 	create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
-	device := WGPU_CONTEXT.device;
+	device := renderer.wgpuContext.device;
 
 	colorAttachment := WGPURenderPassColorAttachment.{
 		loadOp = ifx renderer.clear then WGPULoadOp.Clear else WGPULoadOp.Load,
@@ -47,12 +24,12 @@ renderUIStart :: (data:*RenderCollectionData, renderer: *Renderer)->(cmdEncoder:
 	update_render_pass_descriptor_multisample(renderer, *colorAttachment, *data.frame);
 
 	cmdEncoder :WGPUCommandEncoder= wgpuDeviceCreateCommandEncoder(
-		WGPU_CONTEXT.device,
+		renderer.wgpuContext.device,
 		*(WGPUCommandEncoderDescriptor.{label = "Command Encoder Render"}),
 	);
 	
 
-	renderPassDescriptorLabel := tprint("Render Pass UI %", WGPU_CONTEXT.framesCount,, temp);
+	renderPassDescriptorLabel := tprint("Render Pass UI %", renderer.wgpuContext.framesCount,, temp);
 	renderPassDescriptorLabel_c := to_c_string_temp(renderPassDescriptorLabel);
 	render_pass_descriptor := WGPURenderPassDescriptor.{
 		label = renderPassDescriptorLabel_c,
@@ -70,7 +47,7 @@ renderUIEnd :: (data:*RenderCollectionData, renderer: *Renderer, cmdEncoder:WGPU
 
 	wgpuRenderPassEncoderEnd(renderPassEncoder);
 
-	cmdBuffer1Label := to_c_string_temp(tprint("% %", renderer.label, WGPU_CONTEXT.framesCount));
+	cmdBuffer1Label := to_c_string_temp(tprint("% %", renderer.label, renderer.wgpuContext.framesCount));
 	cmdBuffer1 := wgpuCommandEncoderFinish(cmdEncoder, *(WGPUCommandBufferDescriptor.{label = cmdBuffer1Label}));
 	defer wgpuCommandBufferRelease(cmdBuffer1);
 
@@ -80,9 +57,5 @@ renderUIEnd :: (data:*RenderCollectionData, renderer: *Renderer, cmdEncoder:WGPU
 	defer wgpuRenderPassEncoderRelease(renderPassEncoder);
 }
 // renderUI :: (data:*RenderCollectionData, renderer: *Renderer){
-// 	gui_update(renderer, render_pass_encoder, *WGPU_CONTEXT);
+// 	gui_update(renderer, render_pass_encoder, renderer.wgpuContext);
 // }
-
-#scope_file
-
-IMGUI_INITIALIZED :bool = false;

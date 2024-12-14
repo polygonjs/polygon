@@ -14,9 +14,9 @@ ViewerPanel :: struct {
 	renderer: *Renderer;
 }
 
-newViewerPanel :: (editor: *Editor) -> *TYPE {
+newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
 	panel: *TYPE = New(TYPE);
-	viewerPanelInit(panel, editor);
+	viewerPanelInit(panel, editor, ensureWGPUContextValid);
 
 	return panel;
 }
@@ -68,12 +68,11 @@ panelRemoveScene :: (panel: *TYPE, nodesScene: *NodesScene) {
 
 TYPE :: ViewerPanel;
 
-viewerPanelInit :: (panel: *TYPE, _editor: *Editor) {
+viewerPanelInit :: (panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 
 	using panel;
 
-
-	renderer = newRenderer();
+	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 
 	renderer.label = "ViewerPanelRenderer";
 	renderer.full_screen = false;

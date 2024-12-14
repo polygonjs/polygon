@@ -19,45 +19,38 @@ runTests :: () {
 	} else {
 		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
 	}
-	windowCreated:bool = false;
-
 	testsCount := 0;
-	windowSize :Vector2UInt;
+	headlessWGPUContext: WGPUContext;
+	headlessInit(*headlessWGPUContext, .{4,4});
 	for test,i: NAMED_PROCEDURES {
 		found :bool= requestedTestNames.count == 0 || _isRequestedTestName(test.name, requestedTestNames);
 		if found {
 			testOptions:TestProcedureOptions;
+			testOptions.headlessWGPUContext = *headlessWGPUContext;
 			print("% TEST: %\n", tprintGreen(" "),test.name);
-			if test.withScene == true {
+			if test.scene == true {
 				testOptions.nodesScene = newNodesScene();
 			}
-			if test.requiresWGPU {
-				if test.headless {
-					if test.withEditor == true {
-						if windowCreated==false {
-							testOptions.window_size = headlessInit();
-							windowSize = testOptions.window_size;
-						} else {
-							testOptions.window_size = windowSize;
-						}
+			if test.wgpu {
+				if test.editor == true {
+					if test.headless {
 						testOptions.editor = newEditor();
+						testOptions.editor.wgpuContext = headlessWGPUContext;
+						
+						editorInit(testOptions.editor);
 						if testOptions.nodesScene != null {
 							editorSetScene(testOptions.editor, testOptions.nodesScene);
 						}
-					}
-				} else {
-					testOptions.editor = newEditor();
-					if testOptions.nodesScene != null {
-						editorSetScene(testOptions.editor, testOptions.nodesScene);
-					}
-					if windowCreated==false {
-						testOptions.window_size = windowInit(testOptions.editor);
-						windowSize = testOptions.window_size;
 					} else {
-						testOptions.window_size = windowSize;
+						assert(false, "non headless mode not yet implemented");
+						// testOptions.editor = newEditor();
+						// testOptions.editor.wgpuContext = headlessWGPUContext;
+						// editorInit(testOptions.editor);
+						// if testOptions.nodesScene != null {
+						// 	editorSetScene(testOptions.editor, testOptions.nodesScene);
+						// }
 					}
 				}
-				windowCreated = true;
 			}
 			test.proc(testOptions);
 			testsCount += 1;
@@ -82,43 +75,43 @@ runTests :: () {
 test :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=false, headless=true, withScene=false, withEditor=false});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=false, headless=true, scene=false, editor=false});
 }
 testWithWindow :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=true, headless=false, withScene=true, withEditor=true});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=false, scene=true, editor=true});
 }
 testHeadless :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=true, headless=true, withScene=true, withEditor=true});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=true, scene=true, editor=true});
 }
 testHeadlessNoSceneOrEditor :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=true, headless=true, withScene=false, withEditor=false});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=true, scene=false, editor=false});
 }
 testWithScene :: (name: string, procedure: TestProcedure) {
 	_ensure_test_name_is_unique(name);
 	//
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, requiresWGPU=false, headless=true, withScene=true, withEditor=false});
+	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=false, headless=true, scene=true, editor=false});
 }
 
 TestProcedureOptions :: struct {
-	window_size: Vector2UInt;
 	nodesScene: *NodesScene;
 	editor: *Editor;
+	headlessWGPUContext: *WGPUContext;
 }
 TestProcedure :: #type (options: TestProcedureOptions) -> ();
 
 NamedProcedure :: struct {
 	name: string;
 	proc: TestProcedure;
-	requiresWGPU: bool;
+	wgpu: bool;
 	headless: bool;
-	withScene: bool;
-	withEditor: bool;
+	scene: bool;
+	editor: bool;
 }
 
 

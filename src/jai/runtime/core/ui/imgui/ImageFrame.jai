@@ -1,39 +1,38 @@
 
-renderUIFrameStart :: (renderer:*Renderer, eventsData: EventsData, imguiContext: *Imgui_Context){
+renderUIFrameStart :: (renderer:*Renderer, eventsData: EventsData, imguiPolygonContext: *ImguiPolygonContext){
 	// ui_data: *UiData = *UI_DATA;
 
-	width := wgpu_texture_get_width_surface(renderer.wgpu_context);
-	height := wgpu_texture_get_height_surface(renderer.wgpu_context);
-	if (imguiContext.bd.resolution.width != width || imguiContext.bd.resolution.height != height || imguiContext.bd.pipeline==null) {
+	width := wgpu_texture_get_width_surface(renderer.wgpuContext);
+	height := wgpu_texture_get_height_surface(renderer.wgpuContext);
+	if (imguiPolygonContext.bd.resolution.width != width || imguiPolygonContext.bd.resolution.height != height || imguiPolygonContext.bd.pipeline==null) {
 		// print_yellow(tprint("invalidate and create START: %x% -> %x%\n", bd.resolution.width, bd.resolution.height, width, height));
-		ImGui_ImplWGPU_InvalidateDeviceObjects(*imguiContext.bd);
-		ImGui_ImplWGPU_CreateDeviceObjects(*imguiContext.bd, *imguiContext.iwc, renderer);
+		ImGui_ImplWGPU_InvalidateDeviceObjects(*imguiPolygonContext.bd);
+		ImGui_ImplWGPU_CreateDeviceObjects(imguiPolygonContext, renderer);
 		// print_yellow("invalidate and create DONE");
-		imguiContext.bd.resolution.width = width;
-		imguiContext.bd.resolution.height = height;
+		imguiPolygonContext.bd.resolution.width = width;
+		imguiPolygonContext.bd.resolution.height = height;
 	}
 
 	#if WASM {
-		ImGui_ImplWasm_NewFrame(eventsData);
+		ImGui_ImplWasm_NewFrame(imguiPolygonContext, eventsData);
 	} else {
-		assert(renderer.wgpu_context.mode == .HEADLESS || imguiContext.windowContext.window != null, "imguiContext.windowContext.window is null");
-		if renderer.wgpu_context.mode == .SURFACE {
-			ImGui_ImplSdl_NewFrame(imguiContext.windowContext.window, eventsData);
+		assert(renderer.wgpuContext.mode == .HEADLESS || imguiPolygonContext.windowContext.window != null, "imguiPolygonContext.windowContext.window is null");
+		if renderer.wgpuContext.mode == .SURFACE {
+			ImGui_ImplSdl_NewFrame(imguiPolygonContext, eventsData);
 		}
 	}
 	ImGui.NewFrame();
 }
-renderUIFrameEnd :: (render_pass: WGPURenderPassEncoder, imguiContext: *Imgui_Context){
+renderUIFrameEnd :: (renderPass: WGPURenderPassEncoder, imguiPolygonContext: *ImguiPolygonContext){
 	ImGui.EndFrame();
 	ImGui.Render();
-	draw_data := ImGui.GetDrawData();
-	ImGui_ImplWGPU_RenderDrawData(*imguiContext.bd, *imguiContext.iwc.draw, draw_data, render_pass);
-	
+	drawData := ImGui.GetDrawData();
+	ImGui_ImplWGPU_RenderDrawData(imguiPolygonContext, drawData, renderPass);
 }
 
 // gui_update :: ( renderer:*Renderer, render_pass: WGPURenderPassEncoder ){
 // 	#if WASM == false {
-// 		if renderer.wgpu_context.mode == .HEADLESS {
+// 		if renderer.wgpuContext.mode == .HEADLESS {
 // 			return;
 // 		}
 // 	}

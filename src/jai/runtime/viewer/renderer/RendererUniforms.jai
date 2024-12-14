@@ -7,6 +7,7 @@ renderer_camera_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURen
 }
 
 renderer_uniform_buffer_create :: (renderer: *Renderer, buffer_data: *RendererBufferData, uniforms: $UniformType, label: string) {
+	assert(renderer.wgpuContext != null, "renderer.wgpuContext is null");
 	// TODO: This is a hack to make sure the buffer is at least 16 bytes
 	size := cast(u64) max( 16, size_of(UniformType));
 
@@ -16,10 +17,10 @@ renderer_uniform_buffer_create :: (renderer: *Renderer, buffer_data: *RendererBu
 		size = size,
 		label = buffer_label,
 	};
-	buffer := wgpuDeviceCreateBuffer(WGPU_CONTEXT.device, *buffer_desc);
+	buffer := wgpuDeviceCreateBuffer(renderer.wgpuContext.device, *buffer_desc);
 	assert(buffer != null, "Buffer is not created correctly");
 
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, buffer, 0, *uniforms, size);
+	wgpuQueueWriteBuffer(renderer.wgpuContext.queue, buffer, 0, *uniforms, size);
 
 	buffer_data.buffer_container = .{buffer=buffer, buffer_size=size};
 }
@@ -32,10 +33,10 @@ renderer_camera_uniform_buffer_create :: (renderer: *Renderer, camera:*Camera) {
 }
 
 renderer_scene_uniform_buffer_update :: (renderer: *Renderer, scene:*Scene, uniforms: $UniformType){
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.scene_data.buffer_container.buffer, 0, *scene.scene_uniforms, size_of(UniformType));
+	wgpuQueueWriteBuffer(renderer.wgpuContext.queue, renderer.scene_data.buffer_container.buffer, 0, *scene.scene_uniforms, size_of(UniformType));
 }
 renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*Camera, uniforms: $UniformType){
-	wgpuQueueWriteBuffer(WGPU_CONTEXT.queue, renderer.camera_data.buffer_container.buffer, 0, *camera.camera_uniforms, size_of(UniformType));
+	wgpuQueueWriteBuffer(renderer.wgpuContext.queue, renderer.camera_data.buffer_container.buffer, 0, *camera.camera_uniforms, size_of(UniformType));
 }
 
 #scope_file
@@ -57,7 +58,7 @@ renderer_uniform_buffer_assign :: (renderer: *Renderer, pipeline: WGPURenderPipe
 		entryCount = xx entries.count,
 		entries = entries.data
 	};
-	bind_group := wgpuDeviceCreateBindGroup(WGPU_CONTEXT.device, *bind_group_descriptor);
+	bind_group := wgpuDeviceCreateBindGroup(renderer.wgpuContext.device, *bind_group_descriptor);
 
 	buffer_data.bind_group = bind_group;
 	buffer_data.bind_group_entries = entries;
