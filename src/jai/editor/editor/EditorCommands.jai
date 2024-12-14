@@ -23,13 +23,17 @@ onNodeSelectionRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 
 editorFlushCommands :: (editor: *Editor) {
 	using editor.commands;
+	// node
 	doEditorNodeAddCommands(editor, nodeAdded);
 	doEditorNodeBeforeRemoveCommands(editor, nodeBeforeRemove);
+	// node position
 	doEditorNodeSetPositionCommands(editor, nodeSetPosition);
+	// node inputs
 	doEditorNodeInputAddCommands(editor, nodeInputAdd);
 	doEditorNodeInputRemoveCommands(editor, nodeInputRemove);
-	doEditorNodeSelectionAddedCommands(editor, nodeSelectionAdded);
+	// selection
 	doEditorNodeSelectionRemovedCommands(editor, nodeSelectionRemoved);
+	doEditorNodeSelectionAddedCommands(editor, nodeSelectionAdded);
 
 	nodeAdded.count = 0;
 	nodeBeforeRemove.count = 0;

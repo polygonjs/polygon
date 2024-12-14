@@ -42,8 +42,12 @@ _nodePrepareInputCookResultsWithClonedFirstInput :: (using scene:*NodesScene, no
 	}
 }
 _nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T) {
-	if NODE_METADATAS[node.nodeTypeId].inputsCount.max == 0 {
+	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+	if maxInputsCount == 0 {
 		return;
+	}
+	for inputIndex:0..(maxInputsCount-1) {
+		nodeInputCookResults[node.nodeId][inputIndex] = null;
 	}
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
 	for srcConnectionId: srcConnectionIds {

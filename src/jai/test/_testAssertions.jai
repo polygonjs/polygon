@@ -60,6 +60,12 @@ assertLessThan ::  (current_value: $T, comparison: T, name: string) {
 	}
 	ASSERTIONS_COUNT += 1;
 }
+assertNull :: (ptr: *$T, name: string="assertNull") {
+	if(ptr != null) {
+		assert(false, name);
+	}
+	ASSERTIONS_COUNT += 1;
+}
 assertNotNull :: (ptr: *$T, name: string="assertNotNull") {
 	if(ptr == null) {
 		assert(false, name);
