@@ -109,23 +109,26 @@ nodeConnectionFindByDestNode :: (list:*NodeConnectionList, nodeId: NodeId, input
 	return 0;
 }
 
-nodeConnectionAdd :: (list:*NodeConnectionList, connection:NodeConnection) {
+nodeConnectionAdd :: (list:*NodeConnectionList, connection:NodeConnection)->NodeConnection {
 	using list;
 
 	assert(connections.count==validIndices.count, "connections and validIndices should have the same count\n");
 
 	if nextIndex < xx connections.count {
-		_addAtIndex(list, connection, nextIndex);
+		connectionWithId := _addAtIndex(list, connection, nextIndex);
 		while nextIndex < xx validIndices.count && validIndices[xx nextIndex]==true {
 			nextIndex += 1;
 		}
+		return connectionWithId;
 	} else {
 		array_set_count_and_maybe_grow(*connections, xx (nextIndex+1));
 		bit_array_resize(*validIndices, xx (nextIndex+1));
-		_addAtIndex(list, connection, nextIndex);
+		connectionWithId := _addAtIndex(list, connection, nextIndex);
 		nextIndex += 1;
+		return connectionWithId;
 	}
 
+	
 }
 
 nodeConnectionRemove :: (list:*NodeConnectionList, connection:NodeConnection) {
@@ -163,7 +166,7 @@ nodeConnectionRemove :: (list:*NodeConnectionList, connection:NodeConnection) {
 
 #scope_file
 
-_addAtIndex :: (list:*NodeConnectionList, connection:NodeConnection, index:NodeConnectionId) {
+_addAtIndex :: (list:*NodeConnectionList, connection:NodeConnection, index:NodeConnectionId) -> NodeConnection {
 	using list;
 	validIndices[xx index] = true;
 	connections[index] = connection;
@@ -171,6 +174,8 @@ _addAtIndex :: (list:*NodeConnectionList, connection:NodeConnection, index:NodeC
 
 	_addConnectionId(*connectionIdBySrcNodeId,  connection.src.nodeId, index);
 	_addConnectionId(*connectionIdByDestNodeId, connection.dest.nodeId, index);
+
+	return connections[index];
 }
 
 _addConnectionId :: (idList: *[..][..]NodeConnectionId, nodeId:NodeId, connectionId:NodeConnectionId) {

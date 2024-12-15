@@ -10,14 +10,16 @@ NetworkPanel :: struct {
 	editor: *Editor;
 	sceneWorld: *Scene;
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast: *Scene;
-	objectIndex: [..]u32;
+	nodeObjectIndexByNodeId: [..]u32;
+	connectionObjectIndexByConnectionId: [..]u32;
 
 	camera: *OrthographicCamera;
 	cameraControls: PanControls;
 
 	DefaultMaterial :: struct {
-		basic: *MATERIAL_BASIC;
+		nodeBasic: *MATERIAL_BASIC;
 		nodeSelected: *MATERIAL_BASIC;
+		connectionBasic: *MATERIAL_BASIC;
 	}
 	mat: DefaultMaterial;
 
@@ -100,7 +102,8 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	// allocatorAssign(rendererColor);
 	// allocatorAssign(rendererRaycast);
 	
-	objectIndex.allocator = panel.allocator;
+	nodeObjectIndexByNodeId.allocator = panel.allocator;
+	connectionObjectIndexByConnectionId.allocator = panel.allocator;
 	editor = _editor;
 	sceneWorld = newScene(panel.allocator);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast = newScene(panel.allocator);
@@ -118,10 +121,12 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 		sceneAddObserver(sceneRaycast, rendererRaycastAny);
 	}
 
-	mat.basic = newMaterial(MATERIAL_BASIC, panel.allocator);
+	mat.nodeBasic = newMaterial(MATERIAL_BASIC, panel.allocator);
 	mat.nodeSelected = newMaterial(MATERIAL_BASIC, panel.allocator);
-	setColor(mat.basic, .{1.0, 0.5, 0.25, 1.0});
+	mat.connectionBasic = newMaterial(MATERIAL_BASIC, panel.allocator);
+	setColor(mat.nodeBasic, .{1.0, 0.5, 0.25, 1.0});
 	setColor(mat.nodeSelected, .{0, 1, 0, 1});
+	setColor(mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
 
 	cameraControls.camera = camera;
 

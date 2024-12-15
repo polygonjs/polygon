@@ -27,6 +27,15 @@ testNetworkPanel :: () {
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 
+		setInput(box2, 0, box1);
+		editorFlushCommands(editor);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 6);
+
+		removeInput(box2, 0);
+		editorFlushCommands(editor);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
+
 		nodeDelete(box3);
 		editorFlushCommands(editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);

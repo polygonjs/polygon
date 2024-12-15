@@ -1,4 +1,4 @@
-setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex:u8=0) -> bool
+setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex:u8=0, $doAssert:bool=true) -> bool
 // #modify {
 // 	ti0 := cast(*Type_Info) N0;
 // 	tis0 := cast(*Type_Info_Struct)ti0;
@@ -10,15 +10,18 @@ setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex
 // }
 {
 	// #assert(N0.ctx == N1.ctx);
-	assert(NODE_METADATAS[node.nodeTypeId].ctx == NODE_METADATAS[inputNode.nodeTypeId].ctx, "nodes have different contexts");
-	assert(node.nodeId != inputNode.nodeId, "node ids must be different");
+	#if doAssert assert(NODE_METADATAS[node.nodeTypeId].ctx == NODE_METADATAS[inputNode.nodeTypeId].ctx, "nodes have different contexts");
+	else if (NODE_METADATAS[node.nodeTypeId].ctx != NODE_METADATAS[inputNode.nodeTypeId].ctx) { return false; }
+	#if doAssert assert(node.nodeId != inputNode.nodeId, "node ids must be different");
+	else if (node.nodeId == inputNode.nodeId) { return false; }
 	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
-	assert(inputIndex < maxInputsCount, "input index out of bounds");
+	#if doAssert assert(inputIndex < maxInputsCount, "input index out of bounds");
+	else if (inputIndex >= maxInputsCount) { return false; }
 	// node.inputs[inputIndex] = xx inputNode;
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
 	connectionCreated := graphNodeConnect(src=inputNode, dest=node, checkCycle=true);
 	if connectionCreated == true {
-		nodeConnectionAdd(*graphNodeScene(node).connections, .{
+		connection := nodeConnectionAdd(*graphNodeScene(node).connections, .{
 			src=.{
 				nodeId=inputNode.nodeId,
 				outputIndex=outputIndex
@@ -29,11 +32,12 @@ setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex
 			}
 		});
 		setDirty(node);
+
+		#if NODES_SCENE_EMIT_EVENTS {
+			nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_CONNECTION_ADDED, connection);
+		}
 	}
 
-	#if NODES_SCENE_EMIT_EVENTS {
-		nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
-	}
 	return connectionCreated;
 }
 setInput :: (node: BaseNode, inputIndex:u8=0, inputNode: BaseNode, outputIndex:u8=0) -> bool {
@@ -44,6 +48,11 @@ removeInput :: (node: *BaseNode, inputIndex:u8=0) -> bool {
 	connectionId := nodeConnectionFindByDestNode(*scene.connections, node.nodeId, inputIndex);
 	if connectionId != 0 {
 		connection := scene.connections.connections[connectionId];
+
+		#if NODES_SCENE_EMIT_EVENTS {
+			nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_CONNECTION_REMOVED, connection);
+		}
+
 		previousInputNodeId := connection.src.nodeId;
 		previousInputNode := scene.nodes[previousInputNodeId];
 		graphNodeDisconnect(src=previousInputNode, dest=node);
@@ -51,9 +60,6 @@ removeInput :: (node: *BaseNode, inputIndex:u8=0) -> bool {
 		// node.inputs[inputIndex] = null;
 		setDirty(node);
 
-		#if NODES_SCENE_EMIT_EVENTS {
-			nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_INPUT_ADDED, node, inputIndex);
-		}
 		return true;
 
 	} else {

@@ -4,6 +4,7 @@
 #load "NetworkPanelCursorData.jai";
 #load "NetworkPanelDelete.jai";
 #load "NetworkPanelEvent.jai";
+#load "NetworkPanelNodeConnectionCreateDelete.jai";
 #load "NetworkPanelNodeCreateDelete.jai";
 #load "NetworkPanelNodePosition.jai";
 #load "NetworkPanelNodeSelection.jai";

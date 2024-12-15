@@ -24,11 +24,7 @@ geometryDelete :: (geometry: *Geometry) {
 	free(geometry,, geometry.allocator);
 }
 
-geometry_box_update :: (geometry: *Geometry, segments: Vector3UInt) {
-	geometry_box_attributes_set(geometry, .{segments = segments});
-	geometryAttributesValidate(geometry);
-	normals_compute(geometry);
-}
+
 geometry_icosahedron_update :: (geometry: *Geometry, detail: u8) {
 	geometry_icosahedron_attributes_set(geometry, .{detail = detail});
 	geometryAttributesValidate(geometry);

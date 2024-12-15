@@ -1,19 +1,19 @@
 
 nodeSceneObserverOnNodeAdded :: (observer: Any, scene: *NodesScene, node:*$N) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_ADDED;
-	assert(false, tprint("nodeSceneObserverOnNodeAdded: node type '%' is not implemented", node.type));
+	assert(false, tprint("nodeSceneObserverOnNodeAdded: observer type '%' is not implemented", observer.type));
 }
 nodeSceneObserverOnNodeBeforeRemove :: (observer: Any, scene: *NodesScene, node:*$N) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE;
-	assert(false, tprint("nodeSceneObserverOnNodeBeforeRemove: node type '%' is not implemented", node.type));
+	assert(false, tprint("nodeSceneObserverOnNodeBeforeRemove: observer type '%' is not implemented", observer.type));
 }
-nodeSceneObserverOnNodeInputAdded :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED;
-	assert(false, tprint("nodeSceneObserverOnNodeInputAdded: node type '%' is not implemented", node.type));
+nodeSceneObserverOnNodeConnectionAdded :: (observer: Any, scene: *NodesScene, connection:NodeConnection) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_CONNECTION_ADDED;
+	assert(false, tprint("nodeSceneObserverOnNodeConnectionAdded: observer type '%' is not implemented", observer.type));
 }
-nodeSceneObserverOnNodeInputRemoved :: (observer: Any, scene: *NodesScene, node:*$N, inputIndex:u8) {
-	#insert NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED;
-	assert(false, tprint("nodeSceneObserverOnNodeInputRemoved: node type '%' is not implemented", node.type));
+nodeSceneObserverOnNodeConnectionRemoved :: (observer: Any, scene: *NodesScene, connection:NodeConnection) {
+	#insert NODES_SCENE_OBSERVER_ON_NODE_CONNECTION_REMOVED;
+	assert(false, tprint("nodeSceneObserverOnNodeConnectionRemoved: observer type '%' is not implemented", observer.type));
 }
 
 
@@ -22,8 +22,8 @@ nodeSceneObserverOnNodeInputRemoved :: (observer: Any, scene: *NodesScene, node:
 
 NODES_SCENE_OBSERVER_ON_NODE_ADDED,
 NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE,
-NODES_SCENE_OBSERVER_ON_NODE_INPUT_ADDED,
-NODES_SCENE_OBSERVER_ON_NODE_INPUT_REMOVED :: #run registerNodesSceneObserver();
+NODES_SCENE_OBSERVER_ON_NODE_CONNECTION_ADDED,
+NODES_SCENE_OBSERVER_ON_NODE_CONNECTION_REMOVED :: #run registerNodesSceneObserver();
 
 NODES_SCENE_OBSERVER_TYPES :[..]Type;
 
@@ -31,7 +31,11 @@ nodesSceneObserverRegister :: ($T:Type) {
 	array_add(*NODES_SCENE_OBSERVER_TYPES, T);
 }
 
-registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeBeforeRemove:string, onNodeInputAdded:string, onNodeInputRemoved:string {
+registerNodesSceneObserver :: ()-> (
+	onNodeAdded:string,
+	onNodeBeforeRemove:string,
+	onNodeconnectionAdded:string,
+	onNodeConnectionRemoved:string) {
 	nodesSceneObserverRegister(Editor);
 
 	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
@@ -39,8 +43,8 @@ registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeBeforeRemove:string
 	NodesSceneObserverGeneratedCode :: struct {
 		onNodeAdded: string;
 		onNodeBeforeRemove: string;
-		onNodeInputAdded: string;
-		onNodeInputRemoved: string;
+		onNodeConnectionAdded: string;
+		onNodeConnectionRemoved: string;
 	}
 
 	generated: NodesSceneObserverGeneratedCode;
@@ -67,22 +71,22 @@ registerNodesSceneObserver :: ()-> onNodeAdded:string, onNodeBeforeRemove:string
 		builder: String_Builder;
 		print_to_builder(*builder, IF_FIRST_LINE);
 		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeInputAdded(cast(*%) observer.value_pointer, scene, node, inputIndex); return;\n", observerType, observerType));
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeConnectionAdded(cast(*%) observer.value_pointer, scene, connection); return;\n", observerType, observerType));
 		}
 		print_to_builder(*builder, "}");
-		generated.onNodeInputAdded = builder_to_string(*builder);
+		generated.onNodeConnectionAdded = builder_to_string(*builder);
 	}
 	{
 		builder: String_Builder;
 		print_to_builder(*builder, IF_FIRST_LINE);
 		for observerType: NODES_SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeInputRemoved(cast(*%) observer.value_pointer, scene, node, inputIndex); return;\n", observerType, observerType));
+			print_to_builder(*builder, tprint("\tcase \"%\"; onNodeConnectionRemoved(cast(*%) observer.value_pointer, scene, connection); return;\n", observerType, observerType));
 		}
 		print_to_builder(*builder, "}");
-		generated.onNodeInputRemoved = builder_to_string(*builder);
+		generated.onNodeConnectionRemoved = builder_to_string(*builder);
 	}
 	return 	generated.onNodeAdded,
 			generated.onNodeBeforeRemove,
-			generated.onNodeInputAdded,
-			generated.onNodeInputRemoved;
+			generated.onNodeConnectionAdded,
+			generated.onNodeConnectionRemoved;
 }

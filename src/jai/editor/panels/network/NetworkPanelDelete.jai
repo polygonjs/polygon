@@ -45,7 +45,7 @@ networkPanelDelete :: (using panel: *TYPE) {
 	// 	}
 	// }
 	
-	// array_reset(*objectIndex);
+	// array_reset(*nodeObjectIndexByNodeId);
 	// generatedWorldObjectDelete(sceneWorld);
 	// generatedWorldObjectDelete(sceneRaycast);
 	// materialDelete(basicMat);

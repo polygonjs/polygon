@@ -38,7 +38,7 @@ object3DInit :: (mesh: *TYPE) {
 	object3DInit(cast(*Object3D)mesh);
 
 
-	// geometry_box_update(mesh.geometry, .{2,2,2});
+	// geometryBoxUpdate(mesh.geometry, .{2,2,2});
 	// mesh.material = cast(*Material(Any))	*MATERIAL_BASIC;
 	assert(mesh.geometry != null, "mesh.geometry is null\n");
 	assert(mesh.geometry.attributes.position.format != WGPUVertexFormat.Undefined, "mesh.geometry.attributes.position.format is Undefined\n");

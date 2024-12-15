@@ -5,7 +5,13 @@ BoxGeometryParams :: struct {
 	segments:Vector3UInt = .{1,1,1};
 }
 
-geometry_box_attributes_set :: (geometry: *Geometry, params: BoxGeometryParams) {
+geometryBoxUpdate :: (geometry: *Geometry, params: BoxGeometryParams) {
+	geometryBoxAttributesSet(geometry, params);
+	geometryAttributesValidate(geometry);
+	normals_compute(geometry);
+}
+
+geometryBoxAttributesSet :: (geometry: *Geometry, params: BoxGeometryParams) {
 
 	count0 := plane_points_and_indices_count(params.segments.x, params.segments.y);
 	count1 := plane_points_and_indices_count(params.segments.x, params.segments.z);

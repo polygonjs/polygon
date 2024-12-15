@@ -87,7 +87,7 @@ renderUIFrameEnd :: (renderPass: WGPURenderPassEncoder, imguiPolygonContext: *Im
 // 		// ImGui.SliderInt("segments z", *scene.segments.z, 1, 128);
 // 		// if( previous_segments != scene.segments ){
 // 		// 	// print("updated: %x%x% = %\n", scene_data.segments.x, scene_data.segments.y, scene_data.segments.z, scene_data.segments.x*scene_data.segments.y*scene_data.segments.z);
-// 		// 	// geometry_box_update(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
+// 		// 	// geometryBoxUpdate(*scene_data.meshes0[0].geometry, xx scene_data.segments, scene_data.freq);
 // 		// 	// pipeline_controller_mesh_update_draw_data(*PIPELINE_CONTROLLERS[0], *scene_data.meshes0[0]);
 // 		// }
 

@@ -31,6 +31,8 @@ object3DInit :: (camera: *Camera) {
 	camera.far = tmp.far;
 	camera.aspect = tmp.aspect;
 
+	camera.transformOrder = .RTS;
+
 	identity(*camera.matrix);
 	translate(*camera.matrix, .{x = 0.0, y = 0.0, z = 5.0});
 }

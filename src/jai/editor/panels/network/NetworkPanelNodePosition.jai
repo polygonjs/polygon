@@ -5,7 +5,7 @@ networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 		} else {
 			scene := sceneWorld;
 		}
-		meshIndex := objectIndex[node.nodeId];
+		meshIndex := nodeObjectIndexByNodeId[node.nodeId];
 		if meshIndex >= 0 {
 			mesh := scene.children[meshIndex];
 			pos := panel.editor.sceneUiData.nodePositions[node.nodeId];

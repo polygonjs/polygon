@@ -1,18 +1,17 @@
-
-onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
-	array_add(*editor.commands.nodeAdded, .{node=xx node});
-}
 onNodeBeforeRemove :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	array_add(*editor.commands.nodeBeforeRemove, .{node=xx node});
+}
+onNodeAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
+	array_add(*editor.commands.nodeAdded, .{node=xx node});
 }
 onNodeSetPosition :: (editor: *Editor, scene: *NodesScene, node: *$T, position:Vector2) {
 	array_add(*editor.commands.nodeSetPosition, .{node=xx node, position=position});
 }
-onNodeInputAdded :: (editor: *Editor, scene: *NodesScene, node: *$T, inputIndex: u8) {
-	// print("onNodeInputAdded % %\n", node, inputIndex);
+onNodeConnectionRemoved :: (editor: *Editor, scene: *NodesScene, connection: NodeConnection) {
+	array_add(*editor.commands.nodeConnectionRemoved, .{connection=connection});
 }
-onNodeInputRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T, inputIndex: u8) {
-	// print("onNodeInputRemoved % %\n", node, inputIndex);
+onNodeConnectionAdded :: (editor: *Editor, scene: *NodesScene, connection: NodeConnection) {
+	array_add(*editor.commands.nodeConnectionAdded, .{connection=connection});
 }
 onNodeSelectionAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	array_add(*editor.commands.nodeSelectionAdded, .{node=xx node});
@@ -24,22 +23,22 @@ onNodeSelectionRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 editorFlushCommands :: (editor: *Editor) {
 	using editor.commands;
 	// node
-	doEditorNodeAddCommands(editor, nodeAdded);
 	doEditorNodeBeforeRemoveCommands(editor, nodeBeforeRemove);
+	doEditorNodeAddCommands(editor, nodeAdded);
 	// node position
 	doEditorNodeSetPositionCommands(editor, nodeSetPosition);
-	// node inputs
-	doEditorNodeInputAddCommands(editor, nodeInputAdd);
-	doEditorNodeInputRemoveCommands(editor, nodeInputRemove);
+	// node connections
+	doEditorNodeConnectionRemovedCommands(editor, nodeConnectionRemoved);
+	doEditorNodeConnectionAddedCommands(editor, nodeConnectionAdded);
 	// selection
 	doEditorNodeSelectionRemovedCommands(editor, nodeSelectionRemoved);
 	doEditorNodeSelectionAddedCommands(editor, nodeSelectionAdded);
 
-	nodeAdded.count = 0;
 	nodeBeforeRemove.count = 0;
+	nodeAdded.count = 0;
 	nodeSetPosition.count = 0;
-	nodeInputAdd.count = 0;
-	nodeInputRemove.count = 0;
+	nodeConnectionRemoved.count = 0;
+	nodeConnectionAdded.count = 0;
 	nodeSelectionAdded.count = 0;
 	nodeSelectionRemoved.count = 0;
 }
@@ -48,8 +47,8 @@ editorCommandsSetAllocator :: (editor: *Editor) {
 	nodeAdded.allocator = editor.allocator;
 	nodeBeforeRemove.allocator = editor.allocator;
 	nodeSetPosition.allocator = editor.allocator;
-	nodeInputAdd.allocator = editor.allocator;
-	nodeInputRemove.allocator = editor.allocator;
+	nodeConnectionAdded.allocator = editor.allocator;
+	nodeConnectionRemoved.allocator = editor.allocator;
 	nodeSelectionAdded.allocator = editor.allocator;
 	nodeSelectionRemoved.allocator = editor.allocator;
 }
@@ -59,8 +58,8 @@ EditorCommands :: struct {
 	nodeAdded :[..]EditorNodeAddCommand;
 	nodeBeforeRemove :[..]EditorNodeBeforeRemoveCommand;
 	nodeSetPosition :[..]EditorNodeSetPositionCommand;
-	nodeInputAdd :[..]EditorNodeInputAddCommand;
-	nodeInputRemove :[..]EditorNodeInputRemoveCommand;
+	nodeConnectionAdded :[..]EditorNodeConnectionAddedCommand;
+	nodeConnectionRemoved :[..]EditorNodeConnectionRemovedCommand;
 	nodeSelectionAdded :[..]EditorNodeSelectionAddedCommand;
 	nodeSelectionRemoved :[..]EditorNodeSelectionRemovedCommand;
 }
@@ -71,16 +70,15 @@ EditorEvent :: enum u8 {
 	NODE_ADDED :: 0;
 	NODE_BEFORE_REMOVE;
 	NODE_SET_POSITION;
-	NODE_INPUT_ADDED;
-	NODE_INPUT_REMOVED;
+	NODE_CONNECTION_ADDED;
+	NODE_CONNECTION_REMOVED;
 }
 
 NodeCommand :: struct {
 	node: *BaseNodeAny;
 }
-NodeInputCommand :: struct {
-	node: *BaseNodeAny;
-	inputIndex: u8;
+NodeConnectionCommand :: struct {
+	connection: NodeConnection;
 }
 EditorNodeAddCommand :: NodeCommand;
 EditorNodeBeforeRemoveCommand :: NodeCommand;
@@ -88,14 +86,14 @@ EditorNodeSetPositionCommand :: struct {
 	node: *BaseNodeAny;
 	position: Vector2;
 }
-EditorNodeInputAddCommand :: NodeInputCommand;
-EditorNodeInputRemoveCommand :: NodeInputCommand;
+EditorNodeConnectionAddedCommand :: NodeConnectionCommand;
+EditorNodeConnectionRemovedCommand :: NodeConnectionCommand;
 EditorNodeSelectionAddedCommand :: NodeCommand;
 EditorNodeSelectionRemovedCommand :: NodeCommand;
 
 
 
-
+// node add/remove
 doEditorNodeAddCommands :: (editor: *Editor, commands: [..]EditorNodeAddCommand) {
 	using editor.sceneUiData;
 
@@ -115,6 +113,7 @@ doEditorNodeBeforeRemoveCommands :: (editor: *Editor, commands: [..]EditorNodeBe
 		#if HAS_NETWORK_PANEL networkPanelRemoveNode(editor.networkPanel, node);
 	}
 }
+// node positions
 doEditorNodeSetPositionCommands :: (editor: *Editor, commands: [..]EditorNodeSetPositionCommand) {
 	using editor.sceneUiData;
 	for cmd: commands {
@@ -124,12 +123,18 @@ doEditorNodeSetPositionCommands :: (editor: *Editor, commands: [..]EditorNodeSet
 		#if HAS_NETWORK_PANEL networkPanelNodeSetPosition(editor.networkPanel, node, cmd.position);
 	}
 }
-doEditorNodeInputAddCommands :: (editor: *Editor, commands: [..]EditorNodeInputAddCommand) {
-
+// node connections
+doEditorNodeConnectionRemovedCommands :: (editor: *Editor, commands: [..]EditorNodeConnectionRemovedCommand) {
+	for cmd: commands {
+		#if HAS_NETWORK_PANEL networkPanelRemoveNodeConnection(editor.networkPanel, cmd.connection);
+	}
 }
-doEditorNodeInputRemoveCommands :: (editor: *Editor, commands: [..]EditorNodeInputRemoveCommand) {
-
+doEditorNodeConnectionAddedCommands :: (editor: *Editor, commands: [..]EditorNodeConnectionAddedCommand) {
+	for cmd: commands {
+		#if HAS_NETWORK_PANEL networkPanelAddNodeConnection(editor.networkPanel, cmd.connection);
+	}
 }
+// node selection
 doEditorNodeSelectionAddedCommands :: (editor: *Editor, commands: [..]EditorNodeSelectionAddedCommand) {
 	for cmd: commands {
 		networkPanelOnNodeSelectionAdded(editor.networkPanel, cmd.node);

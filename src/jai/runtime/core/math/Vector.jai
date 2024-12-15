@@ -89,3 +89,26 @@ applyMatrix4 :: ( v: $T/Vector3All, m:Matrix4 ) -> T {
 	return v2;
 
 }
+
+angle :: (v: $T/Vector2All) -> float {
+	return atan2(-v.y, -v.x) + PI;
+}
+// angle :: (v: $T/Vector2All, to: $T/Vector2All) -> float {
+// 	enominator = Math.sqrt( this.lengthSq() * v.lengthSq() )
+// }
+
+
+
+// 	angleTo( v ) {
+
+// 		const denominator = Math.sqrt( this.lengthSq() * v.lengthSq() );
+
+// 		if ( denominator === 0 ) return Math.PI / 2;
+
+// 		const theta = this.dot( v ) / denominator;
+
+// 		// clamp, to handle numerical problems
+
+// 		return Math.acos( MathUtils.clamp( theta, - 1, 1 ) );
+
+// 	}

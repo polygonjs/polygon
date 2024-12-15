@@ -2,8 +2,8 @@ NodesSceneEvent :: enum u8 {
 	NODE_ADDED :: 0;
 	NODE_BEFORE_REMOVE;
 	NODE_ON_DIRTY;
-	NODE_INPUT_ADDED;
-	NODE_INPUT_REMOVED;
+	NODE_CONNECTION_ADDED;
+	NODE_CONNECTION_REMOVED;
 }
 
 
@@ -27,13 +27,13 @@ nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) 
 		case .NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
 	}
 }
-nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {
+nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, connection: NodeConnection) {
 	using scene;
 	if observer.value_pointer == null {
 		return;
 	}
 	if event == {
-		case .NODE_INPUT_ADDED; 	{nodeSceneObserverOnNodeInputAdded(observer, scene, node, inputIndex);}
-		case .NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, node, inputIndex);}
+		case .NODE_CONNECTION_ADDED; 	{nodeSceneObserverOnNodeConnectionAdded(observer, scene, connection);}
+		case .NODE_CONNECTION_REMOVED;{nodeSceneObserverOnNodeConnectionRemoved(observer, scene, connection);}
 	}
 }

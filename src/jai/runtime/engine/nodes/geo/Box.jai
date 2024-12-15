@@ -17,7 +17,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	mesh := newMesh( nodesScene.worldScene, Mesh);
 
 	using node.p;
-	geometry_box_attributes_set(mesh.geometry, .{
+	geometryBoxAttributesSet(mesh.geometry, .{
 		size = mult(size.value, scale.value),
 		segments = segments.value
 	});

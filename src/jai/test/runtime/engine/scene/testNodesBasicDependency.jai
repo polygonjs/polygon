@@ -104,7 +104,7 @@ testNodesBasicDependency :: () {
 		// report_memory_leaks();
 		assertLeaksCount(0, "no leak after scene delete");
 	});
-	test("when nodes finish cooking, they check if a dirty has been triggered since", (options:TestProcedureOptions){
+	test("when nodes finish cooking, they check if a dirty has been triggered since", (using options:TestProcedureOptions){
 		// this should be easier to test in wasm, where loading a file is async
 	});
 }

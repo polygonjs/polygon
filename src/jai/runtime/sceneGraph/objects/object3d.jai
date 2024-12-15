@@ -10,10 +10,20 @@ Object3D :: struct {
 	position: Vector3;
 	quaternion: Quaternion;
 	scale: Vector3 = .{1.0, 1.0, 1.0};
+	transformOrder: TransformOrder = .TRS;
 	matrix: Matrix4;
 	matrixInverse: Matrix4;
 
 	transformableUniforms: TransformableUniforms;
+}
+
+TransformOrder :: enum u8 {
+	TRS :: 0;
+	TSR;
+	RST;
+	RTS;
+	SRT;
+	STR;
 }
 
 
@@ -71,9 +81,43 @@ transformableUpdateMatrix :: (object: *TYPE) {
 	// we want the translate to happen last.
 	// this may be different in other situation,
 	// and we may then set this per object
-	scale(*object.matrix, object.scale);
-	object.matrix = rotate(object.matrix, object.quaternion);
-	translate(*object.matrix, object.position);
+	// object.matrix = rotate(object.matrix, object.quaternion);
+	// translate(*object.matrix, object.position);
+	// scale(*object.matrix, object.scale);
+
+
+	if object.transformOrder == {
+		case .TRS; {
+			translate(*object.matrix, object.position);
+			object.matrix = rotate(object.matrix, object.quaternion);
+			scale(*object.matrix, object.scale);
+		}
+		case .TSR; {
+			translate(*object.matrix, object.position);
+			scale(*object.matrix, object.scale);
+			object.matrix = rotate(object.matrix, object.quaternion);
+		}
+		case .RST; {
+			object.matrix = rotate(object.matrix, object.quaternion);
+			scale(*object.matrix, object.scale);
+			translate(*object.matrix, object.position);
+		}
+		case .RTS; {
+			object.matrix = rotate(object.matrix, object.quaternion);
+			translate(*object.matrix, object.position);
+			scale(*object.matrix, object.scale);
+		}
+		case .SRT; {
+			scale(*object.matrix, object.scale);
+			object.matrix = rotate(object.matrix, object.quaternion);
+			translate(*object.matrix, object.position);
+		}
+		case .STR; {
+			scale(*object.matrix, object.scale);
+			translate(*object.matrix, object.position);
+			object.matrix = rotate(object.matrix, object.quaternion);
+		}
+	}
 
 	object.matrixInverse = inverse(object.matrix);
 
