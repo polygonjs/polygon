@@ -52,7 +52,7 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 			using object;
 			buffer,
 			bind_group,
-			bind_group_entries = wgpu_uniform_to_buffer(wgpuContext, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformable_uniforms, "object");
+			bind_group_entries = wgpu_uniform_to_buffer(wgpuContext, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformableUniforms, "object");
 		}
 		{
 			using material;

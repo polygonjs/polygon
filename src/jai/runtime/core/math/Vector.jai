@@ -22,7 +22,7 @@ Vector3UInt :: struct {
 	z: u32;
 }
 
-Vector2All :: Type.[Vector2, Vector2UInt, Vector2UInt64];
+Vector2All :: Type.[Vector2, Vector2Int, Vector2UInt, Vector2UInt64];
 Vector3All :: Type.[Vector3, Vector3Int, Vector3UInt];
 VectorAll :: #run array_concat(Vector2All, Vector3All);
 
@@ -33,6 +33,59 @@ operator == :: (a:$T/Vector3All, b:T) -> bool {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
+operator - :: (a:$T/Vector2All, b:T) -> T {
+	return .{a.x - b.x, a.y - b.y};
+}
+
 mult :: inline (a: $T/Vector3All, s: float) -> Vector3 {
 	return .{a.x * s, a.y * s, a.z * s};
+}
+length :: (a: $T/Vector2All) -> float {
+	return sqrt(a.x*a.x + a.y*a.y);
+}
+
+// 0 1 2 3
+// 4 5 6 7
+// 8 9 10 11
+// 12 13 14 15
+
+// 0 4 8 12
+// 1 5 9 13
+// 2 6 10 14
+// 3 7 11 15
+
+// _11 _21 _31 _41
+// _12 _22 _32 _42
+// _13 _23 _33 _43
+// _14 _24 _34 _44
+
+transformDirection :: ( v: $T/Vector3All, m:Matrix4 ) -> T {
+
+	v2 :T = .{
+		x = m._11 * v.x + m._12 * v.y + m._13 * v.z,
+		y = m._21 * v.x + m._22 * v.y + m._23 * v.z,
+		z = m._31 * v.x + m._32 * v.y + m._33 * v.z
+	};
+
+	normalize(*v2);
+
+	return v2;
+}
+unproject :: ( v: $T/Vector3All, camera:*Camera ) -> T {
+	v2 := applyMatrix4( v, camera.projectionMatrixInverse );
+	v3 := applyMatrix4( v2, camera.matrix ); // .matrixWorld
+	return v3;
+}
+
+applyMatrix4 :: ( v: $T/Vector3All, m:Matrix4 ) -> T {
+	w := 1 / ( m._41 * v.x + m._42 * v.y + m._43 * v.z + m._44 );
+
+	v2 :T = .{
+		x = ( m._11 * v.x + m._12 * v.y + m._13 * v.z + m._14 ) * w,
+		y = ( m._21 * v.x + m._22 * v.y + m._23 * v.z + m._24 ) * w,
+		z = ( m._31 * v.x + m._32 * v.y + m._33 * v.z + m._34 ) * w
+	};
+
+	return v2;
+
 }

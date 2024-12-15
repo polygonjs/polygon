@@ -38,7 +38,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 
 	meshSetMaterial(nodesScene.worldScene, mesh, xx nodesScene.defaultMaterial.line);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
-	transformable_update_matrix(mesh);
+	transformableUpdateMatrix(mesh);
 
 	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }

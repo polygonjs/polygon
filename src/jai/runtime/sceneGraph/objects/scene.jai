@@ -22,7 +22,7 @@ Scene :: struct {
 
 	children: [..]*Object3D;
 
-	scene_uniforms: SceneUniforms;
+	sceneUniforms: SceneUniforms;
 	observers:[..]Any;
 
 	// old
@@ -89,15 +89,15 @@ worldObjectDelete :: (scene: *TYPE) {
 }
 
 sceneUniformsUpdate :: (scene: *TYPE, time:Time) {
-	scene.scene_uniforms.time.x = time;
+	scene.sceneUniforms.time.x = time;
 
 	for scene.children {
 		// mesh_update_matrix(*it);
-		if it!=null transformable_uniforms_update(it);
+		if it!=null transformableUniformsUpdate(it);
 	}
 	// for scene.children {
 	// 	// mesh_update_matrix(*it);
-	// 	if it!=null transformable_uniforms_update(it);
+	// 	if it!=null transformableUniformsUpdate(it);
 	// }
 	// update_object_uniforms(*scene_data.object_data, *scene_data.object_uniforms);
 	// update_sdf_uniforms(*scene_data.sdf_data, *scene_data.sdf_uniforms, scene_data.time);

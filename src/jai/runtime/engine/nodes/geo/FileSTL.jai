@@ -34,7 +34,7 @@ parseData :: (node:*TYPE, fileContent: string) {
 
 	meshSetMaterial(nodesScene.worldScene, mesh, xx nodesScene.defaultMaterial.mesh);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
-	transformable_update_matrix(mesh);
+	transformableUpdateMatrix(mesh);
 
 	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }

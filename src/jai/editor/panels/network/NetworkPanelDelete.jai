@@ -1,5 +1,4 @@
-networkPanelDelete :: (panel: *TYPE) {
-	using panel;
+networkPanelDelete :: (using panel: *TYPE) {
 
 	sceneRemoveObserver(sceneWorld, rendererColor);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRemoveObserver(sceneRaycast, rendererRaycast);

@@ -11,8 +11,9 @@ Object3D :: struct {
 	quaternion: Quaternion;
 	scale: Vector3 = .{1.0, 1.0, 1.0};
 	matrix: Matrix4;
+	matrixInverse: Matrix4;
 
-	transformable_uniforms: TransformableUniforms;
+	transformableUniforms: TransformableUniforms;
 }
 
 
@@ -31,7 +32,7 @@ object3DAllocate :: ($T: Type, allocator: Allocator)-> *T {
 
 	object.id = NEXT_OBJECT3D_ID;
 	NEXT_OBJECT3D_ID+=1;
-	init_transformable(object);
+	transformableInit(object);
 	return object;
 }
 worldObjectClone :: (object: *TYPE)->*TYPE {
@@ -41,13 +42,13 @@ worldObjectClone :: (object: *TYPE)->*TYPE {
 }
 object3DInit :: (object: *TYPE) {
 	assert(cast(*void)object.type != null, "object.type is null\n");
-	init_transformable(object);
+	transformableInit(object);
 }
 worldObjectDelete :: (object: *TYPE) {
 	free(object,, object.allocator);
 }
 
-init_transformable :: (object: *TYPE) {
+transformableInit :: (object: *TYPE) {
 	// object.position = .{x = 0.0, y = 0.0, z = 0.0};
 	object.quaternion = .{x = 0.0, y = 0.0, z = 0.0, w = 1.0};
 	object.scale = .{x = 1.0, y = 1.0, z = 1.0};
@@ -58,22 +59,30 @@ init_transformable :: (object: *TYPE) {
 	// scale(*object.matrix, object.scale);
 	identity(*object.matrix);
 	// translate(*object.matrix, .{x = 0.0, y = 0.0, z = 0.0});
-	transformable_uniforms_update(object);
+	transformableUniformsUpdate(object);
 }
 
 
 
-transformable_update_matrix :: (object: *TYPE) {
+transformableUpdateMatrix :: (object: *TYPE) {
 	identity(*object.matrix);
-	translate(*object.matrix, object.position);
-	object.matrix = rotate(object.matrix, object.quaternion);
+
+	// for a camera in an OrbitControls,
+	// we want the translate to happen last.
+	// this may be different in other situation,
+	// and we may then set this per object
 	scale(*object.matrix, object.scale);
-	transformable_uniforms_update(object);
+	object.matrix = rotate(object.matrix, object.quaternion);
+	translate(*object.matrix, object.position);
+
+	object.matrixInverse = inverse(object.matrix);
+
+	transformableUniformsUpdate(object);
 }
 
-transformable_uniforms_update :: (object: *TYPE) {
+transformableUniformsUpdate :: (object: *TYPE) {
 	transposedMatrix := transpose(object.matrix);
-	matrix4x4_to_buffer(*transposedMatrix, *object.transformable_uniforms.transformMatrix);
+	matrix4x4_to_buffer(*transposedMatrix, *object.transformableUniforms.transformMatrix);
 }
 
 #scope_file

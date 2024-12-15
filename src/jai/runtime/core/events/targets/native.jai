@@ -17,31 +17,33 @@
 
 
 
-eventsDataUpdate :: (eventsData :*EventsData, sdl_event :*SDL_Event){
-	using eventsData;
+eventsDataUpdate :: (using eventsData :*EventsData, sdl_event :*SDL_Event){
 	if sdl_event.type == {
 		case SDL_MOUSEBUTTONDOWN; {
 			if (sdl_event.button.button == SDL_BUTTON_LEFT) {
-				mouseButtonPressed.left = mouseButton.left==false;
+				mouseButtonJustPressed.left = mouseButton.left == false;
 				mouseButton.left = true;
 			}
 			if (sdl_event.button.button == SDL_BUTTON_MIDDLE) {
-				mouseButtonPressed.middle = mouseButton.middle==false;
+				mouseButtonJustPressed.middle = mouseButton.middle == false;
 				mouseButton.middle = true;
 			}
 			if (sdl_event.button.button == SDL_BUTTON_RIGHT) {
-				mouseButtonPressed.right = mouseButton.right==false;
+				mouseButtonJustPressed.right = mouseButton.right == false;
 				mouseButton.right = true;
 			}
 		}
 		case SDL_MOUSEBUTTONUP; {
 			if (sdl_event.button.button == SDL_BUTTON_LEFT) {
+				mouseButtonJustReleased.left = mouseButton.left == true;
 				mouseButton.left = false;
 			}
 			if (sdl_event.button.button == SDL_BUTTON_MIDDLE) {
+				mouseButtonJustReleased.middle = mouseButton.middle == true;
 				mouseButton.middle = false;
 			}
 			if (sdl_event.button.button == SDL_BUTTON_RIGHT) {
+				mouseButtonJustReleased.right = mouseButton.right == true;
 				mouseButton.right = false;
 			}
 		}
@@ -56,4 +58,5 @@ eventsDataUpdate :: (eventsData :*EventsData, sdl_event :*SDL_Event){
 			memcpy(text.data, sdl_event.text.text.data, TEXTINPUTEVENT_TEXT_SIZE);
 		}
 	}
+	eventsData.dirty = true;
 }

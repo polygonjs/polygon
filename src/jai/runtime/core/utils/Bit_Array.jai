@@ -1,5 +1,5 @@
 bit_array_resize :: (array: *Bit_Array, new_count: u32, $initialize:=true) {
-	new_size := bits_count(new_count);
+	new_size := bitsCount(new_count);
 	old_count := array.count;
 	if old_count == new_count return;
 	array_resize(*array.slots, new_size);

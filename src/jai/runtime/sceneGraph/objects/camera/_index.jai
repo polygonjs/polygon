@@ -1,3 +1,3 @@
-#load "camera.jai";
-#load "perspective_camera.jai";
-#load "orthographic_camera.jai";
+#load "Camera.jai";
+#load "PerspectiveCamera.jai";
+#load "OrthographicCamera.jai";

@@ -94,7 +94,8 @@ interface MouseButtons {
 interface EventsData {
 	cursor: { x: number; y: number };
 	mouseButton: MouseButtons;
-	mouseButtonPressed: MouseButtons;
+	mouseButtonJustPressed: MouseButtons;
+	mouseButtonJustReleased: MouseButtons;
 	wheel: number;
 	textCharCodes: number[];
 	modifiers: {
@@ -113,7 +114,12 @@ export const EVENTS_DATA: EventsData = {
 		middle: false,
 		right: false,
 	},
-	mouseButtonPressed: {
+	mouseButtonJustPressed: {
+		left: false,
+		middle: false,
+		right: false,
+	},
+	mouseButtonJustReleased: {
 		left: false,
 		middle: false,
 		right: false,
@@ -137,22 +143,27 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		if (event.metaKey) EVENTS_DATA.modifiers.meta = true;
 		if (event.shiftKey) EVENTS_DATA.modifiers.shift = true;
 		if (event.button === 0) {
+			EVENTS_DATA.mouseButtonJustPressed.left =
+				EVENTS_DATA.mouseButton.left == false;
 			EVENTS_DATA.mouseButton.left = true;
-			EVENTS_DATA.mouseButtonPressed.left = true;
 		}
 		if (event.button === 1) {
+			EVENTS_DATA.mouseButtonJustPressed.middle =
+				EVENTS_DATA.mouseButton.middle == false;
 			EVENTS_DATA.mouseButton.middle = true;
-			EVENTS_DATA.mouseButtonPressed.middle = true;
 		}
 		if (event.button === 2) {
+			EVENTS_DATA.mouseButtonJustPressed.right =
+				EVENTS_DATA.mouseButton.right == false;
 			EVENTS_DATA.mouseButton.right = true;
-			EVENTS_DATA.mouseButtonPressed.right = true;
 		}
+		eventsDataDirty = true;
 	}
 	function onPointermove(event: PointerEvent) {
 		// console.log(event.clientX, event.clientY)
 		EVENTS_DATA.cursor.x = Math.round(event.clientX);
 		EVENTS_DATA.cursor.y = Math.round(event.clientY);
+		eventsDataDirty = true;
 	}
 	function onPointerup(event: PointerEvent) {
 		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
@@ -160,17 +171,25 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		if (event.metaKey) EVENTS_DATA.modifiers.meta = false;
 		if (event.shiftKey) EVENTS_DATA.modifiers.shift = false;
 		if (event.button === 0) {
+			EVENTS_DATA.mouseButtonJustReleased.left =
+				EVENTS_DATA.mouseButton.left == true;
 			EVENTS_DATA.mouseButton.left = false;
 		}
 		if (event.button === 1) {
+			EVENTS_DATA.mouseButtonJustReleased.middle =
+				EVENTS_DATA.mouseButton.middle == true;
 			EVENTS_DATA.mouseButton.middle = false;
 		}
 		if (event.button === 2) {
+			EVENTS_DATA.mouseButtonJustReleased.right =
+				EVENTS_DATA.mouseButton.right == true;
 			EVENTS_DATA.mouseButton.right = false;
 		}
+		eventsDataDirty = true;
 	}
 	function onWheel(event: WheelEvent) {
 		EVENTS_DATA.wheel = event.deltaY;
+		eventsDataDirty = true;
 	}
 	function onKeydown(event: KeyboardEvent) {
 		if (event.altKey) EVENTS_DATA.modifiers.alt = true;
@@ -187,6 +206,7 @@ export function addEvents(canvas: HTMLCanvasElement) {
 			return;
 		}
 		EVENTS_DATA.textCharCodes.push(event.key.charCodeAt(0));
+		eventsDataDirty = true;
 	}
 	function onKeyup(event: KeyboardEvent) {
 		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
@@ -201,6 +221,7 @@ export function addEvents(canvas: HTMLCanvasElement) {
 				}
 			}
 		}
+		eventsDataDirty = true;
 	}
 	canvas.addEventListener("pointerdown", onPointerdown);
 	canvas.addEventListener("pointermove", onPointermove);
@@ -210,11 +231,34 @@ export function addEvents(canvas: HTMLCanvasElement) {
 	canvas.addEventListener("keyup", onKeyup);
 }
 export function eventsDataReset() {
-	EVENTS_DATA.wheel = 0;
-	EVENTS_DATA.textCharCodes.length = 0;
-	EVENTS_DATA.mouseButtonPressed.left = false;
-	EVENTS_DATA.mouseButtonPressed.middle = false;
-	EVENTS_DATA.mouseButtonPressed.right = false;
+	if (EVENTS_DATA.wheel != 0) {
+		EVENTS_DATA.wheel = 0;
+		eventsDataDirty = true;
+	}
+	if (EVENTS_DATA.textCharCodes.length != 0) {
+		EVENTS_DATA.textCharCodes.length = 0;
+		eventsDataDirty = true;
+	}
+	if (
+		EVENTS_DATA.mouseButtonJustPressed.left == true ||
+		EVENTS_DATA.mouseButtonJustPressed.middle == true ||
+		EVENTS_DATA.mouseButtonJustPressed.right == true
+	) {
+		EVENTS_DATA.mouseButtonJustPressed.left = false;
+		EVENTS_DATA.mouseButtonJustPressed.middle = false;
+		EVENTS_DATA.mouseButtonJustPressed.right = false;
+		eventsDataDirty = true;
+	}
+	if (
+		EVENTS_DATA.mouseButtonJustReleased.left == true ||
+		EVENTS_DATA.mouseButtonJustReleased.middle == true ||
+		EVENTS_DATA.mouseButtonJustReleased.right == true
+	) {
+		EVENTS_DATA.mouseButtonJustReleased.left = false;
+		EVENTS_DATA.mouseButtonJustReleased.middle = false;
+		EVENTS_DATA.mouseButtonJustReleased.right = false;
+		eventsDataDirty = true;
+	}
 	// EVENTS_DATA.modifiers.alt = false;
 	// EVENTS_DATA.modifiers.ctrl = false;
 	// EVENTS_DATA.modifiers.meta = false;
@@ -233,6 +277,9 @@ export function eventsDataUpdate(
 	lmbPressedPointer: bigint,
 	mmbPressedPointer: bigint,
 	rmbPressedPointer: bigint,
+	lmbReleasedPointer: bigint,
+	mmbReleasedPointer: bigint,
+	rmbReleasedPointer: bigint,
 	wheelPointer: bigint,
 	textDataPointer: bigint,
 	textDataSize: number,
@@ -244,8 +291,12 @@ export function eventsDataUpdate(
 	// keys
 	keysPointer: bigint,
 	// readPixelValue
-	readPixelValuePointer: bigint
+	readPixelValuePointer: bigint,
+	dirtyPointer: bigint
 ) {
+	if (eventsDataDirty == false) {
+		return;
+	}
 	// window
 	setU32(Number(windowWidthPointer), window.WebGPUCanvas.width);
 	setU32(Number(windowHeightPointer), window.WebGPUCanvas.height);
@@ -256,12 +307,30 @@ export function eventsDataUpdate(
 	setBoolean(Number(lmbPointer), EVENTS_DATA.mouseButton.left);
 	setBoolean(Number(mmbPointer), EVENTS_DATA.mouseButton.middle);
 	setBoolean(Number(rmbPointer), EVENTS_DATA.mouseButton.right);
-	setBoolean(Number(lmbPressedPointer), EVENTS_DATA.mouseButtonPressed.left);
+	setBoolean(
+		Number(lmbPressedPointer),
+		EVENTS_DATA.mouseButtonJustPressed.left
+	);
 	setBoolean(
 		Number(mmbPressedPointer),
-		EVENTS_DATA.mouseButtonPressed.middle
+		EVENTS_DATA.mouseButtonJustPressed.middle
 	);
-	setBoolean(Number(rmbPressedPointer), EVENTS_DATA.mouseButtonPressed.right);
+	setBoolean(
+		Number(rmbPressedPointer),
+		EVENTS_DATA.mouseButtonJustPressed.right
+	);
+	setBoolean(
+		Number(lmbReleasedPointer),
+		EVENTS_DATA.mouseButtonJustReleased.left
+	);
+	setBoolean(
+		Number(mmbReleasedPointer),
+		EVENTS_DATA.mouseButtonJustReleased.middle
+	);
+	setBoolean(
+		Number(rmbReleasedPointer),
+		EVENTS_DATA.mouseButtonJustReleased.right
+	);
 	// wheel
 	const wheel = EVENTS_DATA.wheel == 0 ? 0 : EVENTS_DATA.wheel > 0 ? -1 : 1;
 	setFLOAT32(Number(wheelPointer), wheel);
@@ -287,6 +356,11 @@ export function eventsDataUpdate(
 	setU8(Number(readPixelValuePointer) + 1, EVENTS_DATA.readPixelValue[1]);
 	setU8(Number(readPixelValuePointer) + 2, EVENTS_DATA.readPixelValue[2]);
 	setU8(Number(readPixelValuePointer) + 3, EVENTS_DATA.readPixelValue[3]);
+
+	setBoolean(Number(dirtyPointer), true);
+	// console.log("eventsDataDirty", eventsDataDirty);
+
+	eventsDataDirty = false;
 }
 
 export function eventsSetCursor(cursor: number) {
@@ -297,4 +371,9 @@ export function eventsSetCursor(cursor: number) {
 export function performance_now(): bigint {
 	return BigInt(Math.floor(performance.now()));
 }
+export function markEventsDataDirty() {
+	eventsDataDirty = true;
+	// console.warn("markEventsDataDirty");
+}
+let eventsDataDirty = true;
 

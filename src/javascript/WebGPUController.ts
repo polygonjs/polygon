@@ -1,6 +1,10 @@
 import { clockInit, clockTick } from "./Clock";
 import { updateMemoryArrayViews, USELESS_ARG0 } from "./Common";
-import { addEvents, eventsDataReset } from "./EventsController";
+import {
+	addEvents,
+	eventsDataReset,
+	markEventsDataDirty,
+} from "./EventsController";
 import {
 	Heap,
 	heapAdd,
@@ -91,7 +95,10 @@ export function webGPURenderControllerCreate(
 		webGPURequestResponse.device,
 		domElement,
 		canvas,
-		render
+		() => {
+			markEventsDataDirty();
+			render();
+		}
 	);
 
 	let previousHeap: Heap = heapCreate();
@@ -147,6 +154,7 @@ export function webGPURenderControllerCreate(
 		// }
 	}
 	function start() {
+		markEventsDataDirty();
 		animate();
 	}
 	function stop() {

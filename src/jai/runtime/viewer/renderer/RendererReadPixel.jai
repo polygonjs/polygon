@@ -95,8 +95,8 @@ rendererReadPixel :: (renderer: *Renderer,scene:*Scene, camera: *Camera, pos:Vec
 		set_scissor_rect(render_pass_encoder, scissor_pos.x, scissor_pos.y, 1, 1);
 	}
 	
-	renderer_scene_uniform_buffer_update(renderer, scene, scene.scene_uniforms);
-	renderer_camera_uniform_buffer_update(renderer, camera, camera.camera_uniforms);
+	renderer_scene_uniform_buffer_update(renderer, scene, scene.sceneUniforms);
+	renderer_camera_uniform_buffer_update(renderer, camera, camera.cameraUniforms);
 	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(it, render_pass_encoder);
 
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
@@ -149,7 +149,7 @@ readPixelIfMapped :: (renderer: *Renderer, eventsData: *EventsData) -> (buffer_r
 			wgpuBufferGetMappedRange(renderer.readback_buffer, 0, READ_DATA_SIZE);
 			wgpuBufferUnmap(renderer.readback_buffer);
 			WAITING_FOR_BUFFER_MAPPED_STATE = false;
-			eventsDataPpdate(eventsData); // TODO: it would be preferrable to only request the readPixelValue and not all other events data.
+			eventsDataUpdate(eventsData); // TODO: it would be preferrable to only request the readPixelValue and not all other events data.
 			return true, eventsData.readPixelValue;
 		}
 		return false, .[0,0,0,0];

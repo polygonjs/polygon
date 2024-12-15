@@ -16,11 +16,11 @@ OrbitControls :: struct {
 
 
 
-camera_controls_process_event :: (controls:*TYPE, events_data:*EventsData, element_focused:bool){
+cameraControlsProcessEvent :: (controls:*TYPE, events_data:*EventsData, elementFocused:bool){
 	using controls;
 
-	if(actionStarted == false && element_focused==true){
-		if (events_data.mouseButtonPressed.left) {
+	if(actionStarted == false && elementFocused==true){
+		if (events_data.mouseButtonJustPressed.left) {
 			actionStarted = true;
 			lastPointer.x = cast(s32)events_data.cursor.x;
 		lastPointer.y = cast(s32)events_data.cursor.y;
@@ -62,14 +62,17 @@ cameraControlsCommit :: (controls:*TYPE){
 	set_from_axis_and_angle(*quaternionX, AXIS_X, phi);
 	
 	// rotate + translate
-	transformMatrix :Matrix4;
-	identity(*transformMatrix);
-	transformMatrix = rotate(transformMatrix, quaternionY);
-	transformMatrix = rotate(transformMatrix, quaternionX);
-	translate(*transformMatrix, .{x=0.0, y=0.0, z=radius});
+	camera.position = .{x=0.0, y=0.0, z=radius};
+	camera.quaternion = quaternionY * quaternionX;
+	transformableUpdateMatrix(camera);
+	// transformMatrix :Matrix4;
+	// identity(*transformMatrix);
+	// transformMatrix = rotate(transformMatrix, quaternionY);
+	// transformMatrix = rotate(transformMatrix, quaternionX);
+	// translate(*transformMatrix, .{x=0.0, y=0.0, z=radius});
 
-	assert(camera != null, "camera is null\n");
-	camera.camera_matrices.transformMatrix = transformMatrix;
+	// assert(camera != null, "camera is null\n");
+	// camera.transformMatrix = transformMatrix;
 
 	generatedCameraProjectionUpdate(camera);
 }

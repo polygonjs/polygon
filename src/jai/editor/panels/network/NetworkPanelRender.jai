@@ -1,17 +1,14 @@
-drawDataInit :: (panel: *TYPE) {
-	using panel;
+drawDataInit :: (using panel: *TYPE) {
 	rendererInitPipelines(rendererColor, sceneWorld, camera);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererInitPipelines(rendererRaycast, sceneRaycast, camera);
 }
-render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
-	using panel;
+render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	rendererFlushCommands(rendererColor);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererFlushCommands(rendererRaycast);
 	cameraUniformsUpdate(camera);
 	render(renderCollectionData, rendererColor, sceneWorld, camera);
 }
-rendererDestroyBuffers :: (panel: *TYPE) {
-	using panel;
+rendererDestroyBuffers :: (using panel: *TYPE) {
 	rendererDestroyBuffers(rendererColor);
 	rendererDestroyBuffers(rendererRaycast);
 }

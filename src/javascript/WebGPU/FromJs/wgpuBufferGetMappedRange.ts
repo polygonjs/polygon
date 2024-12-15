@@ -1,4 +1,4 @@
-import { EVENTS_DATA } from "../../EventsController";
+import { EVENTS_DATA, markEventsDataDirty } from "../../EventsController";
 import { heapGet } from "../../WasmHeap";
 
 export function wgpuBufferGetMappedRange(
@@ -13,6 +13,7 @@ export function wgpuBufferGetMappedRange(
 	EVENTS_DATA.readPixelValue[1] = uint8[1];
 	EVENTS_DATA.readPixelValue[2] = uint8[2];
 	EVENTS_DATA.readPixelValue[3] = uint8[3];
+	markEventsDataDirty();
 	return BigInt(0);
 }
 

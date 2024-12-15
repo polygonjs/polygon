@@ -23,6 +23,27 @@ NetworkPanel :: struct {
 
 	rendererColor: *Renderer;
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast: *Renderer;
+
+	eventHandler: NetworkPanelEventHandler;
+}
+
+NetworkPanelEventHandler :: struct {
+	mode: NetworkPanelOperation = .NONE;
+	waitingForButtonDownReadPixel:bool = false;
+	waitingForButtonUpReadPixel:bool = false;
+	nodeIdOnButtonDownFound:bool = false;
+	nodeIdOnButtonDown:NodeId = 0;
+
+	screenData: NetworkPanelCursorData;
+	worldData: NetworkPanelCursorData;
+}
+
+NetworkPanelOperation :: enum u8 {
+	NONE :: 0;
+	SELECT;
+	NODE_MOVE;
+	NODE_CREATE;
+	NODE_CONNECT;
 }
 
 newNetworkPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
@@ -43,16 +64,13 @@ MATERIAL_BASIC :: MeshBasicMaterial;
 
 
 
-networkPanelInit :: (panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
+networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	allocatorAssign(panel);
-
-
-	using panel;
 
 	{
 		rendererColor = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 		rendererColor.label = "NetworkPanelRendererColor";
-		rendererColor.full_screen = false;
+		rendererColor.fullScreen = false;
 		rendererColor.viewport = .{
 				start = .{0,0},
 				size = .{1,1}
@@ -66,7 +84,7 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bo
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
 		rendererRaycast = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 		rendererRaycast.label = "NetworkPanelRendererRaycast";
-		rendererRaycast.full_screen = false;
+		rendererRaycast.fullScreen = false;
 		rendererRaycast.viewport = .{
 			start = .{0,0},
 			size = .{1,1}
@@ -87,6 +105,9 @@ networkPanelInit :: (panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bo
 	sceneWorld = newScene(panel.allocator);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast = newScene(panel.allocator);
 	camera = newObject3D(sceneWorld, OrthographicCamera);
+	camera.near = 0;
+	camera.far = 10;
+	cameraProjectionUpdate(camera);
 	// camera.type = OrthographicCamera;
 	// object3DInit(*camera);
 

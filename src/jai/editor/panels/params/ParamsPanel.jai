@@ -55,9 +55,6 @@ rendererDestroyBuffers :: (panel: *TYPE) {
 	rendererDestroyBuffers(panel.renderer);
 }
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
-	// using panel;
-	// focused := element_focused(renderer, eventsData);
-	// camera_controls_process_event(*cameraControls, eventsData, focused);
 }
 onResize :: (using panel: *TYPE) {
 	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
@@ -118,7 +115,7 @@ paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 
 	renderer.label = "ParamsPanelRenderer";
-	renderer.full_screen = false;
+	renderer.fullScreen = false;
 	renderer.viewport = .{
 		start = .{0,0},
 		size = .{1,1}

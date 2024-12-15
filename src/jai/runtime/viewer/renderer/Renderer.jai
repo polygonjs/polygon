@@ -65,7 +65,7 @@ newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true, _
 }
 
 rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
-	if renderer.full_screen {
+	if renderer.fullScreen {
 		width := wgpu_texture_get_width_surface(renderer.wgpuContext);
 		height := wgpu_texture_get_height_surface(renderer.wgpuContext);
 		return .{xx width, xx height};
@@ -203,7 +203,7 @@ pipelineControllerRemoveMeshAndDeleteIfEmpty :: (renderer:*Renderer, mesh:*Mesh,
 // 	// 	queue := wgpuDeviceGetQueue(renderer.wgpuContext.device);
 // 	// 	assert(queue != null, "Queue is not created correctly");
 // 	// }
-// 	renderer_camera_uniform_buffer_create(renderer, scene, camera.camera_uniforms, "camera");
+// 	renderer_camera_uniform_buffer_create(renderer, scene, camera.cameraUniforms, "camera");
 // 	pipeline_controller :*PipelineController= newPipelineController(PipelineController);
 // 	// pipeline_controller_init(*pipeline_controller0, renderer.wgpuContext, *SCENE_DATA.meshes0, "render meshes 0");
 // 	// pipeline_controller_init(*pipeline_controller1, renderer.wgpuContext, *SCENE_DATA.meshes1, "render meshes 1");
@@ -248,11 +248,11 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 
 	compute_controller_collection_compute(*renderer.computes);
 
-	renderer_scene_uniform_buffer_update(renderer, scene, scene.scene_uniforms);
-	renderer_camera_uniform_buffer_update(renderer, camera, camera.camera_uniforms);
+	renderer_scene_uniform_buffer_update(renderer, scene, scene.sceneUniforms);
+	renderer_camera_uniform_buffer_update(renderer, camera, camera.cameraUniforms);
 	for renderer.pipelines_by_mat_type pipeline_controller_update_uniform_buffers(it);
 	
-	// if(renderer.full_screen == false) {
+	// if(renderer.fullScreen == false) {
 	// 	using renderer.viewport;
 	// 	// Create a separate render pass for clearing the viewport
 	// 	clear_color_attachment := WGPURenderPassColorAttachment.{
@@ -275,7 +275,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 
 	render_pass_encoder := wgpuCommandEncoderBeginRenderPass(cmd_encoder, *render_pass_descriptor);
 	defer wgpuRenderPassEncoderRelease(render_pass_encoder);
-	if(renderer.full_screen == false) {
+	if(renderer.fullScreen == false) {
 		using renderer.viewport;
 		// renderer_set_viewport(render_pass_encoder, start.x, start.y, size.x, size.y);
 		set_viewport(render_pass_encoder, xx start.x, xx start.y, xx size.x, xx size.y);

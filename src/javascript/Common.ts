@@ -97,7 +97,7 @@ export function setBoolean(i: number, value: boolean) {
 	updateMemoryArrayViewsIfNeeded();
 	return window.ALLOCATED_MEMORY_CONTAINER.dataView.setUint8(
 		i,
-		value ? 0xff : 0
+		value ? 1 : 0
 	);
 }
 export const getU8 = (i: number) => {

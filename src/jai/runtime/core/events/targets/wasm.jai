@@ -1,29 +1,51 @@
 
-eventsDataPpdate :: (events_data :*EventsData){
+eventsDataUpdate :: (eventsData :*EventsData){
+	eventsDataReset(eventsData);
 	eventsDataUpdate(
-		*(events_data.windowSize.w),
-		*(events_data.windowSize.h),
-		*(events_data.cursor.x),
-		*(events_data.cursor.y),
-		*(events_data.mouseButton.left),
-		*(events_data.mouseButton.middle),
-		*(events_data.mouseButton.right),
-		*(events_data.mouseButtonPressed.left),
-		*(events_data.mouseButtonPressed.middle),
-		*(events_data.mouseButtonPressed.right),
-		*(events_data.wheel),
-		events_data.text.data,
-		events_data.text.count,
-		*(events_data.modifiers.alt),
-		*(events_data.modifiers.ctrl),
-		*(events_data.modifiers.meta),
-		*(events_data.modifiers.shift),
-		events_data.keys.data,
-		*events_data.readPixelValue
+		*(eventsData.windowSize.w),
+		*(eventsData.windowSize.h),
+		*(eventsData.cursor.x),
+		*(eventsData.cursor.y),
+		*(eventsData.mouseButton.left),
+		*(eventsData.mouseButton.middle),
+		*(eventsData.mouseButton.right),
+		*(eventsData.mouseButtonJustPressed.left),
+		*(eventsData.mouseButtonJustPressed.middle),
+		*(eventsData.mouseButtonJustPressed.right),
+		*(eventsData.mouseButtonJustReleased.left),
+		*(eventsData.mouseButtonJustReleased.middle),
+		*(eventsData.mouseButtonJustReleased.right),
+		*(eventsData.wheel),
+		eventsData.text.data,
+		eventsData.text.count,
+		*(eventsData.modifiers.alt),
+		*(eventsData.modifiers.ctrl),
+		*(eventsData.modifiers.meta),
+		*(eventsData.modifiers.shift),
+		eventsData.keys.data,
+		*eventsData.readPixelValue,
+		*(eventsData.dirty)
 	);
 }
 
-eventsDataUpdate :: (ww:*u32, wh:*u32, mx: *u32, my: *u32, lmb: *bool, mmb: *bool, rmb: *bool,lmb_pressed: *bool, mmb_pressed: *bool, rmb_pressed: *bool, wheel: *float, text: *s8, text_size: u32, alt: *bool, ctrl: *bool, meta: *bool, shift: *bool, keys: *bool, readPixelValue: *READ_PIXEL_RESULT) -> void #foreign;
+eventsDataUpdate :: (
+	ww:*u32, wh:*u32,
+	mx: *u32, my: *u32,
+	lmb: *bool, mmb: *bool, rmb: *bool,
+	lmbJustpressed: *bool, mmbJustPressed: *bool, rmbJustPressed: *bool,
+	lmbJustReleased: *bool, mmbJustReleased: *bool, rmbJustReleased: *bool,
+	wheel: *float,
+	text: *s8,
+	text_size: u32,
+	alt: *bool,
+	ctrl: *bool,
+	meta: *bool,
+	shift: *bool,
+	keys: *bool,
+	readPixelValue: *READ_PIXEL_RESULT,
+	dirty: *bool
+) -> void #foreign;
+
 eventsSetCursor :: (cursor:u32)->void #foreign;
 
 performance_now :: ()->u64 #foreign;

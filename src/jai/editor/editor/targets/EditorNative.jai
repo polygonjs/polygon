@@ -15,7 +15,7 @@ editorStart :: (editor: *Editor) {
 		time := current_time_monotonic();
 		computeFPS(editor.nodesScene, time);
 		sdl_event: SDL_Event;
-		events_data_reset(*editor.eventsData);
+		eventsDataReset(*editor.eventsData);
 
 		while SDL_PollEvent(*sdl_event) {
 			eventsDataUpdate(*editor.eventsData, *sdl_event);

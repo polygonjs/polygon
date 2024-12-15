@@ -5,7 +5,7 @@ networkPanelAddBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
 	assert(mesh.geometry != null, "mesh0.geometry is null\n");
 	meshSetMaterial(scene, mesh, xx mat);
 	geometry_plane_update(mesh.geometry, size=.{2,2}, segments=.{1,1});
-	transformable_update_matrix(mesh);
+	transformableUpdateMatrix(mesh);
 	sceneObjectAdd(scene, mesh);
 }
 

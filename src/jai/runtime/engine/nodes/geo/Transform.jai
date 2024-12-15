@@ -22,7 +22,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 		for object: <<inputResult0 {
 			(<<object).position += t.value;
 			(<<object).scale *= s.value;
-			transformable_update_matrix(object);
+			transformableUpdateMatrix(object);
 		}
 	}
 

@@ -8,7 +8,7 @@ ViewportRect :: struct {
 	size: Vector2UInt64;
 }
 ViewportContainer :: struct {
-	full_screen:bool;
+	fullScreen:bool;
 	viewport:ViewportRect;
 }
 EventsDataMouseButtons :: struct {
@@ -31,21 +31,26 @@ EventsData :: struct {
 	windowSize :EventsDataWindowSize;
 	cursor :EventsDataCursor;
 	mouseButton :EventsDataMouseButtons;
-	mouseButtonPressed :EventsDataMouseButtons;
+	mouseButtonJustPressed :EventsDataMouseButtons;
+	mouseButtonJustReleased :EventsDataMouseButtons;
 	wheel :float;
 	text: [TEXTINPUTEVENT_TEXT_SIZE] s8;
 	modifiers: EventsDataModifiers;
 	keys: [KEYS_COUNT]bool;
 	readPixelValue: READ_PIXEL_RESULT;
+	dirty: bool;
 };
 
-events_data_reset :: (using eventsData :*EventsData){
+eventsDataReset :: (using eventsData :*EventsData){
 	wheel = 0;
 	modifiers = .{};
-	mouseButtonPressed.left = false;
-	mouseButtonPressed.middle = false;
-	mouseButtonPressed.right = false;
-
+	mouseButtonJustPressed.left = false;
+	mouseButtonJustPressed.middle = false;
+	mouseButtonJustPressed.right = false;
+	mouseButtonJustReleased.left = false;
+	mouseButtonJustReleased.middle = false;
+	mouseButtonJustReleased.right = false;
+	dirty = false;
 	// events_data.modifiers.alt = false;
 	// events_data.modifiers.ctrl = false;
 	// events_data.modifiers.shift = false;

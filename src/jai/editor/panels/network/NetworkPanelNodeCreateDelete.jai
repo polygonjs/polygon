@@ -1,8 +1,7 @@
 
 networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 
-	_addMesh :: (panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:bool) {
-		using panel;
+	_addMesh :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:bool) {
 
 		#if forRaycast == true {
 			scene := sceneRaycast;
@@ -21,9 +20,8 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 
 		pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
 		mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
-		transformable_update_matrix(mesh);
+		transformableUpdateMatrix(mesh);
 		{
-			using panel;
 			#if forRaycast==false {
 				array_insert_at(*objectIndex, xx scene.children.count, node.nodeId);
 			}
@@ -39,8 +37,7 @@ networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 }
 
 networkPanelRemoveNode :: (panel: *TYPE, node: *$T) {
-	_removeNode :: (panel:*TYPE, node:*T, $forRaycast:bool) {
-		using panel;
+	_removeNode :: (using panel:*TYPE, node:*T, $forRaycast:bool) {
 		meshIndex := objectIndex[node.nodeId];
 		if meshIndex >= 0 {
 			#if forRaycast {

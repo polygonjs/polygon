@@ -20,20 +20,17 @@ newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE
 
 	return panel;
 }
-viewerPanelDelete :: (panel: *TYPE) {
-	using panel;
+viewerPanelDelete :: (using panel: *TYPE) {
 	if(editor.nodesScene != null) sceneRemoveObserver(editor.nodesScene.worldScene, renderer);
 	rendererDelete(renderer);
 	allocatorReset(panel);
 	// object3DDelete(camera);
 	free(panel);
 }
-drawDataInit :: (panel: *TYPE) {
-	using panel;
+drawDataInit :: (using panel: *TYPE) {
 	rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
 }
-render :: (panel: *TYPE, renderCollectionData: *RenderCollectionData) {
-	using panel;
+render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	nodesSceneOutputNodesCompute(editor.nodesScene);
 	rendererFlushCommands(renderer);
 	cameraUniformsUpdate(*camera);
@@ -43,14 +40,13 @@ rendererDestroyBuffers :: (panel: *TYPE) {
 	rendererDestroyBuffers(panel.renderer);
 }
 
-onResize :: (panel: *TYPE) {
-	using panel;
+onResize :: (using panel: *TYPE) {
 	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
 
 	renderer.viewport.start = .{ editor.windowSize.x*0, editor.windowSize.y*0 };
 	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.49), xx(cast(float32)editor.windowSize.y*0.49) };
 
-	if(renderer.full_screen == true) {
+	if(renderer.fullScreen == true) {
 		camera.aspect = newAspect;
 	} else {
 		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
@@ -68,14 +64,12 @@ panelRemoveScene :: (panel: *TYPE, nodesScene: *NodesScene) {
 
 TYPE :: ViewerPanel;
 
-viewerPanelInit :: (panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
-
-	using panel;
+viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 
 	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 
 	renderer.label = "ViewerPanelRenderer";
-	renderer.full_screen = false;
+	renderer.fullScreen = false;
 	renderer.viewport = .{
 		start = .{0,0},
 		size = .{1,1}

@@ -3,15 +3,15 @@ testBitArray :: () {
 	test("BitArray", (options:TestProcedureOptions){
 		dirty: Bit_Array;
 
-		assertEqual(bits_count(2), 1);
-		assertEqual(bits_count(3), 1);
-		assertEqual(bits_count(4), 1);
-		assertEqual(bits_count(5), 1);
-		assertEqual(bits_count(6), 1);
-		assertEqual(bits_count(7), 1);
-		assertEqual(bits_count(8), 1);
-		assertEqual(bits_count(64), 1);
-		assertEqual(bits_count(65), 2);
+		assertEqual(bitsCount(2), 1);
+		assertEqual(bitsCount(3), 1);
+		assertEqual(bitsCount(4), 1);
+		assertEqual(bitsCount(5), 1);
+		assertEqual(bitsCount(6), 1);
+		assertEqual(bitsCount(7), 1);
+		assertEqual(bitsCount(8), 1);
+		assertEqual(bitsCount(64), 1);
+		assertEqual(bitsCount(65), 2);
 
 		init_bit_array(*dirty, 2);
 		assertEqual(dirty.slots.count, 1);

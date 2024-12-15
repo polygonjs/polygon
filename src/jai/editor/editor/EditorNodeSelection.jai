@@ -7,10 +7,7 @@ NodeSelectionMode :: enum u8 {
 selectNode :: (editor: *Editor, node: *BaseNodeAny, mode:NodeSelectionMode=.REPLACE) {
 	if mode == {
 		case .REPLACE; {
-			using editor.sceneUiData;
-			for nodeId: selectedNodeIds { onNodeSelectionRemoved(editor, editor.nodesScene, editor.nodesScene.nodes[nodeId]); }
-			selectedNodeIds.count = 0;
-			_selectNode(editor, node);
+			_replaceNode(editor, node);
 		}
 		case .ADD; {
 			_selectNode(editor, node);
@@ -19,6 +16,15 @@ selectNode :: (editor: *Editor, node: *BaseNodeAny, mode:NodeSelectionMode=.REPL
 			deselectNode(editor, node);
 		}
 	}
+}
+_replaceNode :: (editor: *Editor, node: *BaseNodeAny) {
+	found, index := array_find(editor.sceneUiData.selectedNodeIds, node.nodeId);
+	if found == true { return; }
+
+	using editor.sceneUiData;
+	for nodeId: selectedNodeIds { onNodeSelectionRemoved(editor, editor.nodesScene, editor.nodesScene.nodes[nodeId]); }
+	selectedNodeIds.count = 0;
+	_selectNode(editor, node);
 }
 _selectNode :: (editor: *Editor, node: *BaseNodeAny) {
 	found, index := array_find(editor.sceneUiData.selectedNodeIds, node.nodeId);

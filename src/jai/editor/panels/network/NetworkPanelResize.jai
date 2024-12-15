@@ -1,6 +1,5 @@
 
-onResize :: (panel: *TYPE) {
-	using panel;
+onResize :: (using panel: *TYPE) {
 	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
 
 	rendererColor.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
@@ -8,7 +7,7 @@ onResize :: (panel: *TYPE) {
 	rendererSetSize(rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererCopySize(rendererColor, rendererRaycast);
 
-	if(rendererColor.full_screen == true) {
+	if(rendererColor.fullScreen == true) {
 		camera.aspect = newAspect;
 	} else {
 		camera.aspect = cast(float32)rendererColor.viewport.size.x / cast(float32)rendererColor.viewport.size.y;

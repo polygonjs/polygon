@@ -8,17 +8,22 @@ registerTests :: () {
 	#if HAS_NETWORK_PANEL == true testNetworkPanel();
 	testViewerPanel();
 	// runtime
+	// runtime/core
 	testArray();
 	testBitArray();
 	testCoreGraph();
 	testMath();
-	testNodesBasicDependency();
 	testPerlinNoise();
-	// nodes
+	testRaycaster();
+	testVector();
+	// runtime/engine
+	// runtime/engine/nodes
 	testFileSTLGeoNode();
 	testNoiseGeoNode();
 	testOutputGeoNode();
 	testTransformGeoNode();
+	// runtime/engine/scene
+	testNodesBasicDependency();
 
 }
 

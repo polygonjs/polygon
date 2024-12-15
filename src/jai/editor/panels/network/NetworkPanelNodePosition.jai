@@ -1,6 +1,5 @@
 networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
-	_moveNode :: (panel:*TYPE, node:*T, $forRaycast:bool) {
-		using panel;
+	_moveNode :: (using panel:*TYPE, node:*T, $forRaycast:bool) {
 		#if forRaycast {
 			scene := sceneRaycast;
 		} else {
@@ -11,7 +10,7 @@ networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 			mesh := scene.children[meshIndex];
 			pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
 			mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
-			transformable_update_matrix(mesh);
+			transformableUpdateMatrix(mesh);
 		}
 	}
 	_moveNode(panel, node, forRaycast=false);

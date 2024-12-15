@@ -1,6 +1,6 @@
-element_focused :: (renderer:*ViewportContainer, events_data:*EventsData)->bool {
+elementFocused :: (renderer:*ViewportContainer, events_data:*EventsData)->bool {
 	using renderer;
-	if(full_screen)return true;
+	if(fullScreen)return true;
 	return 	events_data.cursor.x >= xx viewport.start.x &&
 			events_data.cursor.x <= xx (viewport.start.x + viewport.size.x) &&
 			events_data.cursor.y >= xx viewport.start.y &&

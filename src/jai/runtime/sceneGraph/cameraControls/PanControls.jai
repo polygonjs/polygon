@@ -13,11 +13,11 @@ PanControls :: struct {
 
 
 
-camera_controls_process_event :: (controls:*TYPE, events_data:*EventsData, element_focused:bool){
+cameraControlsProcessEvent :: (controls:*TYPE, events_data:*EventsData, elementFocused:bool){
 	using controls;
 
-	if(actionStarted == false && element_focused==true){
-		if (events_data.mouseButtonPressed.middle) {
+	if(actionStarted == false && elementFocused==true){
+		if (events_data.mouseButtonJustPressed.middle) {
 			cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
 			actionStarted = true;
 			startCameraPos.x = controls.camera.position.x;
@@ -56,8 +56,9 @@ cameraControlsCommit :: (controls:*TYPE){
 		z=DEPTH
 	};
 	camera.position = newCameraPos;
-	translate(*transformMatrix, newCameraPos);
-	camera.camera_matrices.transformMatrix = transformMatrix;
+	transformableUpdateMatrix(camera);
+	// translate(*transformMatrix, newCameraPos);
+	// camera.matrix = transformMatrix;
 
 	generatedCameraProjectionUpdate(camera);
 }
