@@ -8,6 +8,7 @@ CameraUniforms :: struct {
 	worldPos: Vector4; // if I give a Vector3, there seems some padding or alignment issue, as this crashes
 	transformMatrixInverse: Matrix4x4Buffer;
 	projectionMatrix: Matrix4x4Buffer;
+	projectionMatrixInverse: Matrix4x4Buffer;
 };
 
 Camera :: struct {
@@ -47,4 +48,5 @@ cameraUniformsUpdate :: (camera: *Camera) {
 	projectionMatrix := transpose(camera.projectionMatrix);
 	matrix4x4_to_buffer(*transformMatrixInverse, *camera.cameraUniforms.transformMatrixInverse);
 	matrix4x4_to_buffer(*projectionMatrix, *camera.cameraUniforms.projectionMatrix);
+	matrix4x4_to_buffer(*inverse(projectionMatrix), *camera.cameraUniforms.projectionMatrixInverse);
 }

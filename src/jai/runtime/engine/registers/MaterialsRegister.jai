@@ -7,7 +7,8 @@ registerMaterials :: () {
 	registerLineBasicMaterial();
 
 	registerMeshBasicMaterial();
-	registerMeshBackgroundMaterial();
+	registerMeshBackgroundBasicMaterial();
+	registerMeshBackgroundGridMaterial();
 	registerMeshIdMaterial();
 	registerMeshIdU32Material();
 	registerMeshNormalMaterial();

@@ -8,6 +8,7 @@ struct CameraUniforms {
 	worldPos: vec4<f32>,
 	transformMatrixInverse: mat4x4f,
 	projectionMatrix: mat4x4f,
+	projectionMatrixInverse: mat4x4f,
 };
 
 

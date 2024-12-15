@@ -12,4 +12,4 @@ networkPanelAddBgMesh :: (panel:*TYPE, scene:*Scene, color:Color) {
 #scope_file
 
 TYPE :: NetworkPanel;
-MATERIAL_BG :: MeshBackgroundMaterial;
+MATERIAL_BG :: MeshBackgroundGridMaterial;

@@ -2,7 +2,8 @@
 
 #load "LineBasicMaterial/LineBasicMaterial.jai";
 
-#load "MeshBackgroundMaterial/MeshBackgroundMaterial.jai";
+#load "MeshBackgroundBasicMaterial/MeshBackgroundBasicMaterial.jai";
+#load "MeshBackgroundGridMaterial/MeshBackgroundGridMaterial.jai";
 #load "MeshBasicMaterial/MeshBasicMaterial.jai";
 #load "MeshIdMaterial/MeshIdMaterial.jai";
 #load "MeshIdU32Material/MeshIdU32Material.jai";
