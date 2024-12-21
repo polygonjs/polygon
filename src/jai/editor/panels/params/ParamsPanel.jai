@@ -64,9 +64,11 @@ onResize :: (using panel: *TYPE) {
 }
 #if USE_IMGUI {
 paramsRender :: (using panel: *TYPE) {
+	mainMenuBarDraw(editor);
+
 	ImGui.SetNextWindowSize(.{xx renderer.viewport.size.x, xx renderer.viewport.size.y}, .Always);
 	ImGui.SetNextWindowPos(.{xx renderer.viewport.start.x, xx renderer.viewport.start.y}, .Always);
-	ImGui.Begin("Params");
+	ImGui.Begin("Params", flags = .NoResize|.NoCollapse);
 
 	{
 		// fps
@@ -88,6 +90,8 @@ paramsRender :: (using panel: *TYPE) {
 			}
 			// params
 			generatedNodeParamsRenderUI(node);
+		} else {
+			ImGui.TextUnformatted("No node selected");
 		}
 	}
 	
