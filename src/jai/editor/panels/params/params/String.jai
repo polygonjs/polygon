@@ -2,7 +2,7 @@ paramRenderUI :: (param: *TYPE, paramName:string) {
 	{
 		assetPath := stringFixedToString(*param.value);
 		// paramValueStr := to_c_string_temp(assetPath);
-		#if USE_IMGUI ImGui.Text(assetPath);
+		#if USE_IMGUI ImGui.TextUnformatted(assetPath);
 	}
 	// tmpValue :s32= xx param.value;
 	// initValue := tmpValue;

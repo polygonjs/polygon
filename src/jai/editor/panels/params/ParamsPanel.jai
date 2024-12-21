@@ -70,8 +70,8 @@ paramsRender :: (using panel: *TYPE) {
 
 	{
 		// fps
-		frameRateStr := tprint("Frame Rate: %\n", editor.nodesScene.fps);
-		ImGui.Text(frameRateStr);
+		frameRateStr := tprint("Frame Rate: %", editor.nodesScene.fps);
+		ImGui.TextUnformatted(frameRateStr);
 	}
 
 	{
@@ -84,7 +84,7 @@ paramsRender :: (using panel: *TYPE) {
 			{
 				selectedNodeName := nodeName(editor.nodesScene, nodeId);
 				nodeNameAndTypeStr := tprint("% (%)", selectedNodeName, node.type);
-				ImGui.Text(nodeNameAndTypeStr);
+				ImGui.TextUnformatted(nodeNameAndTypeStr);
 			}
 			// params
 			generatedNodeParamsRenderUI(node);
