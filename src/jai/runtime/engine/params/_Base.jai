@@ -56,6 +56,9 @@ paramSetValueGeneric :: (param: *$P, value: $ValueType)
 }
 {
 	param.value = value;
+	paramPostSetValue(param);
+}
+paramPostSetValue :: inline (param: *$P)
+{
 	setDirty(param);
 }
-

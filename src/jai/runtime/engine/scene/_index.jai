@@ -6,6 +6,7 @@
 #load "NodesSceneTime.jai";
 #load "NodesSceneUniforms.jai";
 // node
+#load "NodesSceneNodeName.jai";
 #load "NodesSceneNodeConnection.jai";
 #load "NodesSceneNodeCreate.jai";
 #load "NodesSceneNodeDelete.jai";

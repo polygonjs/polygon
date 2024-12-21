@@ -1,6 +1,6 @@
 
 FileSTLGeoParams :: struct {
-	path: StringParam = .{value=""};
+	path: StringParam;
 }
 FileSTLGeoNode :: struct {
 	#as using geoNode: GeoNode(FileSTLGeoNode, FileSTLGeoParams);
@@ -13,7 +13,7 @@ registerFileSTLGeoNode :: (){
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 
-	urlOrPath := node.p.path.value;
+	urlOrPath := stringFixedToString(*node.p.path.value);
 	#if WASM {
 		sceneAddNodeRequest(nodesScene, node, urlOrPath);
 	} else {

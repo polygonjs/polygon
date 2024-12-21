@@ -24,6 +24,7 @@ registerTests :: () {
 	testTransformGeoNode();
 	// runtime/engine/scene
 	testNodesBasicDependency();
+	testNodeNames();
 	testNodeSetInput();
 }
 

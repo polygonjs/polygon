@@ -70,7 +70,7 @@ paramsRender :: (using panel: *TYPE) {
 
 	{
 		// fps
-		frameRateStr := to_c_string_temp(tprint("Frame Rate: %\n", panel.editor.nodesScene.fps));
+		frameRateStr := to_c_string_temp(tprint("Frame Rate: %\n", editor.nodesScene.fps));
 		ImGui.Text_CFormat(frameRateStr);
 	}
 
@@ -82,8 +82,8 @@ paramsRender :: (using panel: *TYPE) {
 
 			// node name and type
 			{
-				nodeName := editor.nodesScene.nodeNames[nodeId];
-				nodeNameAndTypeStr := (tprint("% (%)", nodeName, node.type));
+				selectedNodeName := nodeName(editor.nodesScene, nodeId);
+				nodeNameAndTypeStr := tprint("% (%)", selectedNodeName, node.type);
 				ImGui.Text(nodeNameAndTypeStr);
 			}
 			// params

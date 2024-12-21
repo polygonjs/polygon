@@ -13,11 +13,14 @@ appSceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	assert(graphNodeScene(box1)!=null, "scene can be found from node");
 	output1 := createNode(nodesScene, OutputGeoNode);
 
-	#if WASM {
-		// paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
-		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
-	} else {
-		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+	{
+		push_allocator(nodesScene.allocator);
+		#if WASM {
+			assetPath := tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS);
+		} else {
+			assetPath := tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS);
+		}
+		paramSetValue(*fileSTL1.p.path, assetPath);
 	}
 
 	setInput(noise1, 0, box1);

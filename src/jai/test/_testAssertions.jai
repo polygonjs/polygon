@@ -2,9 +2,9 @@
 ASSERTIONS_COUNT :u32= 0;
 
 
-assertEqual ::  (actual: $T, expected: T, name: string="assertEqual") {
+assertEqual :: (actual: $T, expected: T, name: string="assertEqual") {
 	if(actual != expected) {
-		print("actual: %, expected=%, (%)\n", actual, expected, name);
+		print("actual='%', expected='%', (%)\n", actual, expected, name);
 		assert(false, name);
 	}
 	ASSERTIONS_COUNT += 1;

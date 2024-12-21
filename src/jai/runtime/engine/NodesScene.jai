@@ -1,5 +1,4 @@
 
-
 NodesScene :: struct {
 	#if USE_FLAT_POOL {
 		pool: Flat_Pool;
@@ -16,7 +15,7 @@ NodesScene :: struct {
 	fps:FrameCount = 0;
 	validNodes: Bit_Array;
 	nodes: [..]*BaseNodeAny;
-	nodeNames: [..]string;
+	nodeNames: [..]NodeName;
 	worldScene: *Scene;
 	cookResults:[..]GeoNodeCookOutput;
 	nodeInputCookResults:[..]GeoNodeCookInput;

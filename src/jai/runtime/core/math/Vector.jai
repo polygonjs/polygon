@@ -32,6 +32,12 @@ operator == :: (a:$T/Vector2All, b:T) -> bool {
 operator == :: (a:$T/Vector3All, b:T) -> bool {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
+valueEquals :: (tmpValue: [3] float, vector3: Vector3) -> bool #expand {
+	return tmpValue[0] == vector3.x && tmpValue[1] == vector3.y && tmpValue[2] == vector3.z;
+}
+valueEquals :: (tmpValue: [3] s32, vector3: Vector3UInt) -> bool #expand {
+	return tmpValue[0] == xx vector3.x && tmpValue[1] == xx vector3.y && tmpValue[2] == xx vector3.z;
+}
 
 operator - :: (a:$T/Vector2All, b:T) -> T {
 	return .{a.x - b.x, a.y - b.y};
