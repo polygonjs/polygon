@@ -14,7 +14,6 @@ appSceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	output1 := createNode(nodesScene, OutputGeoNode);
 
 	{
-		push_allocator(nodesScene.allocator);
 		#if WASM {
 			assetPath := tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS);
 		} else {

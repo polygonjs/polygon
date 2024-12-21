@@ -70,8 +70,8 @@ paramsRender :: (using panel: *TYPE) {
 
 	{
 		// fps
-		frameRateStr := to_c_string_temp(tprint("Frame Rate: %\n", editor.nodesScene.fps));
-		ImGui.Text_CFormat(frameRateStr);
+		frameRateStr := tprint("Frame Rate: %\n", editor.nodesScene.fps);
+		ImGui.Text(frameRateStr);
 	}
 
 	{

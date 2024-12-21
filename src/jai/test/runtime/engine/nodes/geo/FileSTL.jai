@@ -11,14 +11,14 @@ testFileSTLGeoNode :: () {
 
 		setInput(output1, 0, fileSTL1);
 
-		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS));
 		nodesSceneOutputNodesCompute(nodesScene);
 		// while(nodesScene.computablesTree.cookingNodeIds.count > 0) {
 		// // 	sleep_milliseconds(10);
 		// }
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 1998, "points count");
 
-		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS,, nodesScene.allocator));
+		paramSetValue(*fileSTL1.p.path, tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS));
 		nodesSceneOutputNodesCompute(nodesScene);
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 2718, "points count");
 
