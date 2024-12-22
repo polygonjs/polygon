@@ -1,9 +1,11 @@
 SceneEvent :: enum u8 {
 	OBJECT_ADDED :: 0;
-	OBJECTS_ADDED :: 0;
+	OBJECTS_ADDED;
 	OBJECT_BEFORE_REMOVE;
 	OBJECTS_BEFORE_REMOVE;
 	RENDERABLE_MATERIAL_CHANGED;
+	OBJECT_MATRIX_UPDATED;
+	CAMERA_MATRIX_UPDATED;
 }
 
 
@@ -18,11 +20,15 @@ sceneRemoveObserver :: (scene: *Scene, observer: Any) {
 		}
 	}
 }
+
+
 sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T) {
 	using scene;
 	if event == {
-		case .OBJECT_ADDED; 	{for o:observers sceneObserverOnObjectAdded(o, scene, object);}
-		case .OBJECT_BEFORE_REMOVE; 	{for o:observers sceneObserverOnObjectBeforeRemove(o, scene, object);}
+		case .OBJECT_ADDED; 	{for o:observers sceneObserverOnObjectAdded(o, scene, object);return;}
+		case .OBJECT_BEFORE_REMOVE; 	{for o:observers sceneObserverOnObjectBeforeRemove(o, scene, object);return;}
+		case .OBJECT_MATRIX_UPDATED; {for o:observers sceneObserverOnObjectMatrixUpdated(o, scene, object);return;}
+		case .CAMERA_MATRIX_UPDATED; {for o:observers sceneObserverOnCameraMatrixUpdated(o, scene, cast(*Camera)object);return;}
 	}
 }
 sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
@@ -38,6 +44,7 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
 			for o:observers {
 				sceneObserverOnObjectsAdded(o, scene, objectsCopy);
 			}
+			return;
 		}
 		case .OBJECTS_BEFORE_REMOVE; {
 			push_allocator(temp);
@@ -45,13 +52,14 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
 			for o:observers {
 				sceneObserverOnObjectsBeforeRemove(o, scene, objectsCopy);
 			}
+			return;
 		}
 	}
 }
 sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T, previousMaterial: *Material) {
 	using scene;
 	if event == {
-		case .RENDERABLE_MATERIAL_CHANGED; {for o:observers sceneObserverOnRenderableMaterialChanged(o, scene, object, previousMaterial);}
+		case .RENDERABLE_MATERIAL_CHANGED; {for o:observers sceneObserverOnRenderableMaterialChanged(o, scene, object, previousMaterial);return;}
 	}
 }
 // sceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T, inputIndex: u8=0) {

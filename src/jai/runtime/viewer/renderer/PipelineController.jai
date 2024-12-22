@@ -24,9 +24,8 @@ PipelineController :: struct {
 	fragment_state: WGPUFragmentState;
 	color_target_state: WGPUColorTargetState;
 	//
-	meshes: [..]*Mesh;
 	material: *Material;
-	meshes_draw_data:[..]*MeshDrawData;
+	drawDatas:[..]*MeshDrawData;
 	//
 	uniforms_dirty: bool=true;
 	
@@ -42,8 +41,7 @@ newPipelineController :: (renderer: *Renderer, $T: Type, material: *Material) ->
 	push_allocator(renderer.allocator);
 	array_init(*pc.vertexBufferLayouts);
 	array_init(*pc.vertexAttributes);
-	array_init(*pc.meshes);
-	array_init(*pc.meshes_draw_data);
+	array_init(*pc.drawDatas);
 	
 
 	pc.material = material;
@@ -56,8 +54,7 @@ pipelineControllerDelete :: (using pc: *PipelineController){
 	push_allocator(renderer.allocator);
 	array_init(*vertexBufferLayouts);
 	array_init(*vertexAttributes);
-	array_init(*meshes);
-	array_init(*meshes_draw_data);
+	array_init(*drawDatas);
 	free(label);
 }
 
@@ -133,23 +130,37 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 }
 pipelineControllerAddMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 	drawData := newDrawData(pc, mesh);
-	array_add(*meshes, mesh);
-	array_add(*meshes_draw_data, drawData);
+	array_add(*drawDatas, drawData);
 
 	if mesh.use_compute {
 		renderer.computes = compute_controller_collection_create(pc.renderer.wgpuContext, mesh);
 		pipeline_controller_update(pc, *pc.renderer.computes);
 	}
 }
+
 pipelineControllerRemoveMesh :: (using pc: *PipelineController, mesh: *Mesh) {
-	found, index := array_find(meshes, mesh);
+	found, index := pipelineControllerGetDrawData(pc, mesh);
 	if found {
-		array_unordered_remove_by_index(*meshes, index);
-		array_unordered_remove_by_index(*meshes_draw_data, index);
+		array_unordered_remove_by_index(*drawDatas, index);
 	}
 	// drawData := newDrawData(pc, mesh);
 	// array_add(*meshes, mesh);
 	// array_add(*meshes_draw_data, drawData);
+}
+pipelineControllerUpdateUniformBuffers :: (using pc: *PipelineController, mesh:*Mesh) {
+	found, index := pipelineControllerGetDrawData(pc, mesh);
+	if found {
+		drawData := drawDatas[index];
+		drawDataUpdateMeshUniforms(pc.renderer, drawData);
+	}
+}
+pipelineControllerGetDrawData :: (using pc: *PipelineController, mesh: *Mesh) -> (found:bool, index:s64) {
+	for drawData, i: drawDatas {
+		if drawData.mesh == mesh {
+			return true, i;
+		}
+	}
+	return false, -1;
 }
 
 // pipeline_controller_mesh_update_draw_data :: (pc: *PipelineController, mesh: *Mesh, scene:*Scene) {
@@ -161,8 +172,7 @@ pipelineControllerRemoveMesh :: (using pc: *PipelineController, mesh: *Mesh) {
 // }
 
 
-
-pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
+pipelineControllerUpdateRenderableUniformBuffers :: (using pc: *PipelineController) {
 	
 	wgpuContext := renderer.wgpuContext;
 	// using the dirty flag may need a bit more work:
@@ -171,15 +181,51 @@ pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
 	// - ensure material uniforms is shared and triggers it
 	// if(!pc.uniforms_dirty) return;
 	// defer pc.uniforms_dirty = false;
-	assert(meshes.count > 0, "pc.meshes is empty");
-	assert(meshes.count == meshes_draw_data.count, "pc.meshes.count != pc.meshes_draw_data.count");
-	for mesh, i: meshes {
-		draw_data := meshes_draw_data[i];
-		{
-			size := cast(u64) max( 16, size_of(TransformableUniforms));
-			buffer := draw_data.uniforms.object.buffer;
-			wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *mesh.transformableUniforms, size);
-		}
+	assert(drawDatas.count > 0, "pc.drawDatas is empty");
+	// assert(meshes.count == drawDatas.count, "pc.meshes.count != pc.meshes_draw_data.count");
+	for drawData, i: drawDatas {
+		drawDataUpdateMeshUniforms(renderer, drawData);
+		// draw_data := meshes_draw_data[i];
+		// {
+		// 	size := cast(u64) max( 16, size_of(TransformableUniforms));
+		// 	buffer := draw_data.uniforms.object.buffer;
+		// 	// print("upload:%,%\n", mesh.id, mesh.position);
+		// 	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *mesh.transformableUniforms, size);
+		// }
+		// {
+		// 	size := cast(u64) max( 16, size_of(CameraUniforms));
+		// 	buffer := draw_data.uniforms.camera.buffer;
+		// 	wgpuQueueWriteBuffer(pc.wgpuContext.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
+		// }
+		// {
+		// 	size := cast(u64) max( 16, material.uniformTypeSize);
+		// 	buffer := draw_data.uniforms.material.buffer;
+		// 	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *material.uniforms, size);
+		// }
+		// update_object_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.object.buffer, *mesh);
+		// update_camera_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.camera.buffer, scene_data);
+		// update_sdf_uniforms_to_buffer(wgpuContext, draw_data.uniforms.material.buffer, scene_data);
+	}
+}
+pipelineControllerUpdateMaterialUniformBuffers :: (using pc: *PipelineController) {
+	
+	wgpuContext := renderer.wgpuContext;
+	// using the dirty flag may need a bit more work:
+	// - ensure mesh uniforms trigger it
+	// - ensure camera uniforms is shared and triggers it
+	// - ensure material uniforms is shared and triggers it
+	// if(!pc.uniforms_dirty) return;
+	// defer pc.uniforms_dirty = false;
+	assert(drawDatas.count > 0, "pc.drawDatas is empty");
+	// assert(meshes.count == meshes_draw_data.count, "pc.meshes.count != pc.meshes_draw_data.count");
+	for drawData, i: drawDatas {
+		// draw_data := meshes_draw_data[i];
+		// {
+		// 	size := cast(u64) max( 16, size_of(TransformableUniforms));
+		// 	buffer := draw_data.uniforms.object.buffer;
+		// 	// print("upload:%,%\n", mesh.id, mesh.position);
+		// 	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *mesh.transformableUniforms, size);
+		// }
 		// {
 		// 	size := cast(u64) max( 16, size_of(CameraUniforms));
 		// 	buffer := draw_data.uniforms.camera.buffer;
@@ -187,7 +233,7 @@ pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
 		// }
 		{
 			size := cast(u64) max( 16, material.uniformTypeSize);
-			buffer := draw_data.uniforms.material.buffer;
+			buffer := drawData.uniforms.material.buffer;
 			wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *material.uniforms, size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.object.buffer, *mesh);
@@ -196,25 +242,25 @@ pipeline_controller_update_uniform_buffers :: (using pc: *PipelineController) {
 	}
 }
 
-pipeline_controller_update_render_pass :: (using  pc: *PipelineController, render_pass_encoder: WGPURenderPassEncoder) {
-	wgpuRenderPassEncoderSetPipeline(render_pass_encoder, pipeline);
-	for draw_data: meshes_draw_data {
+pipeline_controller_update_render_pass :: (using pc: *PipelineController, renderPassEncoder: WGPURenderPassEncoder) {
+	wgpuRenderPassEncoderSetPipeline(renderPassEncoder, pipeline);
+	for drawData: drawDatas {
 		{
-			using draw_data.uniforms;
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.SCENE, renderer.scene_data.bind_group, 0, null);
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.CAMERA, renderer.camera_data.bind_group, 0, null);
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.OBJECT, object.bind_group, 0, null);
-			wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, xx UniformBindingIndex.MATERIAL, material.bind_group, 0, null);
+			using drawData.uniforms;
+			wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, xx UniformBindingIndex.SCENE, renderer.scene_data.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, xx UniformBindingIndex.CAMERA, renderer.camera_data.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, xx UniformBindingIndex.OBJECT, object.bind_group, 0, null);
+			wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, xx UniformBindingIndex.MATERIAL, material.bind_group, 0, null);
 		}
 		//
-		for v, vi: draw_data.vertex {
+		for v, vi: drawData.vertex {
 			// print("submit attribute buffer START: % % (%/%)\n", v.buffer, v.label, vi+1, draw_data.vertex.count);
-			wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder, xx vi, v.buffer, 0, v.buffer_size);
+			wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, xx vi, v.buffer, 0, v.buffer_size);
 		}
-		wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, draw_data.index.buffer, WGPUIndexFormat.Uint32, 0, draw_data.index.buffer_size);
+		wgpuRenderPassEncoderSetIndexBuffer(renderPassEncoder, drawData.index.buffer, WGPUIndexFormat.Uint32, 0, drawData.index.buffer_size);
 
-		mesh :*Mesh= meshes[it_index];
-		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(render_pass_encoder, xx (mesh.geometry.indices.count), 1, 0, 0, 0);
+		// mesh :*Mesh= drawData[it_index];
+		#if RENDER_SCENE wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, xx (drawData.mesh.geometry.indices.count), 1, 0, 0, 0);
 	}
 }
 

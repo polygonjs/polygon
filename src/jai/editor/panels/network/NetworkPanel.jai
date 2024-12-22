@@ -129,10 +129,12 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	setColor(mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
 
 	cameraControls.camera = camera;
+	cameraControlsSetScenes(*cameraControls, .[sceneWorld, sceneRaycast]);
+	cameraControlsCommit(*cameraControls);
+
 
 	networkPanelAddBgMesh(panel, sceneWorld, .{0.2, 0.2, 0.2, 1.0});
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER networkPanelAddBgMesh(panel, sceneRaycast, .{0, 0, 0, 0});
 
-	cameraControlsCommit(*cameraControls);
 }
 

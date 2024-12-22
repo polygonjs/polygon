@@ -120,6 +120,8 @@ rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 	}
 	renderer_scene_uniform_buffer_create(renderer, scene);
 	renderer_camera_uniform_buffer_create(renderer, camera);
+
+	rendererCameraUpdateMatrix(renderer, camera);
 	
 	// for object: scene.children {
 	// 	rendererObjectAdd(renderer, object);
@@ -184,11 +186,24 @@ rendererRenderableMaterialChanged :: (renderer:*Renderer, object:*Object3D, prev
 	pipelineControllerRemoveMeshAndDeleteIfEmpty(renderer, mesh, previousMatId);
 	rendererObjectAdd(renderer, object);
 }
+rendererTransformableUpdateMatrix :: (renderer:*Renderer, mesh:*Mesh) {
+	matId := mesh.material.id;
+	pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
+	if found {
+		pipelineControllerUpdateUniformBuffers(pc, mesh);
+	} else {
+		print("pipeline controller not found\n");
+	}
+}
+rendererCameraUpdateMatrix :: (renderer: *Renderer, camera:*Camera) {
+	cameraUniformsUpdate(camera);
+	renderer_camera_uniform_buffer_update(renderer, camera, camera.cameraUniforms);
+}
 pipelineControllerRemoveMeshAndDeleteIfEmpty :: (renderer:*Renderer, mesh:*Mesh, matId:u64) {
 	pc, found := table_find(*renderer.pipelines_by_mat_type, matId);
 	if found {
 		pipelineControllerRemoveMesh(pc, mesh);
-		if pc.meshes.count == 0 {
+		if pc.drawDatas.count == 0 {
 			pipelineControllerDelete(pc);
 			table_remove(*renderer.pipelines_by_mat_type, matId);
 		}
@@ -213,9 +228,14 @@ pipelineControllerRemoveMeshAndDeleteIfEmpty :: (renderer:*Renderer, mesh:*Mesh,
 // 	array_add(*renderer.pipelines.pipelines, pipeline_controller);
 // }
 
+rendererPreRender :: inline (renderer:*Renderer, camera:*Camera) {
+	rendererFlushCommands(renderer);
+	// cameraUniformsUpdate(camera);
+}
 
 render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera: *Camera){
-	
+	rendererPreRender(renderer, camera);
+
 	create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
 	device := renderer.wgpuContext.device;
@@ -249,8 +269,11 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 	compute_controller_collection_compute(*renderer.computes);
 
 	renderer_scene_uniform_buffer_update(renderer, scene, scene.sceneUniforms);
-	renderer_camera_uniform_buffer_update(renderer, camera, camera.cameraUniforms);
-	for renderer.pipelines_by_mat_type pipeline_controller_update_uniform_buffers(it);
+	
+	for renderer.pipelines_by_mat_type {
+		// pipelineControllerUpdateRenderableUniformBuffers(it);
+		pipelineControllerUpdateMaterialUniformBuffers(it);
+	}
 	
 	// if(renderer.fullScreen == false) {
 	// 	using renderer.viewport;

@@ -1,8 +1,9 @@
 
 
 PanControls :: struct {
+	#as using cameraControls: CameraControls;
+
 	sensitivity:float = 0.025;
-	camera:*Camera=null;
 
 	actionStarted: bool = false;
 	middleButtonPressed: bool = false;
@@ -13,12 +14,11 @@ PanControls :: struct {
 
 
 
-cameraControlsProcessEvent :: (controls:*TYPE, events_data:*EventsData, elementFocused:bool){
-	using controls;
+cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, elementFocused:bool){
 
 	if(actionStarted == false && elementFocused==true){
-		if (events_data.mouseButtonJustPressed.middle) {
-			cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
+		if (eventsData.mouseButtonJustPressed.middle) {
+			cursor :Vector2Int= .{ cast(s32)eventsData.cursor.x, cast(s32)eventsData.cursor.y};
 			actionStarted = true;
 			startCameraPos.x = controls.camera.position.x;
 			startCameraPos.y = controls.camera.position.y;
@@ -28,15 +28,15 @@ cameraControlsProcessEvent :: (controls:*TYPE, events_data:*EventsData, elementF
 		}
 	}
 	if(actionStarted==true){
-		cursor :Vector2Int= .{ cast(s32)events_data.cursor.x, cast(s32)events_data.cursor.y};
+		cursor :Vector2Int= .{ cast(s32)eventsData.cursor.x, cast(s32)eventsData.cursor.y};
 		delta.x = cursor.x - startPointer.x;
 		delta.y = cursor.y - startPointer.y;
-		if (events_data.mouseButton.middle==false) {
+		if (eventsData.mouseButton.middle==false) {
 			actionStarted = false;
 		}
 	}
 
-	if(events_data.wheel != 0){
+	if(eventsData.wheel != 0){
 		// radius -= events_data.wheel * 0.1;
 		// if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
 	}
@@ -44,8 +44,7 @@ cameraControlsProcessEvent :: (controls:*TYPE, events_data:*EventsData, elementF
 	cameraControlsUpdateCamera(controls);
 }
 
-cameraControlsCommit :: (controls:*TYPE){
-	using controls;
+cameraControlsCommit :: (using controls:*TYPE){
 	
 	// translate
 	transformMatrix :Matrix4;
@@ -56,7 +55,7 @@ cameraControlsCommit :: (controls:*TYPE){
 		z=DEPTH
 	};
 	camera.position = newCameraPos;
-	transformableUpdateMatrix(camera);
+	cameraControlsUpdateCameraMatrix(controls);
 	// translate(*transformMatrix, newCameraPos);
 	// camera.matrix = transformMatrix;
 
@@ -72,10 +71,9 @@ delta:Vector2Int;
 DEPTH:float:5;
 
 
-cameraControlsUpdateCamera :: (controls:*TYPE){
-	using controls;
+cameraControlsUpdateCamera :: (using controls:*TYPE){
 
-	if(actionStarted == false)return;
+	if(actionStarted == false){return;}
 
 	cameraControlsCommit(controls);
 }

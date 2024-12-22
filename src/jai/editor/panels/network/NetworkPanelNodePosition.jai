@@ -1,3 +1,8 @@
+moveCapturedNodes :: (using panel: *NetworkPanel, nodeId: NodeId, startPos: Vector2, currentPos: Vector2) {
+	node := editor.nodesScene.nodes[nodeId];
+	onNodeSetPosition(editor, editor.nodesScene, node, currentPos);
+}
+
 networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 	_moveNode :: (using panel:*TYPE, node:*T, $forRaycast:bool) {
 		#if forRaycast {
@@ -10,7 +15,7 @@ networkPanelNodeSetPosition :: (panel: *TYPE, node: *$T, position: Vector2) {
 			mesh := scene.children[meshIndex];
 			pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
 			mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
-			transformableUpdateMatrix(mesh);
+			sceneObjectUpdateMatrix(scene, mesh);
 		}
 	}
 	_moveNode(panel, node, forRaycast=false);

@@ -7,7 +7,7 @@ testRaycaster :: (){
 		camera.far = 100;
 
 		camera.position = .{5,10,2};
-		transformableUpdateMatrix(camera);
+		sceneObjectUpdateMatrix(sceneWorld, camera);
 		cameraProjectionUpdate(camera);
 
 		raycaster: Raycaster;

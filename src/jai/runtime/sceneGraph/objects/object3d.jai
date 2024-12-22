@@ -122,6 +122,7 @@ transformableUpdateMatrix :: (object: *TYPE) {
 	object.matrixInverse = inverse(object.matrix);
 
 	transformableUniformsUpdate(object);
+
 }
 
 transformableUniformsUpdate :: (object: *TYPE) {

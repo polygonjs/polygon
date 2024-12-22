@@ -1,12 +1,13 @@
 
 
 OrbitControls :: struct {
+	#as using cameraControls: CameraControls;
+
 	theta:float = -PI/4; // Angle around the Y-axis
 	phi:float = -PI/4;  // Angle around the X-axis
 	radius:float = 5.0; // Distance from the target
 	target:Vector3 = .{x=0.0,y=0.0,z=0.0}; // Target point the camera looks at
 	sensitivity:float = 0.0025;
-	camera:*Camera=null;
 
 	actionStarted: bool = false;
 	leftButtonPressed: bool = false;
@@ -16,40 +17,38 @@ OrbitControls :: struct {
 
 
 
-cameraControlsProcessEvent :: (controls:*TYPE, events_data:*EventsData, elementFocused:bool){
-	using controls;
+cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, elementFocused:bool){
 
 	if(actionStarted == false && elementFocused==true){
-		if (events_data.mouseButtonJustPressed.left) {
+		if (eventsData.mouseButtonJustPressed.left) {
 			actionStarted = true;
-			lastPointer.x = cast(s32)events_data.cursor.x;
-		lastPointer.y = cast(s32)events_data.cursor.y;
+			lastPointer.x = cast(s32)eventsData.cursor.x;
+		lastPointer.y = cast(s32)eventsData.cursor.y;
 		}
 	}
 	if(actionStarted==true){
-		dx:int = cast(int)events_data.cursor.x - lastPointer.x;
-		dy:int = cast(int)events_data.cursor.y - lastPointer.y;
+		dx:int = cast(int)eventsData.cursor.x - lastPointer.x;
+		dy:int = cast(int)eventsData.cursor.y - lastPointer.y;
 
 		theta += dx * sensitivity;
 		phi -= dy * sensitivity;
 
-		if (events_data.mouseButton.left==false) {
+		if (eventsData.mouseButton.left==false) {
 			actionStarted = false;
 		}
-		lastPointer.x = cast(s32)events_data.cursor.x;
-		lastPointer.y = cast(s32)events_data.cursor.y;
+		lastPointer.x = cast(s32)eventsData.cursor.x;
+		lastPointer.y = cast(s32)eventsData.cursor.y;
 	}
 
-	if(events_data.wheel != 0){
-		radius -= events_data.wheel * 0.1;
+	if(eventsData.wheel != 0){
+		radius -= eventsData.wheel * 0.1;
 		if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
 	}
 
 	cameraControlsUpdateCamera(controls);
 }
 
-cameraControlsCommit :: (controls:*TYPE){
-	using controls;
+cameraControlsCommit :: (using controls:*TYPE){
 
 	// Clamp phi to avoid flipping at the poles
 	if (phi < PHI_MIN) phi = PHI_MIN;
@@ -64,7 +63,7 @@ cameraControlsCommit :: (controls:*TYPE){
 	// rotate + translate
 	camera.position = .{x=0.0, y=0.0, z=radius};
 	camera.quaternion = quaternionY * quaternionX;
-	transformableUpdateMatrix(camera);
+	cameraControlsUpdateCameraMatrix(controls);
 	// transformMatrix :Matrix4;
 	// identity(*transformMatrix);
 	// transformMatrix = rotate(transformMatrix, quaternionY);
@@ -89,8 +88,8 @@ AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
 AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
 // UP		::Vector3.{x=0.0, y=1.0, z=0.0};
 
-cameraControlsUpdateCamera :: (controls:*TYPE){
-	if(controls.actionStarted == false)return;
+cameraControlsUpdateCamera :: (using controls:*TYPE){
+	if(actionStarted == false){return;}
 
 	cameraControlsCommit(controls);
 }

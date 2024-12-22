@@ -1,5 +1,9 @@
 
-appSceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
+appSceneInit :: appSceneInit1;
+
+#scope_file
+
+appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	add1 := createNode(nodesScene, AddGeoNode);
 	box1 := createNode(nodesScene, BoxGeoNode);
@@ -44,13 +48,13 @@ appSceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	nodeSetPosition(editor, output1, .{0,-4});
 
-	nodeSetPosition(editor, add1, .{-4,2});
+	nodeSetPosition(editor, add1, .{-4,0});
 	nodeSetPosition(editor, box1, .{-2,2});
 	nodeSetPosition(editor, noise1, .{-2,0});
 	nodeSetPosition(editor, icosahedron1, .{0,2});
 	nodeSetPosition(editor, noise2, .{0,0});
 	nodeSetPosition(editor, line1, .{2,2});
-	nodeSetPosition(editor, fileSTL1, .{4,2});
+	nodeSetPosition(editor, fileSTL1, .{5,0});
 
 	// nodeSetPosition(editor, transform1, .{0,0});
 	// nodeSetPosition(editor, transform2, .{0,-2});
@@ -59,3 +63,12 @@ appSceneInit :: (nodesScene: *NodesScene, editor: *Editor) {
 	editorFlushCommands(editor);
 }
 
+
+appSceneInit2 :: (nodesScene: *NodesScene, editor: *Editor) {
+
+	output1 := createNode(nodesScene, OutputGeoNode);
+
+	nodeSetPosition(editor, output1, .{0,-4});
+
+	editorFlushCommands(editor);
+}

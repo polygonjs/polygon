@@ -12,7 +12,8 @@ onResize :: (using panel: *TYPE) {
 	} else {
 		camera.aspect = cast(float32)rendererColor.viewport.size.x / cast(float32)rendererColor.viewport.size.y;
 	}
-	cameraProjectionUpdate(camera);
+	sceneCameraUpdateProjectionMatrix(sceneWorld, camera);
+	sceneCameraUpdateProjectionMatrix(sceneRaycast, camera);
 }
 
 #scope_file

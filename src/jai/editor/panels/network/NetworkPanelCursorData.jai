@@ -10,8 +10,8 @@ cursorForRaycast :: (eventsData: *EventsData, viewportContainer: *ViewportContai
 	}
 	using viewportContainer.viewport;
 	return .{
-		x = cast(float)(eventsData.cursor.x-start.x) / cast(float)size.x,
-		y = cast(float)(eventsData.cursor.y-start.y) / cast(float)size.y,
+		x = 2*(cast(float)(eventsData.cursor.x-start.x) / cast(float)size.x)-1,
+		y = -2*(cast(float)(eventsData.cursor.y-start.y) / cast(float)size.y)+1,
 	};
 }
 

@@ -18,10 +18,12 @@ testViewerPanel :: () {
 		editor.onAfterTick = (using editor: *Editor) {
 			if nodesScene.framesCount == {
 				case 1; {
-					assertEqual(viewerPanel.renderer.pipelines_by_mat_type.count, 1);
-					meshesCount := 0;
-					for pc: viewerPanel.renderer.pipelines_by_mat_type { meshesCount += pc.meshes.count; }
-					assertEqual(meshesCount, 1);
+					#if HAS_VIEWER_PANEL {
+						assertEqual(viewerPanel.renderer.pipelines_by_mat_type.count, 1);
+						meshesCount := 0;
+						for pc: viewerPanel.renderer.pipelines_by_mat_type { meshesCount += pc.drawDatas.count; }
+						assertEqual(meshesCount, 1);
+					}
 				}
 				case 2; { output1 := sceneFindNodeByType (editor.nodesScene, OutputGeoNode); paramSetValue(*output1.p.input, xx 1); }
 				case 3; { }

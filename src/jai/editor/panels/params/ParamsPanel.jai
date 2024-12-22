@@ -46,10 +46,6 @@ render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 		renderUIFrameEnd(renderPassEncoder, *panel.editor.imguiPolygonContext);
 		renderUIEnd(renderCollectionData, renderer, cmdEncoder, renderPassEncoder);
 	}
-	// nodesSceneOutputNodesCompute(editor.nodesScene);
-	// rendererFlushCommands(renderer);
-	// cameraUniformsUpdate(*camera);
-	// render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
 	rendererDestroyBuffers(panel.renderer);
@@ -69,12 +65,6 @@ paramsRender :: (using panel: *TYPE) {
 	ImGui.SetNextWindowSize(.{xx renderer.viewport.size.x, xx renderer.viewport.size.y}, .Always);
 	ImGui.SetNextWindowPos(.{xx renderer.viewport.start.x, xx renderer.viewport.start.y}, .Always);
 	ImGui.Begin("Params", flags = .NoResize|.NoCollapse);
-
-	{
-		// fps
-		frameRateStr := tprint("Frame Rate: %", editor.nodesScene.fps);
-		ImGui.TextUnformatted(frameRateStr);
-	}
 
 	{
 		// node name / type / selection count
@@ -132,9 +122,4 @@ paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 	renderer.clear = false;
 
 	editor = _editor;
-	// camera.type = PerspectiveCamera;
-	// object3DInit(*camera);
-	// cameraControls.camera = *camera;
-
-	// cameraControlsCommit(*cameraControls);
 }

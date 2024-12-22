@@ -15,8 +15,9 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, camera);
 				networkPanelCursorDataInit(*eventHandler.worldData, worldPos);
 			}
+			moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
 			if (eventsData.mouseButtonJustReleased.left == true) {
-				if(eventHandler.screenData.distanceMoved < 0.1){
+				if(moveThresholdCrossed == false){
 					eventHandler.waitingForButtonUpReadPixel = eventHandler.nodeIdOnButtonDownFound == true;
 				}
 				eventHandler.nodeIdOnButtonDownFound = false;
@@ -25,10 +26,13 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 				networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, rendererColor));
 				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, camera);
 				networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
+				if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
+					moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
+				}
 			}
 			if (eventHandler.waitingForButtonDownReadPixel == true) {
 				eventHandler.nodeIdOnButtonDownFound = false;
-				rendererReadPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+				renderPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
 				success, result := readPixelIfMapped(rendererRaycast, eventsData);
 				if success == true {
 					eventHandler.waitingForButtonDownReadPixel = false;
@@ -42,7 +46,7 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 					}
 				}
 			} else if (eventHandler.waitingForButtonUpReadPixel == true) {
-				rendererReadPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
+				renderPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
 				success, result := readPixelIfMapped(rendererRaycast, eventsData);
 				if success == true {
 					eventHandler.waitingForButtonUpReadPixel = false;
@@ -67,6 +71,8 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 
 TYPE :: NetworkPanel;
 READ_PIXEL_WARNING_PRINTED:=false;
+
+MOVE_DIST_THRESHOLD :: 0.05;
 
 updateOutputNode :: (using panel: *TYPE, eventsData:*EventsData) {
 	// print("%,%\n", eventsData.text[0], cast(u8)eventsData.text[0]);

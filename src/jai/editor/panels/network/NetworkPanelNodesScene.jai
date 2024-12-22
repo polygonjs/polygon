@@ -1,5 +1,5 @@
 
-panelSetScene :: (panel: *TYPE, scene: *NodesScene) {
+panelSetScene :: (using panel: *TYPE, scene: *NodesScene) {
 	networkPanelUpdateScenes(panel, panel.editor.nodesScene);
 	// sceneAddObserver(editor.nodesScene.worldScene, renderer);
 }

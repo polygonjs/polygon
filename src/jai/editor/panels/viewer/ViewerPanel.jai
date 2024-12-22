@@ -32,8 +32,6 @@ drawDataInit :: (using panel: *TYPE) {
 }
 render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	nodesSceneOutputNodesCompute(editor.nodesScene);
-	rendererFlushCommands(renderer);
-	cameraUniformsUpdate(*camera);
 	render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
 }
 rendererDestroyBuffers :: (panel: *TYPE) {
@@ -51,10 +49,12 @@ onResize :: (using panel: *TYPE) {
 	} else {
 		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
 	}
-	cameraProjectionUpdate(*camera);
+	sceneCameraUpdateProjectionMatrix(editor.nodesScene.worldScene, *camera);
 }
-panelSetScene :: (panel: *TYPE, nodesScene: *NodesScene) {
+panelSetScene :: (using panel: *TYPE, nodesScene: *NodesScene) {
 	rendererAny: Any = <<panel.renderer;
+	cameraControlsSetScenes(*cameraControls, .[editor.nodesScene.worldScene]);
+	cameraControlsCommit(*cameraControls);
 	sceneAddObserver(nodesScene.worldScene, rendererAny);
 }
 panelRemoveScene :: (panel: *TYPE, nodesScene: *NodesScene) {
@@ -85,5 +85,5 @@ viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 	object3DInit(*camera);
 	cameraControls.camera = *camera;
 
-	cameraControlsCommit(*cameraControls);
+	// cameraControlsCommit(*cameraControls); // do not commit as we don't have the scene yet
 }

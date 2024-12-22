@@ -106,6 +106,6 @@ testNetworkPanel :: () {
 
 _meshesCount :: (networkPanel: *NetworkPanel)->u64{
 	meshesCount :u64= 0;
-	for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += xx pc.meshes.count; }
+	for pc: networkPanel.rendererColor.pipelines_by_mat_type { meshesCount += xx pc.drawDatas.count; }
 	return meshesCount;
 }

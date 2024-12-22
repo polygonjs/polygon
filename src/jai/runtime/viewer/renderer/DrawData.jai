@@ -1,4 +1,5 @@
 MeshDrawData :: struct {
+	mesh: *Mesh;
 	vertex:[..]BufferContainer;
 	index:BufferContainer;
 	uniforms:PipelineDataUniform;
@@ -8,6 +9,7 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 	renderer := pc.renderer;
 	wgpuContext := renderer.wgpuContext;
 	drawData :*MeshDrawData = New(MeshDrawData,, renderer.allocator);
+	drawData.mesh = mesh;
 	push_allocator(pc.renderer.allocator);
 	array_init(*drawData.vertex);
 
@@ -67,39 +69,45 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 }
 
 
-draw_data_update :: (pc: *PipelineController, using draw_data: *MeshDrawData, mesh: *Mesh) {
-	// TODO: this is a duplication with the create function, refactor
-	queue := pc.renderer.wgpuContext.queue;
-	{
-		using mesh.geometry.attributes;
-		{
-			container := vertex[0];
-			wgpuQueueWriteBuffer(queue, container.buffer, 0, position.values.data, container.buffer_size);
-		}
-		{
-			container := vertex[1];
-			wgpuQueueWriteBuffer(queue, container.buffer, 0, normal.values.data, container.buffer_size);
-		}
-		{
-			// container := draw_data.vertex[2];
-			// wgpuQueueWriteBuffer(pc.wgpuContext.queue, container.buffer, 0, color.values.data, container.buffer_size);
-		}
-		{
-			container := vertex[2];
-			wgpuQueueWriteBuffer(queue, container.buffer, 0, uv.values.data, container.buffer_size);
-		}
-	}
+// draw_data_update :: (pc: *PipelineController, using draw_data: *MeshDrawData, mesh: *Mesh) {
+// 	// TODO: this is a duplication with the create function, refactor
+// 	queue := pc.renderer.wgpuContext.queue;
+// 	{
+// 		using mesh.geometry.attributes;
+// 		{
+// 			container := vertex[0];
+// 			wgpuQueueWriteBuffer(queue, container.buffer, 0, position.values.data, container.buffer_size);
+// 		}
+// 		{
+// 			container := vertex[1];
+// 			wgpuQueueWriteBuffer(queue, container.buffer, 0, normal.values.data, container.buffer_size);
+// 		}
+// 		{
+// 			// container := draw_data.vertex[2];
+// 			// wgpuQueueWriteBuffer(pc.wgpuContext.queue, container.buffer, 0, color.values.data, container.buffer_size);
+// 		}
+// 		{
+// 			container := vertex[2];
+// 			wgpuQueueWriteBuffer(queue, container.buffer, 0, uv.values.data, container.buffer_size);
+// 		}
+// 	}
 
-	{
-		using mesh.geometry;
-		container := index;
-		wgpuQueueWriteBuffer(queue, container.buffer, 0, indices.data, container.buffer_size);
-	}
-}
+// 	{
+// 		using mesh.geometry;
+// 		container := index;
+// 		wgpuQueueWriteBuffer(queue, container.buffer, 0, indices.data, container.buffer_size);
+// 	}
+// }
 
 drawDataBuffersScheduleDestroy :: (using renderer: *Renderer, drawData: *MeshDrawData) {
 	for v: drawData.vertex {
 		array_add(*buffers_to_destroy, v);
 	}
 	array_add(*buffers_to_destroy, drawData.index);
+}
+
+drawDataUpdateMeshUniforms :: (using renderer: *Renderer, drawData: *MeshDrawData) {
+	size := cast(u64) max( 16, size_of(TransformableUniforms));
+	buffer := drawData.uniforms.object.buffer;
+	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *drawData.mesh.transformableUniforms, size);
 }

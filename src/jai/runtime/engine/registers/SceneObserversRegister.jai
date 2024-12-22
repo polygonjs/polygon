@@ -19,6 +19,14 @@ sceneObserverOnRenderableMaterialChanged :: (observer: Any, scene: *Scene, objec
 	#insert ON_RENDERABLE_MATERIAL_CHANGED;
 	assert(false, tprint("sceneObserverOnRenderableMaterialChanged: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
+sceneObserverOnObjectMatrixUpdated :: (observer: Any, scene: *Scene, object:*$O) {
+	#insert ON_OBJECT_MATRIX_UPDATED;
+	assert(false, tprint("sceneObserverOnObjectMatrixUpdated: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
+}
+sceneObserverOnCameraMatrixUpdated :: (observer: Any, scene: *Scene, camera:*$C) {
+	#insert ON_CAMERA_MATRIX_UPDATED;
+	assert(false, tprint("sceneObserverOnCameraMatrixUpdated: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
+}
 
 
 
@@ -28,9 +36,13 @@ ON_OBJECT_ADDED,
 ON_OBJECTS_ADDED,
 ON_OBJECT_BEFORE_REMOVE,
 ON_OBJECTS_BEFORE_REMOVE,
-ON_RENDERABLE_MATERIAL_CHANGED :: #run registerSceneObserver();
+ON_RENDERABLE_MATERIAL_CHANGED,
+ON_OBJECT_MATRIX_UPDATED,
+ON_CAMERA_MATRIX_UPDATED :: #run registerSceneObserver();
 
 SCENE_OBSERVER_TYPES :[..]Type;
+
+IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
 
 sceneObserverRegister :: ($T:Type) {
 	array_add(*SCENE_OBSERVER_TYPES, T);
@@ -41,11 +53,13 @@ registerSceneObserver :: ()-> (
 	ON_OBJECTS_ADDED:string,
 	ON_OBJECT_BEFORE_REMOVE:string,
 	ON_OBJECTS_BEFORE_REMOVE:string,
-	ON_RENDERABLE_MATERIAL_CHANGED:string
+	ON_RENDERABLE_MATERIAL_CHANGED:string,
+	ON_OBJECT_MATRIX_UPDATED:string,
+	ON_CAMERA_MATRIX_UPDATED:string
 ) {
 	sceneObserverRegister(Renderer);
 
-	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
+	
 
 	SceneObserverGeneratedCode :: struct {
 		onObjectAdded: string;
@@ -53,62 +67,63 @@ registerSceneObserver :: ()-> (
 		onObjectBeforeRemove: string;
 		onObjectsBeforeRemove: string;
 		onRenderableMaterialChanged: string;
+		onObjectMatrixUpdated: string;
+		onCameraMatrixUpdated: string;
 	}
-
 	generated: SceneObserverGeneratedCode;
-	{
-		builder: String_Builder;
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectAdded(cast(*%) observer.value_pointer, scene, object); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onObjectAdded = builder_to_string(*builder);
+	using generated;
+	onObjectAdded = _loopObject("onObjectAdded");
+	onObjectsAdded = _loopObjects("onObjectsAdded");
+	onObjectBeforeRemove = _loopObject("onObjectBeforeRemove");
+	onObjectsBeforeRemove = _loopObjects("onObjectsBeforeRemove");
+	onRenderableMaterialChanged = _loopObjectWithArg("onRenderableMaterialChanged","previousMaterial");
+	onObjectMatrixUpdated = _loopObject("onObjectMatrixUpdated");
+	onCameraMatrixUpdated = _loopCamera("onCameraMatrixUpdated");
+	return
+		onObjectAdded,
+		onObjectsAdded,
+		onObjectBeforeRemove,
+		onObjectsBeforeRemove,
+		onRenderableMaterialChanged,
+		onObjectMatrixUpdated,
+		onCameraMatrixUpdated;
+}
+
+
+_loopObject :: (funcName:string)->string{
+	builder: String_Builder;
+	print_to_builder(*builder, IF_FIRST_LINE);
+	for observerType: SCENE_OBSERVER_TYPES {
+		print_to_builder(*builder, tprint("\tcase \"%\"; %(cast(*%) observer.value_pointer, scene, object); return;\n", observerType, funcName, observerType));
 	}
-	{
-		builder: String_Builder;
-		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectsAdded(cast(*%) observer.value_pointer, scene, objects); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onObjectsAdded = builder_to_string(*builder);
+	print_to_builder(*builder, "}");
+	return builder_to_string(*builder);
+}
+_loopObjects :: (funcName:string)->string{
+	builder: String_Builder;
+	// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
+	print_to_builder(*builder, IF_FIRST_LINE);
+	for observerType: SCENE_OBSERVER_TYPES {
+		print_to_builder(*builder, tprint("\tcase \"%\"; %(cast(*%) observer.value_pointer, scene, objects); return;\n", observerType, funcName, observerType));
 	}
-	{
-		builder: String_Builder;
-		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectBeforeRemove(cast(*%) observer.value_pointer, scene, object); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onObjectBeforeRemove = builder_to_string(*builder);
+	print_to_builder(*builder, "}");
+	return builder_to_string(*builder);
+}
+_loopObjectWithArg :: (funcName:string, argName:string)->string{
+	builder: String_Builder;
+	print_to_builder(*builder, IF_FIRST_LINE);
+	for observerType: SCENE_OBSERVER_TYPES {
+		print_to_builder(*builder, tprint("\tcase \"%\"; %(cast(*%) observer.value_pointer, scene, object, %); return;\n", observerType, funcName, observerType, argName));
 	}
-	{
-		builder: String_Builder;
-		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onObjectsBeforeRemove(cast(*%) observer.value_pointer, scene, objects); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onObjectsBeforeRemove = builder_to_string(*builder);
+	print_to_builder(*builder, "}");
+	return builder_to_string(*builder);
+}
+_loopCamera :: (funcName:string)->string{
+	builder: String_Builder;
+	print_to_builder(*builder, IF_FIRST_LINE);
+	for observerType: SCENE_OBSERVER_TYPES {
+		print_to_builder(*builder, tprint("\tcase \"%\"; %(cast(*%) observer.value_pointer, scene, camera); return;\n", observerType, funcName, observerType));
 	}
-	{
-		builder: String_Builder;
-		// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
-		print_to_builder(*builder, IF_FIRST_LINE);
-		for observerType: SCENE_OBSERVER_TYPES {
-			print_to_builder(*builder, tprint("\tcase \"%\"; onRenderableMaterialChanged(cast(*%) observer.value_pointer, scene, object, previousMaterial); return;\n", observerType, observerType));
-		}
-		print_to_builder(*builder, "}");
-		generated.onRenderableMaterialChanged = builder_to_string(*builder);
-	}
-	
-	return generated.onObjectAdded,
-	generated.onObjectsAdded,
-	generated.onObjectBeforeRemove,
-	generated.onObjectsBeforeRemove,
-	generated.onRenderableMaterialChanged;
+	print_to_builder(*builder, "}");
+	return builder_to_string(*builder);
 }

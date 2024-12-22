@@ -17,6 +17,11 @@ mainMenuBarDraw :: (using editor: *Editor) {
 			if (ImGui.MenuItem("Paste", "CTRL+V")) {}
 			ImGui.EndMenu();
 		}
+		{
+			// fps
+			frameRateStr := tprint("FPS:%", editor.nodesScene.fps);
+			ImGui.TextUnformatted(frameRateStr);
+		}
 		ImGui.EndMainMenuBar();
 	}
 }

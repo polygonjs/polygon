@@ -46,7 +46,6 @@ newScene :: (allocator: Allocator) -> *TYPE {
 	object3DInit(scene);
 	array_init(*scene.children, scene.allocator);
 	array_init(*scene.observers, scene.allocator);
-
 	return scene;
 }
 worldObjectClone :: (object: *TYPE)->*TYPE {
@@ -83,6 +82,22 @@ sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
 		}
 	}
 }
+sceneObjectUpdateMatrix :: (scene: *TYPE, object: *Object3D) {
+	transformableUpdateMatrix(object);
+	sceneEmitEvent(scene, .OBJECT_MATRIX_UPDATED, object);
+}
+sceneCameraUpdateMatrix :: (scene: *TYPE, camera: *Camera) {
+	transformableUpdateMatrix(camera);
+	sceneEmitEvent(scene, .CAMERA_MATRIX_UPDATED, camera);
+}
+sceneCameraUpdateProjectionMatrix :: (scene: *TYPE, camera: *$T/Camera) {
+	cameraProjectionUpdate(camera);
+	// we could emit a .CAMERA_PROJECTION_MATRIX_UPDATED event
+	// but for now, we just emit the same event as .CAMERA_MATRIX_UPDATED
+	// as both matrices are updated at the same time in the renderer anyway
+	sceneEmitEvent(scene, .CAMERA_MATRIX_UPDATED, camera);
+}
+
 worldObjectDelete :: (scene: *TYPE) {
 	allocatorReset(scene);
 	free(scene,,allocator=scene.allocator);
