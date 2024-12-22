@@ -1,3 +1,4 @@
+NETWORK_PANEL_CONNECTION_HEIGHT :: NETWORK_PANEL_NODE_HALF_SIZE / 2;
 
 networkPanelAddNodeConnection :: (panel: *TYPE, connection: NodeConnection) {
 
@@ -12,6 +13,35 @@ networkPanelAddNodeConnection :: (panel: *TYPE, connection: NodeConnection) {
 networkPanelRemoveNodeConnection :: (panel: *TYPE, connection: NodeConnection) {
 	_removeConnection(panel, connection, forRaycast=false);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER _removeConnection(panel, connection, forRaycast=true);
+}
+
+networkPanelConnectionSetMatrix :: (using panel: *TYPE, connection: NodeConnection, mesh: *Mesh, scene: *Scene) {
+	nodeSrcPos := editor.sceneUiData.nodePositions[connection.src.nodeId] - Vector2.{x=0, y=NETWORK_PANEL_NODE_HALF_SIZE};
+	nodeDestPos := editor.sceneUiData.nodePositions[connection.dest.nodeId] + Vector2.{x=0, y=NETWORK_PANEL_NODE_HALF_SIZE};
+	dist := distance(nodeSrcPos, nodeDestPos);
+	angle_delta := angle(nodeDestPos-nodeSrcPos) + PI/2;
+	mesh.position = .{x = nodeDestPos.x, y = nodeDestPos.y, z = NETWORK_PANEL_CONNECTION_HEIGHT};
+	// mesh.scale.x = dist;
+	mesh.scale.y = dist;
+	set_from_axis_and_angle(*mesh.quaternion, .{x=0, y=0, z=1}, angle_delta);
+	// mesh.scale.z = dist;
+	sceneObjectUpdateMatrix(scene, mesh);
+}
+networkPanelConnectionSetMatrix :: (using panel: *TYPE, connection: NodeConnection, $forRaycast:bool) {
+	if connectionObjectIndexByConnectionId.count < xx connection.id {
+		return;
+	}
+	meshIndex := connectionObjectIndexByConnectionId[connection.id];
+	if meshIndex >= 0 {
+		#if forRaycast {
+			scene := sceneRaycast;
+		} else {
+			scene := sceneWorld;
+		}
+		object := scene.children[meshIndex];
+		mesh := cast(*Mesh)object;
+		networkPanelConnectionSetMatrix(panel, connection, mesh, scene);
+	}
 }
 
 #scope_file
@@ -36,16 +66,7 @@ _addConnection :: (using panel: *TYPE, connection: NodeConnection, geometry: *Ge
 		meshSetMaterial(scene, mesh, xx panel.mat.connectionBasic);
 	}
 
-	nodeSrcPos := panel.editor.sceneUiData.nodePositions[connection.src.nodeId] - Vector2.{x=0, y=0.5};
-	nodeDestPos := panel.editor.sceneUiData.nodePositions[connection.dest.nodeId] + Vector2.{x=0, y=0.5};
-	dist := distance(nodeSrcPos, nodeDestPos);
-	angle_delta := angle(nodeDestPos-nodeSrcPos) + PI/2;
-	mesh.position = .{x = nodeDestPos.x, y = nodeDestPos.y, z = 0.5};
-	// mesh.scale.x = dist;
-	mesh.scale.y = dist;
-	set_from_axis_and_angle(*mesh.quaternion, .{x=0, y=0, z=1}, angle_delta);
-	// mesh.scale.z = dist;
-	transformableUpdateMatrix(mesh);
+	networkPanelConnectionSetMatrix(panel, connection, mesh, scene);
 	{
 		#if forRaycast==false {
 			if connectionObjectIndexByConnectionId.count < xx connection.id {

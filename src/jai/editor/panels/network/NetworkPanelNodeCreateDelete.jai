@@ -1,7 +1,10 @@
+NETWORK_PANEL_NODE_SIZE :: 1.0;
+NETWORK_PANEL_NODE_HALF_SIZE :: NETWORK_PANEL_NODE_SIZE / 2;
+NETWORK_PANEL_NODE_SIZE_V3 :Vector3: .{NETWORK_PANEL_NODE_SIZE,NETWORK_PANEL_NODE_SIZE,NETWORK_PANEL_NODE_SIZE};
 
 networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 	geometry :*Geometry = newGeometry(panel.sceneWorld.allocator);
-	geometryBoxAttributesSet(geometry, .{size=.{1,1,0.1}});
+	geometryBoxAttributesSet(geometry, .{size=NETWORK_PANEL_NODE_SIZE_V3});
 
 	_addNode(panel, node, geometry, forRaycast=false);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER _addNode(panel, node, geometry, forRaycast=true);
