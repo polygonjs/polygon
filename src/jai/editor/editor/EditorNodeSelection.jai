@@ -5,7 +5,7 @@ NodeSelectionMode :: enum u8 {
 }
 
 selectNode :: (editor: *Editor, node: *BaseNodeAny, mode:NodeSelectionMode=.REPLACE) {
-	if mode == {
+	if #complete mode == {
 		case .REPLACE; {
 			_replaceNode(editor, node);
 		}

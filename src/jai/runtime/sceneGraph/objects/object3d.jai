@@ -86,7 +86,7 @@ transformableUpdateMatrix :: (object: *TYPE) {
 	// scale(*object.matrix, object.scale);
 
 
-	if object.transformOrder == {
+	if #complete object.transformOrder == {
 		case .TRS; {
 			translate(*object.matrix, object.position);
 			object.matrix = rotate(object.matrix, object.quaternion);
