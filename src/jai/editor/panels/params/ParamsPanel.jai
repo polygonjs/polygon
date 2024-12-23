@@ -4,7 +4,7 @@ ParamsPanel :: struct {
 	} else #if USE_POOL {
 		pool: Pool;
 	}
-	allocator: Allocator;
+	// allocator: Allocator;
 	//
 	editor: *Editor;
 
@@ -20,7 +20,7 @@ newParamsPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE
 paramsPanelDelete :: (using panel: *TYPE) {
 	#if USE_IMGUI rendererUIDestroy(*panel.editor.imguiPolygonContext);
 	rendererDelete(renderer);
-	allocatorReset(panel);
+	// allocatorReset(panel);
 	free(panel);
 }
 drawDataInit :: (using panel: *TYPE) {
@@ -105,6 +105,7 @@ else {
 TYPE :: ParamsPanel;
 
 paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
+	// allocatorAssign(panel);
 
 	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 

@@ -26,8 +26,10 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	inputResult := inputResults[inputIndex];
 	nodesScene := graphNodeScene(node);
 	if inputResult != null {
-		sceneObjectsClear(nodesScene.worldScene);
-		sceneObjectsAdd(nodesScene.worldScene, <<inputResult);
+		if _objectChanged(nodesScene.worldScene, inputResult) {
+			sceneObjectsClear(nodesScene.worldScene);
+			sceneObjectsAdd(nodesScene.worldScene, <<inputResult);
+		}
 	} else {
 		sceneObjectsClear(nodesScene.worldScene);
 	}
@@ -40,3 +42,15 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 #scope_file
 
 TYPE :: OutputGeoNode;
+
+_objectChanged :: (worldScene:*Scene, objects: *[..]*Object3D)->bool {
+	if worldScene.children.count != objects.count {
+		return true;
+	}
+	for sceneChild, i: worldScene.children {
+		if sceneChild.id != (<<objects)[i].id {
+			return true;
+		}
+	}
+	return false;
+}

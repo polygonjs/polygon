@@ -34,11 +34,18 @@ Vector3ArrayArray :: []*Vector3Array;
 
 subdivide :: (geometry: *Geometry, params: PolyhedronGeometryParams) {
 
-	SUBDIVIDE_POOL:Pool;
-	new_context := context;
-	new_context.allocator.proc = pool_allocator_proc;
-	new_context.allocator.data = *SUBDIVIDE_POOL;
-	set_allocators(*SUBDIVIDE_POOL);
+	#if USE_FLAT_POOL {
+		SUBDIVIDE_POOL:Flat_Pool;
+		new_context := context;
+		new_context.allocator.proc = flat_pool_allocator_proc;
+		new_context.allocator.data = *SUBDIVIDE_POOL;
+	} else {
+		SUBDIVIDE_POOL:Pool;
+		new_context := context;
+		new_context.allocator.proc = pool_allocator_proc;
+		new_context.allocator.data = *SUBDIVIDE_POOL;
+		set_allocators(*SUBDIVIDE_POOL);
+	}
 
 	push_context new_context {
 		i:=0;
@@ -51,7 +58,12 @@ subdivide :: (geometry: *Geometry, params: PolyhedronGeometryParams) {
 		}
 	}
 
-	release(*SUBDIVIDE_POOL);
+	#if USE_FLAT_POOL {
+		reset(*SUBDIVIDE_POOL, overwrite_memory=true);
+		fini(*SUBDIVIDE_POOL);
+	} else {
+		release(*SUBDIVIDE_POOL);
+	}
 }
 
 subdivide_face :: (geometry: *Geometry, a: Vector3, b: Vector3, c: Vector3, detail: u32) {

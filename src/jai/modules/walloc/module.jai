@@ -8,6 +8,9 @@ walloc_free :: (p: *void) #foreign "free"; // Will be provided by WASM
 walloc_allocator :: Allocator.{allocator_proc, null};
 
 allocator_proc :: (mode: Allocator_Mode, requested_size: s64, old_size: s64, old_memory: *void, allocator_data: *void) -> *void {
+    // if mode != .FREE {
+    //     log("[Walloc]: allocator_proc:%\n", mode);
+    // }
     if #complete mode == {
         case .STARTUP;      #through;
         case .SHUTDOWN;     #through;
@@ -17,6 +20,7 @@ allocator_proc :: (mode: Allocator_Mode, requested_size: s64, old_size: s64, old
 
         case .ALLOCATE; #through;
         case .RESIZE;
+            // log("[Walloc]: RESIZE:%->%\n", old_size, requested_size);
             // @TODO: Can we support proper realloc?
             result := walloc_malloc(requested_size);
             if mode == .RESIZE {
@@ -26,10 +30,10 @@ allocator_proc :: (mode: Allocator_Mode, requested_size: s64, old_size: s64, old
             return result;
 
         case .FREE;
-            // log("[Walloc]: FREE");
+            // log("[Walloc]: FREE: %\n", old_memory!=null);
             walloc_free(old_memory);
             return null;
-// 
+
         case .CREATE_HEAP; #through;
         case .DESTROY_HEAP;
             context.handling_assertion_failure = true;

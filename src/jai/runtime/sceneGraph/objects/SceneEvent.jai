@@ -7,23 +7,24 @@ SceneEvent :: enum u8 {
 	OBJECT_MATRIX_UPDATED;
 	CAMERA_MATRIX_UPDATED;
 }
+SCENE_EVENTS_COUNT :: #run enum_values_as_s64(SceneEvent).count;
 
 
-sceneAddObserver :: (scene: *Scene, observer: Any) {
-	array_add(*scene.observers, observer);
+sceneAddObserver :: (using scene: *Scene, observer: Any) {
+	array_add(*observers, observer);
 }
-sceneRemoveObserver :: (scene: *Scene, observer: Any) {
-	for o, i: scene.observers {
+sceneRemoveObserver :: (using scene: *Scene, observer: Any) {
+	for o, i: observers {
 		if o.value_pointer == observer.value_pointer {
-			array_unordered_remove_by_index(*scene.observers, i);
+			array_unordered_remove_by_index(*observers, i);
 			return;
 		}
 	}
 }
 
 
-sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T) {
-	using scene;
+sceneEmitEvent :: (using scene: *Scene, $event: SceneEvent, object: *$T) {
+	_incrementEventsCount(scene, event);
 	if event == {
 		case .OBJECT_ADDED; 	{for o:observers sceneObserverOnObjectAdded(o, scene, object);return;}
 		case .OBJECT_BEFORE_REMOVE; 	{for o:observers sceneObserverOnObjectBeforeRemove(o, scene, object);return;}
@@ -31,8 +32,8 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T) {
 		case .CAMERA_MATRIX_UPDATED; {for o:observers sceneObserverOnCameraMatrixUpdated(o, scene, cast(*Camera)object);return;}
 	}
 }
-sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
-	using scene;
+sceneEmitEvent :: (using scene: *Scene, $event: SceneEvent, objects: []*$T) {
+	_incrementEventsCount(scene, event);
 	if event == {
 		/*
 		if we send an event with scene.children as a list,
@@ -56,8 +57,8 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, objects: []*$T) {
 		}
 	}
 }
-sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T, previousMaterial: *Material) {
-	using scene;
+sceneEmitEvent :: (using scene: *Scene, $event: SceneEvent, object: *$T, previousMaterial: *Material) {
+	_incrementEventsCount(scene, event);
 	if event == {
 		case .RENDERABLE_MATERIAL_CHANGED; {for o:observers sceneObserverOnRenderableMaterialChanged(o, scene, object, previousMaterial);return;}
 	}
@@ -72,3 +73,18 @@ sceneEmitEvent :: (scene: *Scene, $event: SceneEvent, object: *$T, previousMater
 // 		case NodesSceneEvent.NODE_INPUT_REMOVED;{nodeSceneObserverOnNodeInputRemoved(observer, scene, node, inputIndex);}
 // 	}
 // }
+
+eventsCount :: (scene: *Scene, event: SceneEvent) -> u64 {
+	#if RUN_TESTS {
+		return scene.eventsCountByEvent[event];
+	}
+	return 0;
+}
+
+#scope_file
+
+_incrementEventsCount :: (scene: *Scene, event: SceneEvent) #expand {
+	#if RUN_TESTS {
+		scene.eventsCountByEvent[event] += 1;
+	}
+}

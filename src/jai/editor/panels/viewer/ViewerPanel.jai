@@ -4,7 +4,7 @@ ViewerPanel :: struct {
 	} else #if USE_POOL {
 		pool: Pool;
 	}
-	allocator: Allocator;
+	// allocator: Allocator;
 	//
 	editor: *Editor;
 
@@ -23,7 +23,7 @@ newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE
 viewerPanelDelete :: (using panel: *TYPE) {
 	if(editor.nodesScene != null) sceneRemoveObserver(editor.nodesScene.worldScene, renderer);
 	rendererDelete(renderer);
-	allocatorReset(panel);
+	// allocatorReset(panel);
 	// object3DDelete(camera);
 	free(panel);
 }
@@ -65,6 +65,7 @@ panelRemoveScene :: (panel: *TYPE, nodesScene: *NodesScene) {
 TYPE :: ViewerPanel;
 
 viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
+	// allocatorAssign(panel);
 
 	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
 

@@ -71,4 +71,25 @@ testOutputGeoNode :: () {
 
 	});
 
+	testWithScene("geo/output does not update scene if input unchanged", (using options:TestProcedureOptions) {
+		add1 := createNode(nodesScene, AddGeoNode);
+		box1 := createNode(nodesScene, BoxGeoNode);
+		output1 := createNode(nodesScene, OutputGeoNode);
+
+		setInput(output1, 0, add1);
+		setInput(output1, 1, box1);
+
+		paramSetValue(*output1.p.input, 1);
+
+		paramSetValue(*box1.p.scale, 2);
+		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 0);
+
+		nodesSceneOutputNodesCompute(nodesScene);
+		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 1);
+
+		paramSetValue(*add1.p.position, .{1,1,1});
+		nodesSceneOutputNodesCompute(nodesScene);
+		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 1, "output node input objects have not changed, no event should be emitted");
+	});
+
 }

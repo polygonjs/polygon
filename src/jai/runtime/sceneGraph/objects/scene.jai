@@ -23,7 +23,10 @@ Scene :: struct {
 	children: [..]*Object3D;
 
 	sceneUniforms: SceneUniforms;
+
+	//
 	observers:[..]Any;
+	#if RUN_TESTS eventsCountByEvent:[SCENE_EVENTS_COUNT]u64;
 
 	// old
 	// object
@@ -67,7 +70,7 @@ sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
 	sceneEmitEvent(scene, .OBJECT_ADDED, object);
 }
 sceneObjectsAdd :: (scene: *TYPE, objects: [..]*Object3D) {
-	for object: objects array_add(*scene.children, object);
+	array_add(*scene.children, ..objects);
 	sceneEmitEvent(scene, .OBJECTS_ADDED, objects);
 }
 sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {

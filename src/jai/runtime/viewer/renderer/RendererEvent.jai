@@ -75,11 +75,6 @@ RendererCommands :: struct {
 
 #scope_file
 
-RendererEvent :: enum u8 {
-	OBJECT_ADDED :: 0;
-	OBJECT_BEFORE_REMOVE;
-	OBJECTS_BEFORE_REMOVE;
-}
 RendererObjectCommand :: struct {
 	object: *Object3D;
 }
