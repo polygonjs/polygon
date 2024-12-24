@@ -1,5 +1,4 @@
-nodeComputeInputs :: (scene:*NodesScene, node: *$T, target:*[..]NodeId) {
-	using scene;
+nodeComputeInputs :: (using scene:*NodesScene, node: *$T, target:*[..]NodeId) {
 	target.count = 0;
 	if isDirty(*graph, node.graphNodeId) == false {
 		return;
@@ -23,10 +22,15 @@ nodePrepareInputCookResults :: (using scene:*NodesScene, node: *$T) {
 	_nodePrepareInputCookResultsWithClonedFirstInput(scene, node);
 }
 _nodePrepareInputCookResultsWithClonedFirstInput :: (using scene:*NodesScene, node: *$T) {
-	if NODE_METADATAS[node.nodeTypeId].inputsCount.max == 0 {
+	// print("_nodePrepareInputCookResultsWithClonedFirstInput max inputs: %, %\n", node.type, NODE_METADATAS[node.nodeTypeId].inputsCount.max);
+	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+	if maxInputsCount == 0 {
+		// print("no inputs\n");
 		return;
 	}
+	results := NewArray(maxInputsCount, GeoNodeCookOutput,, temp);
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
+	// print("srcConnectionIds: %\n", srcConnectionIds);
 	for srcConnectionId: srcConnectionIds {
 		if srcConnectionId != 0 {
 			connection := connections.connections[srcConnectionId];
@@ -34,12 +38,15 @@ _nodePrepareInputCookResultsWithClonedFirstInput :: (using scene:*NodesScene, no
 			inputIndex := connection.dest.inputIndex;
 			inputCookResult := cookResults[inputNodeId];
 			if inputIndex == 0 {
+				// results[inputIndex] = geoNodeCookOutputClone(inputCookResult);
 				nodeInputCookResults[node.nodeId][inputIndex] = geoNodeCookOutputClone(inputCookResult);
 			} else {
+				// results[inputIndex] = inputCookResult;
 				nodeInputCookResults[node.nodeId][inputIndex] = inputCookResult;
 			}
 		}
 	}
+
 }
 _nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T) {
 	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
@@ -47,6 +54,7 @@ _nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T)
 		return;
 	}
 	for inputIndex:0..(maxInputsCount-1) {
+		// print("inputIndex: %, %\n", inputIndex, cast(u64)(nodeInputCookResults[node.nodeId]).data);
 		nodeInputCookResults[node.nodeId][inputIndex] = null;
 	}
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
@@ -86,8 +94,7 @@ _nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T)
 // 	postCook(scene, node, result, storeResult=true);
 // 	return result;
 // }
-nodeComputeInputsOnlyFromInputParam :: (scene:*NodesScene, node: *$T, target:*[..]NodeId) {
-	using scene;
+nodeComputeInputsOnlyFromInputParam :: (using scene:*NodesScene, node: *$T, target:*[..]NodeId) {
 	target.count = 0;
 	inputIndex := inputIndexFromInputParam(node);
 

@@ -1,6 +1,6 @@
 #load "Editor.jai";
-#load "EditorCommands.jai";
 #load "EditorEvent.jai";
+#load "EditorEventCommands.jai";
 #load "EditorNodePosition.jai";
 #load "EditorNodeSelection.jai";
 #load "EditorNodesScene.jai";

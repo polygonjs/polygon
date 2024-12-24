@@ -21,7 +21,8 @@ setInput :: (node: *BaseNode, inputIndex:u8=0, inputNode: *BaseNode, outputIndex
 	// print("setInput % % %\n", node.type, node.inputs, inputNode.inputs);
 	connectionCreated := graphNodeConnect(src=inputNode, dest=node, checkCycle=true);
 	if connectionCreated == true {
-		connection := nodeConnectionAdd(*graphNodeScene(node).connections, .{
+		nodesScene := graphNodeScene(node);
+		connection := nodeConnectionAdd(nodesScene, *nodesScene.connections, .{
 			src=.{
 				nodeId=inputNode.nodeId,
 				outputIndex=outputIndex

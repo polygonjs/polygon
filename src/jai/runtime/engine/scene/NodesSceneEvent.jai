@@ -17,8 +17,7 @@ nodesSceneRemoveObserver :: (scene: *NodesScene, observer: Any) {
 	scene.observer.value_pointer = null;
 	// array_remove(*scene.observers, observer);
 }
-nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
-	using scene;
+nodesSceneEmitEvent :: (using scene: *NodesScene, $event: NodesSceneEvent, node: *$T) {
 	if observer.value_pointer == null {
 		return;
 	}
@@ -27,8 +26,7 @@ nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, node: *$T) 
 		case .NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
 	}
 }
-nodesSceneEmitEvent :: (scene: *NodesScene, $event: NodesSceneEvent, connection: NodeConnection) {
-	using scene;
+nodesSceneEmitEvent :: (using scene: *NodesScene, $event: NodesSceneEvent, connection: NodeConnection) {
 	if observer.value_pointer == null {
 		return;
 	}

@@ -4,11 +4,11 @@ NetworkPanelCursorData :: struct {
 	distanceMoved: float;
 }
 
-cursorForRaycast :: (eventsData: *EventsData, viewportContainer: *ViewportContainer) -> Vector2 {
-	if(viewportContainer.fullScreen){
+cursorForRaycast :: (eventsData: *EventsData, using viewportContainer: *ViewportContainer) -> Vector2 {
+	if(fullScreen){
 		assert(false, "cursorForRaycast viewport full screen not implemented");
 	}
-	using viewportContainer.viewport;
+	using viewport;
 	return .{
 		x = 2*(cast(float)(eventsData.cursor.x-start.x) / cast(float)size.x)-1,
 		y = -2*(cast(float)(eventsData.cursor.y-start.y) / cast(float)size.y)+1,

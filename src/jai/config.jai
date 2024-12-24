@@ -21,8 +21,8 @@ NODES_SCENE_EMIT_EVENTS :: true;
 // TODO: maybe consider updating this file from build.jai,
 // before the compiler starts.
 FREE_MEMORY_DEBUG :: true;//RUN_TESTS==true;
-USE_FLAT_POOL :: false;
-USE_POOL :: true;
+USE_FLAT_POOL :: true;
+USE_POOL :: false;
 
 #if WASM { #assert FREE_MEMORY_DEBUG==false; }
 #if USE_POOL { #assert USE_FLAT_POOL==false; }

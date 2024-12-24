@@ -57,6 +57,15 @@ nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData {
 	}
 	return list;
 }
+nodesMaxInputsCount :: ()->u8 {
+	maxInputsCount :u8= 0;
+	for nodeMetaData, i: NODE_METADATAS {
+		if nodeMetaData.inputsCount.max > maxInputsCount {
+			maxInputsCount = nodeMetaData.inputsCount.max;
+		}
+	}
+	return maxInputsCount;
+}
 
 registerNodesAndGenerateCode :: () -> (
 	nodeComputeInputs:string,
@@ -128,6 +137,7 @@ NodeMetaData :: struct {
 
 #no_reset NODE_METADATAS_COUNT :u64: #run nodesMetaDatasCount();
 #no_reset NODE_METADATAS :[NODE_METADATAS_COUNT]NodeMetaData: #run nodesMetaDatas();
+#no_reset NODE_MAX_INPUTS_COUNT :u8: #run nodesMaxInputsCount();
 // COOK_METHODS :[..]GeoNodeCookMethod;
 // ON_DIRTY_METHODS :[..]CoreGraphNodeOnDirtyMethod;
 
@@ -163,29 +173,9 @@ generateNodeComputeInputs :: ()->string {
 	// return _generateSceneNode("nodeComputeInputs");
 }
 generateNodePrepareInputCookResults :: ()->string {
-	// builder: String_Builder;
-	// print_to_builder(*builder, "if node.type == {\n");
-	// for nodeMetaData: NODE_METADATAS {
-	// 	nodeType := nodeMetaData.type;
-	// 	print_to_builder(*builder, tprint("\tcase %; nodePrepareInputCookResults(scene, cast(*%) node); return;\n", nodeType, nodeType));
-	// }
-	// print_to_builder(*builder, "}");
-	// result := builder_to_string(*builder);
-	// reset(*builder);
-	// return result;
 	return _generateSceneNode("nodePrepareInputCookResults");
 }
 generateNodeDisposePreviousCookResults :: ()->string {
-	// builder: String_Builder;
-	// print_to_builder(*builder, "if node.type == {\n");
-	// for nodeMetaData: NODE_METADATAS {
-	// 	nodeType := nodeMetaData.type;
-	// 	print_to_builder(*builder, tprint("\tcase %; nodeDisposePreviousCookResults(scene, cast(*%) node); return;\n", nodeType, nodeType));
-	// }
-	// print_to_builder(*builder, "}");
-	// result := builder_to_string(*builder);
-	// reset(*builder);
-	// return result;
 	return _generateSceneNode("nodeDisposePreviousCookResults");
 }
 generateNodeCook :: ()->string {
@@ -240,3 +230,15 @@ _generateSceneNode :: (functionName:string)->string {
 	reset(*builder);
 	return result;
 }
+// _generateSceneNodeWithReturn :: (functionName:string)->string {
+// 	builder: String_Builder;
+// 	print_to_builder(*builder, "if node.type == {\n");
+// 	for nodeMetaData: NODE_METADATAS {
+// 		nodeType := nodeMetaData.type;
+// 		print_to_builder(*builder, tprint("\tcase %; return %(scene, cast(*%) node);\n", nodeType, functionName, nodeType));
+// 	}
+// 	print_to_builder(*builder, "}");
+// 	result := builder_to_string(*builder);
+// 	reset(*builder);
+// 	return result;
+// }

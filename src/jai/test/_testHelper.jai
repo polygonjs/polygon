@@ -33,7 +33,16 @@
 			log_leak_report(report, .{});
 			assert(false, tprint("leaks count mismatch: expected=%, leaks_total=%, bytes_total=% (%)", expectedCounts, count.leaks_total, count.bytes_total, message));
 		}
+	}
+	assertLeaksCountBetween :: (min:s64, max:s64, message:string="no message") {
+		report := make_leak_report();
+		defer deinit(*report);
+		count := reportLeaksCount(*report);
 
+		if count.leaks_total < min || count.leaks_total > max {
+			log_leak_report(report, .{});
+			assert(false, tprint("leaks count mismatch: min=%, max=%, leaks_total=%, bytes_total=% (%)", min, max, count.leaks_total, count.bytes_total, message));
+		}
 	}
 
 	reportLeaksCount :: (report: *Leak_Report)->MemoryLeakCount {

@@ -13,6 +13,7 @@
 
 		buildArgs := getArgs(*options);
 		print_to_builder(*build_log_builder, tprint("WASM:        [%]\n", _checkbox(buildArgs.wasm)));
+		print_to_builder(*build_log_builder, tprint("DEBUGGER:    [%]\n", _checkbox(buildArgs.debugger)));
 		if(buildArgs.wasm){
 			copy_commonly_propagated_fields(get_build_options(), *options);
 
@@ -97,7 +98,8 @@
 		buildArgs := getArgs(*options);
 		print_to_builder(*build_log_builder, tprint("NATIVE:      [%]\n", _checkbox(buildArgs.native)));
 		print_to_builder(*build_log_builder, tprint("RUN_TESTS:   [%]\n", _checkbox(buildArgs.test)));
-		print_to_builder(*build_log_builder, tprint("OPTIMIZED:   [%]\n\n", _checkbox(buildArgs.optimized)));
+		print_to_builder(*build_log_builder, tprint("DEBUGGER:    [%]\n", _checkbox(buildArgs.debugger)));
+		print_to_builder(*build_log_builder, tprint("OPTIMIZED:   [%]\n", _checkbox(buildArgs.optimized)));
 		if(buildArgs.native) {
 			options.output_path = "../../bin/";
 			make_directory_if_it_does_not_exist(options.output_path);
@@ -138,6 +140,8 @@
 		}
 
 	}
+
+	print("\n");
 	build_log :string= builder_to_string(*build_log_builder);
 	print("\n");
 	print("%\n", build_log);
@@ -232,6 +236,7 @@ BuildArgs :: struct {
 	jailsDiagnostics: bool;
 	test:bool;
 	optimized:bool;
+	debugger:bool;
 	// all:[..]string;
 }
 getArgs :: (options: *Build_Options)->BuildArgs {
@@ -243,6 +248,7 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs.test = array_find(args, "test");
 	buildArgs.wasm = array_find(args, "wasm");
 	buildArgs.native = array_find(args, "native");
+	buildArgs.debugger = array_find(args, "debugger");
 	buildArgs.optimized = array_find(args, "O");
 	if( buildArgs.wasm==false && buildArgs.native==false ) {
 		buildArgs.wasm = true;
@@ -264,6 +270,9 @@ setOptimisation :: (options: *Build_Options, buildArgs: *BuildArgs, wasm:bool) {
 		if wasm == false && OS == .LINUX {
 			options.backend = .X64;
 		}
+	}
+	if buildArgs.debugger {
+		options.interactive_bytecode_debugger = true;
 	}
 }
 _checkbox :: (status:bool)->string {

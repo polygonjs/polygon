@@ -86,6 +86,7 @@ initSceneAndAttachToEditor :: (app: *PolygonApp) {
 
 #if FREE_MEMORY_DEBUG #import "Basic"()(MEMORY_DEBUGGER=true);
 else #import "Basic";
+#if FREE_MEMORY_DEBUG #import "Debug";
 #if USE_FLAT_POOL #import "Flat_Pool";
 #if FREE_MEMORY_DEBUG {
 	#import "Unmapping_Allocator";

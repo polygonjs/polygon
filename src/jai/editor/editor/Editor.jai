@@ -46,8 +46,8 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 		assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
 		assert(editor.wgpuContext.queue != null, "editor.wgpuContext.queue is null");
 	}
-	array_init(*editor.sceneUiData.nodePositions,, editor.allocator);
-	array_init(*editor.sceneUiData.selectedNodeIds,, editor.allocator);
+	array_init(*editor.sceneUiData.nodePositions, editor.allocator, reserve=true);
+	array_init(*editor.sceneUiData.selectedNodeIds, editor.allocator, reserve=true);
 	editorCommandsSetAllocator(editor);
 
 	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor, ensureWGPUContextValid);
@@ -56,8 +56,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 }
 
 
-editorDelete :: (editor: *Editor) {
-	using editor;
+editorDelete :: (using editor: *Editor) {
 
 	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
 	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);

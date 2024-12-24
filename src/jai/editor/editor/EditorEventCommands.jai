@@ -44,19 +44,20 @@ editorFlushCommands :: (editor: *Editor) {
 }
 editorCommandsSetAllocator :: (editor: *Editor) {
 	using editor.commands;
-	nodeAdded.allocator = editor.allocator;
-	nodeBeforeRemove.allocator = editor.allocator;
-	nodeSetPosition.allocator = editor.allocator;
-	nodeConnectionAdded.allocator = editor.allocator;
-	nodeConnectionRemoved.allocator = editor.allocator;
-	nodeSelectionAdded.allocator = editor.allocator;
-	nodeSelectionRemoved.allocator = editor.allocator;
+
+	array_init(*nodeBeforeRemove, editor.allocator, reserve=true);
+	array_init(*nodeAdded, editor.allocator, reserve=true);
+	array_init(*nodeSetPosition, editor.allocator, reserve=true);
+	array_init(*nodeConnectionAdded, editor.allocator, reserve=true);
+	array_init(*nodeConnectionRemoved, editor.allocator, reserve=true);
+	array_init(*nodeSelectionAdded, editor.allocator, reserve=true);
+	array_init(*nodeSelectionRemoved, editor.allocator, reserve=true);
 }
 
 
 EditorCommands :: struct {
-	nodeAdded :[..]EditorNodeAddCommand;
 	nodeBeforeRemove :[..]EditorNodeBeforeRemoveCommand;
+	nodeAdded :[..]EditorNodeAddCommand;
 	nodeSetPosition :[..]EditorNodeSetPositionCommand;
 	nodeConnectionAdded :[..]EditorNodeConnectionAddedCommand;
 	nodeConnectionRemoved :[..]EditorNodeConnectionRemovedCommand;

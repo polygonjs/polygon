@@ -21,41 +21,38 @@ NodeConnectionList :: struct {
 	connectionIdByDestNodeId: [..][..]NodeConnectionId;
 }
 
-nodeConnectionListInit :: (list:*NodeConnectionList) {
-	using list;
-	array_init(*connections);
-	array_init(*connectionIdBySrcNodeId);
-	array_init(*connectionIdByDestNodeId);
+nodeConnectionListInit :: (using scene:*NodesScene) {
+	push_allocator(scene.allocator);
+	array_init(*connections.connections, reserve=false);
+	array_init(*connections.connectionIdBySrcNodeId, reserve=false);
+	array_init(*connections.connectionIdByDestNodeId, reserve=false);
 
 	// we add a dummy connection,
 	// so that we can use the inde 0 as invalid.
-	array_add(*connections, .{
+	array_add(*connections.connections, .{
 		src=.{nodeId=0, outputIndex=0},
 		dest=.{nodeId=0, inputIndex=0},
 	});
-	bit_array_resize(*validIndices, 1);
-	validIndices[0] = false;
-	nextIndex = 1;
+	bit_array_resize(*connections.validIndices, 1);
+	connections.validIndices[0] = false;
+	connections.nextIndex = 1;
 }
-nodeConnectionListClear :: (list:*NodeConnectionList) {
-	using list;
+// nodeConnectionListClear :: (using list:*NodeConnectionList) {
 
-	array_reset(*connections);
-	for connectionIds, nodeId: connectionIdBySrcNodeId { array_reset(*connectionIds); }
-	for connectionIds, nodeId: connectionIdByDestNodeId { array_reset(*connectionIds); }
+// 	array_reset(*connections);
+// 	for connectionIds, nodeId: connectionIdBySrcNodeId { array_reset(*connectionIds); }
+// 	for connectionIds, nodeId: connectionIdByDestNodeId { array_reset(*connectionIds); }
 
-}
-nodeConnectionListDelete :: (list:*NodeConnectionList) {
-	using list;
+// }
+// nodeConnectionListDelete :: (using list:*NodeConnectionList) {
 
-	nodeConnectionListClear(list);
+// 	// nodeConnectionListClear(list);
 
-	deinit(*validIndices);
-	array_reset(*connectionIdBySrcNodeId);
-	array_reset(*connectionIdByDestNodeId);
-}
-nodeConnectionInitForNode :: (list:*NodeConnectionList, nodeId:NodeId) {
-	using list;
+// 	// deinit(*validIndices);
+// 	// array_reset(*connectionIdBySrcNodeId);
+// 	// array_reset(*connectionIdByDestNodeId);
+// }
+nodeConnectionInitForNode :: (using list:*NodeConnectionList, nodeId:NodeId) {
 	if nodeId >= xx connectionIdBySrcNodeId.count {
 		array_resize(*connectionIdBySrcNodeId, xx nodeId+1);
 		array_resize(*connectionIdByDestNodeId, xx nodeId+1);
@@ -78,8 +75,7 @@ nodeConnectionFindSuccessorConnectionIds :: (list:*NodeConnectionList, nodeId:No
 	// }
 	// return target;
 }
-nodeConnectionFindPredecessorConnectionIds :: (list:*NodeConnectionList, nodeId:NodeId)-> [..]NodeConnectionId {
-	using list;
+nodeConnectionFindPredecessorConnectionIds :: (using list:*NodeConnectionList, nodeId:NodeId)-> [..]NodeConnectionId {
 	return connectionIdByDestNodeId[nodeId];
 	// target:[..]NodeConnectionId;
 	// // array_copy(target, list.connectionIdByDestNodeId[nodeId]);
@@ -95,8 +91,7 @@ nodeConnectionFindPredecessorConnectionIds :: (list:*NodeConnectionList, nodeId:
 	// }
 	// return target;
 }
-nodeConnectionFindByDestNode :: (list:*NodeConnectionList, nodeId: NodeId, inputIndex:u8=0)->NodeConnectionId {
-	using list;
+nodeConnectionFindByDestNode :: (using list:*NodeConnectionList, nodeId: NodeId, inputIndex:u8=0)->NodeConnectionId {
 	connectionIds := connectionIdByDestNodeId[nodeId];
 	for connectionId: connectionIds {
 		if connectionId != 0 {
@@ -109,13 +104,12 @@ nodeConnectionFindByDestNode :: (list:*NodeConnectionList, nodeId: NodeId, input
 	return 0;
 }
 
-nodeConnectionAdd :: (list:*NodeConnectionList, connection:NodeConnection)->NodeConnection {
-	using list;
+nodeConnectionAdd :: (scene:*NodesScene, using list:*NodeConnectionList, connection:NodeConnection)->NodeConnection {
 
 	assert(connections.count==validIndices.count, "connections and validIndices should have the same count\n");
 
 	if nextIndex < xx connections.count {
-		connectionWithId := _addAtIndex(list, connection, nextIndex);
+		connectionWithId := _addAtIndex(scene, list, connection, nextIndex);
 		while nextIndex < xx validIndices.count && validIndices[xx nextIndex]==true {
 			nextIndex += 1;
 		}
@@ -123,7 +117,7 @@ nodeConnectionAdd :: (list:*NodeConnectionList, connection:NodeConnection)->Node
 	} else {
 		array_set_count_and_maybe_grow(*connections, xx (nextIndex+1));
 		bit_array_resize(*validIndices, xx (nextIndex+1));
-		connectionWithId := _addAtIndex(list, connection, nextIndex);
+		connectionWithId := _addAtIndex(scene, list, connection, nextIndex);
 		nextIndex += 1;
 		return connectionWithId;
 	}
@@ -131,8 +125,7 @@ nodeConnectionAdd :: (list:*NodeConnectionList, connection:NodeConnection)->Node
 	
 }
 
-nodeConnectionRemove :: (list:*NodeConnectionList, connection:NodeConnection) {
-	using list;
+nodeConnectionRemove :: (using list:*NodeConnectionList, connection:NodeConnection) {
 
 	// assert(connection.id == 0, "connection should not have an id here, as we are only looking for it from the src or dest node\n");
 	assert(connection.id != 0, "connection id must be known to remove it\n");
@@ -166,19 +159,18 @@ nodeConnectionRemove :: (list:*NodeConnectionList, connection:NodeConnection) {
 
 #scope_file
 
-_addAtIndex :: (list:*NodeConnectionList, connection:NodeConnection, index:NodeConnectionId) -> NodeConnection {
-	using list;
+_addAtIndex :: (scene:*NodesScene, using list:*NodeConnectionList, connection:NodeConnection, index:NodeConnectionId) -> NodeConnection {
 	validIndices[xx index] = true;
 	connections[index] = connection;
 	connections[index].id = index;
 
-	_addConnectionId(*connectionIdBySrcNodeId,  connection.src.nodeId, index);
-	_addConnectionId(*connectionIdByDestNodeId, connection.dest.nodeId, index);
+	_addConnectionId(scene, *connectionIdBySrcNodeId,  connection.src.nodeId, index);
+	_addConnectionId(scene, *connectionIdByDestNodeId, connection.dest.nodeId, index);
 
 	return connections[index];
 }
 
-_addConnectionId :: (idList: *[..][..]NodeConnectionId, nodeId:NodeId, connectionId:NodeConnectionId) {
+_addConnectionId :: (scene:*NodesScene, idList: *[..][..]NodeConnectionId, nodeId:NodeId, connectionId:NodeConnectionId) {
 	if nodeId >= xx idList.count {
 		array_resize(idList, xx nodeId+1);
 	}
@@ -193,6 +185,7 @@ _addConnectionId :: (idList: *[..][..]NodeConnectionId, nodeId:NodeId, connectio
 		}
 	}
 	if(!added){
+		push_allocator(scene.allocator);
 		array_add(*(<<idList)[nodeId], connectionId);
 	}
 }

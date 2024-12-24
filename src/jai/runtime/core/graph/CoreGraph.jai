@@ -28,7 +28,7 @@ graphInit :: (graph: *CoreGraph, _scene: *NodesScene) {
 	// init_bit_array(*graph.dirty, 1);
 
 	{
-		using graph;
+		// using graph;
 		// allocator := scene.allocator;
 		// nodes.allocator = allocator;
 		// dirty.allocator = allocator;
@@ -47,8 +47,7 @@ graph :: (graphNode: *CoreGraphNodeAny) -> *CoreGraph {
 graph :: (graphId: CoreGraphId) -> *CoreGraph {
 	return CORE_GRAPHS[graphId];
 }
-graphClearConnections :: (graph: *CoreGraph) {
-	using graph;
+graphClearConnections :: (using graph: *CoreGraph) {
 	
 	for subArray: predecessors { array_reset(*subArray); }
 	for subArray: successors { array_reset(*subArray); }
@@ -59,8 +58,7 @@ graphClearConnections :: (graph: *CoreGraph) {
 	array_reset(*allPredecessors);
 	array_reset(*allSuccessors);
 }
-graphDelete :: (graph: *CoreGraph) {
-	using graph;
+graphDelete :: (using graph: *CoreGraph) {
 	array_reset(*nodes);
 	// array_reset(*onDirtyCallbacks);
 	
@@ -71,10 +69,9 @@ graphDelete :: (graph: *CoreGraph) {
 	deinit(*dirty);
 }
 
-graphAddNode :: (graph: *CoreGraph, graphNode: *$T/*, onDirtyCallback:CoreGraphNodeOnDirtyMethod=null*/) {
+graphAddNode :: (using graph: *CoreGraph, graphNode: *$T/*, onDirtyCallback:CoreGraphNodeOnDirtyMethod=null*/) {
 	assert(graphNode.graphNodeId == 0, "graphAddNode: graphNode.graphId is not 0");
 	
-	using graph;
 	graphNode.graphId = graphId;
 	graphNode.graphNodeId = nextGraphNodeId;
 	// assert(cast(*void)graphNode.type != null, "graphAddNode type is null");
@@ -104,8 +101,7 @@ graphAddNode :: (graph: *CoreGraph, graphNode: *$T/*, onDirtyCallback:CoreGraphN
 	allPredecessorsDirty[graphNode.graphNodeId] = true;
 	allSuccessorsDirty[graphNode.graphNodeId] = true;
 }
-graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
-	using graph;
+graphRemoveNode :: (using graph: *CoreGraph, graphNode: *$T) {
 
 	nodes[graphNode.graphNodeId] = null;
 	// onDirtyCallbacks[graphNode.graphNodeId] = null;
@@ -123,9 +119,8 @@ graphRemoveNode :: (graph: *CoreGraph, graphNode: *$T) {
 	}
 }
 
-graphNodeConnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId, $checkCycle:bool)-> bool {
+graphNodeConnect :: (using graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId, $checkCycle:bool)-> bool {
 	if checkCycle {
-		using graph;
 		if allPredecessorsDirty[srcId] == true {
 			_graphAllPredecessorsUpdate(graph, srcId);
 		}
@@ -138,8 +133,7 @@ graphNodeConnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGrap
 	_graphCreateConnection(graph, srcId, destId);
 	return true;
 }
-graphNodeDisconnect :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId)-> bool {
-	using graph;
+graphNodeDisconnect :: (using graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId)-> bool {
 	if predecessors[destId].count == 0 {
 		return false;
 	}
@@ -166,8 +160,7 @@ unSetDirty :: (node: *$T/CoreGraphNode) {
 unSetDirty :: (graph: *CoreGraph, graphNodeId: CoreGraphNodeId) {
 	graph.dirty[graphNodeId] = false;
 }
-setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
-	using graph;
+setDirty :: (using graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 	dirty[graphNode.graphNodeId] = true;
 	#if propagate {
 		if allSuccessorsDirty[graphNode.graphNodeId] == true {
@@ -199,8 +192,7 @@ setDirty :: (graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 NEXT_CORE_GRAPH_ID:CoreGraphId=0;
 CORE_GRAPHS:[..]*CoreGraph;
 
-_graphCreateConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
-	using graph;
+_graphCreateConnection :: (using graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
 
 	array_add(*predecessors[destId], srcId);
 	array_add(*successors[srcId], destId);
@@ -208,8 +200,7 @@ _graphCreateConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: Co
 	_updatePredecessorsAndSuccessors(graph, srcId, destId);
 
 }
-_graphDeleteConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
-	using graph;
+_graphDeleteConnection :: (using graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
 
 	{
 		found, index := array_find(predecessors[destId], srcId);
@@ -222,8 +213,7 @@ _graphDeleteConnection :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: Co
 
 	_updatePredecessorsAndSuccessors(graph, srcId, destId);
 }
-_updatePredecessorsAndSuccessors :: (graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
-	using graph;
+_updatePredecessorsAndSuccessors :: (using graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
 
 	// update successors
 	if allSuccessorsDirty[destId] == true {
@@ -244,8 +234,7 @@ _updatePredecessorsAndSuccessors :: (graph: *CoreGraph, srcId: CoreGraphNodeId, 
 	allPredecessorsDirty[destId] = true;
 }
 
-_graphAllPredecessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
-	using graph;
+_graphAllPredecessorsUpdate :: (using graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 
 	tmp: [..]CoreGraphNodeId;
 	tmp.allocator = temp;
@@ -265,8 +254,7 @@ _graphAllPredecessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 	}
 	allPredecessorsDirty[nodeId] = false;
 }
-_graphAllSuccessorsUpdate :: (graph: *CoreGraph, nodeId: CoreGraphNodeId) {
-	using graph;
+_graphAllSuccessorsUpdate :: (using graph: *CoreGraph, nodeId: CoreGraphNodeId) {
 
 	tmp: [..]CoreGraphNodeId;
 	tmp.allocator = temp;

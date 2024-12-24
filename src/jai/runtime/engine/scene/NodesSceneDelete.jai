@@ -1,8 +1,7 @@
-sceneDelete :: (scene: *NodesScene) {
-	using scene;
+sceneDelete :: (using scene: *NodesScene) {
 
 	graphClearConnections(*graph);
-	nodeConnectionListClear(*connections);
+	// nodeConnectionListClear(*connections);
 
 	// for node, i: nodes {
 	// 	if node != null {
@@ -18,7 +17,7 @@ sceneDelete :: (scene: *NodesScene) {
 		// for cookResult, i: cookResults { generatedWorldObjectDelete(cookResult); }
 		// array_reset(*cookResults);
 		graphDelete(*graph);
-		nodeConnectionListDelete(*connections);
+		// nodeConnectionListDelete(*connections);
 		// array_reset(*observers);
 		// observer = null;
 	}

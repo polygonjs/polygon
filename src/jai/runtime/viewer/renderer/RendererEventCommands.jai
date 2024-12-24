@@ -41,6 +41,13 @@ rendererFlushCommands :: (renderer: *Renderer) {
 	doRendererRenderableMaterialChangedCommands(renderer, renderableMaterialChanged);
 	doRendererTransformableMatrixUpdatedCommands(renderer, objectMatrixUpdated);
 	doRendererCameraMatrixUpdatedCommands(renderer, cameraMatrixUpdated);
+
+	// print("objectAdd 1: %\n", objectAdd.count);
+	// for :members renderer.commands {
+	// 	// (<<member).count = 0;
+	// 	array_reset_keeping_memory(it);
+	// }
+	// print("objectAdd 2: %\n", objectAdd.count);
 	objectAdd.count = 0;
 	objectBeforeRemove.count = 0;
 	objectsBeforeRemove.count = 0;
@@ -50,27 +57,52 @@ rendererFlushCommands :: (renderer: *Renderer) {
 }
 rendererCommandsSetAllocator :: (renderer: *Renderer) {
 	using renderer.commands;
-	objectAdd.allocator = renderer.allocator;
-	objectBeforeRemove.allocator = renderer.allocator;
-	objectsBeforeRemove.allocator = renderer.allocator;
-	renderableMaterialChanged.allocator = renderer.allocator;
-	objectMatrixUpdated.allocator = renderer.allocator;
-	cameraMatrixUpdated.allocator = renderer.allocator;
+	// print("set allocator\n");
+	// for :members member: renderer.commands {
+	// 	print("%,%\n", it_index, memberName);
+	// 	member.allocator = renderer.allocator;
+	// 	array_reserve(member, 1024);
+	// }
+
+	array_init(*objectAdd, renderer.allocator, reserve=true);
+	array_init(*objectBeforeRemove, renderer.allocator, reserve=true);
+	array_init(*objectsBeforeRemove, renderer.allocator, reserve=true);
+	array_init(*renderableMaterialChanged, renderer.allocator, reserve=true);
+	array_init(*objectMatrixUpdated, renderer.allocator, reserve=true);
+	array_init(*cameraMatrixUpdated, renderer.allocator, reserve=true);
 }
-// rendererCommandsDelete :: (using commands: *RendererCommands) {
-// 	array_reset(*objectAdd);
-// 	array_reset(*objectBeforeRemove);
-// }
 
 
 RendererCommands :: struct {
-	objectAdd :[..]RendererObjectAddCommand;
 	objectBeforeRemove :[..]RendererObjectBeforeRemoveCommand;
 	objectsBeforeRemove :[..]RendererObjectsBeforeRemoveCommand;
+	objectAdd :[..]RendererObjectAddCommand;
 	renderableMaterialChanged :[..]RendererRenderableMaterialChangedCommand;
 	objectMatrixUpdated :[..]RendererObjectMatrixUpdatedCommand;
 	cameraMatrixUpdated :[..]RendererCameraMatrixUpdatedCommand;
 }
+
+// members :: (using object: *RendererCommands, body: Code, flags: For_Flags) #expand {
+// 	object_info := type_info(type_of(<<object));
+// 	object_tis := cast(*Type_Info_Struct)object_info;
+
+// 	for member, i: object_tis.members {
+// 		memberField := get_field(object_tis, member.name);
+// 		member_tis := cast(*Type_Info_Struct)memberField.type;
+// 		memberPtr := (cast(*u8)object) + memberField.offset_in_bytes + memberField.offset_in_bytes;
+// 		`it := cast(*[..]Any)memberPtr;
+// 		`it_index := i;
+// 		`memberName := member.name;
+
+// 		#insert body;
+// 	}
+// 	// `it_index := 0; `it :[..]Any= objectBeforeRemove; #insert body;
+// 	// `it_index = 1; `it = objectAdd; #insert body;
+// 	// `it_index = 2; `it = objectsBeforeRemove; #insert body;
+// 	// `it_index = 3; `it = renderableMaterialChanged; #insert body;
+// 	// `it_index = 4; `it = objectMatrixUpdated; #insert body;
+// 	// `it_index = 5; `it = cameraMatrixUpdated; #insert body;
+// }
 
 
 #scope_file

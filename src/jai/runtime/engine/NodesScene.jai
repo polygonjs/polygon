@@ -18,7 +18,7 @@ NodesScene :: struct {
 	nodeNames: [..]NodeName;
 	worldScene: *Scene;
 	cookResults:[..]GeoNodeCookOutput;
-	nodeInputCookResults:[..]GeoNodeCookInput;
+	nodeInputCookResults:[..][NODE_MAX_INPUTS_COUNT]GeoNodeCookOutput;
 	cookResultsToDispose:[..]*Object3D;
 	cooksCount:[..]u32;
 	connections: NodeConnectionList;
@@ -56,7 +56,7 @@ newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 		scene.allocator = _allocator;
 	}
 	{
-		using scene;
+		// using scene;
 		// #if NODES_SCENE_EMIT_EVENTS {
 			// array_init(*observers);
 		// }
@@ -104,8 +104,7 @@ newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
 
 INIT_NEXT_NODE_ID :NodeId: 0;
 
-_sceneInit :: (scene: *NodesScene) {
-	using scene;
+_sceneInit :: (using scene: *NodesScene) {
 	nextNodeId = INIT_NEXT_NODE_ID;
 	// array_add(*nodes, null);
 	// bit_array_resize(*validNodeIds, 1);
@@ -114,24 +113,21 @@ _sceneInit :: (scene: *NodesScene) {
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
 	// array_init(*nodes);
-	array_init(*nodes, scene.allocator);
-	array_init(*nodeNames, scene.allocator);
-	nodeConnectionListInit(*connections);
-	array_init(*nodeInputCookResults, scene.allocator);
-	array_init(*cookResults, scene.allocator);
-	array_init(*cooksCount, scene.allocator);
-	array_init(*cookResultsToDispose, scene.allocator);
+	array_init(*nodes, scene.allocator, reserve=true);
+	array_init(*nodeNames, scene.allocator, reserve=true);
+	nodeConnectionListInit(scene);
+	array_init(*nodeInputCookResults, scene.allocator, reserve=true);
+	array_init(*cookResults, scene.allocator, reserve=true);
+	array_init(*cooksCount, scene.allocator, reserve=true);
+	array_init(*cookResultsToDispose, scene.allocator, reserve=true);
 	graphInit(*graph, scene);
 	// scene.timeGraphNode.type = TimeNode;
 	// scene.timeGraphNode.name = "TimeNode";
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
-	array_init(*computablesTree.cookingNodeIds, scene.allocator);
-	array_init(*computablesTree.inputs, scene.allocator);
-	array_init(*computablesTree.outputs, scene.allocator);
-	array_init(*computablesTree.leaves, scene.allocator);
+	nodesSceneComputableTreeInit(scene);
 
-	array_init(*nodeRequests, scene.allocator);
+	array_init(*nodeRequests, scene.allocator, reserve=true);
 
 	scene.worldScene = newScene(scene);
 	scene.defaultMaterial.line = xx newMaterial(scene.worldScene, LineBasicMaterial);

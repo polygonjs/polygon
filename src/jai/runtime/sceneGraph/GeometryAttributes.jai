@@ -20,8 +20,7 @@ geometryAttributesCopy :: (src: *GeometryAttributes, target: *GeometryAttributes
 	geometryAttributeCopy(*src.normal, *target.normal);
 	geometryAttributeCopy(*src.uv, *target.uv);
 }
-geometryAttributesDelete :: (attributes: *GeometryAttributes) {
-	using attributes;
+geometryAttributesDelete :: (using attributes: *GeometryAttributes) {
 	geometryAttributeDelete(*position);
 	geometryAttributeDelete(*normal);
 	geometryAttributeDelete(*uv);

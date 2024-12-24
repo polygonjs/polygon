@@ -4,6 +4,15 @@ ComputablesTree :: struct {
 	outputs: [..][..]NodeId;
 	leaves: [..]NodeId;
 }
+
+nodesSceneComputableTreeInit :: (using scene: *NodesScene) {
+	array_init(*computablesTree.cookingNodeIds, scene.allocator, reserve=true);
+	array_init(*computablesTree.inputs, scene.allocator, reserve=false);
+	array_init(*computablesTree.outputs, scene.allocator, reserve=false);
+	array_init(*computablesTree.leaves, scene.allocator, reserve=true);
+
+}
+
 nodesSceneFindFirstOutputNode :: (scene: *NodesScene) -> *OutputGeoNode {
 	for node, i: scene.nodes {
 		if node.type == OutputGeoNode {
@@ -12,25 +21,21 @@ nodesSceneFindFirstOutputNode :: (scene: *NodesScene) -> *OutputGeoNode {
 	}
 	return null;
 }
+debugThiShit :: (scene: *NodesScene, message:string) {
+	print("\n- %, %/%\n", message, scene.nodes.count, scene.nodes.allocated);
+	for node, i: scene.nodes {
+		print("%: %, %, %\n", i, node, node.nodeId, node.type);
+		print("   node: %, %\n", node.type, node.nodeId);
+	}
+}
 nodesSceneOutputNodesCompute :: (scene: *NodesScene) {
 	nodesSceneDisposeCookResults(scene);
 
 	outputNode := nodesSceneFindFirstOutputNode(scene);
 	if outputNode != null {
 		buildAndComputeComputableTree(scene, outputNode);
-		return;
 	}
-	// // atLeastOneCompute := false;
-	// for node, i: scene.nodes {
-	// 	if node.type == OutputGeoNode {
-	// 		// print(">>>> compute output node: %\n", node.nodeId);
-	// 		buildAndComputeComputableTree(scene, cast(*OutputGeoNode)node);
-	// 		return;
-	// 		// atLeastOneCompute = true;
-	// 	}
-	// }
-	// if atLeastOneCompute
-	// print(">>>> nodesSceneOutputNodesCompute :%\n", atLeastOneCompute);
+	
 }
 nodesSceneSetFirstOutputNodeInput :: (scene: *NodesScene, input: u8) {
 	outputNode := nodesSceneFindFirstOutputNode(scene);
@@ -48,8 +53,7 @@ nodesSceneDisposeCookResults :: (scene: *NodesScene) {
 }
 
 GeoNodeCookOutputOrObject :[2]Type: .[Object3D, Object3DArray];
-completeCookWithResult :: (scene:*NodesScene, node: *$T, objects: *$O/GeoNodeCookOutputOrObject) {
-	using scene;
+completeCookWithResult :: (using scene:*NodesScene, node: *$T, objects: *$O/GeoNodeCookOutputOrObject) {
 	cooksCount[node.nodeId] += 1;
 	//
 	generatedNodeDisposePreviousCookResults(scene, node);
@@ -77,7 +81,7 @@ completeCookWithResult :: (scene:*NodesScene, node: *$T, objects: *$O/GeoNodeCoo
 			array_add_if_unique(*computablesTree.leaves, outputNodeId);
 		}
 	}
-	computeComputableNodes(scene);
+	computeComputableNodes(scene, node);
 
 	// #if storeResult {
 	// 	previousResult := cookResults[node.nodeId];
@@ -100,16 +104,21 @@ buildAndComputeComputableTree :: (using scene: *NodesScene, outputNode: *OutputG
 		return;
 	}
 	buildComputableTree(scene, outputNode);
-	computeComputableNodes(scene);
+	computeComputableNodes(scene, xx outputNode);
 }
 
-computeComputableNodes :: (using scene: *NodesScene) {
-	
-	while(computablesTree.leaves.count > 0) {
+computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) {
+	if(computablesTree.leaves.count > 0) {
+		// print("<<<<<<<<<<<<<<<<<<<<<<<< START calling node=%\n", callingNode.nodeId);
+		// print("computablesTree.leaves.count: %\n", computablesTree.leaves.count);
 		nodeId := pop(*computablesTree.leaves);
 		node := nodes[nodeId];
+		// print("node: %, %\n", nodeId, node.type);
 		array_add(*computablesTree.cookingNodeIds, node.nodeId);
+		// debugThiShit(scene, tprint("computeComputableNodes A: %\n", node.nodeId, node.type));
 		generatedNodePrepareInputCookResults(scene, node);
+		// debugThiShit(scene, tprint("computeComputableNodes B: %\n", node.nodeId, node.type));
+		// print("END >>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 		generatedNodeCook(node, nodeInputCookResults[nodeId]);
 	}
 }
@@ -121,9 +130,12 @@ buildComputableTree :: (scene: *NodesScene, outputNode: *OutputGeoNode) {
 	defer array_reset(*nodesToTraverse);
 	defer array_reset(*traversedNodeIds);
 	array_add(*nodesToTraverse, outputNode.nodeId);
+	// print("start:%\n", nodesToTraverse);
 	while nodesToTraverse.count > 0 {
 		nodeId := pop(*nodesToTraverse);
 		node := scene.nodes[nodeId];
+		// print("nodeId:%, node: %\n", nodeId, node);
+		// print("node.type: %\n", node.type);
 		generatedNodeComputeInputs(scene, node, *scene.computablesTree.inputs[nodeId]);
 		if scene.computablesTree.inputs[nodeId].count == 0 {
 			array_add_if_unique(*scene.computablesTree.leaves, nodeId);

@@ -1,12 +1,26 @@
+ARRAY_DEFAULT_RESERVE_SIZE :: 1024;
+array_reserve :: (array: *[..] $T) {
+	array_reserve(array, ARRAY_DEFAULT_RESERVE_SIZE);
+}
+
 array_find_ptr :: (array: *[] $T, item: T) -> bool, s64 {
 	for <<array if it == item return true, it_index;
 	return false, -1;  // Not found.
 }
-array_init :: (array: *[..] $T, allocator: Allocator=context.allocator) {
+array_init :: (array: *[..] $T, allocator: Allocator=context.allocator, $reserve:bool=false) {
+	// is_context := allocator.proc==context.allocator.proc;
+	// if is_context {
+	// 	// print("is context:%\n", allocator.proc==context.allocator.proc);
+	// 	// print_stack_trace(context.stack_trace);
+	// }
+
 	array.count = 0;
 	array.allocated = 0;
 	array.data = null;
 	array.allocator = allocator;
+	#if reserve {
+		array_reserve(array);
+	}
 }
 array_concat :: (array0: [$N] $T, array1: [$M] T)-> [..] T {
 	array:[..]T;
