@@ -1,8 +1,8 @@
 Vector3Param :: struct {
-	#as using baseParam: BaseParam(Vector3Param, VALUE_TYPE);
+	#as using baseParam: BaseParam(#run nextParamTypeId(), VALUE_TYPE);
 };
 
-paramRegisterVector3Param :: (){
+paramRegisterVector3Param :: () #compile_time {
 	paramRegister(TYPE, VALUE_TYPE);
 }
 

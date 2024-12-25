@@ -1,8 +1,8 @@
 FloatParam :: struct {
-	#as using baseParam: BaseParam(FloatParam, VALUE_TYPE);
+	#as using baseParam: BaseParam(#run nextParamTypeId(), VALUE_TYPE);
 };
 
-paramRegisterFloatParam :: (){
+paramRegisterFloatParam :: () #compile_time {
 	paramRegister(TYPE, VALUE_TYPE);
 }
 

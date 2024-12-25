@@ -36,7 +36,7 @@ NoiseComputeControllerParams :: struct {
 	offset: Vector3 = .{0.0, 0.0, 0.0};
 }
 
-registerComputeControllerNoise :: () {
+registerComputeControllerNoise :: () #compile_time {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 

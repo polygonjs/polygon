@@ -3,17 +3,17 @@ FileSTLGeoParams :: struct {
 	path: StringParam;
 }
 FileSTLGeoNode :: struct {
-	#as using geoNode: GeoNode(FileSTLGeoNode, FileSTLGeoParams);
+	#as using contextNode: GeoNode(FileSTLGeoNode, FileSTLGeoParams, inputs=.[0,0]);
 };
 
-registerFileSTLGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
+registerFileSTLGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 
-	urlOrPath := stringFixedToString(*node.p.path.value);
+	urlOrPath := stringFixedToString(node.p.path.value);
 	#if WASM {
 		sceneAddNodeRequest(nodesScene, node, urlOrPath);
 	} else {

@@ -25,7 +25,7 @@ ComputeControllerAttributeNormalize :: struct {
 }
 
 
-registerComputeControllerAttributeNormalize :: () {
+registerComputeControllerAttributeNormalize :: () #compile_time {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 

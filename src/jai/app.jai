@@ -1,5 +1,5 @@
 
-appSceneInit :: appSceneInit1;
+appSceneInit :: appSceneInit4;
 
 #scope_file
 
@@ -69,6 +69,42 @@ appSceneInit2 :: (nodesScene: *NodesScene, editor: *Editor) {
 	output1 := createNode(nodesScene, OutputGeoNode);
 
 	nodeSetPosition(editor, output1, .{0,-4});
+
+	editorFlushCommands(editor);
+}
+
+
+appSceneInit3 :: (nodesScene: *NodesScene, editor: *Editor) {
+
+	output1 := createNode(nodesScene, OutputGeoNode);
+	box1 := createNode(nodesScene, BoxGeoNode);
+	noise1 := createNode(nodesScene, NoiseGeoNode);
+
+	setInput(output1, 0, noise1);
+	setInput(noise1, 0, box1);
+
+	nodeSetPosition(editor, output1, .{0,-4});
+	nodeSetPosition(editor, noise1, .{0,-2});
+	nodeSetPosition(editor, box1, .{0,0});
+
+	editorFlushCommands(editor);
+}
+
+appSceneInit4 :: (nodesScene: *NodesScene, editor: *Editor) {
+
+	output1 := createNode(nodesScene, OutputGeoNode);
+	switch1 := createNode(nodesScene, SwitchGeoNode);
+	box1 := createNode(nodesScene, BoxGeoNode);
+	icosahedron1 := createNode(nodesScene, IcosahedronGeoNode);
+
+	setInput(output1, 0, switch1);
+	setInput(switch1, 0, box1);
+	setInput(switch1, 1, icosahedron1);
+
+	nodeSetPosition(editor, output1, .{0,-4});
+	nodeSetPosition(editor, switch1, .{0,-2});
+	nodeSetPosition(editor, box1, .{-2,0});
+	nodeSetPosition(editor, icosahedron1, .{2,0});
 
 	editorFlushCommands(editor);
 }

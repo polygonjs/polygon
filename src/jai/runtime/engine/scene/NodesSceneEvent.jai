@@ -22,8 +22,8 @@ nodesSceneEmitEvent :: (using scene: *NodesScene, $event: NodesSceneEvent, node:
 		return;
 	}
 	if event == {
-		case .NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, node);}
-		case .NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, node);}
+		case .NODE_ADDED; 	{nodeSceneObserverOnNodeAdded(observer, scene, xx node);}
+		case .NODE_BEFORE_REMOVE; 	{nodeSceneObserverOnNodeBeforeRemove(observer, scene, xx node);}
 	}
 }
 nodesSceneEmitEvent :: (using scene: *NodesScene, $event: NodesSceneEvent, connection: NodeConnection) {

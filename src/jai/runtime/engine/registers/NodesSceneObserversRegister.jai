@@ -1,9 +1,9 @@
 
-nodeSceneObserverOnNodeAdded :: (observer: Any, scene: *NodesScene, node:*$N) {
+nodeSceneObserverOnNodeAdded :: (observer: Any, scene: *NodesScene, node:*BaseNodeAny) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_ADDED;
 	assert(false, tprint("nodeSceneObserverOnNodeAdded: observer type '%' is not implemented", observer.type));
 }
-nodeSceneObserverOnNodeBeforeRemove :: (observer: Any, scene: *NodesScene, node:*$N) {
+nodeSceneObserverOnNodeBeforeRemove :: (observer: Any, scene: *NodesScene, node:*BaseNodeAny) {
 	#insert NODES_SCENE_OBSERVER_ON_NODE_BEFORE_REMOVE;
 	assert(false, tprint("nodeSceneObserverOnNodeBeforeRemove: observer type '%' is not implemented", observer.type));
 }

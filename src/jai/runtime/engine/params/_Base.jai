@@ -1,13 +1,19 @@
+ParamTypeId :: u8;
 
+// BaseParamStruct :: struct {
+// 	paramTypeId: ParamTypeId
+// 	valueType: Type
+// }
 
-BaseParam :: struct ($paramType: Type, $valueType: Type) {
-	#as using coreGraphNode: CoreGraphNode(paramType);
+BaseParam :: struct (paramTypeId: ParamTypeId, valueType: Type) {
+	#as using coreGraphNode: CoreGraphNode;
+	// paramTypeId: ParamTypeId = paramTypeId;
 	node: *BaseNodeAny;
 	value: valueType;
 	defaultValue: valueType;
 	
 }
-BaseParamAny :: BaseParam(Any, u8);
+BaseParamAny :: BaseParam(0, u8);
 
 // newParam :: (node: *BaseNode, $T: Type) -> *T {
 // 	param: *T = alloc(size_of(T));
@@ -24,7 +30,7 @@ paramInit :: (param: *$P, node: *$N) {
 	// print("initParam START %\n", <<param);
 	param.node = xx node;
 
-	param.type = P;
+	// param.type = P;
 	// tmp:P;
 
 	graphAddNode(graph(node.graphId), param);

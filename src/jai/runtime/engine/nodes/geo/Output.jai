@@ -2,11 +2,11 @@ OutputGeoParams :: struct {
 	input: UInt8Param = .{value=0};
 }
 OutputGeoNode :: struct {
-	#as using geoNode: GeoNode(OutputGeoNode, OutputGeoParams);
+	#as using contextNode: GeoNode(OutputGeoNode, OutputGeoParams, inputs=.[0,MAX_INPUTS_COUNT]);
 };
 
-registerOutputGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=10);
+registerOutputGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 nodeComputeInputs :: (scene:*NodesScene, node: *TYPE, target:*[..]NodeId) {
@@ -22,7 +22,7 @@ nodeDisposePreviousCookResults :: (scene:*NodesScene, node: *TYPE) {
 // }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
-	inputIndex := inputIndexFromInputParam(node);
+	inputIndex := inputIndexFromInputParam(xx node);
 	inputResult := inputResults[inputIndex];
 	nodesScene := graphNodeScene(node);
 	if inputResult != null {
@@ -42,6 +42,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 #scope_file
 
 TYPE :: OutputGeoNode;
+MAX_INPUTS_COUNT :: 10;
 
 _objectChanged :: (worldScene:*Scene, objects: *[..]*Object3D)->bool {
 	if worldScene.children.count != objects.count {

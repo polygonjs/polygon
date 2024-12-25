@@ -4,11 +4,11 @@ IcosahedronGeoParams :: struct {
 	detail: UIntegerParam = .{value=2};
 }
 IcosahedronGeoNode :: struct {
-	#as using geoNode: GeoNode(IcosahedronGeoNode, IcosahedronGeoParams);
+	#as using contextNode: GeoNode(IcosahedronGeoNode, IcosahedronGeoParams, inputs=.[0,1]);
 };
 
-registerIcosahedronGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
+registerIcosahedronGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

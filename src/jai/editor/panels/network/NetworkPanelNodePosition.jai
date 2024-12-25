@@ -27,14 +27,14 @@ networkPanelNodeSetPosition :: (using panel: *TYPE, node: *$T, position: Vector2
 	// make sure we don't update the matrices of connections more than we need.
 
 	connections := editor.nodesScene.connections;
-	outConnections := connections.connectionIdBySrcNodeId[node.nodeId];
-	inConnections := connections.connectionIdByDestNodeId[node.nodeId];
-	for connectionId, outConnection: outConnections {
+	outConnectionIds := nodeConnectionFindSuccessorConnectionIds(*editor.nodesScene.connections, node.nodeId);
+	inConnectionIds := nodeConnectionFindPredecessorConnectionIds(*editor.nodesScene.connections, node.nodeId);
+	for connectionId: outConnectionIds {
 		connection := connections.connections[connectionId];
 		networkPanelConnectionSetMatrix(panel, connection, forRaycast=false);
 		networkPanelConnectionSetMatrix(panel, connection, forRaycast=true);
 	}
-	for connectionId, inConnection: inConnections {
+	for connectionId: inConnectionIds {
 		connection := connections.connections[connectionId];
 		networkPanelConnectionSetMatrix(panel, connection, forRaycast=false);
 		networkPanelConnectionSetMatrix(panel, connection, forRaycast=true);

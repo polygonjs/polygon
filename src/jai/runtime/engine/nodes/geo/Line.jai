@@ -6,11 +6,11 @@ LineGeoParams :: struct {
 	segments: UIntegerParam = .{value=1};
 }
 LineGeoNode :: struct {
-	#as using geoNode: GeoNode(LineGeoNode, LineGeoParams);
+	#as using contextNode: GeoNode(LineGeoNode, LineGeoParams, inputs=.[0,0]);
 };
 
-registerLineGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
+registerLineGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

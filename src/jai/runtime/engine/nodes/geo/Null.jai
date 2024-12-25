@@ -1,11 +1,11 @@
 NullGeoParams :: struct {
 }
 NullGeoNode :: struct {
-	#as using geoNode: GeoNode(NullGeoNode, MergeGeoParams);
+	#as using contextNode: GeoNode(NullGeoNode, NullGeoParams, inputs=.[1,1]);
 };
 
-registerNullGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=1);
+registerNullGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

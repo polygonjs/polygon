@@ -55,7 +55,7 @@ newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true, _
 		renderer.allocator = _allocator;
 	}
 	rendererCommandsSetAllocator(renderer);
-	array_init(*renderer.buffers_to_destroy, renderer.allocator);
+	array_init(*renderer.buffers_to_destroy, renderer.allocator, reserve=true);
 	renderer.wgpuContext = wgpuContext;
 	#if ensureWGPUContextValid {
 		assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");

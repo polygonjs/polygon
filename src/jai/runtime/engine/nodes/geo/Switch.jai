@@ -2,11 +2,11 @@ SwitchGeoParams :: struct {
 	input: UInt8Param = .{value=0,min=0,max=MAX_INPUTS_COUNT};
 }
 SwitchGeoNode :: struct {
-	#as using geoNode: GeoNode(SwitchGeoNode, SwitchGeoParams);
+	#as using contextNode: GeoNode(SwitchGeoNode, SwitchGeoParams, inputs=.[0, MAX_INPUTS_COUNT]);
 };
 
-registerSwitchGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=MAX_INPUTS_COUNT);
+registerSwitchGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 nodeComputeInputs :: (scene:*NodesScene, node: *TYPE, target:*[..]NodeId) {
@@ -19,7 +19,7 @@ nodeDisposePreviousCookResults :: (scene:*NodesScene, node: *TYPE) {
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
-	inputIndex := inputIndexFromInputParam(node);
+	inputIndex := inputIndexFromInputParam(xx node);
 	inputResult := inputResults[inputIndex];
 	nodesScene := graphNodeScene(node);
 

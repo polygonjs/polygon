@@ -6,7 +6,7 @@ LineBasicMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
 
-registerLineBasicMaterial :: (){
+registerLineBasicMaterial :: () #compile_time {
 	materialRegister(TYPE, topology = .LineList);
 }
 

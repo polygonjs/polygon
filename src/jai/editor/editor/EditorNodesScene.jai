@@ -14,7 +14,7 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 	// 	editor.sceneUiData.nodePositions[i] = .{0,0};
 	// }
 	//
-	assert(nodesScene.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly");
+	// assert(nodesScene.timeGraphNode.type == TimeNode, "timeGraphNode not set up correctly");
 }
 editorRemoveScene :: (editor: *Editor) {
 	assert(editor.nodesScene!=null, "editor.nodesScene is null");

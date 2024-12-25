@@ -5,11 +5,11 @@ TransformGeoParams :: struct {
 	scale: FloatParam = .{value=1};
 }
 TransformGeoNode :: struct {
-	#as using geoNode: GeoNode(TransformGeoNode, TransformGeoParams);
+	#as using contextNode: GeoNode(TransformGeoNode, TransformGeoParams, inputs=.[1,1]);
 };
 
-registerTransformGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=1);
+registerTransformGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

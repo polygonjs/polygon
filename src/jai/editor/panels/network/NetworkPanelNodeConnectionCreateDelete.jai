@@ -28,7 +28,7 @@ networkPanelConnectionSetMatrix :: (using panel: *TYPE, connection: NodeConnecti
 	sceneObjectUpdateMatrix(scene, mesh);
 }
 networkPanelConnectionSetMatrix :: (using panel: *TYPE, connection: NodeConnection, $forRaycast:bool) {
-	if connectionObjectIndexByConnectionId.count < xx connection.id {
+	if connectionObjectIndexByConnectionId.count <= xx connection.id {
 		return;
 	}
 	meshIndex := connectionObjectIndexByConnectionId[connection.id];

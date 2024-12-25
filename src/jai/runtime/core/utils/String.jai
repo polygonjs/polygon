@@ -12,18 +12,18 @@ StringFixedTypes :: Type.[NodeName, AssetPath];
 
 INDENT_CHAR :: #char "\t";
 
-stringFixedToString :: (stringFixed: *StringFixed)->string {
+stringFixedToString :: (stringFixed: StringFixed)->string {
 	view := array_view(stringFixed.array, 0, stringFixed.count);
 	str := cast(string)view;
 	return str;
 }
-stringToStringFixed :: (src: *string, stringFixed:*$T/StringFixedTypes) {
+stringToStringFixed :: (src: string, stringFixed:*$T/StringFixedTypes) {
 	stringFixed.count = xx src.count;
 	memcpy(stringFixed.array.data, src.data, min(stringFixed.array.count, src.count));
 }
-stringToStringFixed :: (src: string, stringFixed:*$T/StringFixedTypes) {
-	stringToStringFixed(*src, stringFixed);
-}
+// stringToStringFixed :: (src: string, stringFixed:*$T/StringFixedTypes) {
+// 	stringToStringFixed(*src, stringFixed);
+// }
 
 indent :: inline (level: u8) -> string {
 	builder:String_Builder;

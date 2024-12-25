@@ -2,11 +2,11 @@
 MergeGeoParams :: struct {
 }
 MergeGeoNode :: struct {
-	#as using geoNode: GeoNode(MergeGeoNode, MergeGeoParams);
+	#as using contextNode: GeoNode(MergeGeoNode, MergeGeoParams, inputs=.[1, MAX_INPUTS_COUNT]);
 };
 
-registerMergeGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=128);
+registerMergeGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
@@ -25,4 +25,5 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 #scope_file
 
 TYPE :: MergeGeoNode;
+MAX_INPUTS_COUNT :: 128;
 

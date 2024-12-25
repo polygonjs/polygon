@@ -27,7 +27,7 @@ TranslateComputeControllerParams :: struct {
 	translate: Vector3=.{0.0, 0.0, 0.0};
 }
 
-registerComputeControllerTranslate :: () {
+registerComputeControllerTranslate :: () #compile_time {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 

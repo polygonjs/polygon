@@ -21,7 +21,7 @@ materialsMetaDatasCount :: ()->u64{
 	return xx TMP_METADATAS.count;
 }
 materialsMetaDatas :: ()->[MATERIAL_METADATAS_COUNT]MaterialMetaData {
-	registerNodes();
+	registerMaterials();
 
 	list:[MATERIAL_METADATAS_COUNT]MaterialMetaData;
 

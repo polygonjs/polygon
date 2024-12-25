@@ -5,5 +5,5 @@ nodeName :: (nodesScene: *NodesScene, nodeId: NodeId)->string {
 	// str := cast(string)view;
 	// return str;
 
-	return stringFixedToString(*nodesScene.nodeNames[nodeId]);
+	return stringFixedToString(nodesScene.nodeNames[nodeId]);
 }

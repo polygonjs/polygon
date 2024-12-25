@@ -2,7 +2,7 @@
 // 	radius: FloatParam;
 // }
 // SphereGeoNode :: struct {
-// 	#as using geoNode: GeoNode(SphereGeoParams, init, cook, nodeCompute);
+// 	#as using contextNode: GeoNode(SphereGeoParams, init, cook, nodeCompute);
 // };
 
 // cook :GeoNodeCookMethod: (node: *NODE_TYPE, inputs:GeoNodeCookInput)->GeoNodeCookOutput {

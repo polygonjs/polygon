@@ -1,7 +1,7 @@
 
 
 
-generatedWorldObjectDelete :: (object: *$T) {
+generatedWorldObjectDelete :: (object: *Object3D) {
 	#insert GENERATED_CODE_WORLD_OBJECT_DELETE;
 	assert(false, tprint("generatedWorldObjectDelete: object type '%' is not implemented", object.type));
 }
@@ -52,7 +52,7 @@ generateWorldObjectClone :: ()->string {
 	builder: String_Builder;
 	print_to_builder(*builder, "if object.type == {\n");
 	for type: WORLD_OBJECT_TYPES {
-		print_to_builder(*builder, tprint("\tcase %; return worldObjectClone( cast(*%) object);\n", type, type));
+		print_to_builder(*builder, tprint("\tcase %; clone := worldObjectClone( cast(*%) object); clone.id = nextWorldObjectId(); return clone;\n", type, type));
 	}
 	print_to_builder(*builder, "}");
 

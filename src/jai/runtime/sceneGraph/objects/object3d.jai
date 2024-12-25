@@ -40,8 +40,7 @@ object3DAllocate :: ($T: Type, allocator: Allocator)-> *T {
 	object.allocator = allocator;
 	object.type = T;
 
-	object.id = NEXT_OBJECT3D_ID;
-	NEXT_OBJECT3D_ID+=1;
+	object.id = nextWorldObjectId();
 	transformableInit(object);
 	return object;
 }
@@ -130,7 +129,14 @@ transformableUniformsUpdate :: (object: *TYPE) {
 	matrix4x4_to_buffer(*transposedMatrix, *object.transformableUniforms.transformMatrix);
 }
 
+nextWorldObjectId :: ()->WorldObjectId{
+	currentId := NEXT_OBJECT3D_ID;
+	NEXT_OBJECT3D_ID += 1;
+	return currentId;
+}
+
 #scope_file
 
-NEXT_OBJECT3D_ID :u64= 0;
+WorldObjectId :: u64;
+NEXT_OBJECT3D_ID :WorldObjectId= 0;
 TYPE :: Object3D;

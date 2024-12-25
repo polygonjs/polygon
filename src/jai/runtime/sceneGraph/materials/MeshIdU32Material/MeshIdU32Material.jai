@@ -5,7 +5,7 @@ MeshIdU32MaterialUniforms :: struct {
 MeshIdU32Material :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
-registerMeshIdU32Material :: (){
+registerMeshIdU32Material :: () #compile_time {
 	materialRegister(TYPE, topology = .TriangleList);
 }
 

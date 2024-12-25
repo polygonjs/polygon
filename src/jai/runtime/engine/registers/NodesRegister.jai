@@ -1,32 +1,49 @@
 
 
-generatedNodeComputeInputs :: (scene: *NodesScene, node: *$T, target:*[..]NodeId) {
+generatedNodeComputeInputs :: (scene: *NodesScene, node: *BaseNodeAny, target:*[..]NodeId) {
 	#insert GENERATED_CODE_NODE_COMPUTE_INPUTS;
 	assert(false, tprint("generatedNodeComputeInputs: node type '%' is not implemented", node.type));
 }
-generatedNodePrepareInputCookResults :: (scene: *NodesScene, node: *$T) {
+generatedNodePrepareInputCookResults :: (scene: *NodesScene, node: *BaseNodeAny) {
 	#insert GENERATED_CODE_NODE_PREPARE_INPUT_COOK_RESULTS;
 	assert(false, tprint("generatedNodePrepareInputCookResults: node type '%' is not implemented", node.type));
 }
-generatedNodeDisposePreviousCookResults :: (scene: *NodesScene, node: *$T) {
+generatedNodeDisposePreviousCookResults :: (scene: *NodesScene, node: *BaseNodeAny) {
 	#insert GENERATED_CODE_NODE_DISPOSE_PREVIOUS_COOK_RESULTS;
 	assert(false, tprint("generatedNodeDisposePreviousCookResults: node type '%' is not implemented", node.type));
 }
-generatedNodeCook :: (node: *$T, inputResults:GeoNodeCookInput) {
+generatedNodeCook :: (node: *BaseNodeAny, inputResults:GeoNodeCookInput) {
 	#insert GENERATED_CODE_COOK;
 	assert(false, tprint("generatedNodeCook: node type '%' is not implemented", node.type));
 }
-generatedSceneNodeDelete :: (scene: *NodesScene, node: *$T, $removeFromGraph:bool = true) {
+generatedSceneNodeDelete :: (scene: *NodesScene, node: *BaseNodeAny, $removeFromGraph:bool = true) {
 	#insert GENERATED_CODE_SCENE_NODE_DELETE;
 	assert(false, tprint("generatedSceneNodeDelete: node type '%' is not implemented", node.type));
 }
-generatedNodeParamsRenderUI :: (node: *$T) {
+generatedNodeCtx :: (node: *BaseNodeAny)->NodeContext {
+	#insert GENERATED_CODE_NODE_CTX;
+	assert(false, tprint("generatedNodeDelete: node type '%' is not implemented", node.type));
+	return .ANY;
+}
+generatedNodeParamsRenderUI :: (node: *BaseNodeAny) {
 	#insert GENERATED_CODE_PARAMS_RENDER_UI;
 	assert(false, tprint("generatedNodeParamsRenderUI: node type '%' is not implemented", node.type));
 }
+generatedParamsInit :: (node: *BaseNodeAny) #expand {
+	#insert GENERATED_CODE_PARAMS_INIT;
+	assert(false, tprint("generatedParamsInit: node.nodeTypeId '%' is not implemented", node.nodeTypeId));
+}
+generatedParamsReset :: (node: *BaseNodeAny) #expand {
+	#insert GENERATED_CODE_PARAMS_RESET;
+	assert(false, tprint("generatedParamsReset: node.nodeTypeId '%' is not implemented", node.nodeTypeId));
+}
+// no #expand, as it is otherwise repeated many times in .added_strings, since it is called from _sceneDeleteNode_
+generatedParamsGraphNodeDelete :: (node: *BaseNodeAny) {
+	#insert GENERATED_CODE_PARAMS_GRAPH_NODE_DELETE;
+	assert(false, tprint("generatedParamsGraphNodeDelete: node.nodeTypeId '%' is not implemented", node.nodeTypeId));
+}
 
-registerNodes :: () {
-
+registerNodes :: (label:string) {
 	array_reset(*TMP_METADATAS);
 
 	registerAddGeoNode();
@@ -44,11 +61,11 @@ registerNodes :: () {
 
 }
 nodesMetaDatasCount :: ()->u64{
-	registerNodes();
+	registerNodes("nodesMetaDatasCount");
 	return xx TMP_METADATAS.count;
 }
 nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData {
-	registerNodes();
+	registerNodes("nodesMetaDatas");
 
 	list:[NODE_METADATAS_COUNT]NodeMetaData;
 
@@ -57,14 +74,34 @@ nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData {
 	}
 	return list;
 }
-nodesMaxInputsCount :: ()->u8 {
-	maxInputsCount :u8= 0;
+nodesMaxInputsCount :: () -> NodeInputsCount #compile_time {
+	maxInputsCount :NodeInputsCount= 0;
 	for nodeMetaData, i: NODE_METADATAS {
 		if nodeMetaData.inputsCount.max > maxInputsCount {
 			maxInputsCount = nodeMetaData.inputsCount.max;
 		}
 	}
 	return maxInputsCount;
+}
+nodeMinInputsCount :: (node: *BaseNodeAny)->NodeInputsCount #expand {
+	return NODE_METADATAS[node.nodeTypeId].inputsCount.min;
+}
+nodeMaxInputsCount :: (node: *BaseNodeAny)->NodeInputsCount #expand {
+	return NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+}
+nodeType :: (node: *BaseNodeAny)->Type #expand {
+	return NODE_METADATAS[node.nodeTypeId].type;
+}
+getNodeTypeId :: (T:Type)->(found:bool, id: NodeTypeId) {
+	found := false;
+	for nodeMetaData, i: NODE_METADATAS {
+		if nodeMetaData.type == T {
+			return true, xx i;
+		}
+	}
+	assert(found, tprint("node type not found: '%'", T));
+	// assert(found, "node type not found");
+	return false, 0;
 }
 
 registerNodesAndGenerateCode :: () -> (
@@ -73,89 +110,123 @@ registerNodesAndGenerateCode :: () -> (
 	nodeDisposePreviousCookResults:string,
 	nodeCook:string,
 	sceneNodeDelete:string,
-	paramsRenderUI:string
+	nodeCtx:string,
+	paramsRenderUI:string,
+	paramsInit:string,
+	paramsReset:string,
+	paramsGraphNodeDelete:string
 ) {
 
-	registerNodes();
+	registerNodes("registerNodesAndGenerateCode");
 
 	nodeComputeInputs := generateNodeComputeInputs();
 	nodePrepareInputCookResults := generateNodePrepareInputCookResults();
 	nodeDisposePreviousCookResults := generateNodeDisposePreviousCookResults();
 	nodeCook := generateNodeCook();
 	sceneNodeDelete := generateSceneNodeDelete();
+	nodeCtx := generateNodeCtx();
 	paramsRenderUI := generateNodeParamsRenderUI();
-
-	return 	nodeComputeInputs,
-	nodePrepareInputCookResults,
-	nodeDisposePreviousCookResults,
-	nodeCook,
-	sceneNodeDelete,
-	paramsRenderUI;
+	paramsInit := generateParamsInit();
+	paramsReset := generateParamsReset();
+	paramsGraphNodeDelete := generateParamsGraphNodeDelete();
+	return
+		nodeComputeInputs,
+		nodePrepareInputCookResults,
+		nodeDisposePreviousCookResults,
+		nodeCook,
+		sceneNodeDelete,
+		nodeCtx,
+		paramsRenderUI,
+		paramsInit,
+		paramsReset,
+		paramsGraphNodeDelete;
 }
 
-getNodeTypeId :: (T:Type)->u64 {
-	index := -1;
-	found := false;
-	for nodeMetaData, i: NODE_METADATAS {
-		if nodeMetaData.type == T {
-			found = true;
-			index = i;
-			break;
-		}
-	}
-	assert(found, tprint("node type not found: '%'", T));
-	// assert(found, "node type not found");
-	return xx index;
-}
+
 
 nodeRegister :: (
-	ctx: NodeContext,
-	$T:Type,
-	minInputsCount:u8,
-	maxInputsCount:u8
+	// ctx: NodeContext,
+	$T:Type
+	// minInputsCount:u8,
+	// maxInputsCount:u8
 	) {
-	array_add(*TMP_METADATAS, .{
-		ctx = ctx,
+
+
+	// paramMetaDatas: [..]NodeParamMetaData;
+	// {
+	// 	node_info := type_info(T);
+	// 	print("node_info: %\n", <<node_info);
+	// 	node_tis := cast(*Type_Info_Struct)node_info;
+	// 	paramsField := get_field(node_tis, "p");
+	// 	print("paramsField: %\n", <<(<<paramsField).type);
+	// 	params_tis := cast(*Type_Info_Struct)paramsField;
+
+	// 	print("params_tis.members: % -> %\n", T, params_tis.members);
+
+	// 	for member, i: params_tis.members {
+	// 		paramField := get_field(params_tis, member.name);
+	// 		member_tis := cast(*Type_Info_Struct)paramField.type;
+	// 		offset := paramsField.offset_in_bytes + paramField.offset_in_bytes;
+	// 		paramMetaData:NodeParamMetaData = .{
+	// 			type = paramField.name,
+	// 			name = member.name,
+	// 			offset = xx offset
+	// 		};
+	// 		array_add(*paramMetaDatas, paramMetaData);
+	// 	}
+	// }
+	node: T;
+	params := paramsMetaDataFixed(*node);
+
+	nodeMetaData: NodeMetaData = .{
+		// ctx = ctx,
 		type = T,
-		inputsCount = .{min=minInputsCount, max=maxInputsCount}
-	});
+		inputsCount = .{min=node.minInputsCount, max=node.maxInputsCount},
+		params = params
+	};
+
+	array_add(*TMP_METADATAS, nodeMetaData);
 
 }
-nodeRegisterGeo :: (
-	$T:Type,
-	minInputsCount:u8,
-	maxInputsCount:u8
-	){
-		nodeRegister(NodeContext.GEOMETRY, T, minInputsCount, maxInputsCount);
-	}
+nodeRegisterGeo :: nodeRegister;
+
+NodeParamMetaData::struct {
+	type: string;
+	name: string;
+	offset:u64;
+}
+FixedParamMetaData :: struct {
+	count: u64;
+	metaDatas: [256]NodeParamMetaData;
+}
 
 NodeMetaData :: struct {
-	ctx: NodeContext;
+	// ctx: NodeContext;
 	type: Type;
-	inputsCount: NodeInputsCount;
+	inputsCount: NodeInputsCountBounds;
+	params: FixedParamMetaData;
 }
 
-#no_reset NODE_METADATAS_COUNT :u64: #run nodesMetaDatasCount();
-#no_reset NODE_METADATAS :[NODE_METADATAS_COUNT]NodeMetaData: #run nodesMetaDatas();
-#no_reset NODE_MAX_INPUTS_COUNT :u8: #run nodesMaxInputsCount();
-// COOK_METHODS :[..]GeoNodeCookMethod;
-// ON_DIRTY_METHODS :[..]CoreGraphNodeOnDirtyMethod;
-
-NodeInputsCount :: struct {
-	min: u8;
-	max: u8;
-}
+#no_reset NODES_MAX_INPUTS_COUNT :NodeInputsCount: #run nodesMaxInputsCount();
 
 #scope_file
 
 TMP_METADATAS: [..]NodeMetaData;
+
+#no_reset NODE_METADATAS_COUNT :u64: #run nodesMetaDatasCount();
+#no_reset NODE_METADATAS :[NODE_METADATAS_COUNT]NodeMetaData: #run nodesMetaDatas();
+
 
 GENERATED_CODE_NODE_COMPUTE_INPUTS,
 GENERATED_CODE_NODE_PREPARE_INPUT_COOK_RESULTS,
 GENERATED_CODE_NODE_DISPOSE_PREVIOUS_COOK_RESULTS,
 GENERATED_CODE_COOK,
 GENERATED_CODE_SCENE_NODE_DELETE,
-GENERATED_CODE_PARAMS_RENDER_UI :: #run registerNodesAndGenerateCode();
+GENERATED_CODE_NODE_CTX,
+GENERATED_CODE_PARAMS_RENDER_UI,
+GENERATED_CODE_PARAMS_INIT,
+GENERATED_CODE_PARAMS_RESET,
+GENERATED_CODE_PARAMS_GRAPH_NODE_DELETE :: #run registerNodesAndGenerateCode();
 
 
 
@@ -204,12 +275,12 @@ generateSceneNodeDelete :: ()->string {
 	reset(*builder);
 	return result;
 }
-generateNodeParamsRenderUI :: ()->string {
+generateNodeCtx :: ()->string {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
 		nodeType := nodeMetaData.type;
-		print_to_builder(*builder, tprint("\tcase %; for :params param: cast(*%)node { generatedParamRenderUI(param, paramName); };return;\n", nodeType, nodeType));
+		print_to_builder(*builder, tprint("\tcase %; return (cast(*%) node).ctx;\n", nodeType, nodeType));
 	}
 	print_to_builder(*builder, "}");
 
@@ -217,6 +288,20 @@ generateNodeParamsRenderUI :: ()->string {
 	reset(*builder);
 	return result;
 }
+// generateNodeParamsRenderUI :: ()->string {
+// 	builder: String_Builder;
+// 	print_to_builder(*builder, "if node.type == {\n");
+// 	for nodeMetaData: NODE_METADATAS {
+// 		nodeType := nodeMetaData.type;
+// 		// print_to_builder(*builder, tprint("\tcase %; iterateParams(cast(*%)node, #code { generatedParamRenderUI(param, paramName); });return;\n", nodeType, nodeType));
+// 		print_to_builder(*builder, tprint("\tcase %; return;\n", nodeType, nodeType));
+// 	}
+// 	print_to_builder(*builder, "}");
+
+// 	result := builder_to_string(*builder);
+// 	reset(*builder);
+// 	return result;
+// }
 
 _generateSceneNode :: (functionName:string)->string {
 	builder: String_Builder;
@@ -242,3 +327,53 @@ _generateSceneNode :: (functionName:string)->string {
 // 	reset(*builder);
 // 	return result;
 // }
+
+
+generateNodeParamsRenderUI :: ()->string {
+	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
+		print_to_builder(builder, "		paramRenderUI(cast(*%)((cast(*u8)node) + %), \"%\"); // %\n", param.type, param.offset, param.name, param.name);
+	});
+}
+
+generateParamsInit :: ()->string {
+	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
+		print_to_builder(builder, "		paramInit(cast(*%)((cast(*u8)node) + %), node); // %\n", param.type, param.offset, param.name);
+	});
+}
+generateParamsReset :: ()->string {
+	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
+		print_to_builder(builder, "		paramsResetValue(cast(*%)((cast(*u8)node) + %)); // %\n", param.type, param.offset, param.name);
+	});
+}
+generateParamsGraphNodeDelete :: ()->string {
+	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
+		print_to_builder(builder, "		graphNodeDelete(cast(*%)((cast(*u8)node) + %)); // %\n", param.type, param.offset, param.name);
+	});
+}
+
+ForParamsCallback :: #type (metadata: NodeParamMetaData, builder: *String_Builder);
+_forParams :: (callback:ForParamsCallback)->string {
+	builder: String_Builder;
+	print_to_builder(*builder, "if node.nodeTypeId == {\n");
+	for nodeMetaData, nodeTypeId: NODE_METADATAS {
+
+		params := nodeMetaData.params;
+		print_to_builder(*builder, tprint("\tcase %; { // % (% %)\n", nodeTypeId, nodeMetaData.type, params.count, ifx params.count==1 then "param" else "params"));
+
+		if params.count > 0 {
+			for 0..(params.count-1) {
+				param := params.metaDatas[it];
+				callback(param, *builder);
+				// print_to_builder(*builder, "		paramInit(cast(*%)((cast(*u8)node) + %), node); // %\n", param.type, param.offset, param.name);
+			}
+		}
+		print_to_builder(*builder, "		return;\n");
+		print_to_builder(*builder, "	}\n");
+
+	}
+	print_to_builder(*builder, "}");
+
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}

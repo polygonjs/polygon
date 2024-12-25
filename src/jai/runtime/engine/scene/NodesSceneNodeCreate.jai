@@ -1,5 +1,6 @@
 createNode :: (using scene: *NodesScene, $T:Type)->*T {
-	nodeTypeId := getNodeTypeId(T);
+	found, nodeTypeId := getNodeTypeId(T);
+	assert(found, "node type not found");
 	node := New(T,, scene.allocator);
 	node.type = T;
 	node.nodeId = nextNodeId;
@@ -12,6 +13,8 @@ createNode :: (using scene: *NodesScene, $T:Type)->*T {
 
 	newSize := nextNodeId;
 	if newSize > nodes.count {
+		prevCount := nodes.count;
+
 		array_set_count_and_maybe_grow(*nodes, newSize);
 		array_set_count_and_maybe_grow(*nodeNames, newSize);
 		array_set_count_and_maybe_grow(*nodeInputCookResults, newSize);
@@ -22,13 +25,14 @@ createNode :: (using scene: *NodesScene, $T:Type)->*T {
 		array_set_count_and_maybe_grow(*computablesTree.inputs, newSize);
 		array_set_count_and_maybe_grow(*computablesTree.outputs, newSize);
 
+		index := prevCount;
 		{
-			// push_allocator(scene.allocator);
-			cookResults[node.nodeId] = New(Object3DArray,,scene.allocator);
-			array_init(cookResults[node.nodeId], scene.allocator, reserve=true);
+			push_allocator(scene.allocator);
+			cookResults[index] = New(Object3DArray,,scene.allocator);
+			array_init(cookResults[index], scene.allocator, reserve=false);
 		}
-		array_init(*computablesTree.inputs[node.nodeId], scene.allocator, reserve=true);
-		array_init(*computablesTree.outputs[node.nodeId], scene.allocator, reserve=true);
+		array_init(*computablesTree.inputs[index], scene.allocator, reserve=true);
+		array_init(*computablesTree.outputs[index], scene.allocator, reserve=true);
 	}
 	{
 		// push_allocator(scene.allocator);
@@ -52,7 +56,7 @@ createNode :: (using scene: *NodesScene, $T:Type)->*T {
 	nodes[node.nodeId] = cast(*BaseNodeAny)node;
 	{
 		newNodeName := tprint("%01",T);
-		stringToStringFixed(*newNodeName, *nodeNames[node.nodeId]);
+		stringToStringFixed(newNodeName, *nodeNames[node.nodeId]);
 		// after := nodeName(scene, node.nodeId);
 	}
 
@@ -60,7 +64,7 @@ createNode :: (using scene: *NodesScene, $T:Type)->*T {
 	validNodes[node.nodeId] = true;
 	// validNodeIds[node.nodeId] = true;
 	nodeConnectionInitForNode(*connections, node.nodeId);
-	nodeParamsInit(node);
+	nodeParamsInit(xx node);
 
 	#if NODES_SCENE_EMIT_EVENTS {
 		nodesSceneEmitEvent(scene, NodesSceneEvent.NODE_ADDED, node);

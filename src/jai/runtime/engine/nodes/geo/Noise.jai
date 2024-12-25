@@ -5,11 +5,11 @@ NoiseGeoParams :: struct {
 	offset: Vector3Param = .{value=.{0,0,0}};
 }
 NoiseGeoNode :: struct {
-	#as using geoNode: GeoNode(NoiseGeoNode, NoiseGeoParams);
+	#as using contextNode: GeoNode(NoiseGeoNode, NoiseGeoParams, inputs=.[1,1]);
 };
 
-registerNoiseGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=1, maxInputsCount=1);
+registerNoiseGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

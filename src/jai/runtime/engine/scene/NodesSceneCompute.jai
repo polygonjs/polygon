@@ -7,8 +7,8 @@ ComputablesTree :: struct {
 
 nodesSceneComputableTreeInit :: (using scene: *NodesScene) {
 	array_init(*computablesTree.cookingNodeIds, scene.allocator, reserve=true);
-	array_init(*computablesTree.inputs, scene.allocator, reserve=false);
-	array_init(*computablesTree.outputs, scene.allocator, reserve=false);
+	array_init(*computablesTree.inputs, scene.allocator, reserve=true);
+	array_init(*computablesTree.outputs, scene.allocator, reserve=true);
 	array_init(*computablesTree.leaves, scene.allocator, reserve=true);
 
 }
@@ -108,19 +108,29 @@ buildAndComputeComputableTree :: (using scene: *NodesScene, outputNode: *OutputG
 }
 
 computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) {
-	if(computablesTree.leaves.count > 0) {
-		// print("<<<<<<<<<<<<<<<<<<<<<<<< START calling node=%\n", callingNode.nodeId);
-		// print("computablesTree.leaves.count: %\n", computablesTree.leaves.count);
-		nodeId := pop(*computablesTree.leaves);
-		node := nodes[nodeId];
-		// print("node: %, %\n", nodeId, node.type);
-		array_add(*computablesTree.cookingNodeIds, node.nodeId);
-		// debugThiShit(scene, tprint("computeComputableNodes A: %\n", node.nodeId, node.type));
-		generatedNodePrepareInputCookResults(scene, node);
-		// debugThiShit(scene, tprint("computeComputableNodes B: %\n", node.nodeId, node.type));
-		// print("END >>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
-		generatedNodeCook(node, nodeInputCookResults[nodeId]);
+	if(computablesTree.leaves.count == 0) {
+		return;
 	}
+	// print("<<<<<<<<<<<<<<<<<<<<<<<< START calling node=%\n", callingNode.nodeId);
+	// print("computablesTree.leaves.count: %\n", computablesTree.leaves.count);
+	nodeId := pop(*computablesTree.leaves);
+	node := nodes[nodeId];
+	// print("node: %, %\n", nodeId, node.type);
+	array_add(*computablesTree.cookingNodeIds, node.nodeId);
+	// debugThiShit(scene, tprint("computeComputableNodes A: %\n", node.nodeId, node.type));
+	generatedNodePrepareInputCookResults(scene, node);
+	// debugThiShit(scene, tprint("computeComputableNodes B: %\n", node.nodeId, node.type));
+	// print("END >>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
+
+	#if RUN_TESTS {
+		if nodeMinInputsCount(node) == 1 {
+			if nodeInputCookResults[nodeId][0] == null {
+				assert(false, tprint("input 0 is null for node '%'.", nodeName(scene, node.nodeId)));
+			}
+		}
+	}
+	// print("cook: %\n", nodeName(scene, node.nodeId));
+	generatedNodeCook(node, nodeInputCookResults[nodeId]);
 }
 
 
@@ -152,6 +162,8 @@ buildComputableTree :: (scene: *NodesScene, outputNode: *OutputGeoNode) {
 			}
 		}
 	}
+	// print("connections: %\n", scene.connections);
+	// print("tree: %\n", scene.computablesTree);
 	// print("leaves: %\n", scene.computablesTree.leaves.count);
 	// for leafId: scene.computablesTree.leaves {
 	// 	print("leaf: %\n", scene.nodes[leafId].type);

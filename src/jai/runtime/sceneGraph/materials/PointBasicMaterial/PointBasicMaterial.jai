@@ -6,7 +6,7 @@ PointBasicMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
 
-registerPointBasicMaterial :: (){
+registerPointBasicMaterial :: () #compile_time {
 	materialRegister(TYPE, topology = .PointList);
 }
 

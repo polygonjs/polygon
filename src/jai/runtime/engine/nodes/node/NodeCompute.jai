@@ -3,18 +3,16 @@ nodeComputeInputs :: (using scene:*NodesScene, node: *$T, target:*[..]NodeId) {
 	if isDirty(*graph, node.graphNodeId) == false {
 		return;
 	}
-	if NODE_METADATAS[node.nodeTypeId].inputsCount.max == 0 {
+	if nodeMaxInputsCount(xx node) == 0 {
 		return;
 	}
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
 	for srcConnectionId: srcConnectionIds {
-		if srcConnectionId != 0 {
-			connection := connections.connections[srcConnectionId];
-			inputNodeId := connection.src.nodeId;
-			inputNode := nodes[inputNodeId];
-			if isDirty(*graph, inputNode.graphNodeId) {
-				array_add_if_unique(target, inputNodeId);
-			}
+		connection := connections.connections[srcConnectionId];
+		inputNodeId := connection.src.nodeId;
+		inputNode := nodes[inputNodeId];
+		if isDirty(*graph, inputNode.graphNodeId) {
+			array_add_if_unique(target, inputNodeId);
 		}
 	}
 }
@@ -22,22 +20,25 @@ nodePrepareInputCookResults :: (using scene:*NodesScene, node: *$T) {
 	_nodePrepareInputCookResultsWithClonedFirstInput(scene, node);
 }
 _nodePrepareInputCookResultsWithClonedFirstInput :: (using scene:*NodesScene, node: *$T) {
-	// print("_nodePrepareInputCookResultsWithClonedFirstInput max inputs: %, %\n", node.type, NODE_METADATAS[node.nodeTypeId].inputsCount.max);
-	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+	maxInputsCount := nodeMaxInputsCount(xx node);
 	if maxInputsCount == 0 {
 		// print("no inputs\n");
 		return;
 	}
-	results := NewArray(maxInputsCount, GeoNodeCookOutput,, temp);
+	// results := NewArray(maxInputsCount, GeoNodeCookOutput,, temp);
+	for inputIndex:0..(maxInputsCount-1) {
+		// print("inputIndex: %, %\n", inputIndex, cast(u64)(nodeInputCookResults[node.nodeId]).data);
+		nodeInputCookResults[node.nodeId][inputIndex] = null;
+	}
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
-	// print("srcConnectionIds: %\n", srcConnectionIds);
 	for srcConnectionId: srcConnectionIds {
-		if srcConnectionId != 0 {
+		if connectionIdValid(srcConnectionId) {
 			connection := connections.connections[srcConnectionId];
 			inputNodeId := connection.src.nodeId;
 			inputIndex := connection.dest.inputIndex;
 			inputCookResult := cookResults[inputNodeId];
 			if inputIndex == 0 {
+				// we only clone the first input.
 				// results[inputIndex] = geoNodeCookOutputClone(inputCookResult);
 				nodeInputCookResults[node.nodeId][inputIndex] = geoNodeCookOutputClone(inputCookResult);
 			} else {
@@ -49,7 +50,7 @@ _nodePrepareInputCookResultsWithClonedFirstInput :: (using scene:*NodesScene, no
 
 }
 _nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T) {
-	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+	maxInputsCount := nodeMaxInputsCount(xx node);
 	if maxInputsCount == 0 {
 		return;
 	}
@@ -59,7 +60,7 @@ _nodePrepareInputCookResultsWithoutClone :: (using scene:*NodesScene, node: *$T)
 	}
 	srcConnectionIds := nodeConnectionFindPredecessorConnectionIds(*connections, node.nodeId);
 	for srcConnectionId: srcConnectionIds {
-		if srcConnectionId != 0 {
+		if connectionIdValid(srcConnectionId) {
 			connection := connections.connections[srcConnectionId];
 			inputNodeId := connection.src.nodeId;
 			inputIndex := connection.dest.inputIndex;
@@ -102,10 +103,11 @@ nodeComputeInputsOnlyFromInputParam :: (using scene:*NodesScene, node: *$T, targ
 	if srcConnectionIds.count == 0 {
 		return;
 	}
-	srcConnectionId := ifx inputIndex < srcConnectionIds.count then
-		srcConnectionIds[inputIndex]
-	else
-		xx (srcConnectionIds.count - 1);
+	validInputIndex := min(inputIndex, xx (srcConnectionIds.count - 1));
+	srcConnectionId := srcConnectionIds[validInputIndex];
+	if connectionIdValid(srcConnectionId) == false {
+		return;
+	}
 	connection := connections.connections[srcConnectionId];
 	inputNodeId := connection.src.nodeId;
 	inputNode := nodes[inputNodeId];
@@ -181,7 +183,7 @@ nodeCooksCount :: (node: *$T)->u32 {
 }
 
 inputIndexFromInputParam :: (node: *$T)->u8 {
-	maxInputsCount := NODE_METADATAS[node.nodeTypeId].inputsCount.max;
+	maxInputsCount := nodeMaxInputsCount(xx node);
 	inputIndex := ifx node.p.input.value < maxInputsCount then node.p.input.value else maxInputsCount - 1;
 	return inputIndex;
 }

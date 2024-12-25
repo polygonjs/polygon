@@ -18,7 +18,7 @@ NodesScene :: struct {
 	nodeNames: [..]NodeName;
 	worldScene: *Scene;
 	cookResults:[..]GeoNodeCookOutput;
-	nodeInputCookResults:[..][NODE_MAX_INPUTS_COUNT]GeoNodeCookOutput;
+	nodeInputCookResults:[..][NODES_MAX_INPUTS_COUNT]GeoNodeCookOutput;
 	cookResultsToDispose:[..]*Object3D;
 	cooksCount:[..]u32;
 	connections: NodeConnectionList;

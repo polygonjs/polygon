@@ -48,13 +48,8 @@ testNodesBasicDependency :: () {
 		}
 		assertLeaksCount(expectedLeaksCount, "leaks on cook 1");
 		assertEqual(nodesScene.worldScene.children.count, 1);
-		box3:Box3;
-		firstGeometry :: (scene:*NodesScene)->*Geometry {
-			firstObject := scene.worldScene.children[0];
-			return (cast(*Mesh)firstObject).geometry;
-		}
-		box3SetFromGeometry(*box3, firstGeometry(nodesScene));
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 24, "points count");
+		box3:Box3 = firstGeometryBbox(nodesScene);
 		assertEqual(box3Size(*box3).x, 2, "size x");
 
 		paramSetValue(*box1.p.scale, 4);

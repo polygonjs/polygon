@@ -8,13 +8,12 @@ CoreGraphNodeOnDirtyMethod :: #type (graph:*CoreGraph, graphNode: *CoreGraphNode
 // 	graphId: CoreGraphId;
 // }
 // CoreGraphNodeAny :: CoreGraphNode(Any);
-CoreGraphNode :: struct ($T: Type) {
-	type: Type=T;
+CoreGraphNode :: struct {
 	graphNodeId: CoreGraphNodeId;
 	graphId: CoreGraphId;
 	// name: string;
 }
-CoreGraphNodeAny :: CoreGraphNode(Any);
+CoreGraphNodeAny :: CoreGraphNode;
 
 // newCoreGraphNode :: (graph: *CoreGraph, $T: Type) -> *T {
 // 	graphNode: *T;

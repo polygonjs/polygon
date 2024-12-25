@@ -4,8 +4,8 @@ GeoNodeCookInput  :: []GeoNodeCookOutput;
 GeoNodeCookMethod :: #type (node: $T, inputResults:GeoNodeCookInput);
 NodePrepareInputCookResultsMethod :: #type (scene:*NodesScene, node: *$T);
 
-GeoNode :: struct ($GeoNodeType: Type, $geoParamsType: Type){
-	#as using baseNode: BaseNode(GeoNodeType, geoParamsType);
+GeoNode :: struct (GeoNodeType: Type, GeoParamsType: Type, inputs:[2]NodeInputsCount){
+	#as using baseNode: BaseNode(NodeContext.GEOMETRY, GeoNodeType, GeoParamsType, minInputsCount=inputs[0], maxInputsCount=inputs[1]);
 };
 GeoNodeAny :: GeoNode;
 

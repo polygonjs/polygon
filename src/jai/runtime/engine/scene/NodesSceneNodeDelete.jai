@@ -8,7 +8,7 @@ _sceneDeleteNode_ :: (using scene: *NodesScene, node: $T, $removeFromGraph:bool 
 	// found, index := array_find(nodes, cast(*GeoNodeAny)node);
 	// assert(found, "node not found");
 
-	nodeResetParams(node);
+	nodeResetParams(xx node);
 
 	{
 		// remove inputs
@@ -41,7 +41,10 @@ _sceneDeleteNode_ :: (using scene: *NodesScene, node: $T, $removeFromGraph:bool 
 
 	// remove graph node
 	#if removeFromGraph {
-		for :params param: node { graphNodeDelete(param); }
+		// for :params param: node { graphNodeDelete(param); }
+		// print("node remove from graph not implemented\n");
+		// iterateParams(node, #code { graphNodeDelete(param); });
+		generatedParamsGraphNodeDelete(cast(*BaseNodeAny) node);
 		graphNodeDelete(node);
 	}
 	// array_reset(*node.params);

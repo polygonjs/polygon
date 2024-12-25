@@ -6,11 +6,11 @@ CopyGeoParams :: struct {
 	s: Vector3Param = .{value=.{1,1,1}};
 }
 CopyGeoNode :: struct {
-	#as using geoNode: GeoNode(CopyGeoNode, CopyGeoParams);
+	#as using contextNode: GeoNode(CopyGeoNode, CopyGeoParams, inputs=.[0,1]);
 };
 
-registerCopyGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
+registerCopyGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

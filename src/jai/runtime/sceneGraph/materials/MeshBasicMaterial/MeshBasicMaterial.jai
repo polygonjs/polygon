@@ -6,7 +6,7 @@ MeshBasicMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
 
-registerMeshBasicMaterial :: (){
+registerMeshBasicMaterial :: () #compile_time {
 	materialRegister(TYPE, topology = .TriangleList);
 }
 

@@ -5,11 +5,11 @@ BoxGeoParams :: struct {
 	segments: Vector3UIntParam = .{value=.{1,1,1}};
 }
 BoxGeoNode :: struct {
-	#as using geoNode: GeoNode(BoxGeoNode, BoxGeoParams);
+	#as using contextNode: GeoNode(BoxGeoNode, BoxGeoParams, inputs=.[0,1]);
 };
 
-registerBoxGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=1);
+registerBoxGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

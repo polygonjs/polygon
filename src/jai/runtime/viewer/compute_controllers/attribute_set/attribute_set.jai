@@ -23,7 +23,7 @@ ComputeControllerAttributeSet :: struct {
 	// set_buffers: SetBufferMethod = attribute_set_set_buffer;
 }
 
-registerComputeControllerAttributeSet :: () {
+registerComputeControllerAttributeSet :: () #compile_time {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 

@@ -18,6 +18,7 @@ registerTests :: () {
 	testVector();
 	// runtime/engine
 	// runtime/engine/nodes
+	testBaseNode();
 	testFileSTLGeoNode();
 	testNoiseGeoNode();
 	testOutputGeoNode();

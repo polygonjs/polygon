@@ -3,11 +3,11 @@ AddGeoParams :: struct {
 	position: Vector3Param = .{value=.{0,0,0}};
 }
 AddGeoNode :: struct {
-	#as using geoNode: GeoNode(AddGeoNode, AddGeoParams);
+	#as using contextNode: GeoNode(AddGeoNode, AddGeoParams, inputs=.[0,0]);
 };
 
-registerAddGeoNode :: (){
-	nodeRegisterGeo(TYPE, minInputsCount=0, maxInputsCount=0);
+registerAddGeoNode :: () #compile_time {
+	nodeRegisterGeo(TYPE);
 }
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {

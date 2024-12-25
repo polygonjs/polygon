@@ -1,10 +1,6 @@
 testFileSTLGeoNode :: () {
 
 	testWithScene("geo/fileSTL basic", (using options:TestProcedureOptions) {
-		firstGeometry :: (scene:*NodesScene)->*Geometry {
-			firstObject := scene.worldScene.children[0];
-			return (cast(*Mesh)firstObject).geometry;
-		}
 
 		fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
 		output1 := createNode(nodesScene, OutputGeoNode);

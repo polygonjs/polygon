@@ -32,7 +32,7 @@ BoxCreateComputeControllerParams :: struct {
 	segments: Vector3Int = .{128, 128, 128};
 }
 
-registerComputeControllerBoxCreate :: () {
+registerComputeControllerBoxCreate :: () #compile_time {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 

@@ -1,4 +1,11 @@
 NodeId :: u32;
+NodeTypeId :: u16;
+NodeInputIndex :: u8;
+NodeInputsCount :: NodeInputIndex;
+NodeInputsCountBounds :: struct {
+	min: NodeInputsCount;
+	max: NodeInputsCount;
+}
 
 NodeContext :: enum u8 {
 	ANY		:: 0;
@@ -13,13 +20,14 @@ NodeContext :: enum u8 {
 	RENDER	:: 9;
 };
 
-BaseNode :: struct ($BaseNodeType: Type, $ParamsType: Type){
-	#as using coreGraphNode: CoreGraphNode(BaseNodeType);
+BaseNode :: struct ($ctx: NodeContext, BaseNodeType: Type, $ParamsType: Type, $minInputsCount:NodeInputsCount, $maxInputsCount:NodeInputsCount){
+	#as using coreGraphNode: CoreGraphNode;
+	type :Type=BaseNodeType;
 	nodeId:NodeId;
-	nodeTypeId:u64;
+	nodeTypeId:NodeTypeId;
 	p:ParamsType;
 }
-BaseNodeAny :: BaseNode(Any, Any);
+BaseNodeAny :: BaseNode(.ANY, Any, Any, 0, 0);
 
 #scope_file
 

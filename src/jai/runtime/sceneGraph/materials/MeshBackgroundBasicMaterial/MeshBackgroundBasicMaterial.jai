@@ -5,7 +5,7 @@ MeshBackgroundBasicMaterialUniforms :: struct {
 MeshBackgroundBasicMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
-registerMeshBackgroundBasicMaterial :: (){
+registerMeshBackgroundBasicMaterial :: () #compile_time {
 	materialRegister(TYPE, topology = .TriangleList);
 }
 // uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {

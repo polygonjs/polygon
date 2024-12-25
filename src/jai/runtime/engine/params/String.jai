@@ -1,8 +1,8 @@
 StringParam :: struct {
-	#as using baseParam: BaseParam(StringParam, VALUE_TYPE);
+	#as using baseParam: BaseParam(#run nextParamTypeId(), VALUE_TYPE);
 };
 
-paramRegisterStringParam :: (){
+paramRegisterStringParam :: () #compile_time {
 	paramRegister(TYPE, VALUE_TYPE);
 }
 
@@ -10,7 +10,7 @@ paramSetValue :: (param: *TYPE, value: VALUE_TYPE) {
 	paramSetValueGeneric(param, value);
 }
 paramSetValue :: (param: *TYPE, value: string) {
-	stringToStringFixed(*value, *param.value);
+	stringToStringFixed(value, *param.value);
 	paramPostSetValue(param);
 }
 

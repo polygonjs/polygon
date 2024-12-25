@@ -5,7 +5,7 @@ MeshRaymarchingMaterialUniforms :: struct {
 MeshRaymarchingMaterial :: struct {
 	#as using material: MaterialBase(UNIFORM_TYPE);
 };
-registerMeshRaymarchingMaterial :: (){
+registerMeshRaymarchingMaterial :: () #compile_time {
 	materialRegister(TYPE, topology = .TriangleList);
 }
 

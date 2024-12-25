@@ -6,7 +6,7 @@ materialInit :: (material: *TYPE) {
 	material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 }
-registerMeshNormalMaterial :: (){
+registerMeshNormalMaterial :: () #compile_time {
 	materialRegister(TYPE, topology = .TriangleList);
 }
 

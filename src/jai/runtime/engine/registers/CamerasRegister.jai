@@ -1,10 +1,10 @@
 
 
-generatedCameraProjectionUpdate :: (object:*$T) {
+generatedCameraProjectionUpdate :: (object:*Camera) {
 	#insert GENERATED_CODE_CAMERA_PROJECTION_UPDATE;
 	assert(false, tprint("generatedCameraProjectionUpdate: object type '%' is not implemented", object.type));
 }
-generatedCameraSetRaycaster :: (object:*$T, raycaster:*Raycaster, coords: Vector2) {
+generatedCameraSetRaycaster :: (object:*Camera, raycaster:*Raycaster, coords: Vector2) {
 	#insert GENERATED_CODE_CAMERA_SET_RAYCASTER;
 	assert(false, tprint("generatedCameraSetRaycaster: object type '%' is not implemented", object.type));
 }

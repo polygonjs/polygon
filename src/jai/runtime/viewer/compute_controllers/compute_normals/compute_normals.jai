@@ -26,7 +26,7 @@ ComputeControllerComputeNormals :: struct {
 }
 
 
-registerComputeControllerComputeNormals :: () {
+registerComputeControllerComputeNormals :: () #compile_time {
 	computeControllerRegister(CONTROLLER_TYPE);
 }
 
