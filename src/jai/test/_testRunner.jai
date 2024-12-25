@@ -19,15 +19,20 @@ runTests :: () {
 	} else {
 		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
 	}
+	skippedTestsCount := 0;
+	t0 := current_time_monotonic();
 	testsCount := 0;
 	headlessWGPUContext: WGPUContext;
 	headlessInit(*headlessWGPUContext, .{4,4});
+	t1 := current_time_monotonic();
+	print("headlessInit in % seconds.\n", to_float64_seconds(t1-t0));
 	for test,i: NAMED_PROCEDURES {
 		found :bool= requestedTestNames.count == 0 || _isRequestedTestName(test.name, requestedTestNames);
 		if found {
+			testStartTime := current_time_monotonic();
 			testOptions:TestProcedureOptions;
 			testOptions.headlessWGPUContext = *headlessWGPUContext;
-			print("% TEST: %\n", tprintGreen(" "),test.name);
+			print("% TEST: %...			", tprintGreen(" "), test.name);
 			if test.scene == true {
 				testOptions.nodesScene = newNodesScene();
 			}
@@ -61,14 +66,22 @@ runTests :: () {
 			reset_temporary_storage();
 			assertLeaksCount(0, "no leaks");
 			reset_temporary_storage();
+			testEndTime := current_time_monotonic();
+			testTime := to_float64_seconds(testEndTime-testStartTime);
+			print("%\n", testTime);
 		} else {
-			print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
+			skippedTestsCount += 1;
+			// print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
 		}
 	}
 	if testsCount == 0 {
 		printRed("---------NO TESTS WERE EXECUTED\n");
 	} else {
-		print("---------TEST COMPLETED: (%)\n", testsCount);
+		tEnd := current_time_monotonic();
+		print("--------- % TEST COMPLETED in % seconds.\n", testsCount, to_float64_seconds(tEnd-t0));
+		if skippedTestsCount > 0 {
+			print("% TEST SKIPPED: %\n", tprintYellow(" "), skippedTestsCount);
+		}
 	}
 }
 
