@@ -29,7 +29,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 
 	array_add(*geometry.indices, 0);
 
-	meshSetMaterial(nodesScene.worldScene, mesh, xx nodesScene.defaultMaterial.point);
+	meshSetMaterial(nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.point);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformableUpdateMatrix(mesh);
 

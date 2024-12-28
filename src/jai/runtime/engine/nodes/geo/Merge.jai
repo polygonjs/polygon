@@ -12,7 +12,7 @@ registerMergeGeoNode :: () #compile_time {
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 	mesh := newObject3D(nodesScene.worldScene, Mesh);
-	meshSetMaterial(nodesScene.worldScene, mesh, xx nodesScene.defaultMaterial.mesh);
+	meshSetMaterial(nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.mesh);
 
 	print("MergeGeoNode::cook not implemented\n");
 

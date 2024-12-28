@@ -17,7 +17,8 @@ setColor :: (material: *TYPE, color: Color) {
 	material.uniforms.color = color;
 }
 materialInit :: (material: *TYPE) {
-	material.name = MATERIAL_NAME;
+	baseMaterialInit(material);
+	// material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 	material.uniforms.color = .{1.0, 0.0, 0.0, 1.0};
 }
@@ -29,6 +30,6 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "MeshBasicMaterial.wgsl"; };
 TYPE :: MeshBasicMaterial;
 UNIFORM_TYPE :: MeshBasicMaterialUniforms;
-MATERIAL_NAME :: #run tprint("%", TYPE);
+// MATERIAL_NAME :: #run tprint("%", TYPE);
 
 

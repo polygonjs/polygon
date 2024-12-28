@@ -3,7 +3,8 @@ MeshNormalMaterial :: struct {
 };
 
 materialInit :: (material: *TYPE) {
-	material.name = MATERIAL_NAME;
+	baseMaterialInit(material);
+	// material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 }
 registerMeshNormalMaterial :: () #compile_time {
@@ -16,5 +17,5 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "MeshNormalMaterial.wgsl"; };
 TYPE :: MeshNormalMaterial;
 UNIFORM_TYPE :: EmptyUniforms;
-MATERIAL_NAME :: #run tprint("%", TYPE);
+// MATERIAL_NAME :: #run tprint("%", TYPE);
 

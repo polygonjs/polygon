@@ -24,9 +24,9 @@ NodesScene :: struct {
 	connections: NodeConnectionList;
 
 	DefaultMaterial :: struct {
-		line: *LineBasicMaterial;
-		mesh: *MeshBasicMaterial;
-		point: *PointBasicMaterial;
+		line: LineBasicMaterial;
+		mesh: MeshNormalMaterial;
+		point: PointBasicMaterial;
 	}
 	defaultMaterial:DefaultMaterial;
 
@@ -132,8 +132,8 @@ _sceneInit :: (using scene: *NodesScene) {
 	array_init(*nodeRequests, scene.allocator, reserve=true);
 
 	scene.worldScene = newScene(scene);
-	scene.defaultMaterial.line = xx newMaterial(scene.worldScene, LineBasicMaterial);
-	scene.defaultMaterial.mesh = xx newMaterial(scene.worldScene, MeshNormalMaterial);
-	scene.defaultMaterial.point = xx newMaterial(scene.worldScene, PointBasicMaterial);
+	materialInit(*scene.defaultMaterial.line);
+	materialInit(*scene.defaultMaterial.mesh);
+	materialInit(*scene.defaultMaterial.point);
 
 }

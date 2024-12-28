@@ -14,7 +14,8 @@ registerMeshRaymarchingMaterial :: () #compile_time {
 // }
 
 materialInit :: (material: *TYPE) {
-	material.name = MATERIAL_NAME;
+	baseMaterialInit(material);
+	// material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 	material.uniforms.offset = .{0.0, 0.0, 0.0, 0.0};
 }
@@ -27,7 +28,7 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "MeshRaymarchingMaterial.wgsl"; };
 TYPE :: MeshRaymarchingMaterial;
 UNIFORM_TYPE :: MeshRaymarchingMaterialUniforms;
-MATERIAL_NAME :: #run tprint("%", TYPE);
+// MATERIAL_NAME :: #run tprint("%", TYPE);
 
 
 

@@ -10,7 +10,8 @@ registerMeshIdMaterial :: () #compile_time {
 }
 
 materialInit :: (material: *TYPE) {
-	material.name = MATERIAL_NAME;
+	baseMaterialInit(material);
+	// material.name = MATERIAL_NAME;
 	material.shader = SHADER_RAW;
 	material.uniforms.id = 0;
 }
@@ -32,6 +33,6 @@ SHADER_RAW :: #run import_shader();
 import_shader :: () -> string { return "MeshIdMaterial.wgsl"; };
 TYPE :: MeshIdMaterial;
 UNIFORM_TYPE :: MeshIdMaterialUniforms;
-MATERIAL_NAME :: #run tprint("%", TYPE);
+// MATERIAL_NAME :: #run tprint("%", TYPE);
 
 

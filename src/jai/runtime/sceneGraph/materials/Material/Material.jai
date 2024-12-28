@@ -8,7 +8,7 @@ MaterialBase :: struct ($UniformType: Type) {
 	uniformTypeSize: u32=size_of(UniformType);
 	id: u64;
 	//
-	name: string;
+	// name: string;
 	shader: string;
 	uniforms: UniformType;
 }
@@ -21,16 +21,18 @@ newMaterial :: (scene: *Scene, $T: Type) -> *T {
 newMaterial :: ($T: Type, allocator: Allocator) -> *T {
 	material: *T = New(T,,allocator);
 	material.allocator = allocator;
+
+	materialInit(material);
+
+	return material;
+}
+baseMaterialInit :: (material: *$T) {
 	material.type = T;
 
 	material.materialTypeId = getMaterialTypeId(T);
 
 	material.id = NEXT_MATERIAL_ID;
 	NEXT_MATERIAL_ID += 1;
-
-	materialInit(material);
-
-	return material;
 }
 materialDelete :: (material: *$T) {
 	free(material,, material.allocator);
@@ -86,5 +88,3 @@ materialUpdatePipelineControllerLayout :: (material: *Material, pc : *PipelineCo
 
 NEXT_MATERIAL_ID :u64= 0;
 
-materialInit :: (material: *Material) {
-}

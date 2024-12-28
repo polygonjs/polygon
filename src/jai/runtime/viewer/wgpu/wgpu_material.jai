@@ -4,7 +4,7 @@ BindGroupLayoutDescContainer :: struct {
 }
 
 material_create_module :: (wgpuContext: *WGPUContext, material: *Material)-> WGPUShaderModule {
-	return wgpu_create_shader_module(wgpuContext.device, material.shader, xx tprint("% Shader", material.name));
+	return wgpu_create_shader_module(wgpuContext.device, material.shader, xx tprint("% Shader", material.type));
 }
 
 material_bind_group_layouts_count :: (material: *Material)->u32 {
