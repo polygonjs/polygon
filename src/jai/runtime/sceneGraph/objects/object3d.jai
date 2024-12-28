@@ -38,11 +38,13 @@ newObject3D :: (scene: *Scene, $T: Type) -> *T {
 object3DAllocate :: ($T: Type, allocator: Allocator)-> *T {
 	object: *T = New(T,, allocator);
 	object.allocator = allocator;
+	worldObjectInit(object);
+	return object;
+}
+worldObjectInit :: (object: *$T) {
 	object.type = T;
-
 	object.id = nextWorldObjectId();
 	transformableInit(object);
-	return object;
 }
 worldObjectClone :: (object: *TYPE)->*TYPE {
 	clone := New(TYPE,, object.allocator);

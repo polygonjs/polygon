@@ -32,7 +32,7 @@ parseData :: (node:*TYPE, fileContent: string) {
 	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
-	meshSetMaterial(nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.mesh);
+	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.mesh);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformableUpdateMatrix(mesh);
 

@@ -13,8 +13,6 @@ testNetworkPanel :: () {
 		APP.editor = editor;
 		editorInit(editor, ensureWGPUContextValid=false);
 		editorSetScene(editor, nodesScene);
-		assertNotNull(editor.networkPanel.sceneWorld);
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertNotNull(editor.networkPanel.sceneRaycast);
 
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 3);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 3);
@@ -63,7 +61,7 @@ testNetworkPanel :: () {
 				case 1; {
 					assertEqual(networkPanel.sceneWorld.children.count, 3);
 					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
-					assertEqual(_meshesCount(networkPanel), 3);
+					assertEqual(_meshesCount(*networkPanel), 3);
 				}
 				// add a node
 				case 2; {
@@ -72,7 +70,7 @@ testNetworkPanel :: () {
 				case 3; {
 					assertEqual(networkPanel.sceneWorld.children.count, 4);
 					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
-					assertEqual(_meshesCount(networkPanel), 4);
+					assertEqual(_meshesCount(*networkPanel), 4);
 				}
 				// connect a node
 				// case 4; {
@@ -93,7 +91,7 @@ testNetworkPanel :: () {
 				case 7; {
 					assertEqual(networkPanel.sceneWorld.children.count, 3);
 					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2);
-					assertEqual(_meshesCount(networkPanel), 3);
+					assertEqual(_meshesCount(*networkPanel), 3);
 				}
 				case 8; { editorRequestExit(editor); }
 			}

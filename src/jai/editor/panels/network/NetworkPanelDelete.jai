@@ -1,7 +1,6 @@
-networkPanelDelete :: (using panel: *TYPE) {
-
-	sceneRemoveObserver(sceneWorld, rendererColor);
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRemoveObserver(sceneRaycast, rendererRaycast);
+networkPanelReset :: (using panel: *TYPE) {
+	sceneRemoveObserver(*sceneWorld, *rendererColor);
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRemoveObserver(*sceneRaycast, *rendererRaycast);
 
 	// delete bg material
 	// {
@@ -31,10 +30,10 @@ networkPanelDelete :: (using panel: *TYPE) {
 	// 		}
 	// 	}
 	// }
-	rendererDelete(rendererColor);
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererDelete(rendererRaycast);
-	worldObjectDelete(sceneWorld);
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER worldObjectDelete(sceneRaycast);
+	rendererReset(*rendererColor);
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererReset(*rendererRaycast);
+	worldObjectReset(*sceneWorld);
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER worldObjectReset(*sceneRaycast);
 	// for object,i : sceneRaycast.children {
 	// 	if object != null {
 	// 		mesh := cast(*Mesh)object;
@@ -50,6 +49,9 @@ networkPanelDelete :: (using panel: *TYPE) {
 	// generatedWorldObjectDelete(sceneRaycast);
 	// materialDelete(basicMat);
 	allocatorReset(panel);
+}
+networkPanelDelete :: (using panel: *TYPE) {
+	networkPanelReset(panel);
 	free(panel);
 }
 

@@ -26,12 +26,12 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	inputResult := inputResults[inputIndex];
 	nodesScene := graphNodeScene(node);
 	if inputResult != null {
-		if _objectChanged(nodesScene.worldScene, inputResult) {
-			sceneObjectsClear(nodesScene.worldScene);
-			sceneObjectsAdd(nodesScene.worldScene, <<inputResult);
+		if _objectChanged(*nodesScene.worldScene, inputResult) {
+			sceneObjectsClear(*nodesScene.worldScene);
+			sceneObjectsAdd(*nodesScene.worldScene, <<inputResult);
 		}
 	} else {
-		sceneObjectsClear(nodesScene.worldScene);
+		sceneObjectsClear(*nodesScene.worldScene);
 	}
 
 	completeGeoCookWithObjects(nodesScene, xx node, inputResult);

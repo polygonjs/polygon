@@ -1,7 +1,7 @@
 testOutputGeoNode :: () {
 	
 	testWithScene("geo/output basic", (using options:TestProcedureOptions) {
-		worldScene := nodesScene.worldScene;
+		worldScene := *nodesScene.worldScene;
 		output1 := createNode(nodesScene, OutputGeoNode);
 		nodesSceneOutputNodesCompute(nodesScene); // no crash if output has no input
 
@@ -76,20 +76,20 @@ testOutputGeoNode :: () {
 		paramSetValue(*output1.p.input, 1);
 
 		paramSetValue(*box1.p.scale, 2);
-		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 0);
+		assertEqual(eventsCount(*nodesScene.worldScene, .OBJECTS_ADDED), 0);
 
 		nodesSceneOutputNodesCompute(nodesScene);
-		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 1);
+		assertEqual(eventsCount(*nodesScene.worldScene, .OBJECTS_ADDED), 1);
 
 		paramSetValue(*add1.p.position, .{1,1,1});
 		nodesSceneOutputNodesCompute(nodesScene);
-		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 1, "output node input objects have not changed, no event should be emitted");
+		assertEqual(eventsCount(*nodesScene.worldScene, .OBJECTS_ADDED), 1, "output node input objects have not changed, no event should be emitted");
 
 		endTest();
 	});
 
 	testWithScene("geo/output works as expected when direct input is changed", (using options:TestProcedureOptions) {
-		worldScene := nodesScene.worldScene;
+		worldScene := *nodesScene.worldScene;
 
 		output1 := createNode(nodesScene, OutputGeoNode);
 		box1 := createNode(nodesScene, BoxGeoNode);
@@ -116,7 +116,7 @@ testOutputGeoNode :: () {
 
 	testWithScene("geo/output works as expected with an input node switch that does not clone its input", (using options:TestProcedureOptions) {
 
-		worldScene := nodesScene.worldScene;
+		worldScene := *nodesScene.worldScene;
 
 		output1 := createNode(nodesScene, OutputGeoNode);
 		switch1 := createNode(nodesScene, SwitchGeoNode);

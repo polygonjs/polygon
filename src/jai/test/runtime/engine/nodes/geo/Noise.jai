@@ -1,7 +1,6 @@
 testNoiseGeoNode :: () {
 
 	testWithScene("geo/noise basic", (using options:TestProcedureOptions) {
-		worldScene := nodesScene.worldScene;
 
 		box1 := createNode(nodesScene, BoxGeoNode);
 		transform1 := createNode(nodesScene, TransformGeoNode);
@@ -25,7 +24,7 @@ testNoiseGeoNode :: () {
 
 		nodesSceneOutputNodesCompute(nodesScene);
 
-		assertEqual(worldScene.children.count, 1);
+		assertEqual(nodesScene.worldScene.children.count, 1);
 		nodesSceneDisposeCookResults(nodesScene);
 
 		endTest();

@@ -11,7 +11,7 @@ ViewerPanel :: struct {
 	camera: PerspectiveCamera;
 	cameraControls: OrbitControls;
 
-	renderer: *Renderer;
+	renderer: Renderer;
 }
 
 newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
@@ -20,54 +20,10 @@ newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE
 
 	return panel;
 }
-viewerPanelDelete :: (using panel: *TYPE) {
-	if(editor.nodesScene != null) sceneRemoveObserver(editor.nodesScene.worldScene, renderer);
-	rendererDelete(renderer);
-	// allocatorReset(panel);
-	// object3DDelete(camera);
-	free(panel);
-}
-drawDataInit :: (using panel: *TYPE) {
-	rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
-}
-render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
-	nodesSceneOutputNodesCompute(editor.nodesScene);
-	render(renderCollectionData, renderer, editor.nodesScene.worldScene, *camera);
-}
-rendererDestroyBuffers :: (panel: *TYPE) {
-	rendererDestroyBuffers(panel.renderer);
-}
-
-onResize :: (using panel: *TYPE) {
-	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
-
-	renderer.viewport.start = .{ editor.windowSize.x*0, editor.windowSize.y*0 };
-	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.49), xx(cast(float32)editor.windowSize.y*0.49) };
-
-	if(renderer.fullScreen == true) {
-		camera.aspect = newAspect;
-	} else {
-		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
-	}
-	sceneCameraUpdateProjectionMatrix(editor.nodesScene.worldScene, *camera);
-}
-panelSetScene :: (using panel: *TYPE, nodesScene: *NodesScene) {
-	rendererAny: Any = <<panel.renderer;
-	cameraControlsSetScenes(*cameraControls, .[editor.nodesScene.worldScene]);
-	cameraControlsCommit(*cameraControls);
-	sceneAddObserver(nodesScene.worldScene, rendererAny);
-}
-panelRemoveScene :: (panel: *TYPE, nodesScene: *NodesScene) {
-	sceneRemoveObserver(nodesScene.worldScene, panel.renderer);
-}
-#scope_file
-
-TYPE :: ViewerPanel;
-
 viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	// allocatorAssign(panel);
 
-	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
+	rendererInit(*renderer, *_editor.wgpuContext, ensureWGPUContextValid);
 
 	renderer.label = "ViewerPanelRenderer";
 	renderer.fullScreen = false;
@@ -88,3 +44,48 @@ viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 
 	// cameraControlsCommit(*cameraControls); // do not commit as we don't have the scene yet
 }
+viewerPanelReset :: (using panel: *TYPE) {
+	if(editor.nodesScene != null) sceneRemoveObserver(*editor.nodesScene.worldScene, *renderer);
+	rendererReset(*renderer);
+}
+viewerPanelDelete :: (using panel: *TYPE) {
+	viewerPanelReset(panel);
+	free(panel);
+}
+drawDataInit :: (using panel: *TYPE) {
+	rendererInitPipelines(*renderer, *editor.nodesScene.worldScene, *camera);
+}
+render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
+	nodesSceneOutputNodesCompute(editor.nodesScene);
+	render(renderCollectionData, *renderer, *editor.nodesScene.worldScene, *camera);
+}
+rendererDestroyBuffers :: (using panel: *TYPE) {
+	rendererDestroyBuffers(*renderer);
+}
+
+onResize :: (using panel: *TYPE) {
+	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
+
+	renderer.viewport.start = .{ editor.windowSize.x*0, editor.windowSize.y*0 };
+	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.49), xx(cast(float32)editor.windowSize.y*0.49) };
+
+	if(renderer.fullScreen == true) {
+		camera.aspect = newAspect;
+	} else {
+		camera.aspect = cast(float32)renderer.viewport.size.x / cast(float32)renderer.viewport.size.y;
+	}
+	sceneCameraUpdateProjectionMatrix(*editor.nodesScene.worldScene, *camera);
+}
+panelSetScene :: (using panel: *TYPE, nodesScene: *NodesScene) {
+	rendererAny: Any = panel.renderer;
+	cameraControlsSetScenes(*cameraControls, .[*editor.nodesScene.worldScene]);
+	cameraControlsCommit(*cameraControls);
+	sceneAddObserver(*nodesScene.worldScene, rendererAny);
+}
+panelRemoveScene :: (using panel: *TYPE, nodesScene: *NodesScene) {
+	sceneRemoveObserver(*nodesScene.worldScene, *renderer);
+}
+#scope_file
+
+TYPE :: ViewerPanel;
+

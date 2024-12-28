@@ -23,9 +23,9 @@ MATERIAL_RAYCAST :: NETWORK_PANEL_MATERIAL_RAYCAST;
 _addNode :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:bool) {
 
 	#if forRaycast == true {
-		scene := sceneRaycast;
+		scene := *sceneRaycast;
 	} else {
-		scene := sceneWorld;
+		scene := *sceneWorld;
 	}
 	mesh := newMesh(scene, Mesh, geometry);
 
@@ -34,7 +34,7 @@ _addNode :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:boo
 		material.uniforms.id = node.nodeId;
 		meshSetMaterial(scene, mesh, xx material);
 	} else {
-		meshSetMaterial(scene, mesh, xx panel.mat.nodeBasic);
+		meshSetMaterial(scene, mesh, xx *panel.mat.nodeBasic);
 	}
 
 	pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
@@ -55,9 +55,9 @@ _removeNode :: (using panel:*TYPE, node:*$T, $forRaycast:bool) {
 	meshIndex := nodeObjectIndexByNodeId[node.nodeId];
 	if meshIndex >= 0 {
 		#if forRaycast {
-			scene := sceneRaycast;
+			scene := *sceneRaycast;
 		} else {
-			scene := sceneWorld;
+			scene := *sceneWorld;
 		}
 		object := scene.children[meshIndex];
 		#if forRaycast {

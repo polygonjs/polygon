@@ -8,9 +8,9 @@ moveCapturedNodes :: (using panel: *NetworkPanel, nodeId: NodeId, startPos: Vect
 networkPanelNodeSetPosition :: (using panel: *TYPE, node: *$T, position: Vector2) {
 	_moveNode :: (using panel:*TYPE, node:*T, $forRaycast:bool) {
 		#if forRaycast {
-			scene := sceneRaycast;
+			scene := *sceneRaycast;
 		} else {
-			scene := sceneWorld;
+			scene := *sceneWorld;
 		}
 		meshIndex := nodeObjectIndexByNodeId[node.nodeId];
 		if meshIndex >= 0 {

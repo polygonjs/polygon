@@ -16,7 +16,7 @@ NodesScene :: struct {
 	validNodes: Bit_Array;
 	nodes: [..]*BaseNodeAny;
 	nodeNames: [..]NodeName;
-	worldScene: *Scene;
+	worldScene: Scene;
 	cookResults:[..]GeoNodeCookOutput;
 	nodeInputCookResults:[..][NODES_MAX_INPUTS_COUNT]GeoNodeCookOutput;
 	cookResultsToDispose:[..]*Object3D;
@@ -49,11 +49,7 @@ NodesScene :: struct {
 newNodesScene :: () -> *NodesScene {
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
-	pool := nextPool();
-	set_allocators(pool);
 	scene: *NodesScene = New(NodesScene);
-	// if _allocator == null {
-		allocatorAssign(scene, pool, do_set_allocators=false);
 	// } else {
 	// 	scene.allocator = _allocator;
 	// }
@@ -72,7 +68,7 @@ newNodesScene :: () -> *NodesScene {
 		memcpy(targetPtr, srPtr, size_of(CoreGraph));
 	}
 	scene.time = 0;
-	_sceneInit(scene);
+	nodesSceneInit(scene);
 
 	return scene;
 }
@@ -102,12 +98,13 @@ newNodesScene :: () -> *NodesScene {
 // 	print("---- sceneDebug END\n");
 // }
 
-#scope_file
+nodesSceneInit :: (scene: *NodesScene) {
+	pool := nextPool();
+	set_allocators(pool);
+	allocatorAssign(scene, pool, do_set_allocators=false);
 
-INIT_NEXT_NODE_ID :NodeId: 0;
-
-_sceneInit :: (using scene: *NodesScene) {
-	nextNodeId = INIT_NEXT_NODE_ID;
+	// using scene;
+	scene.nextNodeId = INIT_NEXT_NODE_ID;
 	// array_add(*nodes, null);
 	// bit_array_resize(*validNodeIds, 1);
 	// validNodeIds[0] = false;
@@ -115,25 +112,31 @@ _sceneInit :: (using scene: *NodesScene) {
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
 	// array_init(*nodes);
-	array_init(*nodes, scene.allocator, reserve=true);
-	array_init(*nodeNames, scene.allocator, reserve=true);
+	array_init(*scene.nodes, scene.allocator, reserve=true);
+	array_init(*scene.nodeNames, scene.allocator, reserve=true);
 	nodeConnectionListInit(scene);
-	array_init(*nodeInputCookResults, scene.allocator, reserve=true);
-	array_init(*cookResults, scene.allocator, reserve=true);
-	array_init(*cooksCount, scene.allocator, reserve=true);
-	array_init(*cookResultsToDispose, scene.allocator, reserve=true);
-	graphInit(*graph, scene);
+	array_init(*scene.nodeInputCookResults, scene.allocator, reserve=true);
+	array_init(*scene.cookResults, scene.allocator, reserve=true);
+	array_init(*scene.cooksCount, scene.allocator, reserve=true);
+	array_init(*scene.cookResultsToDispose, scene.allocator, reserve=true);
+	graphInit(*scene.graph, scene);
 	// scene.timeGraphNode.type = TimeNode;
 	// scene.timeGraphNode.name = "TimeNode";
 	graphAddNode(*scene.graph, *scene.timeGraphNode);
 
 	nodesSceneComputableTreeInit(scene);
 
-	array_init(*nodeRequests, scene.allocator, reserve=true);
+	array_init(*scene.nodeRequests, scene.allocator, reserve=true);
 
-	scene.worldScene = newScene(scene);
+	// scene.worldScene = newScene(scene);
+	worldSceneInit(*scene.worldScene);
 	materialInit(*scene.defaultMaterial.line);
 	materialInit(*scene.defaultMaterial.mesh);
 	materialInit(*scene.defaultMaterial.point);
 
 }
+
+#scope_file
+
+INIT_NEXT_NODE_ID :NodeId: 0;
+

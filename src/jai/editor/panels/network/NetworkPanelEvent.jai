@@ -2,7 +2,7 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 	if(eventsData.dirty == false){
 		return;
 	}
-	focused := elementFocused(rendererColor, eventsData);
+	focused := elementFocused(*rendererColor, eventsData);
 	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
 	if (focused){
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
@@ -11,8 +11,8 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 			if (eventsData.mouseButtonJustPressed.left == true) {
 				eventHandler.waitingForButtonDownReadPixel = true;
 				eventHandler.waitingForButtonUpReadPixel = false;
-				networkPanelCursorDataInit(*eventHandler.screenData, cursorForRaycast(eventsData, rendererColor));
-				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, camera);
+				networkPanelCursorDataInit(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
+				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
 				networkPanelCursorDataInit(*eventHandler.worldData, worldPos);
 			}
 			moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
@@ -23,8 +23,8 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 				eventHandler.nodeIdOnButtonDownFound = false;
 			}
 			if (eventsData.mouseButton.left == true) {
-				networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, rendererColor));
-				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, camera);
+				networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
+				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
 				networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
 				if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
 					moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
@@ -32,8 +32,8 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 			}
 			if (eventHandler.waitingForButtonDownReadPixel == true) {
 				eventHandler.nodeIdOnButtonDownFound = false;
-				renderPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
-				success, result := readPixelIfMapped(rendererRaycast, eventsData);
+				renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
+				success, result := readPixelIfMapped(*rendererRaycast, eventsData);
 				if success == true {
 					eventHandler.waitingForButtonDownReadPixel = false;
 					found, nodeId := meshIdMaterialUnpackId(result);
@@ -46,8 +46,8 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 					}
 				}
 			} else if (eventHandler.waitingForButtonUpReadPixel == true) {
-				renderPixel(rendererRaycast, sceneRaycast, camera, eventsData.cursor);
-				success, result := readPixelIfMapped(rendererRaycast, eventsData);
+				renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
+				success, result := readPixelIfMapped(*rendererRaycast, eventsData);
 				if success == true {
 					eventHandler.waitingForButtonUpReadPixel = false;
 					found, nodeId := meshIdMaterialUnpackId(result);

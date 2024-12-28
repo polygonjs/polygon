@@ -6,6 +6,7 @@ PerspectiveCamera :: struct {
 }
 
 object3DInit :: (camera: *TYPE) {
+	worldObjectInit(camera);
 	object3DInit(cast(*Camera)camera);
 	camera.fov_in_degrees = DEFAULT_FOV_IN_DEGREES;
 

@@ -8,23 +8,23 @@ NetworkPanel :: struct {
 	allocator: Allocator;
 	//
 	editor: *Editor;
-	sceneWorld: *Scene;
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast: *Scene;
+	sceneWorld: Scene;
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast: Scene;
 	nodeObjectIndexByNodeId: [..]u32;
 	connectionObjectIndexByConnectionId: [..]u32;
 
-	camera: *OrthographicCamera;
+	camera: OrthographicCamera;
 	cameraControls: PanControls;
 
 	DefaultMaterial :: struct {
-		nodeBasic: *MATERIAL_BASIC;
-		nodeSelected: *MATERIAL_BASIC;
-		connectionBasic: *MATERIAL_BASIC;
+		nodeBasic: MATERIAL_BASIC;
+		nodeSelected: MATERIAL_BASIC;
+		connectionBasic: MATERIAL_BASIC;
 	}
 	mat: DefaultMaterial;
 
-	rendererColor: *Renderer;
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast: *Renderer;
+	rendererColor: Renderer;
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast: Renderer;
 
 	eventHandler: NetworkPanelEventHandler;
 }
@@ -56,21 +56,11 @@ newNetworkPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYP
 	return panel;
 }
 
-
-NETWORK_PANEL_MATERIAL_RAYCAST :: MeshIdMaterial;
-
-#scope_file
-
-TYPE :: NetworkPanel;
-MATERIAL_BASIC :: MeshBasicMaterial;
-
-
-
 networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	allocatorAssign(panel, nextPool(), do_set_allocators=true);
 
 	{
-		rendererColor = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
+		rendererInit(*rendererColor, *_editor.wgpuContext, ensureWGPUContextValid);
 		rendererColor.label = "NetworkPanelRendererColor";
 		rendererColor.fullScreen = false;
 		rendererColor.viewport = .{
@@ -84,7 +74,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 		rendererColor.clear = false;
 	}
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
-		rendererRaycast = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
+		rendererInit(*rendererRaycast, *_editor.wgpuContext, ensureWGPUContextValid);
 		rendererRaycast.label = "NetworkPanelRendererRaycast";
 		rendererRaycast.fullScreen = false;
 		rendererRaycast.viewport = .{
@@ -105,36 +95,47 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	nodeObjectIndexByNodeId.allocator = panel.allocator;
 	connectionObjectIndexByConnectionId.allocator = panel.allocator;
 	editor = _editor;
-	sceneWorld = newScene(panel.allocator);
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast = newScene(panel.allocator);
-	camera = newObject3D(sceneWorld, OrthographicCamera);
+	worldSceneInit(*sceneWorld);
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER worldSceneInit(*sceneRaycast);
+	// camera = newObject3D(*sceneWorld, OrthographicCamera);
+	object3DInit(*camera);
 	camera.near = 0;
 	camera.far = 10;
-	cameraProjectionUpdate(camera);
+	cameraProjectionUpdate(*camera);
 	// camera.type = OrthographicCamera;
 	// object3DInit(*camera);
 
-	rendererColorAny: Any = <<rendererColor;
-	sceneAddObserver(sceneWorld, rendererColorAny);
+	rendererColorAny: Any = rendererColor;
+	sceneAddObserver(*sceneWorld, rendererColorAny);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
-		rendererRaycastAny: Any = <<rendererRaycast;
-		sceneAddObserver(sceneRaycast, rendererRaycastAny);
+		rendererRaycastAny: Any = rendererRaycast;
+		sceneAddObserver(*sceneRaycast, rendererRaycastAny);
 	}
 
-	mat.nodeBasic = newMaterial(MATERIAL_BASIC, panel.allocator);
-	mat.nodeSelected = newMaterial(MATERIAL_BASIC, panel.allocator);
-	mat.connectionBasic = newMaterial(MATERIAL_BASIC, panel.allocator);
-	setColor(mat.nodeBasic, .{1.0, 0.5, 0.25, 1.0});
-	setColor(mat.nodeSelected, .{0, 1, 0, 1});
-	setColor(mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
+	materialInit(*mat.nodeBasic);
+	materialInit(*mat.nodeSelected);
+	materialInit(*mat.connectionBasic);
+	setColor(*mat.nodeBasic, .{1.0, 0.5, 0.25, 1.0});
+	setColor(*mat.nodeSelected, .{0, 1, 0, 1});
+	setColor(*mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
 
-	cameraControls.camera = camera;
-	cameraControlsSetScenes(*cameraControls, .[sceneWorld, sceneRaycast]);
+	cameraControls.camera = *camera;
+	cameraControlsSetScenes(*cameraControls, .[*sceneWorld, *sceneRaycast]);
 	cameraControlsCommit(*cameraControls);
 
 
-	networkPanelAddBgMesh(panel, sceneWorld, .{0.2, 0.2, 0.2, 1.0});
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER networkPanelAddBgMesh(panel, sceneRaycast, .{0, 0, 0, 0});
+	networkPanelAddBgMesh(panel, *sceneWorld, .{0.2, 0.2, 0.2, 1.0});
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER networkPanelAddBgMesh(panel, *sceneRaycast, .{0, 0, 0, 0});
 
 }
+
+
+
+NETWORK_PANEL_MATERIAL_RAYCAST :: MeshIdMaterial;
+
+#scope_file
+
+TYPE :: NetworkPanel;
+MATERIAL_BASIC :: MeshBasicMaterial;
+
 

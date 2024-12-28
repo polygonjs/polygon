@@ -34,9 +34,9 @@ networkPanelConnectionSetMatrix :: (using panel: *TYPE, connection: NodeConnecti
 	meshIndex := connectionObjectIndexByConnectionId[connection.id];
 	if meshIndex >= 0 {
 		#if forRaycast {
-			scene := sceneRaycast;
+			scene := *sceneRaycast;
 		} else {
-			scene := sceneWorld;
+			scene := *sceneWorld;
 		}
 		object := scene.children[meshIndex];
 		mesh := cast(*Mesh)object;
@@ -51,9 +51,9 @@ MATERIAL_RAYCAST :: NETWORK_PANEL_MATERIAL_RAYCAST;
 
 _addConnection :: (using panel: *TYPE, connection: NodeConnection, geometry: *Geometry, $forRaycast:bool) {
 	#if forRaycast == true {
-		scene := sceneRaycast;
+		scene := *sceneRaycast;
 	} else {
-		scene := sceneWorld;
+		scene := *sceneWorld;
 	}
 	mesh := newMesh(scene, Mesh, geometry);
 	mesh.transformOrder = .TRS;
@@ -63,7 +63,7 @@ _addConnection :: (using panel: *TYPE, connection: NodeConnection, geometry: *Ge
 		material.uniforms.id = xx connection.id;
 		meshSetMaterial(scene, mesh, xx material);
 	} else {
-		meshSetMaterial(scene, mesh, xx panel.mat.connectionBasic);
+		meshSetMaterial(scene, mesh, xx *panel.mat.connectionBasic);
 	}
 
 	networkPanelConnectionSetMatrix(panel, connection, mesh, scene);
@@ -82,9 +82,9 @@ _removeConnection :: (using panel:*TYPE, connection:NodeConnection, $forRaycast:
 	meshIndex := connectionObjectIndexByConnectionId[connection.id];
 	if meshIndex >= 0 {
 		#if forRaycast {
-			scene := sceneRaycast;
+			scene := *sceneRaycast;
 		} else {
-			scene := sceneWorld;
+			scene := *sceneWorld;
 		}
 		object := scene.children[meshIndex];
 		#if forRaycast {

@@ -102,7 +102,7 @@ doEditorNodeAddCommands :: (editor: *Editor, commands: [..]EditorNodeAddCommand)
 		node := cmd.node;
 		array_insert_at(*nodePositions, .{0, 0}, node.nodeId);
 
-		#if HAS_NETWORK_PANEL networkPanelAddNode(editor.networkPanel, node);
+		#if HAS_NETWORK_PANEL networkPanelAddNode(*editor.networkPanel, node);
 	}
 }
 doEditorNodeBeforeRemoveCommands :: (editor: *Editor, commands: [..]EditorNodeBeforeRemoveCommand) {
@@ -111,7 +111,7 @@ doEditorNodeBeforeRemoveCommands :: (editor: *Editor, commands: [..]EditorNodeBe
 		node := cmd.node;
 		nodePositions[node.nodeId] = .{-1000000,-1000000};
 
-		#if HAS_NETWORK_PANEL networkPanelRemoveNode(editor.networkPanel, node);
+		#if HAS_NETWORK_PANEL networkPanelRemoveNode(*editor.networkPanel, node);
 	}
 }
 // node positions
@@ -121,28 +121,28 @@ doEditorNodeSetPositionCommands :: (editor: *Editor, commands: [..]EditorNodeSet
 		node := cmd.node;
 		nodePositions[node.nodeId] = cmd.position;
 
-		#if HAS_NETWORK_PANEL networkPanelNodeSetPosition(editor.networkPanel, node, cmd.position);
+		#if HAS_NETWORK_PANEL networkPanelNodeSetPosition(*editor.networkPanel, node, cmd.position);
 	}
 }
 // node connections
 doEditorNodeConnectionRemovedCommands :: (editor: *Editor, commands: [..]EditorNodeConnectionRemovedCommand) {
 	for cmd: commands {
-		#if HAS_NETWORK_PANEL networkPanelRemoveNodeConnection(editor.networkPanel, cmd.connection);
+		#if HAS_NETWORK_PANEL networkPanelRemoveNodeConnection(*editor.networkPanel, cmd.connection);
 	}
 }
 doEditorNodeConnectionAddedCommands :: (editor: *Editor, commands: [..]EditorNodeConnectionAddedCommand) {
 	for cmd: commands {
-		#if HAS_NETWORK_PANEL networkPanelAddNodeConnection(editor.networkPanel, cmd.connection);
+		#if HAS_NETWORK_PANEL networkPanelAddNodeConnection(*editor.networkPanel, cmd.connection);
 	}
 }
 // node selection
 doEditorNodeSelectionAddedCommands :: (editor: *Editor, commands: [..]EditorNodeSelectionAddedCommand) {
 	for cmd: commands {
-		networkPanelOnNodeSelectionAdded(editor.networkPanel, cmd.node);
+		networkPanelOnNodeSelectionAdded(*editor.networkPanel, cmd.node);
 	}
 }
 doEditorNodeSelectionRemovedCommands :: (editor: *Editor, commands: [..]EditorNodeSelectionRemovedCommand) {
 	for cmd: commands {
-		networkPanelOnNodeSelectionRemoved(editor.networkPanel, cmd.node);
+		networkPanelOnNodeSelectionRemoved(*editor.networkPanel, cmd.node);
 	}
 }

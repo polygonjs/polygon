@@ -4,7 +4,9 @@ main :: () {
 		runTests();
 		return;
 	}
-	APP.nodesScene = newNodesScene();
+	nodesScene: NodesScene;
+	nodesSceneInit(*nodesScene);
+	APP.nodesScene = *nodesScene;
 	APP.editor = newEditor();
 
 	windowInit(APP.editor);

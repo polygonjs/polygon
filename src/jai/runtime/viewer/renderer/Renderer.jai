@@ -48,9 +48,28 @@ Renderer :: struct {
 }
 
 newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true/*, _allocator: *Allocator=null*/) -> *Renderer {
+	// pool := nextPool();
+	// set_allocators(pool);
+	renderer := New(Renderer);
+	rendererInit(renderer, wgpuContext, ensureWGPUContextValid);
+	// if _allocator == null {
+	// 	allocatorAssign(renderer, pool, do_set_allocators=false);
+	// // } else {
+	// // 	renderer.allocator = _allocator;
+	// // }
+	// rendererCommandsSetAllocator(renderer);
+	// array_init(*renderer.buffers_to_destroy, renderer.allocator, reserve=true);
+	// renderer.wgpuContext = wgpuContext;
+	// #if ensureWGPUContextValid {
+	// 	assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");
+	// 	assert(renderer.wgpuContext.queue != null, "renderer.wgpuContext.queue is null");
+	// }
+	return renderer;
+}
+rendererInit :: (renderer:*Renderer, wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true) {
 	pool := nextPool();
 	set_allocators(pool);
-	renderer := New(Renderer);
+
 	// if _allocator == null {
 		allocatorAssign(renderer, pool, do_set_allocators=false);
 	// } else {
@@ -63,7 +82,6 @@ newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true/*,
 		assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");
 		assert(renderer.wgpuContext.queue != null, "renderer.wgpuContext.queue is null");
 	}
-	return renderer;
 }
 
 rendererSize :: (renderer:*Renderer) -> Vector2UInt64 {
@@ -337,11 +355,13 @@ rendererDestroyBuffers :: (using renderer:*Renderer){
 	// multisample_release(renderer);
 	// depth_release(renderer);
 }
-
-rendererDelete :: (renderer:*Renderer) {
+rendererReset :: (renderer:*Renderer) {
 	rendererDestroyBuffers(renderer);
 	allocatorReset(renderer);
-	// rendererCommandsDelete(*renderer.commands);
+}
+
+rendererDelete :: (renderer:*Renderer) {
+	rendererReset(renderer);
 	free(renderer);
 }
 

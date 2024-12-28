@@ -1,7 +1,7 @@
 testTransformGeoNode :: () {
 
 	testWithScene("geo/transform basic", (using options:TestProcedureOptions) {
-		worldScene := nodesScene.worldScene;
+		worldScene := *nodesScene.worldScene;
 
 		box1 := createNode(nodesScene, BoxGeoNode);
 		transform1 := createNode(nodesScene, TransformGeoNode);

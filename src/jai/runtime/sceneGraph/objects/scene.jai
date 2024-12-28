@@ -43,15 +43,19 @@ newScene :: (scene: *NodesScene) -> *TYPE {
 }
 newScene :: (allocator: Allocator) -> *TYPE {
 	scene := object3DAllocate(TYPE, allocator);
-
+	worldSceneInit(scene);
+	return scene;
+}
+worldSceneInit :: (scene: *TYPE) {
 	pool := nextPool();
 	set_allocators(pool);
 	allocatorAssign(scene, pool, do_set_allocators=false);
 
+	worldObjectInit(scene);
 	object3DInit(scene);
 	array_init(*scene.children, scene.allocator);
 	array_init(*scene.observers, scene.allocator);
-	return scene;
+
 }
 worldObjectClone :: (object: *TYPE)->*TYPE {
 	clone := New(TYPE,, object.allocator);
@@ -102,9 +106,11 @@ sceneCameraUpdateProjectionMatrix :: (scene: *TYPE, camera: *$T/Camera) {
 	// as both matrices are updated at the same time in the renderer anyway
 	sceneEmitEvent(scene, .CAMERA_MATRIX_UPDATED, camera);
 }
-
-worldObjectDelete :: (scene: *TYPE) {
+worldObjectReset :: (scene: *TYPE) {
 	allocatorReset(scene);
+}
+worldObjectDelete :: (scene: *TYPE) {
+	worldObjectReset(scene);
 	free(scene,,allocator=scene.allocator);
 }
 

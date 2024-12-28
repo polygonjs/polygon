@@ -21,9 +21,9 @@ Editor :: struct {
 	}
 
 	windowSize: Vector2UInt64;
-	#if HAS_VIEWER_PANEL viewerPanel: *ViewerPanel;
-	#if HAS_NETWORK_PANEL networkPanel: *NetworkPanel;
-	paramsPanel: *ParamsPanel;
+	#if HAS_VIEWER_PANEL viewerPanel: ViewerPanel;
+	#if HAS_NETWORK_PANEL networkPanel: NetworkPanel;
+	paramsPanel: ParamsPanel;
 
 	SceneUiData :: struct {
 		nodePositions:[..]Vector2;
@@ -53,17 +53,17 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	array_init(*editor.sceneUiData.selectedNodeIds, editor.allocator, reserve=true);
 	editorCommandsSetAllocator(editor);
 
-	#if HAS_VIEWER_PANEL editor.viewerPanel = newViewerPanel(editor, ensureWGPUContextValid);
-	#if HAS_NETWORK_PANEL editor.networkPanel = newNetworkPanel(editor, ensureWGPUContextValid);
-	editor.paramsPanel = newParamsPanel(editor, ensureWGPUContextValid);
+	#if HAS_VIEWER_PANEL viewerPanelInit(*editor.viewerPanel, editor, ensureWGPUContextValid);
+	#if HAS_NETWORK_PANEL networkPanelInit(*editor.networkPanel, editor, ensureWGPUContextValid);
+	paramsPanelInit(*editor.paramsPanel, editor, ensureWGPUContextValid);
 }
 
 
 editorDelete :: (using editor: *Editor) {
 	_scene := nodesScene;
-	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
-	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);
-	paramsPanelDelete(paramsPanel);
+	#if HAS_VIEWER_PANEL viewerPanelReset(*viewerPanel);
+	#if HAS_NETWORK_PANEL networkPanelReset(*networkPanel);
+	paramsPanelReset(*paramsPanel);
 	if(nodesScene != null) {
 		editorRemoveScene(editor);
 	}

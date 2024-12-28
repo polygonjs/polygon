@@ -45,7 +45,7 @@ testCoreGraph :: () {
 			}
 		});
 	}
-	test("CoreGraphPreventCycleConnections", (options:TestProcedureOptions){
+	test("CoreGraphPreventCycleConnections on heap", (options:TestProcedureOptions){
 		nodesScene := newNodesScene();
 		defer sceneDelete(nodesScene);
 		box1 := createNode(nodesScene, BoxGeoNode);
@@ -54,6 +54,20 @@ testCoreGraph :: () {
 		assertFalse(setInput(box2, 0, box1));
 
 		null1 := createNode(nodesScene, NullGeoNode);
+		assertTrue(setInput(box2, 0, null1));
+		assertFalse(setInput(null1, 0, box1));
+		endTest();
+	});
+	test("CoreGraphPreventCycleConnections on stack", (options:TestProcedureOptions){
+		nodesScene :NodesScene;
+		nodesSceneInit(*nodesScene);
+		defer sceneReset(*nodesScene);
+		box1 := createNode(*nodesScene, BoxGeoNode);
+		box2 := createNode(*nodesScene, BoxGeoNode);
+		assertTrue(setInput(box1, 0, box2));
+		assertFalse(setInput(box2, 0, box1));
+
+		null1 := createNode(*nodesScene, NullGeoNode);
 		assertTrue(setInput(box2, 0, null1));
 		assertFalse(setInput(null1, 0, box1));
 		endTest();

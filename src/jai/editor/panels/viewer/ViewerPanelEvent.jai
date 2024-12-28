@@ -1,5 +1,5 @@
 processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
-	focused := elementFocused(renderer, eventsData);
+	focused := elementFocused(*renderer, eventsData);
 	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
 }
 

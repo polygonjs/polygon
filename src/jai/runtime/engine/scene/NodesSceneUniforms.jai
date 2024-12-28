@@ -1,3 +1,3 @@
 sceneUniformsUpdate :: (scene: *NodesScene) {
-	sceneUniformsUpdate(scene.worldScene, scene.time);
+	sceneUniformsUpdate(*scene.worldScene, scene.time);
 }

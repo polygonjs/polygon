@@ -24,13 +24,6 @@ Camera :: struct {
 }
 
 object3DInit :: (camera: *Camera) {
-	object3DInit(cast(*Object3D)camera);
-
-	tmp:Camera;
-	camera.near = tmp.near;
-	camera.far = tmp.far;
-	camera.aspect = tmp.aspect;
-
 	camera.transformOrder = .RTS;
 
 	identity(*camera.matrix);

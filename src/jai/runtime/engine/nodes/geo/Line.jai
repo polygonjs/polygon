@@ -15,7 +15,7 @@ registerLineGeoNode :: () #compile_time {
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
-	mesh := newMesh( nodesScene.worldScene, Mesh);
+	mesh := newMesh( *nodesScene.worldScene, Mesh);
 
 	using node.p;
 	geometry := mesh.geometry;
@@ -36,7 +36,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	array_add(*geometry.indices, 0);
 	array_add(*geometry.indices, 1);
 
-	meshSetMaterial(nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.line);
+	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.line);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformableUpdateMatrix(mesh);
 

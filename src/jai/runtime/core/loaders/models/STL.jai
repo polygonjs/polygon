@@ -1,6 +1,6 @@
 
 parseSTL :: (nodesScene:*NodesScene, fileContent: string)->*Mesh {
-	mesh := newMesh( nodesScene.worldScene, Mesh);
+	mesh := newMesh( *nodesScene.worldScene, Mesh);
 
 	colorFound := false;
 	for 0..(HEADER_SIZE-1){

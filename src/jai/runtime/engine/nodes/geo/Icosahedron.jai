@@ -13,7 +13,7 @@ registerIcosahedronGeoNode :: () #compile_time {
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
-	mesh := newMesh(nodesScene.worldScene, Mesh);
+	mesh := newMesh(*nodesScene.worldScene, Mesh);
 	// mesh.use_compute = true;
 
 	using node.p;
@@ -24,7 +24,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
-	meshSetMaterial(nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.mesh);
+	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.mesh);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformableUpdateMatrix(mesh);
 

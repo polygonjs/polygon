@@ -8,8 +8,8 @@ editorSetScene :: (editor: *Editor, nodesScene: *NodesScene) {
 	editor.sceneUiData.nodePositions.count = nodesScene.nodes.count;
 	maybe_grow(*editor.sceneUiData.nodePositions);
 
-	#if HAS_NETWORK_PANEL panelSetScene(editor.networkPanel, editor.nodesScene);
-	#if HAS_VIEWER_PANEL panelSetScene(editor.viewerPanel, editor.nodesScene);
+	#if HAS_NETWORK_PANEL panelSetScene(*editor.networkPanel, editor.nodesScene);
+	#if HAS_VIEWER_PANEL panelSetScene(*editor.viewerPanel, editor.nodesScene);
 	// for node, i: nodesScene.nodes {
 	// 	editor.sceneUiData.nodePositions[i] = .{0,0};
 	// }
@@ -20,7 +20,7 @@ editorRemoveScene :: (editor: *Editor) {
 	assert(editor.nodesScene!=null, "editor.nodesScene is null");
 	editorAny: Any = <<editor;
 	nodesSceneRemoveObserver(editor.nodesScene, editorAny);
-	#if HAS_NETWORK_PANEL panelRemoveScene(editor.networkPanel, editor.nodesScene);
-	#if HAS_VIEWER_PANEL panelRemoveScene(editor.viewerPanel, editor.nodesScene);
+	#if HAS_NETWORK_PANEL panelRemoveScene(*editor.networkPanel, editor.nodesScene);
+	#if HAS_VIEWER_PANEL panelRemoveScene(*editor.viewerPanel, editor.nodesScene);
 	editor.nodesScene = null;
 }

@@ -1,5 +1,12 @@
 sceneDelete :: (using scene: *NodesScene) {
 
+	sceneReset(scene);
+	free(scene/*,,allocator=scene.allocator*/);
+
+}
+
+sceneReset :: (using scene: *NodesScene) {
+
 	graphClearConnections(*graph);
 	// nodeConnectionListClear(*connections);
 
@@ -21,10 +28,9 @@ sceneDelete :: (using scene: *NodesScene) {
 		// array_reset(*observers);
 		// observer = null;
 	}
-	worldObjectDelete(worldScene);
+	worldObjectReset(*worldScene);
 	
 	allocatorReset(scene);
-	free(scene/*,,allocator=scene.allocator*/);
 
 	// sceneAllocatorPush(scene);
 	// reset_temporary_storage();

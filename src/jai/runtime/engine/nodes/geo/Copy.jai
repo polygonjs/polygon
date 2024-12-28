@@ -15,7 +15,7 @@ registerCopyGeoNode :: () #compile_time {
 
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
-	mesh := newMesh( nodesScene.worldScene, Mesh);
+	mesh := newMesh( *nodesScene.worldScene, Mesh);
 	completeGeoCookWithObject(nodesScene, xx node, mesh);
 }
 

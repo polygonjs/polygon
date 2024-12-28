@@ -8,7 +8,7 @@ ParamsPanel :: struct {
 	//
 	editor: *Editor;
 
-	renderer: *Renderer;
+	renderer: Renderer;
 }
 
 newParamsPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
@@ -17,9 +17,32 @@ newParamsPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE
 
 	return panel;
 }
-paramsPanelDelete :: (using panel: *TYPE) {
+paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
+	// allocatorAssign(panel);
+
+	rendererInit(*renderer, *_editor.wgpuContext, ensureWGPUContextValid);
+
+	renderer.label = "ParamsPanelRenderer";
+	renderer.fullScreen = false;
+	renderer.viewport = .{
+		start = .{0,0},
+		size = .{1,1}
+	};
+	renderer.bgColor = DEFAULT_RENDERER_BG_COLOR;
+	renderer.use_msaa = false;
+	renderer.use_depth_buffer = false;
+	renderer.useReadback = false;
+	// renderer.render_ui = true;
+	renderer.clear = false;
+
+	editor = _editor;
+}
+paramsPanelReset :: (using panel: *TYPE) {
 	#if USE_IMGUI rendererUIDestroy(*panel.editor.imguiPolygonContext);
-	rendererDelete(renderer);
+	rendererReset(*renderer);
+}
+paramsPanelDelete :: (using panel: *TYPE) {
+	paramsPanelReset(panel);
 	// allocatorReset(panel);
 	free(panel);
 }
@@ -40,15 +63,15 @@ render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 	}
 	// #if USE_IMGUI renderUI(renderCollectionData, renderer);
 	#if USE_IMGUI {
-		cmdEncoder, renderPassEncoder := renderUIStart(renderCollectionData, renderer);
-		renderUIFrameStart(renderer, panel.editor.eventsData, *panel.editor.imguiPolygonContext);
+		cmdEncoder, renderPassEncoder := renderUIStart(renderCollectionData, *renderer);
+		renderUIFrameStart(*renderer, panel.editor.eventsData, *panel.editor.imguiPolygonContext);
 		paramsRender(panel);
 		renderUIFrameEnd(renderPassEncoder, *panel.editor.imguiPolygonContext);
-		renderUIEnd(renderCollectionData, renderer, cmdEncoder, renderPassEncoder);
+		renderUIEnd(renderCollectionData, *renderer, cmdEncoder, renderPassEncoder);
 	}
 }
-rendererDestroyBuffers :: (panel: *TYPE) {
-	rendererDestroyBuffers(panel.renderer);
+rendererDestroyBuffers :: (using panel: *TYPE) {
+	rendererDestroyBuffers(*renderer);
 }
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 }
@@ -104,23 +127,3 @@ else {
 
 TYPE :: ParamsPanel;
 
-paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
-	// allocatorAssign(panel);
-
-	renderer = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);
-
-	renderer.label = "ParamsPanelRenderer";
-	renderer.fullScreen = false;
-	renderer.viewport = .{
-		start = .{0,0},
-		size = .{1,1}
-	};
-	renderer.bgColor = DEFAULT_RENDERER_BG_COLOR;
-	renderer.use_msaa = false;
-	renderer.use_depth_buffer = false;
-	renderer.useReadback = false;
-	// renderer.render_ui = true;
-	renderer.clear = false;
-
-	editor = _editor;
-}

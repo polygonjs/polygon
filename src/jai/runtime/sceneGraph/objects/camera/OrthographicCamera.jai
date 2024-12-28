@@ -5,6 +5,7 @@ OrthographicCamera :: struct {
 }
 
 object3DInit :: (camera: *TYPE) {
+	worldObjectInit(camera);
 	object3DInit(cast(*Camera)camera);
 
 	camera.size = DEFAULT_SIZE;
