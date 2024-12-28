@@ -24,11 +24,11 @@ runNextTestOrTerminate :: () {
 	TEST_APP.procedureIndex += 1;
 	found :bool= TEST_APP.requestedTestNames.count == 0 || _isRequestedTestName(test.name, TEST_APP.requestedTestNames);
 	if found {
+		print("% TEST: %... (%)			", tprintGreen(" "), test.name, currentIndex);
 		TEST_APP.testStartTime = current_time_monotonic();
 		TEST_APP.testInProgress = true;
 		testOptions:TestProcedureOptions;
 		// TEST_APP.testLineStart = tprint("% TEST: %... (%)			", tprintGreen(" "), test.name, TEST_APP.procedureIndex);
-		print("% TEST: %... (%)			", tprintGreen(" "), test.name, currentIndex);
 		if test.scene == true {
 			testOptions.nodesScene = newNodesScene();
 			APP.nodesScene = testOptions.nodesScene;
@@ -88,12 +88,14 @@ postTest :: () {
 	if TEST_APP.testOptions.nodesScene != null {
 		sceneDelete(TEST_APP.testOptions.nodesScene);
 	}
+	TEST_APP.testEndTime = current_time_monotonic();
 	reset_temporary_storage();
 	assertLeaksCount(0, "no leaks");
 	reset_temporary_storage();
 	TEST_APP.testInProgress = false;
 
 	poolsContainerReset();
+	TEST_APP.testTeardownTime = current_time_monotonic();
 	
 	if TEST_APP.hasFailedAssertion==true {
 		postTestFailed();
@@ -110,12 +112,12 @@ postTestFailed :: (){
 postTestSuccessful :: (){
 	TEST_APP.testsCount += 1;
 
-	testEndTime := current_time_monotonic();
-	testTime := to_float64_seconds(testEndTime-TEST_APP.testStartTime);
+	testTime := to_float64_seconds(TEST_APP.testEndTime-TEST_APP.testStartTime);
+	teardownTime := to_float64_seconds(TEST_APP.testTeardownTime-TEST_APP.testEndTime);
 	#if WASM==true {
 		print("    ✅ completed in %ms\n", testTime);
 	} else {
-		print(" %ms\n", testTime*1000);
+		print(" %ms, (teardown: %ms)\n", testTime*1000, teardownTime*1000);
 	}
 
 	#if WASM==true { batchRunNextTestOrTerminate(); }
@@ -189,6 +191,8 @@ TestApp :: struct {
 	t0 :TestAppTime;
 	t1 :TestAppTime;
 	testStartTime :TestAppTime;
+	testEndTime :TestAppTime;
+	testTeardownTime :TestAppTime;
 	testInProgress: bool=false;
 	headlessWGPUContext: WGPUContext;
 	procedures :[]NamedProcedure;
