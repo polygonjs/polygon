@@ -11,7 +11,7 @@ renderUIFrameStart :: (renderer:*Renderer, eventsData: EventsData, imguiPolygonC
 	}
 
 	#if WASM {
-		ImGui_ImplWasm_NewFrame(imguiPolygonContext, eventsData);
+		ImGui_ImplWasm_NewFrame(imguiPolygonContext, eventsData, renderer.wgpuContext);
 	} else {
 		assert(renderer.wgpuContext.mode == .HEADLESS || imguiPolygonContext.windowContext.window != null, "imguiPolygonContext.windowContext.window is null");
 		if renderer.wgpuContext.mode == .SURFACE {

@@ -39,6 +39,7 @@ testBitArray :: () {
 		assertEqual(dirty[100], true);
 
 		deinit(*dirty);
+		endTest();
 	});
 }
 

@@ -6,6 +6,7 @@ testEditor :: () {
 			}
 		};
 
+		editor.onAfterDelete = (_: *NodesScene){ endTest(); };
 		editorStart(editor);
 	});
 
@@ -33,6 +34,7 @@ testEditor :: () {
 			}
 		};
 
+		editor.onAfterDelete = (_: *NodesScene){ endTest(); };
 		editorStart(editor);
 	});
 }

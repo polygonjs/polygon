@@ -18,5 +18,7 @@ testArray :: () {
 		assertEqual(nums[1], 12);
 
 		array_reset(*arr);
+
+		endTest();
 	});
 }

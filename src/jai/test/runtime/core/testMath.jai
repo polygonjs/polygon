@@ -24,6 +24,7 @@ testMath :: () {
 		assertEqual(nextPowerOf2(511), 512);
 		assertEqual(nextPowerOf2(512), 512);
 		assertEqual(nextPowerOf2(513), 1024);
+		endTest();
 	});
 }
 

@@ -86,10 +86,11 @@ export function webGPURenderControllerCreate(
 		canvasIndex,
 		deviceHeapIndex,
 		queueHeapIndex,
-		formatNative
+		formatNative,
+		BigInt(canvas.width),
+		BigInt(canvas.height)
 	);
 	updateMemoryArrayViews();
-	window.wasmFunctions.initDrawData(USELESS_ARG0);
 
 	const resizeObserver = webGPUListenToResize(
 		webGPURequestResponse.device,

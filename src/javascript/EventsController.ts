@@ -375,6 +375,20 @@ export const current_time_monotonic = performance_now;
 export function to_float64_seconds(num: bigint): bigint {
 	return num; //BigInt(Number(num) / 1000);
 }
+// export function onMemoryResize(
+// 	new_memory: bigint,
+// 	old_memory: bigint,
+// 	old_size: bigint,
+// 	requested_size: bigint
+// ) {
+// 	console.log(
+// 		"onMemoryResize",
+// 		new_memory,
+// 		old_memory,
+// 		old_size,
+// 		requested_size
+// 	);
+// }
 export function markEventsDataDirty() {
 	eventsDataDirty = true;
 	// console.warn("markEventsDataDirty");

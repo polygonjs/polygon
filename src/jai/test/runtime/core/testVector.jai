@@ -9,5 +9,6 @@ testVector :: (){
 		assertEqual(vector3b.x, 1);
 		assertEqual(vector3b.y, 2);
 		assertEqual(vector3b.z, 3);
+		endTest();
 	});
 }

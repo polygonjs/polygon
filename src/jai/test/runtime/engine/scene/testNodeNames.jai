@@ -9,5 +9,6 @@ testNodeNames :: () {
 		assertEqual(compare(nodeNameCopy, "BoxGeoNode1"), 0, "test with compare (2)");
 		assertEqual(nodeNameCopy, "BoxGeoNode1", "test with == (2)");
 
+		endTest();
 	});
 }

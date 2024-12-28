@@ -4,5 +4,6 @@ testPerlinNoise :: (){
 		assertInDelta(perlin_noise(1.2, 0, 0), 0.234752);
 		assertInDelta(perlin_noise(1.2, 1.2, 0), 0.360373);
 		assertInDelta(perlin_noise(1.2, 1.2, 1.5), -0.234204);
+		endTest();
 	});
 }

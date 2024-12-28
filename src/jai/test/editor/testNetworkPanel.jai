@@ -2,6 +2,7 @@ testNetworkPanel :: () {
 	test("NetworkPanel update scene graph", (options:TestProcedureOptions) {
 		
 		nodesScene := newNodesScene();
+		APP.nodesScene = nodesScene;
 		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
 		box1 := createNode(nodesScene, BoxGeoNode);
 		assertEqual(nodesScene.nodes.count, 1, "1 node in scene");
@@ -9,6 +10,7 @@ testNetworkPanel :: () {
 		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
 
 		editor := newEditor();
+		APP.editor = editor;
 		editorInit(editor, ensureWGPUContextValid=false);
 		editorSetScene(editor, nodesScene);
 		assertNotNull(editor.networkPanel.sceneWorld);
@@ -47,6 +49,8 @@ testNetworkPanel :: () {
 		sceneDelete(nodesScene);
 		editorDelete(editor);
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
+
+		endTest();
 	});
 	testHeadless("NetworkPanel update renderer", (using options:TestProcedureOptions) {
 		#if HAS_NETWORK_PANEL == false {return;}

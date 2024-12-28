@@ -47,13 +47,15 @@ Renderer :: struct {
 	buffers_to_destroy: [..]BufferContainer;
 }
 
-newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true, _allocator: *Allocator=null) -> *Renderer {
+newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true/*, _allocator: *Allocator=null*/) -> *Renderer {
+	pool := nextPool();
+	set_allocators(pool);
 	renderer := New(Renderer);
-	if _allocator == null {
-		allocatorAssign(renderer);
-	} else {
-		renderer.allocator = _allocator;
-	}
+	// if _allocator == null {
+		allocatorAssign(renderer, pool, do_set_allocators=false);
+	// } else {
+	// 	renderer.allocator = _allocator;
+	// }
 	rendererCommandsSetAllocator(renderer);
 	array_init(*renderer.buffers_to_destroy, renderer.allocator, reserve=true);
 	renderer.wgpuContext = wgpuContext;

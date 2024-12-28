@@ -20,5 +20,5 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 	editor.onAfterTick(editor);
 
 
-	// if FRAMES_COUNT > 2 {do_exit = true;};
+	// if FRAMES_COUNT > 2 {editor.exitRequested = true;};
 }

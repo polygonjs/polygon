@@ -63,31 +63,7 @@
 			compiler_begin_intercept(w);
 
 			add_build_string("FREE_MEMORY_DEBUG :: false; #load \"main.jai\";", w);
-			// add_build_file("main.jai", w);
 			listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
-			// generated_code := false;
-			// while true {
-			// 	message := compiler_wait_for_message();
-			// 	if message.kind == {
-			// 		case .TYPECHECKED;
-			// 			update_procedures(message);
-			// 		case .PHASE;
-			// 			phase := cast(*Message_Phase) message;
-			// 				// print("phase:%.\n", phase.phase);
-			// 			if phase.phase == .TYPECHECKED_ALL_WE_CAN {
-			// 				if !generated_code {
-
-			// 					add_build_string("WASM :: true;", w);
-			// 					add_build_string(tprint("RUN_TESTS :: %;", buildArgs.test), w);
-			// 					// add_build_string(tprint("COMPILE_TIME_ARGS :[%]string: .[\"%\"];", buildArgs.all.count, join(..buildArgs.all, "\", \"")), w);
-			// 					generated_code = true;
-			// 				}
-			// 			}
-
-			// 		case .COMPLETE;
-			// 			break;
-			// 	}
-			// }
 
 			compiler_end_intercept(w);
 		}
@@ -112,32 +88,8 @@
 
 			compiler_begin_intercept(w);
 
-			// add_build_string(tprint("FREE_MEMORY_DEBUG :: %;", buildArgs.test && buildArgs.wasm), w);
-			// add_build_file("main.jai", w);
 			add_build_string(tprint("FREE_MEMORY_DEBUG :: %; #load \"main.jai\";", buildArgs.test), w);
 			listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
-			// generated_code := false;
-			// while true {
-			// 	message := compiler_wait_for_message();
-			// 	if message.kind == {
-			// 		case .TYPECHECKED;
-			// 			update_procedures(message);
-			// 		case .PHASE;
-			// 			phase := cast(*Message_Phase) message;
-			// 			if phase.phase == .TYPECHECKED_ALL_WE_CAN {
-			// 				if !generated_code {
-
-			// 					add_build_string("WASM :: false;", w);
-								
-			// 					add_build_string(tprint("RUN_TESTS :: %;", buildArgs.test), w);
-			// 					generated_code = true;
-			// 				}
-			// 			}
-
-			// 		case .COMPLETE;
-			// 			break;
-			// 	}
-			// }
 
 			compiler_end_intercept(w);
 		}
@@ -158,46 +110,19 @@ listen_to_compiler_messages :: (w: Workspace, wasm:bool, test:bool) {
 	count := 0;
 	while true {
 		message := compiler_wait_for_message();
-		// print("message: %\n", message.kind);
 		if message.kind == {
-			// case .FILE; {
-			// 	messageFile := cast(*Message_File) message;
-			// 	// print("messageFile: %\n", messageFile.fully_pathed_filename);
-			// 	if ends_with(messageFile.fully_pathed_filename, "ComputeControllersRegister.jai") {
-			// 		print("compute, %\n", count);
-			// 	}
-			// 	if ends_with(messageFile.fully_pathed_filename, "MaterialsRegister.jai") {
-			// 		print("materials, %\n", count);
-			// 	}
-			// 	if ends_with(messageFile.fully_pathed_filename, "core/math/Vector.jai") {
-			// 		print("vector, %\n", count);
-			// 	}
-			// 	if ends_with(messageFile.fully_pathed_filename, "Hash_Table.jai") {
-			// 		print("hash: %\n", count);
-			// 	}
-			// 	count += 1;
-			// }
-			// case .IMPORT; {
-			// 	messageImport := cast(*Message_Import) message;
-			// 	print("messageImport: %, %\n", messageImport.module_type, messageImport.fully_pathed_filename);
-			// }
 			case .TYPECHECKED;{
 				update_procedures(message);
 			}
 			case .PHASE;
 				messagePhase := cast(*Message_Phase) message;
-				// print("phase: %\n", messagePhase.phase);
 				if messagePhase.phase == .TYPECHECKED_ALL_WE_CAN {
-					// print("TYPECHECKED_ALL_WE_CAN\n");
 					if !generated_code {
 						add_build_string(tprint("WASM :: %;", wasm), w);
 						add_build_string(tprint("RUN_TESTS :: %;", test), w);
-						// add_build_string(tprint("FREE_MEMORY_DEBUG :: %;", true), w);
 						generated_code = true;
 					}
 				}
-				// if messagePhase.phase == .ALL_SOURCE_CODE_PARSED { print("ALL_SOURCE_CODE_PARSED\n"); }
-				// if messagePhase.phase == .ALL_TARGET_CODE_BUILT { print("ALL_TARGET_CODE_BUILT\n"); }
 
 			case .COMPLETE;
 				break;

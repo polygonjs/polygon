@@ -66,7 +66,7 @@ testBaseNode :: () {
 		// 	assertEqual(output1.nodeTypeId, 1);
 		// }
 
-
+		endTest();
 	});
 
 }

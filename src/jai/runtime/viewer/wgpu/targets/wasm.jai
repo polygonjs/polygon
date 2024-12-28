@@ -1,8 +1,9 @@
-wgpuContextInit :: (wgpuContext: *WGPUContext, canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQueue, preferred_texture_format: WGPUTextureFormat){
+wgpuContextInit :: (wgpuContext: *WGPUContext, canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQueue, preferred_texture_format: WGPUTextureFormat, width: u64, height: u64){
 	wgpuContext.surface = canvas;
 	wgpuContext.device = device;
 	wgpuContext.queue = queue;
 	wgpuContext.preferred_texture_format = preferred_texture_format;
+	wgpuContext.windowSize = .{xx width, xx height};
 }
 
 wgpu_texture_get_width_surface :: (wgpuContext: *WGPUContext) -> u32 {

@@ -46,15 +46,17 @@ NodesScene :: struct {
 // SCENE_ALLOCATOR :Allocator: .{temporary_allocator_proc, null};
 // SCENE_TEMPORARY_STORAGE :Temporary_Storage = .{};
 
-newNodesScene :: (_allocator: *Allocator=null) -> *NodesScene {
+newNodesScene :: () -> *NodesScene {
 	// print("temporary_storage: %\n", <<context.temporary_storage);
 	// push_allocator(allocator);
+	pool := nextPool();
+	set_allocators(pool);
 	scene: *NodesScene = New(NodesScene);
-	if _allocator == null {
-		allocatorAssign(scene);
-	} else {
-		scene.allocator = _allocator;
-	}
+	// if _allocator == null {
+		allocatorAssign(scene, pool, do_set_allocators=false);
+	// } else {
+	// 	scene.allocator = _allocator;
+	// }
 	{
 		// using scene;
 		// #if NODES_SCENE_EMIT_EVENTS {

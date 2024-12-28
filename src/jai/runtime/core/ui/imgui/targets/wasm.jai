@@ -25,11 +25,11 @@ ImGui_ImplWasm_Init :: (imguiPolygonContext: *ImguiPolygonContext) {
 }
 
 last_cursor:ImGuiMouseCursor;
-ImGui_ImplWasm_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: EventsData) {
+ImGui_ImplWasm_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: EventsData, wgpuContext: *WGPUContext) {
 	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	io := ImGui.GetIO();
 
-	io.DisplaySize = .{xx eventsData.windowSize.w, xx eventsData.windowSize.h};
+	io.DisplaySize = .{xx wgpuContext.windowSize.x, xx wgpuContext.windowSize.y};
 	io.DisplayFramebufferScale = .{xx 1, xx 1};
 
 	io.MousePos.x = xx eventsData.cursor.x;

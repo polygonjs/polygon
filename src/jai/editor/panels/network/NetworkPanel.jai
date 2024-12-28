@@ -67,7 +67,7 @@ MATERIAL_BASIC :: MeshBasicMaterial;
 
 
 networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
-	allocatorAssign(panel);
+	allocatorAssign(panel, nextPool(), do_set_allocators=true);
 
 	{
 		rendererColor = newRenderer(*_editor.wgpuContext, ensureWGPUContextValid);

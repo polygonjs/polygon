@@ -22,10 +22,10 @@ testFileSTLGeoNode :: () {
 	});
 
 	testWithScene("geo/fileSTL errors gracefully if path is incorrect", (using options:TestProcedureOptions) {
-
+		endTest();
 	});
 	testWithScene("geo/fileSTL errors gracefully if url is incorrect", (using options:TestProcedureOptions) {
-
+		endTest();
 	});
 
 }

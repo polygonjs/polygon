@@ -11,6 +11,7 @@ else           #load "main_native.jai";
 PolygonApp :: struct {
 	editor:*Editor;
 	nodesScene:*NodesScene;
+	poolsContainer: PoolsContainer;
 }
 APP:PolygonApp;
 

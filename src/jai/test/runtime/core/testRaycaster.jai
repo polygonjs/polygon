@@ -15,5 +15,6 @@ testRaycaster :: (){
 
 		assertEqual(raycaster.ray.origin.x, 5);
 		assertEqual(raycaster.ray.origin.y, 10);
+		endTest();
 	});
 }

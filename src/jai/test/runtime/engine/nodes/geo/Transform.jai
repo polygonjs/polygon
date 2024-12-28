@@ -16,6 +16,7 @@ testTransformGeoNode :: () {
 
 		assertEqual(worldScene.children.count, 1);
 
+		endTest();
 	});
 
 }

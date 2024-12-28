@@ -11,6 +11,7 @@ testNodeSetInput :: () {
 		assertFalse(setInput(box1, 1, box2, doAssert=false), "box1 has no input 1");
 		assertTrue(setInput(box1, 0, box2, doAssert=false), "box1 has an input 0");
 
+		endTest();
 	});
 	
 }

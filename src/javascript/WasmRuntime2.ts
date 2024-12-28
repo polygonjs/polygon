@@ -1,7 +1,6 @@
 import {
 	AllocatedMemory,
 	RequestAllocationFunction,
-	InitDrawDataFunction,
 	OnRequestAnimationFrameFunction,
 	OnWebGPUReadyFunction,
 	QSortFunction,
@@ -90,6 +89,7 @@ import {
 	performance_now,
 	current_time_monotonic,
 	to_float64_seconds,
+	// onMemoryResize,
 } from "./EventsController";
 import { fetchUrl, onAllocateReady } from "./NodesSceneRequest";
 import { wgpuCommandEncoderCopyBufferToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyBufferToBuffer";
@@ -209,6 +209,7 @@ export function loadWasm(): Promise<void> {
 		performance_now,
 		current_time_monotonic,
 		to_float64_seconds,
+		// onMemoryResize,
 		fetchUrl,
 		onAllocateReady,
 	};
@@ -221,7 +222,6 @@ export function loadWasm(): Promise<void> {
 	const dummyOnAllocatedMemoryWritten = _dummy("onAllocatedMemoryWritten");
 	window.wasmFunctions = {
 		onWebGPUReady: () => {},
-		initDrawData: () => {},
 		onRequestAnimationFrame: () => {},
 		qsort: () => {},
 		qsortWrapper: (a, b, c, d) => {
@@ -321,8 +321,8 @@ export function loadWasm(): Promise<void> {
 			// 	"WASM loaded",
 			// 	allocatedMemoryContainer.allocatedMemory
 			// );
-			const mainFunc: Function = obj.instance.exports["main"] as Function;
-			mainFunc(0, BigInt(0));
+			// const mainFunc: Function = obj.instance.exports["main"] as Function;
+			// mainFunc(0, BigInt(0));
 
 			function mapFunction(
 				functionName: string,
@@ -357,10 +357,6 @@ export function loadWasm(): Promise<void> {
 						if (methodName.startsWith("on_wgpu_device_ready")) {
 							window.wasmFunctions.onWebGPUReady =
 								method as OnWebGPUReadyFunction;
-						}
-						if (methodName.startsWith("init_draw_data")) {
-							window.wasmFunctions.initDrawData =
-								method as InitDrawDataFunction;
 						}
 						if (
 							methodName.startsWith("on_request_animation_frame")

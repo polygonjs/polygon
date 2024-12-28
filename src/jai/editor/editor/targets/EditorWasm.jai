@@ -3,7 +3,7 @@ wasm_debug_break :: ()  #foreign;
 wasm_write_string :: (count: s64, data: *u8, is_error: bool)  #foreign;
 
 editorStart :: (editor: *Editor) {
-	print("editorStart WASM not implemented\n");
+	drawDataInit(editor);
 }
 
 windowInit :: ()->Vector2UInt {

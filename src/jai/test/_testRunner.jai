@@ -2,78 +2,136 @@
 
 
 runTests :: () {
-	print("--------- TEST START\n");
+	initTestApp();
 
-	args := get_command_line_arguments();
-	this_allocation_is_not_a_leak(args.data);
-	requestedTestNames :[..]string;
-	for arg,i: args {
-		if i > 0 {
-			array_add(*requestedTestNames, arg);
+	#if WASM==true {
+		// runNextTestOrTerminate();
+	}
+	else {
+		while TEST_APP.procedureIndex <= (TEST_APP.procedures.count-1) {
+			runNextTestOrTerminate();
 		}
+		printTestAppStats();
 	}
-	this_allocation_is_not_a_leak(requestedTestNames.data);
+}
 
-	#if WASM {
-		#assert(FREE_MEMORY_DEBUG==false); // set FREE_MEMORY_DEBUG :: false in config.jai
-	} else {
-		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
-	}
-	skippedTestsCount := 0;
-	t0 := current_time_monotonic();
-	testsCount := 0;
-	headlessWGPUContext: WGPUContext;
-	headlessInit(*headlessWGPUContext, .{4,4});
-	t1 := current_time_monotonic();
-	print("headlessInit in % seconds.\n", to_float64_seconds(t1-t0));
-	for test,i: NAMED_PROCEDURES {
-		found :bool= requestedTestNames.count == 0 || _isRequestedTestName(test.name, requestedTestNames);
-		if found {
-			testStartTime := current_time_monotonic();
-			testOptions:TestProcedureOptions;
-			testOptions.headlessWGPUContext = *headlessWGPUContext;
-			print("% TEST: %...			", tprintGreen(" "), test.name);
-			if test.scene == true {
-				testOptions.nodesScene = newNodesScene();
-			}
-			if test.wgpu {
-				if test.editor == true {
-					if test.headless {
-						testOptions.editor = newEditor();
-						testOptions.editor.wgpuContext = headlessWGPUContext;
-						
-						editorInit(testOptions.editor);
-						if testOptions.nodesScene != null {
-							editorSetScene(testOptions.editor, testOptions.nodesScene);
-						}
-					} else {
-						assert(false, "non headless mode not yet implemented");
-						// testOptions.editor = newEditor();
-						// testOptions.editor.wgpuContext = headlessWGPUContext;
-						// editorInit(testOptions.editor);
-						// if testOptions.nodesScene != null {
-						// 	editorSetScene(testOptions.editor, testOptions.nodesScene);
-						// }
+
+
+runNextTestOrTerminate :: () {
+
+	currentIndex := TEST_APP.procedureIndex;
+	test := TEST_APP.procedures[currentIndex];
+	TEST_APP.procedureIndex += 1;
+	found :bool= TEST_APP.requestedTestNames.count == 0 || _isRequestedTestName(test.name, TEST_APP.requestedTestNames);
+	if found {
+		TEST_APP.testStartTime = current_time_monotonic();
+		TEST_APP.testInProgress = true;
+		testOptions:TestProcedureOptions;
+		// TEST_APP.testLineStart = tprint("% TEST: %... (%)			", tprintGreen(" "), test.name, TEST_APP.procedureIndex);
+		print("% TEST: %... (%)			", tprintGreen(" "), test.name, currentIndex);
+		if test.scene == true {
+			testOptions.nodesScene = newNodesScene();
+			APP.nodesScene = testOptions.nodesScene;
+		}
+		if test.wgpu {
+			if test.editor == true {
+				if test.headless {
+					testOptions.editor = newEditor();
+					APP.editor = testOptions.editor;
+					testOptions.editor.wgpuContext = TEST_APP.headlessWGPUContext;
+					
+					editorInit(testOptions.editor);
+					if testOptions.nodesScene != null {
+						editorSetScene(testOptions.editor, testOptions.nodesScene);
 					}
+				} else {
+					assert(false, "non headless mode not yet implemented");
+					// testOptions.editor = newEditor();
+					// testOptions.editor.wgpuContext = headlessWGPUContext;
+					// editorInit(testOptions.editor);
+					// if testOptions.nodesScene != null {
+					// 	editorSetScene(testOptions.editor, testOptions.nodesScene);
+					// }
 				}
 			}
-			test.proc(testOptions);
-			testsCount += 1;
-	
-			if testOptions.nodesScene != null {
-				sceneDelete(testOptions.nodesScene);
-			}
-			reset_temporary_storage();
-			assertLeaksCount(0, "no leaks");
-			reset_temporary_storage();
-			testEndTime := current_time_monotonic();
-			testTime := to_float64_seconds(testEndTime-testStartTime);
-			print("%\n", testTime);
-		} else {
-			skippedTestsCount += 1;
-			// print("% TEST SKIPPED: %\n", tprintYellow(" "),test.name);
 		}
+		TEST_APP.testOptions = testOptions;
+		test.proc(testOptions);
+		#if WASM==false {postTest();}
+	} else {
+		TEST_APP.skippedTestsCount += 1;
+		postTestSkipped();
 	}
+
+}
+
+#if WASM == true {
+	batchRunNextTestOrTerminate :: (){
+		if TEST_APP.testInProgress == true || TEST_APP.hasFailedAssertion==true {
+			return;
+		}
+		if TEST_APP.procedureIndex >= TEST_APP.procedures.count {
+			printTestAppStats();
+			return;
+		}
+		runNextTestOrTerminate();
+	}
+	endTest :: (){
+		APP.editor = null;
+		APP.nodesScene = null;
+		postTest();
+	};
+} else {
+	endTest :: (){}
+}
+postTest :: () {
+	if TEST_APP.testOptions.nodesScene != null {
+		sceneDelete(TEST_APP.testOptions.nodesScene);
+	}
+	reset_temporary_storage();
+	assertLeaksCount(0, "no leaks");
+	reset_temporary_storage();
+	TEST_APP.testInProgress = false;
+
+	poolsContainerReset();
+	
+	if TEST_APP.hasFailedAssertion==true {
+		postTestFailed();
+	} else {
+		postTestSuccessful();
+	}
+}
+postTestFailed :: (){
+	print(" % \n", tprintRed("FAILED"));
+	print("%\n", TEST_APP.failedAssertionMessage);
+	print_stack_trace(*TEST_APP.stackTraceNode[0]);
+	TEST_APP.procedureIndex = -1;
+}
+postTestSuccessful :: (){
+	TEST_APP.testsCount += 1;
+
+	testEndTime := current_time_monotonic();
+	testTime := to_float64_seconds(testEndTime-TEST_APP.testStartTime);
+	#if WASM==true {
+		print("    ✅ completed in %ms\n", testTime);
+	} else {
+		print(" %ms\n", testTime*1000);
+	}
+
+	#if WASM==true { batchRunNextTestOrTerminate(); }
+}
+postTestSkipped :: (){
+	TEST_APP.skippedTestsCount += 1;
+
+	#if WASM==true { batchRunNextTestOrTerminate(); }
+}
+
+
+printTestAppStats :: () {
+	using TEST_APP;
+	if statsPrinted == true {return;}
+	statsPrinted = true;
+	if (hasFailedAssertion == true) {return;}
 	if testsCount == 0 {
 		printRed("---------NO TESTS WERE EXECUTED\n");
 	} else {
@@ -86,35 +144,30 @@ runTests :: () {
 }
 
 test :: (name: string, procedure: TestProcedure) {
-	_ensure_test_name_is_unique(name);
-	//
+	_ensureTestNameUnique(name);
 	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=false, headless=true, scene=false, editor=false});
 }
 testWithWindow :: (name: string, procedure: TestProcedure) {
-	_ensure_test_name_is_unique(name);
-	//
+	_ensureTestNameUnique(name);
 	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=false, scene=true, editor=true});
 }
 testHeadless :: (name: string, procedure: TestProcedure) {
-	_ensure_test_name_is_unique(name);
-	//
+	_ensureTestNameUnique(name);
 	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=true, scene=true, editor=true});
 }
 testHeadlessNoSceneOrEditor :: (name: string, procedure: TestProcedure) {
-	_ensure_test_name_is_unique(name);
-	//
+	_ensureTestNameUnique(name);
 	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=true, scene=false, editor=false});
 }
 testWithScene :: (name: string, procedure: TestProcedure) {
-	_ensure_test_name_is_unique(name);
-	//
+	_ensureTestNameUnique(name);
 	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=false, headless=true, scene=true, editor=false});
 }
 
 TestProcedureOptions :: struct {
 	nodesScene: *NodesScene;
 	editor: *Editor;
-	headlessWGPUContext: *WGPUContext;
+	// headlessWGPUContext: *WGPUContext;
 }
 TestProcedure :: #type (options: TestProcedureOptions) -> ();
 
@@ -126,9 +179,69 @@ NamedProcedure :: struct {
 	scene: bool;
 	editor: bool;
 }
+#if WASM {
+	TestAppTime :: u64;
+} else {
+	TestAppTime :: Apollo_Time;
+}
+TestApp :: struct {
+	requestedTestNames :[..]string;
+	t0 :TestAppTime;
+	t1 :TestAppTime;
+	testStartTime :TestAppTime;
+	testInProgress: bool=false;
+	headlessWGPUContext: WGPUContext;
+	procedures :[]NamedProcedure;
+	procedureIndex: s64;
+	// testLineStart :string;
+	testOptions:TestProcedureOptions;
+	testsCount: u64;
+	skippedTestsCount: u64;
+	hasFailedAssertion:bool=false;
+	failedAssertionMessage: string;
+	stackTraceNode: [] Stack_Trace_Node;
+	statsPrinted: bool=false;
+}
+TEST_APP: TestApp;
 
+setFailedAssertion :: (message: string) {
+	TEST_APP.hasFailedAssertion = true;
+	TEST_APP.failedAssertionMessage = message;
+	TEST_APP.stackTraceNode = pack_stack_trace();
+}
 
 #scope_file
+
+initTestApp :: (){
+	print("--------- TEST START\n");
+
+	args := get_command_line_arguments();
+	this_allocation_is_not_a_leak(args.data);
+	
+	for arg,i: args {
+		if i > 0 {
+			array_add(*TEST_APP.requestedTestNames, arg);
+		}
+	}
+	this_allocation_is_not_a_leak(TEST_APP.requestedTestNames.data);
+
+	#if WASM {
+		#assert(FREE_MEMORY_DEBUG==false); // set FREE_MEMORY_DEBUG :: false in config.jai
+	} else {
+		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
+	}
+	TEST_APP.skippedTestsCount = 0;
+	TEST_APP.t0 = current_time_monotonic();
+	TEST_APP.testsCount = 0;
+	#if WASM == false {
+		headlessInit(*TEST_APP.headlessWGPUContext, .{4,4});
+		TEST_APP.t1 = current_time_monotonic();
+		print("headlessInit in % seconds.\n", to_float64_seconds(TEST_APP.t1-TEST_APP.t0));
+	}
+
+	TEST_APP.procedures = NAMED_PROCEDURES;
+	TEST_APP.procedureIndex = 0;//NAMED_PROCEDURES.count-1;
+}
 
 getRegisteredTests :: ()->[..]NamedProcedure {
 	registerTests();
@@ -138,7 +251,7 @@ getRegisteredTests :: ()->[..]NamedProcedure {
 NAMED_PROCEDURES_COMPILE_TIME :[..]NamedProcedure;
 NAMED_PROCEDURES :[]NamedProcedure: #run getRegisteredTests();
 
-_ensure_test_name_is_unique :: (name: string) {
+_ensureTestNameUnique :: (name: string) {
 	for test,i: NAMED_PROCEDURES_COMPILE_TIME {
 		if test.name == name {
 			assert(false, tprint("TEST NAME ALREADY EXISTS (%)", test.name));

@@ -26,6 +26,7 @@ testOutputGeoNode :: () {
 		assertEqual(worldScene.children.count, 0);
 		assertNull(firstGeometry(nodesScene), "no geometry");
 
+		endTest();
 	});
 
 	testWithScene("geo/output inputs change", (using options:TestProcedureOptions) {
@@ -61,6 +62,7 @@ testOutputGeoNode :: () {
 			nodesSceneOutputNodesCompute(nodesScene);
 		}
 
+		endTest();
 	});
 
 	testWithScene("geo/output does not update scene if input unchanged", (using options:TestProcedureOptions) {
@@ -82,6 +84,8 @@ testOutputGeoNode :: () {
 		paramSetValue(*add1.p.position, .{1,1,1});
 		nodesSceneOutputNodesCompute(nodesScene);
 		assertEqual(eventsCount(nodesScene.worldScene, .OBJECTS_ADDED), 1, "output node input objects have not changed, no event should be emitted");
+
+		endTest();
 	});
 
 	testWithScene("geo/output works as expected when direct input is changed", (using options:TestProcedureOptions) {
@@ -106,6 +110,8 @@ testOutputGeoNode :: () {
 		assertInDelta(firstGeometryBboxSize(nodesScene).x, 1.75, 0.0001, "size x");
 		assertInDelta(firstGeometryBboxSize(nodesScene).y, 3, 0.0001, "size y");
 		assertInDelta(firstGeometryBboxSize(nodesScene).z, 2, 0.0001, "size z");
+
+		endTest();
 	});
 
 	testWithScene("geo/output works as expected with an input node switch that does not clone its input", (using options:TestProcedureOptions) {
@@ -135,10 +141,13 @@ testOutputGeoNode :: () {
 		paramSetValue(*switch1.p.input, 1);
 		nodesSceneOutputNodesCompute(nodesScene);
 		assertEqual(firstGeometry(nodesScene).attributes.position.values.count, 92, "points count");
+
+		endTest();
 	});
 
 	testWithScene("geo/output works as expected with an input node noise that does not clone its input", (using options:TestProcedureOptions) {
 
+		endTest();
 	});
 
 }

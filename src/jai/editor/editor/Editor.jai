@@ -32,12 +32,15 @@ Editor :: struct {
 	sceneUiData: SceneUiData;
 
 	onAfterTick: EditorCustomOnTickCallback=DEFAULT_EDITOR_ON_TICK;
+	onAfterDelete: EditorCustomOnAfterDeleteCallback=DEFAULT_EDITOR_ON_AFTER_DELETE;
 	commands: EditorCommands;
 }
 
 newEditor :: ()->*Editor {
+	pool := nextPool();
+	set_allocators(pool);
 	editor := New(Editor);
-	allocatorAssign(editor);
+	allocatorAssign(editor, pool, do_set_allocators=false);
 	// editorInit(editor);
 	return editor;
 }
@@ -57,7 +60,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 
 
 editorDelete :: (using editor: *Editor) {
-
+	_scene := nodesScene;
 	#if HAS_VIEWER_PANEL viewerPanelDelete(viewerPanel);
 	#if HAS_NETWORK_PANEL networkPanelDelete(networkPanel);
 	paramsPanelDelete(paramsPanel);
@@ -67,6 +70,8 @@ editorDelete :: (using editor: *Editor) {
 
 	allocatorReset(editor);
 	free(editor);
+
+	editor.onAfterDelete(_scene);
 }
 
 editorRequestExit :: (editor: *Editor) {
@@ -74,10 +79,12 @@ editorRequestExit :: (editor: *Editor) {
 }
 
 EditorCustomOnTickCallback :: #type (editor: *Editor);
+EditorCustomOnAfterDeleteCallback :: #type (nodesScene: *NodesScene);
 
 #scope_file
 
 DEFAULT_EDITOR_ON_TICK :EditorCustomOnTickCallback: (editor: *Editor) {}
+DEFAULT_EDITOR_ON_AFTER_DELETE :EditorCustomOnAfterDeleteCallback: (nodesScene: *NodesScene) {}
 
 // editorEmitEvent :: (editor: *Editor, $event: EditorEvent, node: *$T) {
 // 	p := editor.networkPanel;

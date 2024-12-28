@@ -13,7 +13,7 @@
 
 		if expectedCount != count.leaks_total {
 			log_leak_report(report, .{});
-			assert(expectedCount == count.leaks_total, tprint("leaks count mismatch: expected=%, leaks_total=%, bytes_total=% (%)", expectedCount, count.leaks_total, count.bytes_total, message));
+			setFailedAssertion(tprint("leaks count mismatch: expected=%, leaks_total=%, bytes_total=% (%)", expectedCount, count.leaks_total, count.bytes_total, message));
 		}
 	}
 	assertLeaksCount :: (expectedCounts:[]s64, message:string="no message") {
@@ -31,7 +31,7 @@
 
 		if !matches_at_least_one {
 			log_leak_report(report, .{});
-			assert(false, tprint("leaks count mismatch: expected=%, leaks_total=%, bytes_total=% (%)", expectedCounts, count.leaks_total, count.bytes_total, message));
+			setFailedAssertion(tprint("leaks count mismatch: expected=%, leaks_total=%, bytes_total=% (%)", expectedCounts, count.leaks_total, count.bytes_total, message));
 		}
 	}
 	assertLeaksCountBetween :: (min:s64, max:s64, message:string="no message") {
@@ -41,7 +41,7 @@
 
 		if count.leaks_total < min || count.leaks_total > max {
 			log_leak_report(report, .{});
-			assert(false, tprint("leaks count mismatch: min=%, max=%, leaks_total=%, bytes_total=% (%)", min, max, count.leaks_total, count.bytes_total, message));
+			setFailedAssertion(tprint("leaks count mismatch: min=%, max=%, leaks_total=%, bytes_total=% (%)", min, max, count.leaks_total, count.bytes_total, message));
 		}
 	}
 

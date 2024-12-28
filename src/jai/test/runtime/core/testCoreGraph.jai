@@ -56,6 +56,7 @@ testCoreGraph :: () {
 		null1 := createNode(nodesScene, NullGeoNode);
 		assertTrue(setInput(box2, 0, null1));
 		assertFalse(setInput(null1, 0, box1));
+		endTest();
 	});
 	test("CoreGraphNodeIdRecycle", (options:TestProcedureOptions){
 		nodesScene := newNodesScene();
@@ -109,6 +110,7 @@ testCoreGraph :: () {
 			assertEqual(box7.p.size.graphNodeId, 27);
 			assertEqual(graph.nextGraphNodeId, 30);
 		}
+		endTest();
 	});
 }
 

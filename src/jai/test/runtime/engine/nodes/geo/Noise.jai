@@ -27,6 +27,8 @@ testNoiseGeoNode :: () {
 
 		assertEqual(worldScene.children.count, 1);
 		nodesSceneDisposeCookResults(nodesScene);
+
+		endTest();
 	});
 
 }

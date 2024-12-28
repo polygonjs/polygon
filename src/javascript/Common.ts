@@ -10,9 +10,11 @@ export type OnWebGPUReadyFunction = (
 	canvasHeapIndex: bigint,
 	deviceHeapIndex: bigint,
 	queueHeapIndex: bigint,
-	preferredFormat: number
+	preferredFormat: number,
+	width: bigint,
+	height: bigint
 ) => void;
-export type InitDrawDataFunction = (uselessArg0: bigint) => void;
+// export type InitDrawDataFunction = (uselessArg0: bigint) => void;
 export type OnRequestAnimationFrameFunction = (
 	uselessArg0: bigint,
 	time: bigint,
@@ -54,7 +56,6 @@ export interface Vector3 {
 
 interface WasmFunctions {
 	onWebGPUReady: OnWebGPUReadyFunction;
-	initDrawData: InitDrawDataFunction;
 	onRequestAnimationFrame: OnRequestAnimationFrameFunction;
 	qsort: QSortFunction;
 	qsortWrapper: QSortFunctionWrapper;

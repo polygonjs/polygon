@@ -54,3 +54,6 @@ tprintYellow :: (content:string)->string{
 tprintGreen :: (content:string)->string{
 	return tprintColor(content, ANSI_GREEN_BACKGROUND );
 }
+tprintRed :: (content:string)->string{
+	return tprintColor(content, ANSI_RED_BACKGROUND );
+}

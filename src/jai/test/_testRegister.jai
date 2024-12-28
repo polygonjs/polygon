@@ -3,12 +3,12 @@
 
 registerTests :: () {
 
-	// editor
+	// - editor
 	testEditor();
 	#if HAS_NETWORK_PANEL == true testNetworkPanel();
 	testViewerPanel();
-	// runtime
-	// runtime/core
+	// - runtime
+	// - runtime/core
 	testArray();
 	testBitArray();
 	testCoreGraph();
@@ -16,14 +16,14 @@ registerTests :: () {
 	testPerlinNoise();
 	testRaycaster();
 	testVector();
-	// runtime/engine
-	// runtime/engine/nodes
+	// - runtime/engine
+	// - runtime/engine/nodes
 	testBaseNode();
 	testFileSTLGeoNode();
 	testNoiseGeoNode();
 	testOutputGeoNode();
 	testTransformGeoNode();
-	// runtime/engine/scene
+	// - runtime/engine/scene
 	testNodesBasicDependency();
 	testNodeNames();
 	testNodeSetInput();

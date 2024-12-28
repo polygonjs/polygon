@@ -44,7 +44,9 @@ newScene :: (scene: *NodesScene) -> *TYPE {
 newScene :: (allocator: Allocator) -> *TYPE {
 	scene := object3DAllocate(TYPE, allocator);
 
-	allocatorAssign(scene);
+	pool := nextPool();
+	set_allocators(pool);
+	allocatorAssign(scene, pool, do_set_allocators=false);
 
 	object3DInit(scene);
 	array_init(*scene.children, scene.allocator);
