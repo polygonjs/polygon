@@ -1,70 +1,9 @@
+#placeholder WASM; // for some reason if this is not a placeholder, there will be compilation errors, such as "/home/gui/work/web/games/polygon-next/src/jai/runtime/engine/registers/ComputeControllersRegister.jai:72,52: Error: While executing this #run, we stalled waiting for another directive, that will never be executed because it is waiting on this #run to finish"
+#placeholder RUN_TESTS;
+// FREE_MEMORY_DEBUG :: true; // added in build.jai
 
-main :: () {
-	#if WASM==true call_from_wasm_context = context;
-
-	#if RUN_TESTS {
-		runTests();
-		#if WASM==false {
-			return;
-		}
-	}
-	APP.nodesScene = newNodesScene();
-	APP.editor = newEditor();
-
-	#if WASM==true assert(APP.editor!=null, "main: editor is null");
-
-	#if WASM==false {
-		windowInit(APP.editor);
-		initSceneAndAttachToEditor(*APP);
-		editorStart(APP.editor);
-
-		reset_temporary_storage();
-		#if WASM==false && FREE_MEMORY_DEBUG==true defer report_memory_leaks();
-		SDL_Quit();
-		printGreen("polygon quit\n");
-	}
-
-	#if WASM==true assert(APP.editor!=null, "main end: editor is null");
-}
-
-
-
-#if WASM==true {
-	on_wgpu_device_ready :: (
-		canvas: WGPUSurface,
-		device: WGPUDevice,
-		queue: WGPUQueue,
-		preferred_texture_format: WGPUTextureFormat
-	) {
-		if USE_IMGUI_DEBUG return;
-
-		context = call_from_wasm_context;
-		wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format);
-	}
-	init_draw_data :: () {
-		context = call_from_wasm_context;
-		assert(APP.editor!=null, "init_draw_data: editor is null");
-		initSceneAndAttachToEditor(*APP);
-		drawDataInit(APP.editor);
-	}
-	on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
-		#if WASM==true context = call_from_wasm_context;
-		#if WASM==true assert(APP.editor!=null, "on_request_animation_frame: editor is null");
-
-		editorOnTick(APP.editor, newTime, width, height);
-	}
-	requestAllocation :: (nodeId: NodeId, size: u64) {
-		#if WASM==true context = call_from_wasm_context;
-		__requestAllocation(APP.editor.nodesScene, nodeId, size);
-		// print("Z\n");
-	}
-	onAllocatedMemoryWritten :: (nodeId: NodeId) {
-		#if WASM==true context = call_from_wasm_context;
-		__onAllocatedMemoryWritten(APP.editor.nodesScene, nodeId);
-	}
-}
-
-#scope_file
+#if WASM==true #load "main_wasm.jai";
+else           #load "main_native.jai";
 
 // in wasm, having editor and nodesScene as globals is not enough,
 // as they seem reset to null after main().
@@ -80,6 +19,10 @@ initSceneAndAttachToEditor :: (app: *PolygonApp) {
 	editorSetScene(app.editor, app.nodesScene);
 	appSceneInit(app.nodesScene, app.editor);
 }
+
+
+#scope_file
+
 
 #load "config.jai";
 #load "globals.jai";

@@ -1,6 +1,6 @@
 
 
-registerMaterials :: () {
+registerMaterials :: () #compile_time {
 
 	array_reset(*TMP_METADATAS);
 
@@ -16,11 +16,11 @@ registerMaterials :: () {
 
 	registerPointBasicMaterial();
 }
-materialsMetaDatasCount :: ()->u64{
+materialsMetaDatasCount :: ()->u64 #compile_time {
 	registerMaterials();
 	return xx TMP_METADATAS.count;
 }
-materialsMetaDatas :: ()->[MATERIAL_METADATAS_COUNT]MaterialMetaData {
+materialsMetaDatas :: ()->[MATERIAL_METADATAS_COUNT]MaterialMetaData #compile_time {
 	registerMaterials();
 
 	list:[MATERIAL_METADATAS_COUNT]MaterialMetaData;
@@ -58,7 +58,7 @@ getMaterialTypeId :: (T:Type)->u64 {
 materialRegister :: (
 	$T:Type,
 	topology:WGPUPrimitiveTopology
-	) {
+	) #compile_time {
 	array_add(*TMP_METADATAS, .{
 		type = T,
 		topology = topology

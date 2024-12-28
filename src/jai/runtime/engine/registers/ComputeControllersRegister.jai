@@ -14,7 +14,7 @@ generatedEntitiesCount :: (computeController: *$T)->u64 {
 	return 0;
 }
 
-registerComputeControllers :: () {
+registerComputeControllers :: () #compile_time {
 
 	array_reset(*TMP_METADATAS);
 
@@ -25,11 +25,11 @@ registerComputeControllers :: () {
 	registerComputeControllerNoise();
 	registerComputeControllerTranslate();
 }
-computeControllersMetaDatasCount :: ()->u64{
+computeControllersMetaDatasCount :: ()->u64 #compile_time  {
 	registerComputeControllers();
 	return xx TMP_METADATAS.count;
 }
-computeControllersMetaDatas :: ()->[COMPUTE_CONTROLLER_METADATAS_COUNT]ComputeControllerMetaData {
+computeControllersMetaDatas :: ()->[COMPUTE_CONTROLLER_METADATAS_COUNT]ComputeControllerMetaData #compile_time {
 	registerComputeControllers();
 
 	list:[COMPUTE_CONTROLLER_METADATAS_COUNT]ComputeControllerMetaData;
@@ -44,7 +44,7 @@ registerComputeControllersAndGenerateCode :: () -> (
 	setBindGroup:string,
 	handleMappedBuffers:string,
 	entitiesCount:string
-) {
+) #compile_time {
 
 	registerComputeControllers();
 
@@ -59,7 +59,7 @@ registerComputeControllersAndGenerateCode :: () -> (
 
 computeControllerRegister :: (
 	$T:Type
-	) {
+	) #compile_time {
 	array_add(*TMP_METADATAS, .{
 		type = T,
 	});
@@ -88,7 +88,7 @@ GENERATED_CODE_COMPUTE_ENTITIES_COUNT :: #run registerComputeControllersAndGener
 
 
 
-generateSetBindGroup :: ()->string {
+generateSetBindGroup :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if computeController.type == {\n");
 	for metaData: COMPUTE_CONTROLLER_METADATAS {
@@ -101,7 +101,7 @@ generateSetBindGroup :: ()->string {
 	reset(*builder);
 	return result;
 }
-generateHandleMappedBuffer :: ()->string {
+generateHandleMappedBuffer :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if computeController.type == {\n");
 	for metaData: COMPUTE_CONTROLLER_METADATAS {
@@ -114,7 +114,7 @@ generateHandleMappedBuffer :: ()->string {
 	reset(*builder);
 	return result;
 }
-generateEntitiesCount :: ()->string {
+generateEntitiesCount :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if computeController.type == {\n");
 	for metaData: COMPUTE_CONTROLLER_METADATAS {

@@ -88,6 +88,8 @@ import {
 	eventsDataUpdate,
 	eventsSetCursor,
 	performance_now,
+	current_time_monotonic,
+	to_float64_seconds,
 } from "./EventsController";
 import { fetchUrl, onAllocateReady } from "./NodesSceneRequest";
 import { wgpuCommandEncoderCopyBufferToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyBufferToBuffer";
@@ -205,6 +207,8 @@ export function loadWasm(): Promise<void> {
 		eventsDataUpdate,
 		eventsSetCursor,
 		performance_now,
+		current_time_monotonic,
+		to_float64_seconds,
 		fetchUrl,
 		onAllocateReady,
 	};

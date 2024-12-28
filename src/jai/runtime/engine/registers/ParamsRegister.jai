@@ -18,7 +18,7 @@ generatedParamValueTypeByParamType :: (paramType: Type) -> Type {
 // }
 
 
-registerParams :: () {
+registerParams :: () #compile_time {
 
 	NEXT_PARAM_TYPE_ID = 0;
 	array_reset(*TMP_METADATAS);
@@ -31,11 +31,11 @@ registerParams :: () {
 	paramRegisterVector3UIntParam();
 
 }
-paramsMetaDatasCount :: ()->u64{
+paramsMetaDatasCount :: ()->u64 #compile_time {
 	registerParams();
 	return xx TMP_METADATAS.count;
 }
-paramsMetaDatas :: ()->[PARAM_METADATAS_COUNT]ParamMetaData {
+paramsMetaDatas :: ()->[PARAM_METADATAS_COUNT]ParamMetaData #compile_time {
 	registerParams();
 
 	list:[PARAM_METADATAS_COUNT]ParamMetaData;
@@ -51,7 +51,7 @@ registerParamsAndGenerateCode :: () -> (
 	// paramInit:string,
 	// paramRenderUI:string,
 	// paramMacroCast:string
-) {
+) #compile_time {
 
 	registerParams();
 
@@ -127,7 +127,7 @@ GENERATED_CODE_PARAM_VALUE_TYPE_BY_PARAM_TYPE
 
 
 
-generateParamValueTypeByParamType :: ()->string {
+generateParamValueTypeByParamType :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if paramType == {\n");
 	for metaData: PARAM_METADATAS {

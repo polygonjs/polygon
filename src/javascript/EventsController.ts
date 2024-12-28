@@ -371,6 +371,10 @@ export function eventsSetCursor(cursor: number) {
 export function performance_now(): bigint {
 	return BigInt(Math.floor(performance.now()));
 }
+export const current_time_monotonic = performance_now;
+export function to_float64_seconds(num: bigint): bigint {
+	return num; //BigInt(Number(num) / 1000);
+}
 export function markEventsDataDirty() {
 	eventsDataDirty = true;
 	// console.warn("markEventsDataDirty");

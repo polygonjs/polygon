@@ -16,11 +16,11 @@ GENERATED_CODE_CAMERA_SET_RAYCASTER :: #run registerCameras();
 
 CAMERA_TYPES :[..]Type;
 
-cameraRegister :: ($T:Type) {
+cameraRegister :: ($T:Type) #compile_time {
 	array_add(*CAMERA_TYPES, T);
 }
 
-registerCameras :: () -> (projectionUpdate: string, setRaycaster: string) {
+registerCameras :: () -> (projectionUpdate: string, setRaycaster: string) #compile_time {
 
 	cameraRegister(PerspectiveCamera);
 	cameraRegister(OrthographicCamera);
@@ -32,7 +32,7 @@ registerCameras :: () -> (projectionUpdate: string, setRaycaster: string) {
 	setRaycaster;
 }
 
-_projectionUpdate :: ()->string {
+_projectionUpdate :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if object.type == {\n");
 	for type: CAMERA_TYPES {
@@ -43,7 +43,7 @@ _projectionUpdate :: ()->string {
 	result := builder_to_string(*builder);
 	return result;
 }
-_setRaycaster :: ()->string {
+_setRaycaster :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if object.type == {\n");
 	for type: CAMERA_TYPES {

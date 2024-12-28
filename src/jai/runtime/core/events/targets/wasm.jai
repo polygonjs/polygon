@@ -49,6 +49,8 @@ eventsDataUpdate :: (
 eventsSetCursor :: (cursor:u32)->void #foreign;
 
 performance_now :: ()->u64 #foreign;
+current_time_monotonic :: ()->u64 #foreign;
+to_float64_seconds :: (t:u64)->u64 #foreign;
 
 fetchUrl :: (nodeId:NodeId, url: string) {
 	fetchUrl(nodeId, url.data, url.count);

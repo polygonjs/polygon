@@ -44,7 +44,7 @@ SCENE_OBSERVER_TYPES :[..]Type;
 
 IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";
 
-sceneObserverRegister :: ($T:Type) {
+sceneObserverRegister :: ($T:Type) #compile_time {
 	array_add(*SCENE_OBSERVER_TYPES, T);
 }
 
@@ -56,7 +56,7 @@ registerSceneObserver :: ()-> (
 	ON_RENDERABLE_MATERIAL_CHANGED:string,
 	ON_OBJECT_MATRIX_UPDATED:string,
 	ON_CAMERA_MATRIX_UPDATED:string
-) {
+) #compile_time {
 	sceneObserverRegister(Renderer);
 
 	
@@ -90,7 +90,7 @@ registerSceneObserver :: ()-> (
 }
 
 
-_loopObject :: (funcName:string)->string{
+_loopObject :: (funcName:string)->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, IF_FIRST_LINE);
 	for observerType: SCENE_OBSERVER_TYPES {
@@ -99,7 +99,7 @@ _loopObject :: (funcName:string)->string{
 	print_to_builder(*builder, "}");
 	return builder_to_string(*builder);
 }
-_loopObjects :: (funcName:string)->string{
+_loopObjects :: (funcName:string)->string #compile_time {
 	builder: String_Builder;
 	// print_to_builder(*builder, "print(\"type:.\%.\\n\", (cast(*Type_Info_Struct)observer.type).name);");
 	print_to_builder(*builder, IF_FIRST_LINE);
@@ -109,7 +109,7 @@ _loopObjects :: (funcName:string)->string{
 	print_to_builder(*builder, "}");
 	return builder_to_string(*builder);
 }
-_loopObjectWithArg :: (funcName:string, argName:string)->string{
+_loopObjectWithArg :: (funcName:string, argName:string)->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, IF_FIRST_LINE);
 	for observerType: SCENE_OBSERVER_TYPES {
@@ -118,7 +118,7 @@ _loopObjectWithArg :: (funcName:string, argName:string)->string{
 	print_to_builder(*builder, "}");
 	return builder_to_string(*builder);
 }
-_loopCamera :: (funcName:string)->string{
+_loopCamera :: (funcName:string)->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, IF_FIRST_LINE);
 	for observerType: SCENE_OBSERVER_TYPES {

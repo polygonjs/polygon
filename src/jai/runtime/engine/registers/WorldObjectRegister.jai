@@ -15,7 +15,7 @@ generatedWorldObjectClone :: (object: *$T)->*T {
 registerWorldObjectsAndGenerateCode :: () -> (
 	worldObjectsDelete:string,
 	worldObjectsClone:string
-) {
+) #compile_time {
 
 	worldObjectsDelete := generateWorldObjectDelete();
 	worldObjectsClone := generateWorldObjectClone();
@@ -36,7 +36,7 @@ WORLD_OBJECT_TYPES: [..]Type = .[
 GENERATED_CODE_WORLD_OBJECT_DELETE,
 GENERATED_CODE_WORLD_OBJECT_CLONE :: #run registerWorldObjectsAndGenerateCode();
 
-generateWorldObjectDelete :: ()->string {
+generateWorldObjectDelete :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if object.type == {\n");
 	for type: WORLD_OBJECT_TYPES {
@@ -48,7 +48,7 @@ generateWorldObjectDelete :: ()->string {
 	reset(*builder);
 	return result;
 }
-generateWorldObjectClone :: ()->string {
+generateWorldObjectClone :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if object.type == {\n");
 	for type: WORLD_OBJECT_TYPES {

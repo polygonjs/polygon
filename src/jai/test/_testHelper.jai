@@ -58,12 +58,9 @@
 	}
 
 } else {
-	assertLeaksCount :: (expectedCount:s64, message:string="no message") {
-
-	}
-	assertLeaksCount :: (expectedCounts:[]s64, message:string="no message") {
-		
-	}
+	assertLeaksCount :: (expectedCount:s64, message:string="no message") { }
+	assertLeaksCount :: (expectedCounts:[]s64, message:string="no message") { }
+	assertLeaksCountBetween :: (min:s64, max:s64, message:string="no message") { }
 }
 
 

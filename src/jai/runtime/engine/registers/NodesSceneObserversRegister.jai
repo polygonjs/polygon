@@ -27,7 +27,7 @@ NODES_SCENE_OBSERVER_ON_NODE_CONNECTION_REMOVED :: #run registerNodesSceneObserv
 
 NODES_SCENE_OBSERVER_TYPES :[..]Type;
 
-nodesSceneObserverRegister :: ($T:Type) {
+nodesSceneObserverRegister :: ($T:Type) #compile_time {
 	array_add(*NODES_SCENE_OBSERVER_TYPES, T);
 }
 
@@ -35,7 +35,7 @@ registerNodesSceneObserver :: ()-> (
 	onNodeAdded:string,
 	onNodeBeforeRemove:string,
 	onNodeconnectionAdded:string,
-	onNodeConnectionRemoved:string) {
+	onNodeConnectionRemoved:string) #compile_time {
 	nodesSceneObserverRegister(Editor);
 
 	IF_FIRST_LINE :: "if (cast(*Type_Info_Struct)observer.type).name == {\n";

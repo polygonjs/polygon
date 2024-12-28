@@ -43,7 +43,7 @@ generatedParamsGraphNodeDelete :: (node: *BaseNodeAny) {
 	assert(false, tprint("generatedParamsGraphNodeDelete: node.nodeTypeId '%' is not implemented", node.nodeTypeId));
 }
 
-registerNodes :: (label:string) {
+registerNodes :: (label:string) #compile_time {
 	array_reset(*TMP_METADATAS);
 
 	registerAddGeoNode();
@@ -60,11 +60,11 @@ registerNodes :: (label:string) {
 	registerTransformGeoNode();
 
 }
-nodesMetaDatasCount :: ()->u64{
+nodesMetaDatasCount :: ()->u64 #compile_time {
 	registerNodes("nodesMetaDatasCount");
 	return xx TMP_METADATAS.count;
 }
-nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData {
+nodesMetaDatas :: ()->[NODE_METADATAS_COUNT]NodeMetaData #compile_time {
 	registerNodes("nodesMetaDatas");
 
 	list:[NODE_METADATAS_COUNT]NodeMetaData;
@@ -115,7 +115,7 @@ registerNodesAndGenerateCode :: () -> (
 	paramsInit:string,
 	paramsReset:string,
 	paramsGraphNodeDelete:string
-) {
+) #compile_time {
 
 	registerNodes("registerNodesAndGenerateCode");
 
@@ -149,7 +149,7 @@ nodeRegister :: (
 	$T:Type
 	// minInputsCount:u8,
 	// maxInputsCount:u8
-	) {
+	) #compile_time {
 
 
 	// paramMetaDatas: [..]NodeParamMetaData;
@@ -230,7 +230,7 @@ GENERATED_CODE_PARAMS_GRAPH_NODE_DELETE :: #run registerNodesAndGenerateCode();
 
 
 
-generateNodeComputeInputs :: ()->string {
+generateNodeComputeInputs :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
@@ -243,13 +243,13 @@ generateNodeComputeInputs :: ()->string {
 	return result;
 	// return _generateSceneNode("nodeComputeInputs");
 }
-generateNodePrepareInputCookResults :: ()->string {
+generateNodePrepareInputCookResults :: ()->string #compile_time {
 	return _generateSceneNode("nodePrepareInputCookResults");
 }
-generateNodeDisposePreviousCookResults :: ()->string {
+generateNodeDisposePreviousCookResults :: ()->string #compile_time {
 	return _generateSceneNode("nodeDisposePreviousCookResults");
 }
-generateNodeCook :: ()->string {
+generateNodeCook :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
@@ -262,7 +262,7 @@ generateNodeCook :: ()->string {
 	reset(*builder);
 	return result;
 }
-generateSceneNodeDelete :: ()->string {
+generateSceneNodeDelete :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
@@ -275,7 +275,7 @@ generateSceneNodeDelete :: ()->string {
 	reset(*builder);
 	return result;
 }
-generateNodeCtx :: ()->string {
+generateNodeCtx :: ()->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
@@ -303,7 +303,7 @@ generateNodeCtx :: ()->string {
 // 	return result;
 // }
 
-_generateSceneNode :: (functionName:string)->string {
+_generateSceneNode :: (functionName:string)->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.type == {\n");
 	for nodeMetaData: NODE_METADATAS {
@@ -329,30 +329,30 @@ _generateSceneNode :: (functionName:string)->string {
 // }
 
 
-generateNodeParamsRenderUI :: ()->string {
+generateNodeParamsRenderUI :: ()->string #compile_time {
 	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
 		print_to_builder(builder, "		paramRenderUI(cast(*%)((cast(*u8)node) + %), \"%\"); // %\n", param.type, param.offset, param.name, param.name);
 	});
 }
 
-generateParamsInit :: ()->string {
+generateParamsInit :: ()->string #compile_time {
 	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
 		print_to_builder(builder, "		paramInit(cast(*%)((cast(*u8)node) + %), node); // %\n", param.type, param.offset, param.name);
 	});
 }
-generateParamsReset :: ()->string {
+generateParamsReset :: ()->string #compile_time {
 	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
 		print_to_builder(builder, "		paramsResetValue(cast(*%)((cast(*u8)node) + %)); // %\n", param.type, param.offset, param.name);
 	});
 }
-generateParamsGraphNodeDelete :: ()->string {
+generateParamsGraphNodeDelete :: ()->string #compile_time {
 	return _forParams((param: NodeParamMetaData, builder: *String_Builder){
 		print_to_builder(builder, "		graphNodeDelete(cast(*%)((cast(*u8)node) + %)); // %\n", param.type, param.offset, param.name);
 	});
 }
 
 ForParamsCallback :: #type (metadata: NodeParamMetaData, builder: *String_Builder);
-_forParams :: (callback:ForParamsCallback)->string {
+_forParams :: (callback:ForParamsCallback)->string #compile_time {
 	builder: String_Builder;
 	print_to_builder(*builder, "if node.nodeTypeId == {\n");
 	for nodeMetaData, nodeTypeId: NODE_METADATAS {
