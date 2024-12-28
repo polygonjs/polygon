@@ -1,7 +1,7 @@
 import "../css/style.css";
 import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { logBlueBg, logGreenBg } from "./Logger";
-import { loadWasm } from "./WasmRuntime2";
+import { loadWasm } from "./WasmRuntime";
 import { webGPURequest } from "./WebGPURequest";
 import {
 	WebGPURenderController,
