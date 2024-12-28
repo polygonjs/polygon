@@ -9,16 +9,16 @@ else           #load "main_native.jai";
 // as they seem reset to null after main().
 // but wrapping them in a PolygonApp struct seems to fix the problem.
 PolygonApp :: struct {
-	editor:*Editor;
-	nodesScene:*NodesScene;
+	editor:Editor;
+	nodesScene:NodesScene;
 	poolsContainer: PoolsContainer;
 }
 APP:PolygonApp;
 
 initSceneAndAttachToEditor :: (app: *PolygonApp) {
-	editorInit(app.editor);
-	editorSetScene(app.editor, app.nodesScene);
-	appSceneInit(app.nodesScene, app.editor);
+	editorInit(*app.editor);
+	editorSetScene(*app.editor, *app.nodesScene);
+	appSceneInit(*app.nodesScene, *app.editor);
 }
 
 

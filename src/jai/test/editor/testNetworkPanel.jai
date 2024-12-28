@@ -1,28 +1,29 @@
 testNetworkPanel :: () {
 	test("NetworkPanel update scene graph", (options:TestProcedureOptions) {
 		
-		nodesScene := newNodesScene();
-		APP.nodesScene = nodesScene;
+		nodesScene :NodesScene;
+		nodesSceneInit(*nodesScene);
+		// APP.nodesScene = nodesScene;
 		assertEqual(nodesScene.nodes.count, 0, "0 nodes in scene");
-		box1 := createNode(nodesScene, BoxGeoNode);
+		box1 := createNode(*nodesScene, BoxGeoNode);
 		assertEqual(nodesScene.nodes.count, 1, "1 node in scene");
-		box2 := createNode(nodesScene, BoxGeoNode);
+		box2 := createNode(*nodesScene, BoxGeoNode);
 		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
 
-		editor := newEditor();
-		APP.editor = editor;
+		editor := *APP.editor;
+		// APP.editor = editor;
 		editorInit(editor, ensureWGPUContextValid=false);
-		editorSetScene(editor, nodesScene);
+		editorSetScene(editor, *nodesScene);
 
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 3);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 3);
 
-		box3 := createNode(nodesScene, BoxGeoNode);
+		box3 := createNode(*nodesScene, BoxGeoNode);
 		editorFlushCommands(editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
-		box4 := createNode(nodesScene, BoxGeoNode);
+		box4 := createNode(*nodesScene, BoxGeoNode);
 		editorFlushCommands(editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
@@ -44,8 +45,8 @@ testNetworkPanel :: () {
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
 		editorRemoveScene(editor);
-		sceneDelete(nodesScene);
-		editorDelete(editor);
+		nodesSceneReset(*nodesScene);
+		editorReset(editor);
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 
 		endTest();

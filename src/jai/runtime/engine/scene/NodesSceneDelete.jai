@@ -1,11 +1,11 @@
-sceneDelete :: (using scene: *NodesScene) {
+nodesSceneDelete :: (using scene: *NodesScene) {
 
-	sceneReset(scene);
+	nodesSceneReset(scene);
 	free(scene/*,,allocator=scene.allocator*/);
 
 }
 
-sceneReset :: (using scene: *NodesScene) {
+nodesSceneReset :: (using scene: *NodesScene) {
 
 	graphClearConnections(*graph);
 	// nodeConnectionListClear(*connections);

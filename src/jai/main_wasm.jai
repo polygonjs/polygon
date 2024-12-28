@@ -20,11 +20,11 @@ on_wgpu_device_ready :: ( canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQu
 		wgpuContextInit(*TEST_APP.headlessWGPUContext, canvas, device, queue, preferred_texture_format, width, height);
 		runTests();
 	} else {
-		APP.nodesScene = newNodesScene();
-		APP.editor = newEditor();
+		nodesSceneInit(*APP.nodesScene);
+		// editorInitAPP.editor = newEditor();
 		wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format, width, height);
 		initSceneAndAttachToEditor(*APP);
-		editorStart(APP.editor);
+		editorStart(*APP.editor);
 	}
 }
 
@@ -36,9 +36,9 @@ on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
 
 	if(APP.editor != null) {
 		if(APP.editor.exitRequested==true){
-			editorDelete(APP.editor);
+			editorReset(*APP.editor);
 		} else {
-			editorOnTick(APP.editor, newTime, width, height);
+			editorOnTick(*APP.editor, newTime, width, height);
 		}
 	} else {
 		#if RUN_TESTS {

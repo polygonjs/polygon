@@ -37,14 +37,15 @@ Editor :: struct {
 }
 
 newEditor :: ()->*Editor {
-	pool := nextPool();
-	set_allocators(pool);
 	editor := New(Editor);
-	allocatorAssign(editor, pool, do_set_allocators=false);
 	// editorInit(editor);
 	return editor;
 }
 editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
+	pool := nextPool();
+	set_allocators(pool);
+	allocatorAssign(editor, pool, do_set_allocators=false);
+
 	#if ensureWGPUContextValid {
 		assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
 		assert(editor.wgpuContext.queue != null, "editor.wgpuContext.queue is null");
@@ -58,8 +59,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	paramsPanelInit(*editor.paramsPanel, editor, ensureWGPUContextValid);
 }
 
-
-editorDelete :: (using editor: *Editor) {
+editorReset :: (using editor: *Editor) {
 	_scene := nodesScene;
 	#if HAS_VIEWER_PANEL viewerPanelReset(*viewerPanel);
 	#if HAS_NETWORK_PANEL networkPanelReset(*networkPanel);
@@ -69,9 +69,14 @@ editorDelete :: (using editor: *Editor) {
 	}
 
 	allocatorReset(editor);
-	free(editor);
 
 	editor.onAfterDelete(_scene);
+
+	editor.exitRequested = false;
+}
+editorDelete :: (using editor: *Editor) {
+	editorReset(editor);
+	free(editor);
 }
 
 editorRequestExit :: (editor: *Editor) {

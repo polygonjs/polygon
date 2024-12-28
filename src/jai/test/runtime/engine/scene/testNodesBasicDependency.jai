@@ -94,7 +94,7 @@ testNodesBasicDependency :: () {
 		// print("result: %\n", nodesScene.worldScene.children[0].geometry.attributes.position.values.count);
 
 		assertLeaksCount(expectedLeaksCount, "leak before scene delete");
-		sceneDelete(nodesScene);
+		nodesSceneDelete(nodesScene);
 		// reset_temporary_storage();
 		// report_memory_leaks();
 		assertLeaksCount(0, "no leak after scene delete");

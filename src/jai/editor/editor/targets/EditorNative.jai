@@ -55,7 +55,7 @@ editorStart :: (editor: *Editor) {
 		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.windowSize.x, editor.wgpuContext.windowSize.y);
 
 	}
-	editorDelete(editor);
+	editorReset(editor);
 }
 
 windowInit :: (editor: *Editor) {

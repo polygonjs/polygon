@@ -4,7 +4,7 @@ testCoreGraph :: () {
 			{
 				// empty scene
 				nodesScene := newNodesScene();
-				sceneDelete(nodesScene);
+				nodesSceneDelete(nodesScene);
 				// report_memory_leaks();
 				assertLeaksCount(0, "no leak when deleting an empty scene");
 			}
@@ -13,7 +13,7 @@ testCoreGraph :: () {
 				nodesScene := newNodesScene();
 				box1 := createNode(nodesScene, BoxGeoNode);
 				// sceneDeleteNode(nodesScene, box1);
-				sceneDelete(nodesScene);
+				nodesSceneDelete(nodesScene);
 				// report_memory_leaks();
 				// print("leaksCount(): %\n", leaksCount());
 				assertLeaksCount(0, "no leak when deleting a scene with 1 node");
@@ -25,7 +25,7 @@ testCoreGraph :: () {
 				output1 := createNode(nodesScene, OutputGeoNode);
 				assertTrue(setInput(output1, 0, box1), "connection created");
 				// sceneDeleteNode(nodesScene, box1);
-				sceneDelete(nodesScene);
+				nodesSceneDelete(nodesScene);
 				// report_memory_leaks();
 				// print("leaksCount(): %\n", leaksCount());
 				assertLeaksCount(0, "no leak when deleting a scene with 2 nodes");
@@ -40,14 +40,14 @@ testCoreGraph :: () {
 				assertTrue(setInput(null1, 0, box1));
 				paramSetValue(*box1.p.scale, 1.0);
 				// sceneDeleteNode(nodesScene, box1);
-				sceneDelete(nodesScene);
+				nodesSceneDelete(nodesScene);
 				assertLeaksCount(0, "no leak when deleting a scene with 3 nodes");
 			}
 		});
 	}
 	test("CoreGraphPreventCycleConnections on heap", (options:TestProcedureOptions){
 		nodesScene := newNodesScene();
-		defer sceneDelete(nodesScene);
+		defer nodesSceneDelete(nodesScene);
 		box1 := createNode(nodesScene, BoxGeoNode);
 		box2 := createNode(nodesScene, BoxGeoNode);
 		assertTrue(setInput(box1, 0, box2));
@@ -61,7 +61,7 @@ testCoreGraph :: () {
 	test("CoreGraphPreventCycleConnections on stack", (options:TestProcedureOptions){
 		nodesScene :NodesScene;
 		nodesSceneInit(*nodesScene);
-		defer sceneReset(*nodesScene);
+		defer nodesSceneReset(*nodesScene);
 		box1 := createNode(*nodesScene, BoxGeoNode);
 		box2 := createNode(*nodesScene, BoxGeoNode);
 		assertTrue(setInput(box1, 0, box2));
@@ -74,7 +74,7 @@ testCoreGraph :: () {
 	});
 	test("CoreGraphNodeIdRecycle", (options:TestProcedureOptions){
 		nodesScene := newNodesScene();
-		defer sceneDelete(nodesScene);
+		defer nodesSceneDelete(nodesScene);
 		graph := *nodesScene.graph;
 		assertEqual(graph.nextGraphNodeId, 1);
 		box1 := createNode(nodesScene, BoxGeoNode);

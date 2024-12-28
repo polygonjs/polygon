@@ -4,14 +4,11 @@ main :: () {
 		runTests();
 		return;
 	}
-	nodesScene: NodesScene;
-	nodesSceneInit(*nodesScene);
-	APP.nodesScene = *nodesScene;
-	APP.editor = newEditor();
+	nodesSceneInit(*APP.nodesScene);
 
-	windowInit(APP.editor);
+	windowInit(*APP.editor);
 	initSceneAndAttachToEditor(*APP);
-	editorStart(APP.editor);
+	editorStart(*APP.editor);
 
 	reset_temporary_storage();
 	#if WASM==false && FREE_MEMORY_DEBUG==true defer report_memory_leaks();

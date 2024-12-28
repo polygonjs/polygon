@@ -1,20 +1,20 @@
 testViewerPanel :: () {
 	
 	testHeadlessNoSceneOrEditor("ViewerPanel update renderer", (options:TestProcedureOptions) {
-		nodesScene := newNodesScene();
-		APP.nodesScene = nodesScene;
-		box1 := createNode(nodesScene, BoxGeoNode);
-		line1 := createNode(nodesScene, LineGeoNode);
-		output1 := createNode(nodesScene, OutputGeoNode);
+		nodesScene :NodesScene;
+		nodesSceneInit(*nodesScene);
+		box1 := createNode(*nodesScene, BoxGeoNode);
+		line1 := createNode(*nodesScene, LineGeoNode);
+		output1 := createNode(*nodesScene, OutputGeoNode);
 		setInput(output1, 0, box1);
 		setInput(output1, 1, line1);
 		paramSetValue(*output1.p.input, xx 0);
 
-		editor := newEditor();
-		APP.editor = editor;
+		editor := *APP.editor;
+		// APP.editor = editor;
 		editor.wgpuContext = TEST_APP.headlessWGPUContext;
 		editorInit(editor, ensureWGPUContextValid=false);
-		editorSetScene(editor, nodesScene);
+		editorSetScene(editor, *nodesScene);
 
 
 		editor.onAfterTick = (using editor: *Editor) {
@@ -34,7 +34,7 @@ testViewerPanel :: () {
 		};
 
 		editor.onAfterDelete = (nodesScene: *NodesScene){
-			sceneDelete(nodesScene);
+			nodesSceneReset(nodesScene);
 			assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 
 			endTest();

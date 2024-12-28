@@ -30,14 +30,16 @@ runNextTestOrTerminate :: () {
 		testOptions:TestProcedureOptions;
 		// TEST_APP.testLineStart = tprint("% TEST: %... (%)			", tprintGreen(" "), test.name, TEST_APP.procedureIndex);
 		if test.scene == true {
-			testOptions.nodesScene = newNodesScene();
-			APP.nodesScene = testOptions.nodesScene;
+			nodesScene:NodesScene;
+			APP.nodesScene = nodesScene;
+			nodesSceneInit(*APP.nodesScene);
+			testOptions.nodesScene = *APP.nodesScene;
 		}
 		if test.wgpu {
 			if test.editor == true {
 				if test.headless {
-					testOptions.editor = newEditor();
-					APP.editor = testOptions.editor;
+					testOptions.editor = *APP.editor;
+					// APP.editor = testOptions.editor;
 					testOptions.editor.wgpuContext = TEST_APP.headlessWGPUContext;
 					
 					editorInit(testOptions.editor);
@@ -77,8 +79,8 @@ runNextTestOrTerminate :: () {
 		runNextTestOrTerminate();
 	}
 	endTest :: (){
-		APP.editor = null;
-		APP.nodesScene = null;
+		// APP.editor = null;
+		// APP.nodesScene = null;
 		postTest();
 	};
 } else {
@@ -86,7 +88,7 @@ runNextTestOrTerminate :: () {
 }
 postTest :: () {
 	if TEST_APP.testOptions.nodesScene != null {
-		sceneDelete(TEST_APP.testOptions.nodesScene);
+		nodesSceneReset(TEST_APP.testOptions.nodesScene);
 	}
 	TEST_APP.testEndTime = current_time_monotonic();
 	reset_temporary_storage();
