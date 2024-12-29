@@ -57,7 +57,7 @@ newNetworkPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYP
 }
 
 networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
-	allocatorAssign(panel, nextPool(), do_set_allocators=true);
+	allocatorAssign(panel);
 
 	{
 		rendererInit(*rendererColor, *_editor.wgpuContext, ensureWGPUContextValid);

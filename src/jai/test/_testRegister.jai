@@ -9,6 +9,7 @@ registerTests :: () {
 	testViewerPanel();
 	// - runtime
 	// - runtime/core
+	testAllocation();
 	testArray();
 	testBitArray();
 	testCoreGraph();

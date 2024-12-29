@@ -1,3 +1,4 @@
+#load "testAllocation.jai";
 #load "testArray.jai";
 #load "testBitArray.jai";
 #load "testCoreGraph.jai";

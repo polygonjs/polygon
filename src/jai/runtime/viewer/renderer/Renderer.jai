@@ -47,31 +47,31 @@ Renderer :: struct {
 	buffers_to_destroy: [..]BufferContainer;
 }
 
-newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true/*, _allocator: *Allocator=null*/) -> *Renderer {
+// newRenderer :: (wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true/*, _allocator: *Allocator=null*/) -> *Renderer {
+// 	// pool := nextPool();
+// 	// set_allocators(pool);
+// 	renderer := New(Renderer);
+// 	rendererInit(renderer, wgpuContext, ensureWGPUContextValid);
+// 	// if _allocator == null {
+// 	// 	allocatorAssign(renderer, pool, do_set_allocators=false);
+// 	// // } else {
+// 	// // 	renderer.allocator = _allocator;
+// 	// // }
+// 	// rendererCommandsSetAllocator(renderer);
+// 	// array_init(*renderer.buffers_to_destroy, renderer.allocator, reserve=true);
+// 	// renderer.wgpuContext = wgpuContext;
+// 	// #if ensureWGPUContextValid {
+// 	// 	assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");
+// 	// 	assert(renderer.wgpuContext.queue != null, "renderer.wgpuContext.queue is null");
+// 	// }
+// 	return renderer;
+// }
+rendererInit :: (renderer:*Renderer, wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true) {
 	// pool := nextPool();
 	// set_allocators(pool);
-	renderer := New(Renderer);
-	rendererInit(renderer, wgpuContext, ensureWGPUContextValid);
-	// if _allocator == null {
-	// 	allocatorAssign(renderer, pool, do_set_allocators=false);
-	// // } else {
-	// // 	renderer.allocator = _allocator;
-	// // }
-	// rendererCommandsSetAllocator(renderer);
-	// array_init(*renderer.buffers_to_destroy, renderer.allocator, reserve=true);
-	// renderer.wgpuContext = wgpuContext;
-	// #if ensureWGPUContextValid {
-	// 	assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");
-	// 	assert(renderer.wgpuContext.queue != null, "renderer.wgpuContext.queue is null");
-	// }
-	return renderer;
-}
-rendererInit :: (renderer:*Renderer, wgpuContext: *WGPUContext, $ensureWGPUContextValid: bool=true) {
-	pool := nextPool();
-	set_allocators(pool);
 
 	// if _allocator == null {
-		allocatorAssign(renderer, pool, do_set_allocators=false);
+		allocatorAssign(renderer);
 	// } else {
 	// 	renderer.allocator = _allocator;
 	// }
@@ -162,7 +162,7 @@ rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
 }
 rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
 	if object.type != Mesh {
-		print("unknown object type\n");
+		print("unknown object type %\n", object.type);
 		return;
 	}
 	mesh := cast(*Mesh)object;
@@ -179,7 +179,7 @@ rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
 }
 rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
 	if object.type != Mesh {
-		print("unknown object type\n");
+		print("unknown object type %\n", object.type);
 		return;
 	}
 	mesh := cast(*Mesh)object;
@@ -197,7 +197,7 @@ rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
 }
 rendererRenderableMaterialChanged :: (renderer:*Renderer, object:*Object3D, previousMaterial:*Material) {
 	if object.type != Mesh {
-		print("unknown object type\n");
+		print("unknown object type %\n", object.type);
 		return;
 	}
 	mesh := cast(*Mesh)object;

@@ -118,9 +118,7 @@ nodesSceneInit :: (scene: *NodesScene) {
 	}
 	scene.initialized = true;
 
-	pool := nextPool();
-	set_allocators(pool);
-	allocatorAssign(scene, pool, do_set_allocators=false);
+	allocatorAssign(scene);
 
 	// using scene;
 	scene.nextNodeId = INIT_NEXT_NODE_ID;

@@ -43,13 +43,11 @@ createNode :: (using scene: *NodesScene, $T:Type)->*T {
 		array_init(*computablesTree.inputs[index], scene.allocator, reserve=true);
 		array_init(*computablesTree.outputs[index], scene.allocator, reserve=true);
 	}
-	#if WASM {
-		// looks like some re-initialisation is needed in wasm
-		// otherwise the cooksCount may not be 0
-		// between tests
-		if cooksCount[node.nodeId] != 0 {
-			cooksCount[node.nodeId] = 0;
-		}
+	// looks like some re-initialisation is needed
+	// otherwise the cooksCount may not be 0
+	// between tests
+	if cooksCount[node.nodeId] != 0 {
+		cooksCount[node.nodeId] = 0;
 	}
 	{
 		// push_allocator(scene.allocator);

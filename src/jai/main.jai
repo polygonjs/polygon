@@ -12,7 +12,6 @@ PolygonApp :: struct {
 	editor:Editor;
 	nodesScene:NodesScene;
 	coreGraphs:[..]*CoreGraph;
-	poolsContainer: PoolsContainer;
 
 	#if RUN_TESTS {
 		testApp: TestApp;

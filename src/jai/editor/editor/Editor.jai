@@ -60,9 +60,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	editor.initialized = true;
 
 
-	pool := nextPool();
-	set_allocators(pool);
-	allocatorAssign(editor, pool, do_set_allocators=false);
+	allocatorAssign(editor);
 
 	#if ensureWGPUContextValid {
 		assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");

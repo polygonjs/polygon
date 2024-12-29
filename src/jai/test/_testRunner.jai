@@ -104,7 +104,6 @@ postTest :: (app: *PolygonApp) {
 	assertLeaksCount(0, "no leaks");
 	reset_temporary_storage();
 
-	poolsContainerReset();
 	app.testApp.testTeardownTime = current_time_monotonic();
 	
 	if app.testApp.hasFailedAssertion==true {

@@ -47,9 +47,7 @@ newScene :: (allocator: Allocator) -> *TYPE {
 	return scene;
 }
 worldSceneInit :: (scene: *TYPE) {
-	pool := nextPool();
-	set_allocators(pool);
-	allocatorAssign(scene, pool, do_set_allocators=false);
+	allocatorAssign(scene);
 
 	worldObjectInit(scene);
 	object3DInit(scene);

@@ -12,6 +12,9 @@ geometryBoxUpdate :: (geometry: *Geometry, params: BoxGeometryParams) {
 }
 
 geometryBoxAttributesSet :: (geometry: *Geometry, params: BoxGeometryParams) {
+	assert(params.segments.x > 0, "segments.x must be greater than 0");
+	assert(params.segments.y > 0, "segments.y must be greater than 0");
+	assert(params.segments.z > 0, "segments.z must be greater than 0");
 
 	count0 := plane_points_and_indices_count(params.segments.x, params.segments.y);
 	count1 := plane_points_and_indices_count(params.segments.x, params.segments.z);
