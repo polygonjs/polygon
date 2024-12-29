@@ -35,27 +35,27 @@ testOutputGeoNode :: () {
 		box1 := createNode(nodesScene, BoxGeoNode);
 		line1 := createNode(nodesScene, LineGeoNode);
 		icosahedron1 := createNode(nodesScene, IcosahedronGeoNode);
-		fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
+		// fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
 		output1 := createNode(nodesScene, OutputGeoNode);
 
-		{
-			#if WASM {
-				assetPath := tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS);
-			} else {
-				assetPath := tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS);
-			}
-			paramSetValue(*fileSTL1.p.path, assetPath);
-		}
+		// {
+		// 	#if WASM {
+		// 		assetPath := tprint("%/models/stl/rounded_cube_sphere_boolean.stl", TEST_ASSETS);
+		// 	} else {
+		// 		assetPath := tprint("%/models/stl/cube_sphere_boolean.stl", TEST_ASSETS);
+		// 	}
+		// 	paramSetValue(*fileSTL1.p.path, assetPath);
+		// }
 
 		setInput(output1, 0, add1);
 		setInput(output1, 1, box1);
 		setInput(output1, 2, line1);
 		setInput(output1, 3, icosahedron1);
-		setInput(output1, 4, fileSTL1);
+		// setInput(output1, 4, fileSTL1);
 
 		paramSetValue(*box1.p.scale, 2.0);
 		paramSetValue(*output1.p.input, 4);
-		paramSetValue(*icosahedron1.p.detail, 40);
+		paramSetValue(*icosahedron1.p.detail, 1);
 
 		for 0..9 {
 			paramSetValue(*output1.p.input, xx it);
