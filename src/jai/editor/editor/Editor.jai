@@ -31,8 +31,8 @@ Editor :: struct {
 	}
 	sceneUiData: SceneUiData;
 
-	onAfterTick: EditorCustomOnTickCallback=DEFAULT_EDITOR_ON_TICK;
-	onAfterDelete: EditorCustomOnAfterDeleteCallback=DEFAULT_EDITOR_ON_AFTER_DELETE;
+	onAfterTick: EditorOnTickCallback=DEFAULT_EDITOR_ON_TICK;
+	onAfterDelete: EditorOnAfterDeleteCallback=DEFAULT_EDITOR_ON_AFTER_DELETE;
 	commands: EditorCommands;
 
 	initialized:bool = false;
@@ -82,13 +82,13 @@ editorRequestExit :: (editor: *Editor) {
 	editor.exitRequested = true;
 }
 
-EditorCustomOnTickCallback :: #type (editor: *Editor);
-EditorCustomOnAfterDeleteCallback :: #type (nodesScene: *NodesScene);
+EditorOnTickCallback :: #type (editor: *Editor);
+EditorOnAfterDeleteCallback :: #type (nodesScene: *NodesScene);
 
 #scope_file
 
-DEFAULT_EDITOR_ON_TICK :EditorCustomOnTickCallback: (editor: *Editor) {}
-DEFAULT_EDITOR_ON_AFTER_DELETE :EditorCustomOnAfterDeleteCallback: (nodesScene: *NodesScene) {}
+DEFAULT_EDITOR_ON_TICK :EditorOnTickCallback: (editor: *Editor) {}
+DEFAULT_EDITOR_ON_AFTER_DELETE :EditorOnAfterDeleteCallback: (nodesScene: *NodesScene) {}
 
 // editorEmitEvent :: (editor: *Editor, $event: EditorEvent, node: *$T) {
 // 	p := editor.networkPanel;

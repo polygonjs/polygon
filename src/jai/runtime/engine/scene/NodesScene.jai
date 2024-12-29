@@ -40,6 +40,8 @@ NodesScene :: struct {
 	computablesTree:ComputablesTree;
 	nodeRequests:[..]NodeSceneRequest;
 
+	onNodesComputed:NodesSceneOnNodesComputedCallback = DEFAULT_NODES_SCENE_ON_NODES_COMPUTED;
+
 	initialized:bool = false;
 	disposed:bool = false;
 }
@@ -158,7 +160,10 @@ nodesSceneInit :: (scene: *NodesScene) {
 
 }
 
+NodesSceneOnNodesComputedCallback :: #type (nodesScene: *NodesScene);
+
 #scope_file
 
 INIT_NEXT_NODE_ID :NodeId: 0;
+DEFAULT_NODES_SCENE_ON_NODES_COMPUTED :NodesSceneOnNodesComputedCallback: (nodesScene: *NodesScene) {}
 

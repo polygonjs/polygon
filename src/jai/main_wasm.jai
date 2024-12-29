@@ -1,12 +1,5 @@
 main :: () {
 	call_from_wasm_context = context;
-
-	// #if RUN_TESTS {
-	// 	runTests();
-	// }
-
-	// #if WASM==true assert(APP.editor!=null, "main: editor is null");
-
 }
 
 
@@ -21,7 +14,6 @@ on_wgpu_device_ready :: ( canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQu
 	} else {
 
 		nodesSceneInit(*APP.nodesScene);
-		// editorInitAPP.editor = newEditor();
 		wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format, width, height);
 		initSceneAndAttachToEditor(*APP);
 		editorStart(*APP.editor);
@@ -48,11 +40,11 @@ on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
 }
 requestAllocation :: (nodeId: NodeId, size: u64) {
 	context = call_from_wasm_context;
-	__requestAllocation(APP.editor.nodesScene, nodeId, size);
+	__requestAllocation(*APP.nodesScene, nodeId, size);
 }
 onAllocatedMemoryWritten :: (nodeId: NodeId) {
 	context = call_from_wasm_context;
-	__onAllocatedMemoryWritten(APP.editor.nodesScene, nodeId);
+	__onAllocatedMemoryWritten(*APP.nodesScene, nodeId);
 }
 
 #scope_file

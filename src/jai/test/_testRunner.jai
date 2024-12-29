@@ -149,7 +149,13 @@ printTestAppStats :: (app: *PolygonApp) {
 		printRed("---------NO TESTS WERE EXECUTED\n");
 	} else {
 		tEnd := current_time_monotonic();
-		print("--------- % TEST COMPLETED in % seconds.\n", testsCount, to_float64_seconds(tEnd-t0));
+		#if WASM == true {
+			totalTimeInt := to_float64_seconds(tEnd-t0);
+			totalTime :float = totalTimeInt * 0.001;
+		} else {
+			totalTime := to_float64_seconds(tEnd-t0);
+		}
+		print("--------- % TEST COMPLETED in % seconds.\n", testsCount, totalTime);
 		if skippedTestsCount > 0 {
 			print("% TEST SKIPPED: %\n", tprintYellow(" "), skippedTestsCount);
 		}

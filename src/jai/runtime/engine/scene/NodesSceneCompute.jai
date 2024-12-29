@@ -3,6 +3,7 @@ ComputablesTree :: struct {
 	inputs: [..][..]NodeId;
 	outputs: [..][..]NodeId;
 	leaves: [..]NodeId;
+	previousLeavesCount: s64;
 }
 
 nodesSceneComputableTreeInit :: (using scene: *NodesScene) {
@@ -109,10 +110,18 @@ buildAndComputeComputableTree :: (using scene: *NodesScene, outputNode: *OutputG
 
 computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) {
 	if(computablesTree.leaves.count == 0) {
+		if computablesTree.previousLeavesCount > 0 {
+			computablesTree.previousLeavesCount = 0;
+			
+			if nodesSceneValid(scene) {
+				scene.onNodesComputed(scene);
+			}
+		}
 		return;
 	}
 	// print("<<<<<<<<<<<<<<<<<<<<<<<< START calling node=%\n", callingNode.nodeId);
 	// print("computablesTree.leaves.count: %\n", computablesTree.leaves.count);
+	computablesTree.previousLeavesCount = computablesTree.leaves.count;
 	nodeId := pop(*computablesTree.leaves);
 	node := nodes[nodeId];
 	// print("node: %, %\n", nodeId, node.type);

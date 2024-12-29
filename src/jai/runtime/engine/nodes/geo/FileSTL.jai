@@ -25,7 +25,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 
 parseData :: (node:*TYPE, fileContent: string) {
 	nodesScene := graphNodeScene(node);
-	mesh := parseSTL( nodesScene, fileContent);
+	mesh := parseSTL( nodesScene, fileContent );
 	// print("parseData done\n");
 
 	using node.p;

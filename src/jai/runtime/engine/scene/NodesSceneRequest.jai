@@ -16,20 +16,21 @@ readRequestContent :: (using scene: *NodesScene, node: *$T) {
 		return;
 	}
 	request := nodeRequests[index];
+	array_unordered_remove_by_index(*nodeRequests, index);
 	if node.type == FileSTLGeoNode {
 		parseData(cast(*FileSTLGeoNode)node, xx request.data);
+		array_reset(*request.data);
 	} else {
 		assert(false, "readRequestContent: unknown node type");
 	}
 	// array_reset(*request.data);
-	array_unordered_remove_by_index(*nodeRequests, index);
 }
 
 #if WASM==true {
 	__requestAllocation :: (nodesScene: *NodesScene, nodeId: NodeId, size: u64) {
 		found, index := nodeSceneRequestIndexForNode(nodesScene, nodeId);
 		if !found {
-			print("requestAllocation: node not found\n");
+			print("% requestAllocation: node not found ***\n", tprintRed("    "));
 			return;
 		}
 		request := *(nodesScene.nodeRequests[index]);
