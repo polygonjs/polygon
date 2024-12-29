@@ -6,46 +6,51 @@ CoreGraph :: struct {
 	nextGraphNodeId :CoreGraphNodeId= 0; // TODO: recycle ids when a node is removed
 	scene: *NodesScene;
 	nodes: [..]*CoreGraphNodeAny;
+	//
 	dirty: Bit_Array;
+	allPredecessorsDirty: Bit_Array;
+	allSuccessorsDirty: Bit_Array;
 	// onDirtyCallbacks:[..]CoreGraphNodeOnDirtyMethod;
 	predecessors: [..][..]CoreGraphNodeId;
 	successors: [..][..]CoreGraphNodeId;
 	allPredecessors: [..][..]CoreGraphNodeId;
-	allPredecessorsDirty: Bit_Array;
 	allSuccessors: [..][..]CoreGraphNodeId;
-	allSuccessorsDirty: Bit_Array;
 }
 
 graphInit :: (graph: *CoreGraph, _scene: *NodesScene) {
 	graph.scene = _scene;
 	graph.graphId = NEXT_CORE_GRAPH_ID;
-	if graph.graphId >= xx CORE_GRAPHS.count {
-		array_set_count_and_maybe_grow(*CORE_GRAPHS, xx (graph.graphId + 1));
+	if graph.graphId >= xx APP.coreGraphs.count {
+		array_set_count_and_maybe_grow(*APP.coreGraphs, xx (graph.graphId + 1));
 	}
-	CORE_GRAPHS[graph.graphId] = graph;
+	APP.coreGraphs[graph.graphId] = graph;
 	NEXT_CORE_GRAPH_ID += 1;
 	// init(*graph.nodeById, 512);
 	// init_bit_array(*graph.dirty, 1);
 
 	{
-		// using graph;
-		// allocator := scene.allocator;
-		// nodes.allocator = allocator;
-		// dirty.allocator = allocator;
+		using graph;
+		allocator := _scene.allocator;
+		push_allocator(allocator);
+		init_bit_array(*dirty);
+		init_bit_array(*allPredecessorsDirty);
+		init_bit_array(*allSuccessorsDirty);
+
+		nodes.allocator = allocator;
 		// onDirty.allocator = allocator;
-		// predecessors.allocator = allocator;
-		// successors.allocator = allocator;
-		// allPredecessors.allocator = allocator;
+		predecessors.allocator = allocator;
+		successors.allocator = allocator;
+		allPredecessors.allocator = allocator;
 		// allPredecessorsDirty.allocator = allocator;
-		// allSuccessors.allocator = allocator;
+		allSuccessors.allocator = allocator;
 		// allSuccessorsDirty.allocator = allocator;
 	}
 }
 graph :: (graphNode: *CoreGraphNodeAny) -> *CoreGraph {
-	return CORE_GRAPHS[graphNode.graphId];
+	return APP.coreGraphs[graphNode.graphId];
 }
 graph :: (graphId: CoreGraphId) -> *CoreGraph {
-	return CORE_GRAPHS[graphId];
+	return APP.coreGraphs[graphId];
 }
 graphClearConnections :: (using graph: *CoreGraph) {
 	
@@ -58,15 +63,15 @@ graphClearConnections :: (using graph: *CoreGraph) {
 	array_reset(*allPredecessors);
 	array_reset(*allSuccessors);
 }
-graphDelete :: (using graph: *CoreGraph) {
-	array_reset(*nodes);
-	// array_reset(*onDirtyCallbacks);
+graphReset :: (using graph: *CoreGraph) {
+	// array_reset(*nodes);
+	// // array_reset(*onDirtyCallbacks);
 	
-	graphClearConnections(graph);
+	// graphClearConnections(graph);
 
-	deinit(*allPredecessorsDirty);
-	deinit(*allSuccessorsDirty);
-	deinit(*dirty);
+	// deinit(*allPredecessorsDirty);
+	// deinit(*allSuccessorsDirty);
+	// deinit(*dirty);
 }
 
 graphAddNode :: (using graph: *CoreGraph, graphNode: *$T/*, onDirtyCallback:CoreGraphNodeOnDirtyMethod=null*/) {
@@ -190,7 +195,7 @@ setDirty :: (using graph: *CoreGraph, graphNode: *$T, $propagate:bool = true) {
 #scope_file
 
 NEXT_CORE_GRAPH_ID:CoreGraphId=0;
-CORE_GRAPHS:[..]*CoreGraph;
+
 
 _graphCreateConnection :: (using graph: *CoreGraph, srcId: CoreGraphNodeId, destId: CoreGraphNodeId) {
 

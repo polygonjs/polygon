@@ -1,4 +1,13 @@
 createNode :: (using scene: *NodesScene, $T:Type)->*T {
+	#if RUN_TESTS {
+		if scene.initialized == false {
+			assert(false, "scene not initialized");
+		}
+		if scene.disposed == true {
+			assert(false, "scene disposed");
+		}
+	}
+
 	found, nodeTypeId := getNodeTypeId(T);
 	assert(found, "node type not found");
 	node := New(T,, scene.allocator);

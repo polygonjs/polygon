@@ -34,9 +34,32 @@ Editor :: struct {
 	onAfterTick: EditorCustomOnTickCallback=DEFAULT_EDITOR_ON_TICK;
 	onAfterDelete: EditorCustomOnAfterDeleteCallback=DEFAULT_EDITOR_ON_AFTER_DELETE;
 	commands: EditorCommands;
+
+	initialized:bool = false;
+	disposed:bool = false;
+}
+
+// I've considered not using a pointer here,
+// to signal this cannot update the editor,
+// but this seemed like it didn't quite work in wasm.
+// to re-investigate.
+editorValid :: (editor: *Editor)-> bool {
+	// if((editor.initialized==true && editor.disposed==false)==false){ print("invalid:editor=%,initialized=% disposed=%\n", editor, editor.initialized, editor.disposed); }
+	return editor.initialized==true && editor.disposed==false;
 }
 
 editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
+	if(editor.disposed==true){
+		assert(false, "editorInit: already disposed");
+		return;
+	}
+	if(editor.initialized==true){
+		assert(false, "editorInit: already initialized");
+		return;
+	}
+	editor.initialized = true;
+
+
 	pool := nextPool();
 	set_allocators(pool);
 	allocatorAssign(editor, pool, do_set_allocators=false);
@@ -52,26 +75,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	#if HAS_VIEWER_PANEL viewerPanelInit(*editor.viewerPanel, editor, ensureWGPUContextValid);
 	#if HAS_NETWORK_PANEL networkPanelInit(*editor.networkPanel, editor, ensureWGPUContextValid);
 	paramsPanelInit(*editor.paramsPanel, editor, ensureWGPUContextValid);
-}
 
-editorReset :: (using editor: *Editor) {
-	_scene := nodesScene;
-	#if HAS_VIEWER_PANEL viewerPanelReset(*viewerPanel);
-	#if HAS_NETWORK_PANEL networkPanelReset(*networkPanel);
-	paramsPanelReset(*paramsPanel);
-	if(nodesScene != null) {
-		editorRemoveScene(editor);
-	}
-
-	allocatorReset(editor);
-
-	editor.onAfterDelete(_scene);
-
-	editor.exitRequested = false;
-}
-editorDelete :: (using editor: *Editor) {
-	editorReset(editor);
-	free(editor);
 }
 
 editorRequestExit :: (editor: *Editor) {

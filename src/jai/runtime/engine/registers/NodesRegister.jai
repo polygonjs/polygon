@@ -44,7 +44,7 @@ generatedParamsGraphNodeDelete :: (node: *BaseNodeAny) {
 }
 
 registerNodes :: (label:string) #compile_time {
-	array_reset(*TMP_METADATAS);
+	array_reset_keeping_memory(*TMP_METADATAS);
 
 	registerAddGeoNode();
 	registerBoxGeoNode();

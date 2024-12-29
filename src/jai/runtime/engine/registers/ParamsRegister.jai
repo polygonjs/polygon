@@ -21,7 +21,7 @@ generatedParamValueTypeByParamType :: (paramType: Type) -> Type {
 registerParams :: () #compile_time {
 
 	NEXT_PARAM_TYPE_ID = 0;
-	array_reset(*TMP_METADATAS);
+	array_reset_keeping_memory(*TMP_METADATAS);
 
 	paramRegisterFloatParam();
 	paramRegisterStringParam();

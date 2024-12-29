@@ -15,7 +15,7 @@ wgpu_texture_get_height_surface :: (wgpuContext: *WGPUContext) -> u32 {
 
 
 print_c :: (format: string, args: ..Any, to_standard_error := false) #expand {
-	new_context: Context;
+	new_context: #Context;
 	push_context new_context {
 		print(format, ..args, to_standard_error);
 	}
@@ -36,6 +36,12 @@ request_adapter :: (instance: WGPUInstance, _surface: WGPUSurface, powerPreferen
 	};
 
 	wgpuInstanceRequestAdapter(instance, *request_adapter_options, (status: WGPURequestAdapterStatus, adapter: WGPUAdapter, message: *u8, user_data: *void) #c_call {
+		// for a reason I don't understand,
+		// if message is not evaluated, we get the following crash:
+		// free(): invalid pointer
+		// Aborted (core dumped)
+		// so the solution is to evaluate it:
+		message;
 		if status != .Success {
 			print_c("%\n", message);
 			return;
@@ -43,7 +49,6 @@ request_adapter :: (instance: WGPUInstance, _surface: WGPUSurface, powerPreferen
 
 		<< cast(*WGPUAdapter) user_data = adapter;
 	}, *adapter);
-
 	return adapter;
 }
 
@@ -131,12 +136,12 @@ wgpuContextInitHeadless :: (wgpuContext: *WGPUContext, size: Vector2UInt){
 	// on_wgpu_device_ready(wgpuContext.surface, wgpuContext.device, wgpuContext.queue, wgpuContext.preferred_texture_format);
 }
 wgpuContextInitIfAllowed :: (wgpuContext: *WGPUContext, window: *SDL_Window, size: Vector2UInt){
-		assert(wgpuContext.mode == .UNSET, "wgpuContext.mode is not .UNSET");
-		wgpuContext.mode = .SURFACE;
-		/*surface_capabilities := */wgpuContextInit(window, wgpuContext, size);
+	assert(wgpuContext.mode == .UNSET, "wgpuContext.mode is not .UNSET");
+	wgpuContext.mode = .SURFACE;
+	/*surface_capabilities := */wgpuContextInit(window, wgpuContext, size);
 
-		// on_wgpu_device_ready(wgpuContext.surface, wgpuContext.device, wgpuContext.queue, wgpuContext.preferred_texture_format);
-	}
+	// on_wgpu_device_ready(wgpuContext.surface, wgpuContext.device, wgpuContext.queue, wgpuContext.preferred_texture_format);
+}
 
 wgpuContextInit :: (window: *SDL_Window, wgpuContext: *WGPUContext, size: Vector2UInt) {
 

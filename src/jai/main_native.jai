@@ -1,11 +1,10 @@
 main :: () {
 
 	#if RUN_TESTS {
-		runTests();
+		runTests(*APP);
 		return;
 	}
 	nodesSceneInit(*APP.nodesScene);
-
 	windowInit(*APP.editor);
 	initSceneAndAttachToEditor(*APP);
 	editorStart(*APP.editor);

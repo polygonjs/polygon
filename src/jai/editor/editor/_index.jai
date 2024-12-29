@@ -1,4 +1,5 @@
 #load "Editor.jai";
+#load "EditorDelete.jai";
 #load "EditorEvent.jai";
 #load "EditorEventCommands.jai";
 #load "EditorNodePosition.jai";

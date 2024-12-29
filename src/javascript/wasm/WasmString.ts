@@ -1,5 +1,5 @@
 const text_decoder = new TextDecoder();
-export function jsStringFromJaiString(pointer: bigint, strlength: number) {
+export function jsStringFromJaiString(pointer: bigint, strlength: bigint) {
 	const u8 = new Uint8Array(
 		window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer
 	);

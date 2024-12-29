@@ -11,18 +11,28 @@ else           #load "main_native.jai";
 PolygonApp :: struct {
 	editor:Editor;
 	nodesScene:NodesScene;
+	coreGraphs:[..]*CoreGraph;
 	poolsContainer: PoolsContainer;
+
+	#if RUN_TESTS {
+		testApp: TestApp;
+	}
 }
+
 APP:PolygonApp;
 
 initSceneAndAttachToEditor :: (app: *PolygonApp) {
+	coreGraphsReserve(app);
 	editorInit(*app.editor);
 	editorSetScene(*app.editor, *app.nodesScene);
 	appSceneInit(*app.nodesScene, *app.editor);
 }
-
+coreGraphsReserve :: (app: *PolygonApp) {
+	array_reserve(*app.coreGraphs, 2048);
+}
 
 #scope_file
+
 
 
 #load "config.jai";

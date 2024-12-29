@@ -1,21 +1,25 @@
 testViewerPanel :: () {
 	
 	testHeadlessNoSceneOrEditor("ViewerPanel update renderer", (options:TestProcedureOptions) {
-		nodesScene :NodesScene;
-		nodesSceneInit(*nodesScene);
-		box1 := createNode(*nodesScene, BoxGeoNode);
-		line1 := createNode(*nodesScene, LineGeoNode);
-		output1 := createNode(*nodesScene, OutputGeoNode);
+		// nodesScene := *app.nodesScene;
+
+		_nodesScene :NodesScene;
+		options.app.nodesScene = _nodesScene;
+		nodesScene :*NodesScene= *options.app.nodesScene;
+		nodesSceneInit(nodesScene);
+		box1 := createNode(nodesScene, BoxGeoNode);
+		line1 := createNode(nodesScene, LineGeoNode);
+		output1 := createNode(nodesScene, OutputGeoNode);
 		setInput(output1, 0, box1);
 		setInput(output1, 1, line1);
 		paramSetValue(*output1.p.input, xx 0);
 
-		editor := *APP.editor;
-		// APP.editor = editor;
-		editor.wgpuContext = TEST_APP.headlessWGPUContext;
+		_editor :Editor;
+		options.app.editor = _editor;
+		editor :*Editor= *options.app.editor;
+		editor.wgpuContext = options.testApp.headlessWGPUContext;
 		editorInit(editor, ensureWGPUContextValid=false);
-		editorSetScene(editor, *nodesScene);
-
+		editorSetScene(editor, nodesScene);
 
 		editor.onAfterTick = (using editor: *Editor) {
 			if nodesScene.framesCount == {
@@ -39,7 +43,7 @@ testViewerPanel :: () {
 
 			endTest();
 		};
-		editorStart(editor);
 
+		editorStart(editor);
 	});
 }

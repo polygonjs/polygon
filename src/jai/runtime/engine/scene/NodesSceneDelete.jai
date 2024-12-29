@@ -1,9 +1,3 @@
-nodesSceneDelete :: (using scene: *NodesScene) {
-
-	nodesSceneReset(scene);
-	free(scene/*,,allocator=scene.allocator*/);
-
-}
 
 nodesSceneReset :: (using scene: *NodesScene) {
 	if(	scene.disposed == true ) {
@@ -19,13 +13,13 @@ nodesSceneReset :: (using scene: *NodesScene) {
 	// }
 	{
 		// array_reset(*nodeTypes);
-		deinit(*validNodes);
+		// deinit(*validNodes);
 		// for list: nodeInputCookResults { array_reset(*list); }
 		// array_reset(*nodeInputCookResults);
 		// print("todo: use pool")
 		// for cookResult, i: cookResults { generatedWorldObjectDelete(cookResult); }
 		// array_reset(*cookResults);
-		graphDelete(*graph);
+		graphReset(*graph);
 		// nodeConnectionListDelete(*connections);
 		// array_reset(*observers);
 		// observer = null;
@@ -39,3 +33,10 @@ nodesSceneReset :: (using scene: *NodesScene) {
 	// sceneAllocatorPush(scene);
 	// reset_temporary_storage();
 }
+
+// nodesSceneDelete :: (using scene: *NodesScene) {
+
+// 	nodesSceneReset(scene);
+// 	free(scene/*,,allocator=scene.allocator*/);
+
+// }

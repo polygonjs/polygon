@@ -16,7 +16,7 @@ generatedEntitiesCount :: (computeController: *$T)->u64 {
 
 registerComputeControllers :: () #compile_time {
 
-	array_reset(*TMP_METADATAS);
+	array_reset_keeping_memory(*TMP_METADATAS);
 
 	registerComputeControllerAttributeSet();
 	registerComputeControllerAttributeNormalize();

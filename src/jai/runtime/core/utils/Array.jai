@@ -41,6 +41,9 @@ array_set_count_and_maybe_grow :: (array: *[..] $T, newCount: s64) #modify {
 	array.count = newCount;
 	maybe_grow(array);
 }
+maybe_grow :: inline (array: *[..] $T) {
+	maybe_grow(xx array, size_of(T));
+}
 array_copy_shallow :: (target: *[..] $T, src: [..] T) {
 	target.count = src.count;
 	array_resize(target, src.count);

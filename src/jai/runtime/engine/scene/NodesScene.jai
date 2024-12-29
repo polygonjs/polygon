@@ -40,6 +40,7 @@ NodesScene :: struct {
 	computablesTree:ComputablesTree;
 	nodeRequests:[..]NodeSceneRequest;
 
+	initialized:bool = false;
 	disposed:bool = false;
 }
 
@@ -48,32 +49,32 @@ NodesScene :: struct {
 // SCENE_ALLOCATOR :Allocator: .{temporary_allocator_proc, null};
 // SCENE_TEMPORARY_STORAGE :Temporary_Storage = .{};
 
-newNodesScene :: () -> *NodesScene {
-	// print("temporary_storage: %\n", <<context.temporary_storage);
-	// push_allocator(allocator);
-	scene: *NodesScene = New(NodesScene);
-	// } else {
-	// 	scene.allocator = _allocator;
-	// }
-	{
-		// using scene;
-		// #if NODES_SCENE_EMIT_EVENTS {
-			// array_init(*observers);
-		// }
-	}
-	{
-		graph:CoreGraph;
-		graph.scene = scene;
-		graph_member := get_field(type_info(NodesScene), "graph");
-		srPtr := cast(*u8)*graph;
-		targetPtr := cast(*u8)scene + graph_member.offset_in_bytes;
-		memcpy(targetPtr, srPtr, size_of(CoreGraph));
-	}
-	scene.time = 0;
-	nodesSceneInit(scene);
+// newNodesScene :: () -> *NodesScene {
+// 	// print("temporary_storage: %\n", <<context.temporary_storage);
+// 	// push_allocator(allocator);
+// 	scene: *NodesScene = New(NodesScene);
+// 	// } else {
+// 	// 	scene.allocator = _allocator;
+// 	// }
+// 	{
+// 		// using scene;
+// 		// #if NODES_SCENE_EMIT_EVENTS {
+// 			// array_init(*observers);
+// 		// }
+// 	}
+// 	{
+// 		graph:CoreGraph;
+// 		graph.scene = scene;
+// 		graph_member := get_field(type_info(NodesScene), "graph");
+// 		srPtr := cast(*u8)*graph;
+// 		targetPtr := cast(*u8)scene + graph_member.offset_in_bytes;
+// 		memcpy(targetPtr, srPtr, size_of(CoreGraph));
+// 	}
+// 	scene.time = 0;
+// 	nodesSceneInit(scene);
 
-	return scene;
-}
+// 	return scene;
+// }
 
 
 // sceneAllocatorPush :: (scene: *NodesScene) #expand #no_debug {
@@ -100,7 +101,21 @@ newNodesScene :: () -> *NodesScene {
 // 	print("---- sceneDebug END\n");
 // }
 
+nodesSceneValid :: (scene: *NodesScene)-> bool {
+	return scene.initialized==true && scene.disposed==false;
+}
+
 nodesSceneInit :: (scene: *NodesScene) {
+	if(scene.disposed==true){
+		assert(false, "scene: already disposed");
+		return;
+	}
+	if(scene.initialized==true){
+		assert(false, "nodesSceneInit: already initialized");
+		return;
+	}
+	scene.initialized = true;
+
 	pool := nextPool();
 	set_allocators(pool);
 	allocatorAssign(scene, pool, do_set_allocators=false);
@@ -114,6 +129,11 @@ nodesSceneInit :: (scene: *NodesScene) {
 	// scene.temporary_storage = SCENE_TEMPORARY_STORAGE;
 	// sceneAllocatorPush(scene);
 	// array_init(*nodes);
+	{
+		push_allocator(scene.allocator);
+		init_bit_array(*scene.validNodes);
+	}
+	// scene.validNodes.allocator = scene.allocator;
 	array_init(*scene.nodes, scene.allocator, reserve=true);
 	array_init(*scene.nodeNames, scene.allocator, reserve=true);
 	nodeConnectionListInit(scene);

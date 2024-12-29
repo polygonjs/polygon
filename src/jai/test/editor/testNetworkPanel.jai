@@ -10,43 +10,43 @@ testNetworkPanel :: () {
 		box2 := createNode(*nodesScene, BoxGeoNode);
 		assertEqual(nodesScene.nodes.count, 2, "2 nodes in scene");
 
-		editor := *APP.editor;
+		editor :Editor;//= *APP.editor;
 		// APP.editor = editor;
-		editorInit(editor, ensureWGPUContextValid=false);
-		editorSetScene(editor, *nodesScene);
+		editorInit(*editor, ensureWGPUContextValid=false);
+		editorSetScene(*editor, *nodesScene);
 
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 3);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 3);
 
 		box3 := createNode(*nodesScene, BoxGeoNode);
-		editorFlushCommands(editor);
+		editorFlushCommands(*editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
 		box4 := createNode(*nodesScene, BoxGeoNode);
-		editorFlushCommands(editor);
+		editorFlushCommands(*editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 
 		setInput(box2, 0, box1);
-		editorFlushCommands(editor);
+		editorFlushCommands(*editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 6);
 
 		removeInput(box2, 0);
-		editorFlushCommands(editor);
+		editorFlushCommands(*editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 
 		nodeDelete(box3);
-		editorFlushCommands(editor);
+		editorFlushCommands(*editor);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
 		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
-		editorRemoveScene(editor);
+		editorRemoveScene(*editor);
 		nodesSceneReset(*nodesScene);
-		editorReset(editor);
+		editorReset(*editor);
 		assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");
 
 		endTest();
@@ -98,6 +98,7 @@ testNetworkPanel :: () {
 			}
 		};
 
+		editor.onAfterDelete = (_: *NodesScene){ endTest(); };
 		editorStart(editor);
 		// sceneDelete(nodesScene);
 		// assertLeaksCount(0, "no leak when deleting a scene with 4 nodes");

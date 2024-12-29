@@ -3,7 +3,6 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 
 	if USE_IMGUI_DEBUG return;
 	#if WASM {
-		context = call_from_wasm_context;
 		eventsDataUpdate(*editor.eventsData);
 		time := performance_now();
 		computeFPS(editor.nodesScene, time);
@@ -20,5 +19,5 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 	editor.onAfterTick(editor);
 
 
-	// if FRAMES_COUNT > 2 {editor.exitRequested = true;};
+	// if FRAMES_COUNT > 2 { editorRequestExit(editor); };
 }

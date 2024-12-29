@@ -1,6 +1,11 @@
 
 
 editorStart :: (editor: *Editor) {
+	if (editorValid(editor)==false){
+		assert(false, "editorValid(editor)==false");
+		return;
+	}
+
 	assert(editor.wgpuContext.windowSize.x > 0, "editor.wgpuContext.windowSize.x is zero");
 	assert(editor.wgpuContext.windowSize.y > 0, "editor.wgpuContext.windowSize.y is zero");
 	assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
@@ -16,13 +21,12 @@ editorStart :: (editor: *Editor) {
 		computeFPS(editor.nodesScene, time);
 		sdl_event: SDL_Event;
 		eventsDataReset(*editor.eventsData);
-
 		while SDL_PollEvent(*sdl_event) {
 			eventsDataUpdate(*editor.eventsData, *sdl_event);
 			processEvent(editor, *editor.eventsData);
 
 			if sdl_event.type == {
-				case SDL_QUIT; {editor.exitRequested = true;}
+				case SDL_QUIT; { editorRequestExit(editor); }
 				case SDL_WINDOWEVENT; {
 					if (sdl_event.window.event == SDL_WINDOWEVENT_RESIZED) {
 						new_width := sdl_event.window.data1;
@@ -39,12 +43,12 @@ editorStart :: (editor: *Editor) {
 					#if USE_IMGUI {
 						if(ImGui.GetIO().WantCaptureKeyboard == false){
 							if sdl_event.key.keysym.sym == SDLK_ESCAPE {
-								editor.exitRequested = true;
+								editorRequestExit(editor);
 							}
 						}
 					} else {
 						if sdl_event.key.keysym.sym == SDLK_ESCAPE {
-							editor.exitRequested = true;
+							editorRequestExit(editor);
 						}
 					}
 				}
@@ -53,7 +57,6 @@ editorStart :: (editor: *Editor) {
 
 		// editor.exitRequested = true;
 		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.windowSize.x, editor.wgpuContext.windowSize.y);
-
 	}
 	editorReset(editor);
 }
@@ -113,7 +116,7 @@ headlessInit :: (wgpuContext: *WGPUContext, windowSize: Vector2UInt) {
 #scope_file
 
 wgpu_log_callback :: (level: WGPULogLevel, msg: *u8, userdata: *void) #c_call {
-	new_context: Context;
+	new_context: #Context;
 	push_context new_context {
 		print("\n");
 		printRed("ERROR WGPU START\n");

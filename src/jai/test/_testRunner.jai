@@ -1,52 +1,56 @@
 
 
 
-runTests :: () {
-	initTestApp();
+runTests :: (app:*PolygonApp) {
+	initTestApp(app);
 
-	#if WASM==true {
+	#if WASM == true {
 		// runNextTestOrTerminate();
 	}
 	else {
-		while TEST_APP.procedureIndex <= (TEST_APP.procedures.count-1) {
-			runNextTestOrTerminate();
+		while app.testApp.procedureIndex>=0 && app.testApp.procedureIndex <= (app.testApp.procedures.count-1) {
+			runNextTestOrTerminate(app);
 		}
-		printTestAppStats();
+		printTestAppStats(app);
 	}
 }
 
 
 
-runNextTestOrTerminate :: () {
-	currentIndex := TEST_APP.procedureIndex;
-	test := TEST_APP.procedures[currentIndex];
-	TEST_APP.procedureIndex += 1;
-	found :bool= TEST_APP.requestedTestNames.count == 0 || _isRequestedTestName(test.name, TEST_APP.requestedTestNames);
+runNextTestOrTerminate :: (app:*PolygonApp) {
+	currentIndex := app.testApp.procedureIndex;
+	test := app.testApp.procedures[currentIndex];
+	app.testApp.procedureIndex += 1;
+	found :bool= app.testApp.requestedTestNames.count == 0 || _isRequestedTestName(test.name, app.testApp.requestedTestNames);
 	if found {
 		print("% TEST: %... (%)			", tprintGreen(" "), test.name, currentIndex);
-		TEST_APP.testStartTime = current_time_monotonic();
-		TEST_APP.testInProgress = true;
+		app.testApp.testStartTime = current_time_monotonic();
+		app.testApp.testInProgress = true;
 		testOptions:TestProcedureOptions;
-		// TEST_APP.testLineStart = tprint("% TEST: %... (%)			", tprintGreen(" "), test.name, TEST_APP.procedureIndex);
-		if test.scene == true {
-			nodesScene:NodesScene;
-			APP.nodesScene = nodesScene;
-			nodesSceneInit(*APP.nodesScene);
-			testOptions.nodesScene = *APP.nodesScene;
+		// app.testApp.testLineStart = tprint("% TEST: %... (%)			", tprintGreen(" "), test.name, app.testApp.procedureIndex);
+		if test.scene == true || test.editor == true {
+			_nodesScene:NodesScene;
+			app.nodesScene = _nodesScene;
+			nodesSceneInit(*app.nodesScene);
+			testOptions.nodesScene = *app.nodesScene;
 		}
 		if test.wgpu {
 			if test.editor == true {
-				editor:Editor;
-				APP.editor = editor;
-				testOptions.editor = *APP.editor;
+				_editor:Editor;
+				assert(_editor.initialized==false, "editor initialized=true");
+				assert(_editor.disposed==false, "editor disposed=true");
+				app.editor = _editor;
+				assert(app.editor.initialized==false, "app.editor initialized=true");
+				assert(app.editor.disposed==false, "app.editor disposed=true");
+				testOptions.editor = *app.editor;
 				if test.headless {
-					// APP.editor = testOptions.editor;
-					testOptions.editor.wgpuContext = TEST_APP.headlessWGPUContext;
-					
-					editorInit(testOptions.editor);
+					// app.editor = testOptions.editor;
+					app.editor.wgpuContext = app.testApp.headlessWGPUContext;
+					editorInit(*app.editor);
 					if testOptions.nodesScene != null {
-						editorSetScene(testOptions.editor, testOptions.nodesScene);
+						editorSetScene(*app.editor, *app.nodesScene);
 					}
+					testOptions.editor = *app.editor;
 				} else {
 					assert(false, "non headless mode not yet implemented");
 					// testOptions.editor = newEditor();
@@ -56,84 +60,88 @@ runNextTestOrTerminate :: () {
 					// 	editorSetScene(testOptions.editor, testOptions.nodesScene);
 					// }
 				}
+				assert(app.editor.initialized==true, "app.editor initialized=false");
+				assert(app.editor.disposed==false, "app.editor disposed=true");
 			}
 		}
-		TEST_APP.testOptions = testOptions;
-		test.proc(testOptions);
-		#if WASM==false {postTest();}
+		app.testApp.testOptions = testOptions;
+		app.testApp.testOptions.app = app;
+		app.testApp.testOptions.testApp = *app.testApp;
+		test.proc(app.testApp.testOptions);
+		#if WASM == false {postTest(app);}
 	} else {
-		TEST_APP.skippedTestsCount += 1;
-		postTestSkipped();
+		app.testApp.skippedTestsCount += 1;
+		postTestSkipped(app);
 	}
 
 }
 
 #if WASM == true {
-	batchRunNextTestOrTerminate :: (){
-		if TEST_APP.testInProgress == true || TEST_APP.hasFailedAssertion==true {
+	batchRunNextTestOrTerminate :: (app: *PolygonApp){
+		if app.testApp.testInProgress == true || app.testApp.hasFailedAssertion==true {
 			return;
 		}
-		if TEST_APP.procedureIndex >= TEST_APP.procedures.count {
-			printTestAppStats();
+		if app.testApp.procedureIndex >= app.testApp.procedures.count {
+			printTestAppStats(app);
 			return;
 		}
-		runNextTestOrTerminate();
+		runNextTestOrTerminate(app);
 	}
 	endTest :: (){
-		// APP.editor = null;
-		// APP.nodesScene = null;
-		postTest();
+		// app.editor = null;
+		// app.nodesScene = null;
+		postTest(*APP);
 	};
 } else {
 	endTest :: (){}
 }
-postTest :: () {
-	if TEST_APP.testOptions.nodesScene != null {
-		nodesSceneReset(TEST_APP.testOptions.nodesScene);
+postTest :: (app: *PolygonApp) {
+	if app.testApp.testOptions.nodesScene != null {
+		nodesSceneReset(app.testApp.testOptions.nodesScene);
 	}
-	TEST_APP.testEndTime = current_time_monotonic();
+	app.testApp.testEndTime = current_time_monotonic();
 	reset_temporary_storage();
 	assertLeaksCount(0, "no leaks");
 	reset_temporary_storage();
-	TEST_APP.testInProgress = false;
 
 	poolsContainerReset();
-	TEST_APP.testTeardownTime = current_time_monotonic();
+	app.testApp.testTeardownTime = current_time_monotonic();
 	
-	if TEST_APP.hasFailedAssertion==true {
-		postTestFailed();
+	if app.testApp.hasFailedAssertion==true {
+		postTestFailed(app);
 	} else {
-		postTestSuccessful();
+		postTestSuccessful(app);
 	}
+	app.testApp.testInProgress = false;
 }
-postTestFailed :: (){
+postTestFailed :: (app: *PolygonApp){
 	print(" % \n", tprintRed("FAILED"));
-	print("%\n", TEST_APP.failedAssertionMessage);
-	print_stack_trace(*TEST_APP.stackTraceNode[0]);
-	TEST_APP.procedureIndex = -1;
+	print("%\n", app.testApp.failedAssertionMessage);
+	print_stack_trace(*app.testApp.stackTraceNode[0]);
+	app.testApp.procedureIndex = -1;
 }
-postTestSuccessful :: (){
-	TEST_APP.testsCount += 1;
+postTestSuccessful :: (app: *PolygonApp){
+	app.testApp.testsCount += 1;
 
-	testTime := to_float64_seconds(TEST_APP.testEndTime-TEST_APP.testStartTime);
-	teardownTime := to_float64_seconds(TEST_APP.testTeardownTime-TEST_APP.testEndTime);
-	#if WASM==true {
+	testTime := to_float64_seconds(app.testApp.testEndTime-app.testApp.testStartTime);
+	teardownTime := to_float64_seconds(app.testApp.testTeardownTime-app.testApp.testEndTime);
+	#if WASM == true {
 		print("    ✅ completed in %ms\n", testTime);
 	} else {
 		print(" %ms, (teardown: %ms)\n", testTime*1000, teardownTime*1000);
 	}
 
-	#if WASM==true { batchRunNextTestOrTerminate(); }
+	#if WASM == true { batchRunNextTestOrTerminate(app); }
 }
-postTestSkipped :: (){
-	TEST_APP.skippedTestsCount += 1;
+postTestSkipped :: (app: *PolygonApp){
+	app.testApp.skippedTestsCount += 1;
 
-	#if WASM==true { batchRunNextTestOrTerminate(); }
+	#if WASM == true { batchRunNextTestOrTerminate(app); }
 }
 
 
-printTestAppStats :: () {
-	using TEST_APP;
+printTestAppStats :: (app: *PolygonApp) {
+	using app.testApp;
 	if statsPrinted == true {return;}
 	statsPrinted = true;
 	if (hasFailedAssertion == true) {return;}
@@ -172,6 +180,8 @@ testWithScene :: (name: string, procedure: TestProcedure) {
 TestProcedureOptions :: struct {
 	nodesScene: *NodesScene;
 	editor: *Editor;
+	app: *PolygonApp;
+	testApp: *TestApp;
 	// headlessWGPUContext: *WGPUContext;
 }
 TestProcedure :: #type (options: TestProcedureOptions) -> ();
@@ -209,17 +219,17 @@ TestApp :: struct {
 	stackTraceNode: [] Stack_Trace_Node;
 	statsPrinted: bool=false;
 }
-TEST_APP: TestApp;
+
 
 setFailedAssertion :: (message: string) {
-	TEST_APP.hasFailedAssertion = true;
-	TEST_APP.failedAssertionMessage = message;
-	TEST_APP.stackTraceNode = pack_stack_trace();
+	APP.testApp.hasFailedAssertion = true;
+	APP.testApp.failedAssertionMessage = message;
+	APP.testApp.stackTraceNode = pack_stack_trace();
 }
 
 #scope_file
 
-initTestApp :: (){
+initTestApp :: (app: *PolygonApp){
 	print("--------- TEST START\n");
 
 	args := get_command_line_arguments();
@@ -227,27 +237,27 @@ initTestApp :: (){
 	
 	for arg,i: args {
 		if i > 0 {
-			array_add(*TEST_APP.requestedTestNames, arg);
+			array_add(*app.testApp.requestedTestNames, arg);
 		}
 	}
-	this_allocation_is_not_a_leak(TEST_APP.requestedTestNames.data);
+	this_allocation_is_not_a_leak(app.testApp.requestedTestNames.data);
 
 	#if WASM {
 		#assert(FREE_MEMORY_DEBUG==false); // set FREE_MEMORY_DEBUG :: false in config.jai
 	} else {
 		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
 	}
-	TEST_APP.skippedTestsCount = 0;
-	TEST_APP.t0 = current_time_monotonic();
-	TEST_APP.testsCount = 0;
+	app.testApp.skippedTestsCount = 0;
+	app.testApp.t0 = current_time_monotonic();
+	app.testApp.testsCount = 0;
 	#if WASM == false {
-		headlessInit(*TEST_APP.headlessWGPUContext, .{4,4});
-		TEST_APP.t1 = current_time_monotonic();
-		print("headlessInit in % seconds.\n", to_float64_seconds(TEST_APP.t1-TEST_APP.t0));
+		headlessInit(*app.testApp.headlessWGPUContext, .{4,4});
+		app.testApp.t1 = current_time_monotonic();
+		print("headlessInit in % seconds.\n", to_float64_seconds(app.testApp.t1-app.testApp.t0));
 	}
 
-	TEST_APP.procedures = NAMED_PROCEDURES;
-	TEST_APP.procedureIndex = 0;//NAMED_PROCEDURES.count-1;
+	app.testApp.procedures = NAMED_PROCEDURES;
+	app.testApp.procedureIndex = 0;//NAMED_PROCEDURES.count-1;
 }
 
 getRegisteredTests :: ()->[..]NamedProcedure {

@@ -104,7 +104,7 @@ import { wgpuCommandEncoderCopyTextureToBuffer } from "./WebGPU/FromJs/wgpuComma
 export function loadWasm(): Promise<void> {
 	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 		wasm_write_string: (
-			s_count: number,
+			s_count: bigint,
 			s_data: bigint,
 			to_standard_error: boolean
 		) => {
@@ -118,7 +118,8 @@ export function loadWasm(): Promise<void> {
 		},
 
 		wasm_debug_break: () => {
-			console.warn("NOT IMPLEMENTED wasm_debug_break");
+			// debugger;
+			// console.warn("NOT IMPLEMENTED wasm_debug_break");
 		},
 		memcmp,
 		memset,
@@ -321,8 +322,12 @@ export function loadWasm(): Promise<void> {
 			// 	"WASM loaded",
 			// 	allocatedMemoryContainer.allocatedMemory
 			// );
-			// const mainFunc: Function = obj.instance.exports["main"] as Function;
-			// mainFunc(0, BigInt(0));
+
+			//
+			// we still call main, as it assigns call_from_wasm_context,
+			// which seems necessary at times (but really may not be, I'm not sure yet)
+			const mainFunc: Function = obj.instance.exports["main"] as Function;
+			mainFunc(0, BigInt(0));
 
 			function mapFunction(
 				functionName: string,

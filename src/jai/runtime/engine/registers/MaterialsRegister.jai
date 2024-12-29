@@ -2,7 +2,7 @@
 
 registerMaterials :: () #compile_time {
 
-	array_reset(*TMP_METADATAS);
+	array_reset_keeping_memory(*TMP_METADATAS);
 
 	registerLineBasicMaterial();
 

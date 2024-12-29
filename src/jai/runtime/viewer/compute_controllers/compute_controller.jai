@@ -305,7 +305,7 @@ compute_controller_compute :: (controller:*ComputeController, command_encoder : 
 
 wgpu_compute_buffer_map_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {
 	if(status!=WGPUBufferMapAsyncStatus.Success){
-		new_context: Context;
+		new_context: #Context;
 		push_context new_context {
 			print("*** status:%\n", status);
 		}

@@ -177,7 +177,7 @@ WAITING_FOR_BUFFER_MAPPED_STATE := false;
 
 wgpu_render_pixel_async_callback :: (status: WGPUBufferMapAsyncStatus, userdata: *void) #c_call {
 	if(status!=WGPUBufferMapAsyncStatus.Success){
-		new_context: Context;
+		new_context: #Context;
 		push_context new_context {
 			print("*** status:%\n", status);
 		}

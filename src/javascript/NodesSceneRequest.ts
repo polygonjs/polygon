@@ -9,7 +9,7 @@ export function fetchUrl(
 ) {
 	// console.log("TODO: use more than a global fetchedData");
 	// console.log("fetchUrl", nodeId, stringPtr, stringSize);
-	const url = jsStringFromJaiString(stringPtr, Number(stringSize));
+	const url = jsStringFromJaiString(stringPtr, stringSize);
 	// console.log("fetchUrl", url);
 	if (url) {
 		fetch(url).then(async (response) => {
