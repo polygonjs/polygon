@@ -6,7 +6,9 @@ nodesSceneDelete :: (using scene: *NodesScene) {
 }
 
 nodesSceneReset :: (using scene: *NodesScene) {
-
+	if(	scene.disposed == true ) {
+		assert(false, "scene already disposed");
+	}
 	graphClearConnections(*graph);
 	// nodeConnectionListClear(*connections);
 
@@ -31,6 +33,8 @@ nodesSceneReset :: (using scene: *NodesScene) {
 	worldObjectReset(*worldScene);
 	
 	allocatorReset(scene);
+
+	scene.disposed = true;
 
 	// sceneAllocatorPush(scene);
 	// reset_temporary_storage();

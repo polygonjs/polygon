@@ -226,7 +226,7 @@ export function addEvents(canvas: HTMLCanvasElement) {
 	canvas.addEventListener("pointerdown", onPointerdown);
 	canvas.addEventListener("pointermove", onPointermove);
 	canvas.addEventListener("pointerup", onPointerup);
-	canvas.addEventListener("wheel", onWheel);
+	canvas.addEventListener("wheel", onWheel, { passive: true });
 	canvas.addEventListener("keydown", onKeydown);
 	canvas.addEventListener("keyup", onKeyup);
 }

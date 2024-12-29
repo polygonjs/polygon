@@ -1,6 +1,6 @@
 
 mainMenuBarDraw :: (using editor: *Editor) {
-	 if (ImGui.BeginMainMenuBar()) {
+	#if USE_IMGUI if (ImGui.BeginMainMenuBar()) {
 		if (ImGui.BeginMenu("File")) {
 			// ShowExampleMenuFile();
 			if (ImGui.MenuItem("Save", "CTRL+S")) {}

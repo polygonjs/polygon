@@ -30,23 +30,23 @@ on_wgpu_device_ready :: ( canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQu
 
 on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
 	context = call_from_wasm_context;
-	#if RUN_TESTS == false {
-		assert(APP.editor!=null, "on_request_animation_frame: editor is null");
-	}
+	// #if RUN_TESTS == false {
+	// 	assert(APP.editor!=null, "on_request_animation_frame: editor is null");
+	// }
 
-	if(APP.editor != null) {
+	// if(APP.editor != null) {
 		if(APP.editor.exitRequested==true){
 			editorReset(*APP.editor);
 		} else {
 			editorOnTick(*APP.editor, newTime, width, height);
 		}
-	} else {
-		#if RUN_TESTS {
-			if TEST_APP.testInProgress {
-				print("editor is null\n");
-			}
-		}
-	}
+	// } else {
+	// 	#if RUN_TESTS {
+	// 		if TEST_APP.testInProgress {
+	// 			print("editor is null\n");
+	// 		}
+	// 	}
+	// }
 
 	#if RUN_TESTS {
 		batchRunNextTestOrTerminate();

@@ -18,7 +18,6 @@ runTests :: () {
 
 
 runNextTestOrTerminate :: () {
-
 	currentIndex := TEST_APP.procedureIndex;
 	test := TEST_APP.procedures[currentIndex];
 	TEST_APP.procedureIndex += 1;
@@ -37,8 +36,10 @@ runNextTestOrTerminate :: () {
 		}
 		if test.wgpu {
 			if test.editor == true {
+				editor:Editor;
+				APP.editor = editor;
+				testOptions.editor = *APP.editor;
 				if test.headless {
-					testOptions.editor = *APP.editor;
 					// APP.editor = testOptions.editor;
 					testOptions.editor.wgpuContext = TEST_APP.headlessWGPUContext;
 					

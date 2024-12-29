@@ -36,11 +36,6 @@ Editor :: struct {
 	commands: EditorCommands;
 }
 
-newEditor :: ()->*Editor {
-	editor := New(Editor);
-	// editorInit(editor);
-	return editor;
-}
 editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	pool := nextPool();
 	set_allocators(pool);

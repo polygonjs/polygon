@@ -7,13 +7,16 @@ onResize :: (using panel: *TYPE) {
 	rendererSetSize(*rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererCopySize(*rendererColor, *rendererRaycast);
 
+	previousAspect := camera.aspect;
 	if(rendererColor.fullScreen == true) {
 		camera.aspect = newAspect;
 	} else {
 		camera.aspect = cast(float32)rendererColor.viewport.size.x / cast(float32)rendererColor.viewport.size.y;
 	}
-	sceneCameraUpdateProjectionMatrix(*sceneWorld, *camera);
-	sceneCameraUpdateProjectionMatrix(*sceneRaycast, *camera);
+	if(previousAspect != camera.aspect) {
+		sceneCameraUpdateProjectionMatrix(*sceneWorld, *camera);
+		sceneCameraUpdateProjectionMatrix(*sceneRaycast, *camera);
+	}
 }
 
 #scope_file

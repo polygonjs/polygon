@@ -1,4 +1,3 @@
-#load "NodesScene.jai";
 
 #load "nodes/_index.jai";
 #load "registers/_index.jai";

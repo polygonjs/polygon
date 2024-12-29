@@ -39,6 +39,8 @@ NodesScene :: struct {
 
 	computablesTree:ComputablesTree;
 	nodeRequests:[..]NodeSceneRequest;
+
+	disposed:bool = false;
 }
 
 
