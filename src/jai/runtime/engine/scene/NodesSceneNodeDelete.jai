@@ -2,9 +2,7 @@
 // do not call directly without the right node type
 _sceneDeleteNode_ :: (using scene: *NodesScene, node: $T, $removeFromGraph:bool = true) {
 	nodeId := node.nodeId;
-	#if NODES_SCENE_EMIT_EVENTS {
-		nodesSceneEmitEvent(scene, NodesSceneEvent.NODE_BEFORE_REMOVE, node);
-	}
+	nodesSceneEmitEvent(scene, .NODE_BEFORE_REMOVE, node);
 	// found, index := array_find(nodes, cast(*GeoNodeAny)node);
 	// assert(found, "node not found");
 

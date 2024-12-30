@@ -1,5 +1,5 @@
 NodeConnectionId :: s64;
-
+NodeConnectionIdOrNone :: s64;
 NodeConnectionSrc :: struct {
 	nodeId: NodeId;
 	outputIndex: NodeInputIndex;

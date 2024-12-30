@@ -46,7 +46,7 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	paramSetValue(*box1.p.scale, 2.0);
 	paramSetValue(*output1.p.input, 4);
-	paramSetValue(*icosahedron1.p.detail, 40);
+	paramSetValue(*icosahedron1.p.detail, 0);
 
 	nodeSetPosition(editor, output1, .{0,-4});
 

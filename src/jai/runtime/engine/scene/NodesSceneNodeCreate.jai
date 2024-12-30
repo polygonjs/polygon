@@ -81,9 +81,7 @@ createNode :: (using scene: *NodesScene, $T:Type)->*T {
 	nodeConnectionInitForNode(*connections, node.nodeId);
 	nodeParamsInit(xx node);
 
-	#if NODES_SCENE_EMIT_EVENTS {
-		nodesSceneEmitEvent(scene, NodesSceneEvent.NODE_ADDED, node);
-	}
+	nodesSceneEmitEvent(scene, .NODE_ADDED, node);
 
 	return node;
 }

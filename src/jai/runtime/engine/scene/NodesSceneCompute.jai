@@ -110,6 +110,7 @@ buildAndComputeComputableTree :: (using scene: *NodesScene, outputNode: *OutputG
 	if isDirty(*graph, outputNode.graphNodeId)==false {
 		return;
 	}
+	nodesSceneEmitEvent(scene, .COMPUTE_STARTED);
 	buildComputableTree(scene, outputNode);
 	computeComputableNodes(scene, xx outputNode);
 }
@@ -118,7 +119,8 @@ computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) 
 	if(computablesTree.leaves.count == 0) {
 		if computablesTree.previousLeavesCount > 0 {
 			computablesTree.previousLeavesCount = 0;
-			
+
+			nodesSceneEmitEvent(scene, .COMPUTE_COMPLETED);
 			if nodesSceneValid(scene) {
 				scene.onNodesComputed(scene);
 			}
@@ -151,9 +153,9 @@ computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) 
 
 buildComputableTree :: (scene: *NodesScene, outputNode: *OutputGeoNode) {
 	using scene.computablesTree;
-	array_reset_keeping_memory(*nodesToTraverse);
 	array_reset_keeping_memory(*traversedNodeIds);
-	array_add(*nodesToTraverse, outputNode.nodeId);
+	nodesToTraverse.count = 1;
+	nodesToTraverse[0] = outputNode.nodeId;
 	// print("start:%\n", nodesToTraverse);
 	while nodesToTraverse.count > 0 {
 		nodeId := pop(*nodesToTraverse);

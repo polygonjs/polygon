@@ -21,6 +21,7 @@ NetworkPanel :: struct {
 		nodeSelected: MATERIAL_BASIC;
 		nodeHovered: MATERIAL_BASIC;
 		connectionBasic: MATERIAL_BASIC;
+		connectionCurrent: MATERIAL_BASIC;
 	}
 	mat: DefaultMaterial;
 
@@ -41,6 +42,7 @@ NetworkPanelEventHandler :: struct {
 	worldData: NetworkPanelCursorData;
 
 	hoveredNodeId: NodeIdOrNone = -1;
+	highlightedConnectionId: NodeConnectionIdOrNone = -1;
 }
 
 NetworkPanelOperation :: enum u8 {
@@ -119,11 +121,12 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	materialInit(*mat.nodeSelected);
 	materialInit(*mat.nodeHovered);
 	materialInit(*mat.connectionBasic);
+	materialInit(*mat.connectionCurrent);
 	setColor(*mat.nodeBasic, .{1.0, 0.5, 0.25, 1.0});
 	setColor(*mat.nodeSelected, .{0, 1, 0, 1});
-	setColor(*mat.nodeHovered, .{1.0, 0.7, 0.2, 0.5});
+	setColor(*mat.nodeHovered, .{1.0, 0.7, 0.2, 0.1});
 	setColor(*mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
-
+	setColor(*mat.connectionCurrent, .{0.9, 1, 0.9, 1});
 	cameraControls.camera = *camera;
 	cameraControlsSetScenes(*cameraControls, .[*sceneWorld, *sceneRaycast]);
 	cameraControlsCommit(*cameraControls);

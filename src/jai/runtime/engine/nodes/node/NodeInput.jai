@@ -33,10 +33,7 @@ setInput :: (node: *$T1, inputIndex:u8=0, inputNode: *$T2, outputIndex:u8=0, $do
 			}
 		});
 		setDirty(node);
-
-		#if NODES_SCENE_EMIT_EVENTS {
-			nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_CONNECTION_ADDED, connection);
-		}
+		nodesSceneEmitEvent(graphNodeScene(node), .NODE_CONNECTION_ADDED, connection);
 	}
 
 	return connectionCreated;
@@ -50,9 +47,7 @@ removeInput :: (node: *BaseNode, inputIndex:u8=0) -> bool {
 	if connectionIdValid(connectionId) {
 		connection := scene.connections.connections[connectionId];
 
-		#if NODES_SCENE_EMIT_EVENTS {
-			nodesSceneEmitEvent(graphNodeScene(node), NodesSceneEvent.NODE_CONNECTION_REMOVED, connection);
-		}
+		nodesSceneEmitEvent(graphNodeScene(node), .NODE_CONNECTION_REMOVED, connection);
 
 		previousInputNodeId := connection.src.nodeId;
 		previousInputNode := scene.nodes[previousInputNodeId];

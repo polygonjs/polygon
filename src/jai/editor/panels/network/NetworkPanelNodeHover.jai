@@ -1,31 +1,36 @@
 networkPanelFindFirstHoveredNode :: (using panel: *TYPE, eventsData:*EventsData) {
 	found, nodeId := _findHoveredObject(panel, eventsData);
 	if found == false {
-		if panel.eventHandler.hoveredNodeId < 0 { return; }
-		nodeId :NodeId= xx panel.eventHandler.hoveredNodeId;
+		_restoreMaterialToPreviouslyHighlighted(panel);
 		panel.eventHandler.hoveredNodeId = -1;
-		objectIndex := nodeObjectIndexByNodeId[nodeId];
-		mesh := sceneWorld.children[objectIndex];
-		if mesh.type == Mesh {
-			material := ifx isNodeSelected(editor, nodeId) then *panel.mat.nodeSelected else *panel.mat.nodeBasic;
-			meshSetMaterial(*sceneWorld, xx mesh, xx material);
-		}
 		return;
 	}
 	if panel.eventHandler.hoveredNodeId == nodeId { return; }
 
-	node := editor.nodesScene.nodes[nodeId];
-	objectIndex := nodeObjectIndexByNodeId[node.nodeId];
-	mesh := sceneWorld.children[objectIndex];
-	if mesh.type == Mesh {
-		meshSetMaterial(*sceneWorld, xx mesh, xx *panel.mat.nodeHovered);
-	}
+	_restoreMaterialToPreviouslyHighlighted(panel);
+	_setMaterial(panel, xx nodeId, xx *panel.mat.nodeHovered);
 	panel.eventHandler.hoveredNodeId = nodeId;
 }
 
 #scope_file
 
 TYPE :: NetworkPanel;
+
+_restoreMaterialToPreviouslyHighlighted :: (using panel: *TYPE) {
+	if panel.eventHandler.hoveredNodeId < 0 { return; }
+	nodeId :NodeId= xx panel.eventHandler.hoveredNodeId;
+	material := ifx isNodeSelected(editor, nodeId) then *panel.mat.nodeSelected else *panel.mat.nodeBasic;
+	_setMaterial(panel, xx nodeId, xx material);
+}
+
+_setMaterial :: (using panel: *TYPE, nodeId:NodeId, material: *Material){
+	node := editor.nodesScene.nodes[nodeId];
+	objectIndex := nodeObjectIndexByNodeId[node.nodeId];
+	mesh := sceneWorld.children[objectIndex];
+	if mesh.type == Mesh {
+		meshSetMaterial(*sceneWorld, xx mesh, material);
+	}
+}
 
 _findHoveredObject :: (using panel: *TYPE, eventsData:*EventsData)-> (found:bool, nodeId:s64) {
 	// networkPanelCursorDataInit(*eventHandler.screenData, );
