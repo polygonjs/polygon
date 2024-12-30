@@ -9,7 +9,8 @@ OrbitControls :: struct {
 	target:Vector3 = .{x=0.0,y=0.0,z=0.0}; // Target point the camera looks at
 	sensitivity:float = 0.0025;
 
-	actionStarted: bool = false;
+	panStarted: bool = false;
+	zoomStarted: bool = false;
 	leftButtonPressed: bool = false;
 	lastPointer: Vector2Int;
 }
@@ -19,40 +20,40 @@ OrbitControls :: struct {
 
 cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, elementFocused:bool){
 
-	if(actionStarted == false && elementFocused==true){
+	if(panStarted == false && elementFocused==true){
 		if (eventsData.mouseButtonJustPressed.left) {
-			actionStarted = true;
+			panStarted = true;
 			lastPointer.x = cast(s32)eventsData.cursor.x;
 			lastPointer.y = cast(s32)eventsData.cursor.y;
 		}
 	}
-	if(actionStarted==true){
+	if(panStarted==true){
 		dx:int = cast(int)eventsData.cursor.x - lastPointer.x;
 		dy:int = cast(int)eventsData.cursor.y - lastPointer.y;
 
 		theta += dx * sensitivity;
-		phi -= dy * sensitivity;
+		phi = clamp(phi - dy * sensitivity, PHI_MIN, PHI_MAX);
 
 		if (eventsData.mouseButton.left==false) {
-			actionStarted = false;
+			panStarted = false;
 		}
 		lastPointer.x = cast(s32)eventsData.cursor.x;
 		lastPointer.y = cast(s32)eventsData.cursor.y;
 	}
 
 	if(eventsData.wheel != 0){
+		previousRadius := radius;
 		radius -= eventsData.wheel * 0.1;
 		if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
+		if previousRadius != radius {
+			zoomStarted = true;
+		}
 	}
 
 	cameraControlsUpdateCamera(controls);
 }
 
-cameraControlsCommit :: (using controls:*TYPE){
-
-	// Clamp phi to avoid flipping at the poles
-	if (phi < PHI_MIN) phi = PHI_MIN;
-	if (phi > PHI_MAX) phi = PHI_MAX;
+cameraControlsCommit :: (using controls:*TYPE) {
 
 	// quaternions
 	quaternionX :Quaternion;
@@ -89,7 +90,9 @@ AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
 // UP		::Vector3.{x=0.0, y=1.0, z=0.0};
 
 cameraControlsUpdateCamera :: (using controls:*TYPE){
-	if(actionStarted == false){return;}
+	if( (panStarted || zoomStarted) == false ){
+		return;
+	}
 
 	cameraControlsCommit(controls);
 }
