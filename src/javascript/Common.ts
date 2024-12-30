@@ -82,8 +82,10 @@ export interface AllocatedMemoryContainer {
 }
 
 export function updateMemoryArrayViews() {
-	const container = window.ALLOCATED_MEMORY_CONTAINER;
-	container.dataView = new DataView(container.allocatedMemory!.buffer);
+	// const container = window.ALLOCATED_MEMORY_CONTAINER;
+	window.ALLOCATED_MEMORY_CONTAINER.dataView = new DataView(
+		window.ALLOCATED_MEMORY_CONTAINER.allocatedMemory!.buffer
+	);
 }
 export function updateMemoryArrayViewsIfNeeded() {
 	if (

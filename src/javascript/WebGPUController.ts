@@ -1,5 +1,9 @@
 import { clockInit, clockTick } from "./Clock";
-import { updateMemoryArrayViews, USELESS_ARG0 } from "./Common";
+import {
+	updateMemoryArrayViews,
+	updateMemoryArrayViewsIfNeeded,
+	USELESS_ARG0,
+} from "./Common";
 import {
 	addEvents,
 	eventsDataReset,
@@ -121,7 +125,7 @@ export function webGPURenderControllerCreate(
 
 		if (DEBUG_HEAP) heapCopy(previousHeap);
 		// const currentTexture = wgpuSurfaceGetCurrentTexture();
-		updateMemoryArrayViews();
+		updateMemoryArrayViewsIfNeeded();
 		window.wasmFunctions.onRequestAnimationFrame(
 			USELESS_ARG0,
 			BigInt(clockData.time),

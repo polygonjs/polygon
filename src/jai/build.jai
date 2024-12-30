@@ -52,6 +52,7 @@
 			EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
 
 			STACK_SIZE :: 512 * 1024 * 1024;
+			// STACK_SIZE :: 65 * 1024;
 			options.additional_linker_arguments = .[
 				"--stack-first",
 				"-z",
