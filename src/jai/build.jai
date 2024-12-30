@@ -243,8 +243,9 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs.optimized = array_find(args, "O");
 	buildArgs.skipmemtest = array_find(args, "skipmemtest");
 	if( buildArgs.wasm==false && buildArgs.native==false ) {
-		buildArgs.wasm = true;
+		buildArgs.wasm = false;
 		buildArgs.native = true;
+		buildArgs.test = true;
 	}
 
 	// array_resize(*COMPILE_TIME_ARGS, args.count);
