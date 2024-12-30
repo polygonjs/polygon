@@ -9,6 +9,9 @@ OrbitControls :: struct {
 	target:Vector3 = .{x=0.0,y=0.0,z=0.0}; // Target point the camera looks at
 	sensitivity:float = 0.0025;
 
+	phiBound :[2]float = .[DEFAULT_PHI_MIN, DEFAULT_PHI_MAX];
+	radiusBound :[2]float = .[DEFAULT_RADIUS_MIN, DEFAULT_RADIUS_MAX];
+
 	panStarted: bool = false;
 	zoomStarted: bool = false;
 	leftButtonPressed: bool = false;
@@ -32,7 +35,7 @@ cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, ele
 		dy:int = cast(int)eventsData.cursor.y - lastPointer.y;
 
 		theta += dx * sensitivity;
-		phi = clamp(phi - dy * sensitivity, PHI_MIN, PHI_MAX);
+		phi = clamp(phi - dy * sensitivity, phiBound[0], phiBound[1]);
 
 		if (eventsData.mouseButton.left==false) {
 			panStarted = false;
@@ -41,10 +44,9 @@ cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, ele
 		lastPointer.y = cast(s32)eventsData.cursor.y;
 	}
 
-	if(eventsData.wheel != 0){
+	if(elementFocused && eventsData.wheel != 0){
 		previousRadius := radius;
-		radius -= eventsData.wheel * 0.1;
-		if (radius < 1.0) radius = 1.0; // Prevent radius from being too small
+		radius = clamp(radius - eventsData.wheel * 0.1, radiusBound[0], radiusBound[1]);
 		if previousRadius != radius {
 			zoomStarted = true;
 		}
@@ -83,8 +85,10 @@ cameraControlsCommit :: (using controls:*TYPE) {
 TYPE :: OrbitControls;
 
 
-PHI_MIN :: -PI/2;
-PHI_MAX :: +PI/2;
+DEFAULT_PHI_MIN :: -PI/2;
+DEFAULT_PHI_MAX :: +PI/2;
+DEFAULT_RADIUS_MIN :: 1.0;
+DEFAULT_RADIUS_MAX :: 50.0;
 AXIS_X	::Vector3.{x=1.0, y=0.0, z=0.0};
 AXIS_Y	::Vector3.{x=0.0, y=1.0, z=0.0};
 // UP		::Vector3.{x=0.0, y=1.0, z=0.0};

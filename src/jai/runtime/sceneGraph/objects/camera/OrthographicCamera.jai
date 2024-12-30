@@ -1,14 +1,14 @@
 OrthographicCamera :: struct {
 	#as using camera: Camera;
 
-	size: float32 = DEFAULT_SIZE;
+	size: float32 = ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE;
 }
 
 object3DInit :: (camera: *TYPE) {
 	worldObjectInit(camera);
 	object3DInit(cast(*Camera)camera);
 
-	camera.size = DEFAULT_SIZE;
+	camera.size = ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE;
 
 	assert(camera.aspect != 0.0, "camera.aspect is 0.0");
 	cameraProjectionUpdate(camera);
@@ -44,9 +44,8 @@ cameraSetRaycaster :: (camera: *TYPE, raycaster: *Raycaster, coords: Vector2) {
 	raycaster.ray.direction = direction;
 }
 
-
+ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE :: 10.0;
 
 #scope_file
 
 TYPE :: OrthographicCamera;
-DEFAULT_SIZE :: 10.0;

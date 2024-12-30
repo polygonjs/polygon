@@ -1,5 +1,6 @@
 processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 	focused := elementFocused(*rendererColor, eventsData);
+	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
 	if focused == false {
 		return;
 	}
@@ -15,7 +16,7 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 		return;
 	}
 
-	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
+	
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
 		updateOutputNodeCurrentInput(panel, eventsData);
 
