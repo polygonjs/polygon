@@ -9,6 +9,7 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	add1 := createNode(nodesScene, AddGeoNode);
 	box1 := createNode(nodesScene, BoxGeoNode);
+	plane1 := createNode(nodesScene, PlaneGeoNode);
 	line1 := createNode(nodesScene, LineGeoNode);
 	icosahedron1 := createNode(nodesScene, IcosahedronGeoNode);
 	fileSTL1 := createNode(nodesScene, FileSTLGeoNode);
@@ -34,7 +35,7 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 	setInput(output1, 0, add1);
 	setInput(output1, 1, noise1);
 	setInput(output1, 2, noise2);
-	setInput(output1, 3, line1);
+	setInput(output1, 3, plane1);
 	setInput(output1, 4, fileSTL1);
 	// setInput(output1, 3, transform2);
 	// setInput(transform1, 0, box1);
@@ -45,13 +46,14 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 
 
 	paramSetValue(*box1.p.scale, 2.0);
-	paramSetValue(*output1.p.input, 4);
+	paramSetValue(*output1.p.input, 3);
 	paramSetValue(*icosahedron1.p.detail, 0);
 
 	nodeSetPosition(editor, output1, .{0,-4});
 
 	nodeSetPosition(editor, add1, .{-4,0});
 	nodeSetPosition(editor, box1, .{-2,2});
+	nodeSetPosition(editor, plane1, .{-2,4});
 	nodeSetPosition(editor, noise1, .{-2,0});
 	nodeSetPosition(editor, icosahedron1, .{0,2});
 	nodeSetPosition(editor, noise2, .{0,0});

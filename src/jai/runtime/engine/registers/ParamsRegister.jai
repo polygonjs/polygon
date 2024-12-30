@@ -27,6 +27,8 @@ registerParams :: () #compile_time {
 	paramRegisterStringParam();
 	paramRegisterUInt8Param();
 	paramRegisterUIntegerParam();
+	paramRegisterVector2Param();
+	paramRegisterVector2UIntParam();
 	paramRegisterVector3Param();
 	paramRegisterVector3UIntParam();
 

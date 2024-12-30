@@ -39,3 +39,24 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 
 TYPE :: NoiseGeoNode;
 
+NoiseParams :: struct {
+	amp:float;
+	freq: Vector3;
+	offset: Vector3;
+}
+geometry_add_noise :: (geometry: *Geometry, using params: NoiseParams) {
+	{
+		position := *geometry.attributes.position;
+		normal := *geometry.attributes.normal;
+		for position.values {
+			noiseValue := perlin_noise(
+				(it.x+offset.x)*freq.x,
+				(it.y+offset.y)*freq.y,
+				(it.z+offset.z)*freq.z
+			);
+			position.values[it_index] += normal.values[it_index] * amp * noiseValue;
+		}
+	}
+	normals_compute(geometry);
+}
+

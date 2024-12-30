@@ -9,5 +9,5 @@
 #load "MeshIdU32Material/MeshIdU32Material.jai";
 #load "MeshNormalMaterial/MeshNormalMaterial.jai";
 #load "MeshRaymarchingMaterial/MeshRaymarchingMaterial.jai";
-
+#load "MeshUVMaterial/MeshUVMaterial.jai";
 #load "PointBasicMaterial/PointBasicMaterial.jai";

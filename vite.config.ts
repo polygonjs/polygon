@@ -21,7 +21,7 @@ if (BUILD_ARGS.wasm) CMD_BUILD_ARGS.push("wasm");
 if (BUILD_ARGS.native) CMD_BUILD_ARGS.push("native");
 if (BUILD_ARGS.test) CMD_BUILD_ARGS.push("test");
 
-const CMD_BUILD = `jai src/jai/build.jai - ${CMD_BUILD_ARGS.join(" ")}`;
+const CMD_BUILD = `jai src/jai/build/build.jai - ${CMD_BUILD_ARGS.join(" ")}`;
 
 function logRedBg(message: string) {
 	logStyled(message, {

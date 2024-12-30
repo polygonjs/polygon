@@ -27,6 +27,7 @@ NodesScene :: struct {
 		line: LineBasicMaterial;
 		mesh: MeshNormalMaterial;
 		point: PointBasicMaterial;
+		uv: MeshUVMaterial;
 	}
 	defaultMaterial:DefaultMaterial;
 
@@ -155,7 +156,7 @@ nodesSceneInit :: (scene: *NodesScene) {
 	materialInit(*scene.defaultMaterial.line);
 	materialInit(*scene.defaultMaterial.mesh);
 	materialInit(*scene.defaultMaterial.point);
-
+	materialInit(*scene.defaultMaterial.uv);
 }
 
 NodesSceneOnNodesComputedCallback :: #type (nodesScene: *NodesScene);

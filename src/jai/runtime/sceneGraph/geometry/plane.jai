@@ -6,7 +6,7 @@ PlaneGeometryParams :: struct {
 	segments:Vector2UInt = .{1,1};
 }
 
-geometry_plane_attributes_set :: (geometry: *Geometry, params: PlaneGeometryParams) {
+geometryPlaneAttributesSet :: (geometry: *Geometry, params: PlaneGeometryParams) {
 
 	width := params.size.x;
 	height := params.size.y;
@@ -22,13 +22,13 @@ geometry_plane_attributes_set :: (geometry: *Geometry, params: PlaneGeometryPara
 	segmentWidth := width / cast(float) widthSegments;
 	segmentHeight := height / cast(float) heightSegments;
 
-	points_count := gridX * gridY;
-	indices_count := widthSegments * heightSegments * 6;
+	pointsCount := gridX * gridY;
+	indicesCount := widthSegments * heightSegments * 6;
 
-	array_resize(*geometry.attributes.position.values, points_count, false);
-	array_resize(*geometry.attributes.normal.values, points_count, false);
-	array_resize(*geometry.attributes.uv.values, points_count, false);
-	array_resize(*geometry.indices, indices_count, false);
+	array_resize(*geometry.attributes.position.values, pointsCount, false);
+	array_resize(*geometry.attributes.normal.values, pointsCount, false);
+	array_resize(*geometry.attributes.uv.values, pointsCount, false);
+	array_resize(*geometry.indices, indicesCount, false);
 
 	// Generate vertices, normals, and uvs
 	for iy: 0..gridY-1 {

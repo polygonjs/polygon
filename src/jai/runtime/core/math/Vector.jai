@@ -32,6 +32,12 @@ operator == :: (a:$T/Vector2All, b:T) -> bool {
 operator == :: (a:$T/Vector3All, b:T) -> bool {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
+valueEquals :: (tmpValue: [2] float, vector2: Vector2) -> bool #expand {
+	return tmpValue[0] == vector2.x && tmpValue[1] == vector2.y;
+}
+valueEquals :: (tmpValue: [2] s32, vector2: Vector2UInt) -> bool #expand {
+	return tmpValue[0] == xx vector2.x && tmpValue[1] == xx vector2.y;
+}
 valueEquals :: (tmpValue: [3] float, vector3: Vector3) -> bool #expand {
 	return tmpValue[0] == vector3.x && tmpValue[1] == vector3.y && tmpValue[2] == vector3.z;
 }
@@ -43,6 +49,9 @@ operator - :: (a:$T/Vector2All, b:T) -> T {
 	return .{a.x - b.x, a.y - b.y};
 }
 
+mult :: inline (a: $T/Vector2All, s: float) -> Vector2 {
+	return .{a.x * s, a.y * s};
+}
 mult :: inline (a: $T/Vector3All, s: float) -> Vector3 {
 	return .{a.x * s, a.y * s, a.z * s};
 }

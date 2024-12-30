@@ -9,6 +9,7 @@
 #load "Merge.jai";
 #load "Noise.jai";
 #load "Null.jai";
+#load "Plane.jai";
 #load "Output.jai";
 #load "Sphere.jai";
 #load "Switch.jai";

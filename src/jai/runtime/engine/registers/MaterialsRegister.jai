@@ -13,6 +13,7 @@ registerMaterials :: () #compile_time {
 	registerMeshIdU32Material();
 	registerMeshNormalMaterial();
 	registerMeshRaymarchingMaterial();
+	registerMeshUVMaterial();
 
 	registerPointBasicMaterial();
 }

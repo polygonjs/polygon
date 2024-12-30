@@ -169,23 +169,23 @@ printTestAppStats :: (app: *PolygonApp) {
 
 test :: (name: string, procedure: TestProcedure) {
 	_ensureTestNameUnique(name);
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=false, headless=true, scene=false, editor=false});
+	array_add(*NAMED_PROCEDURES, .{name=name, proc=procedure, wgpu=false, headless=true, scene=false, editor=false});
 }
 testWithWindow :: (name: string, procedure: TestProcedure) {
 	_ensureTestNameUnique(name);
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=false, scene=true, editor=true});
+	array_add(*NAMED_PROCEDURES, .{name=name, proc=procedure, wgpu=true, headless=false, scene=true, editor=true});
 }
 testHeadless :: (name: string, procedure: TestProcedure) {
 	_ensureTestNameUnique(name);
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=true, scene=true, editor=true});
+	array_add(*NAMED_PROCEDURES, .{name=name, proc=procedure, wgpu=true, headless=true, scene=true, editor=true});
 }
 testHeadlessNoSceneOrEditor :: (name: string, procedure: TestProcedure) {
 	_ensureTestNameUnique(name);
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=true, headless=true, scene=false, editor=false});
+	array_add(*NAMED_PROCEDURES, .{name=name, proc=procedure, wgpu=true, headless=true, scene=false, editor=false});
 }
 testWithScene :: (name: string, procedure: TestProcedure) {
 	_ensureTestNameUnique(name);
-	array_add(*NAMED_PROCEDURES_COMPILE_TIME, .{name=name, proc=procedure, wgpu=false, headless=true, scene=true, editor=false});
+	array_add(*NAMED_PROCEDURES, .{name=name, proc=procedure, wgpu=false, headless=true, scene=true, editor=false});
 }
 
 TestProcedureOptions :: struct {
@@ -267,20 +267,16 @@ initTestApp :: (app: *PolygonApp){
 		print("headlessInit in % seconds.\n", to_float64_seconds(app.testApp.t1-app.testApp.t0));
 	}
 
+	registerTests();
+
 	app.testApp.procedures = NAMED_PROCEDURES;
 	app.testApp.procedureIndex = 0;//NAMED_PROCEDURES.count-1;
 }
 
-getRegisteredTests :: ()->[..]NamedProcedure {
-	registerTests();
-	return NAMED_PROCEDURES_COMPILE_TIME;
-}
-
-NAMED_PROCEDURES_COMPILE_TIME :[..]NamedProcedure;
-NAMED_PROCEDURES :[]NamedProcedure: #run getRegisteredTests();
+NAMED_PROCEDURES :[..]NamedProcedure;
 
 _ensureTestNameUnique :: (name: string) {
-	for test,i: NAMED_PROCEDURES_COMPILE_TIME {
+	for test,i: NAMED_PROCEDURES {
 		if test.name == name {
 			assert(false, tprint("TEST NAME ALREADY EXISTS (%)", test.name));
 		}
