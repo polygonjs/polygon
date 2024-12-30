@@ -20,10 +20,10 @@ mainMenuBarDraw :: (using editor: *Editor) {
 		{
 			// fps
 			// for some reason, this now makes the UI flicker in wasm
-			#if WASM == false {
+			// #if WASM == false {
 				frameRateStr := tprint("FPS:%", editor.nodesScene.fps);
 				ImGui.TextUnformatted(frameRateStr);
-			}
+			// }
 		}
 		ImGui.EndMainMenuBar();
 	}

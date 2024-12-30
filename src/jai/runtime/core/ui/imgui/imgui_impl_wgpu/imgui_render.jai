@@ -107,8 +107,8 @@ ImGui_ImplWGPU_RenderDrawData :: (imguiPolygonContext: *ImguiPolygonContext, dra
 	fr := *(bd.pFrameResources[frame_index]);
 
 	// Create and grow vertex/index buffers if needed
-	array_reset(*iwc_draw.vertices);
-	array_reset(*iwc_draw.indices);
+	array_reset_keeping_memory(*iwc_draw.vertices);
+	array_reset_keeping_memory(*iwc_draw.indices);
 	if (fr.VertexBuffer == null || fr.VertexBufferSize < xx draw_data.TotalVtxCount) {
 		if (fr.VertexBuffer) {
 			wgpuBufferDestroy(fr.VertexBuffer);

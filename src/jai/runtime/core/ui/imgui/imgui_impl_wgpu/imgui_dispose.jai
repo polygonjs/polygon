@@ -27,7 +27,7 @@ ImGui_ImplWGPU_Shutdown :: (imguiPolygonContext: *ImguiPolygonContext) {
 	// delete[] bd->pFrameResources;
 	// free(bd.pFrameResources);
 	// for *bd.pFrameResources free(it);
-	array_reset(*bd.pFrameResources);
+	array_reset_keeping_memory(*bd.pFrameResources);
 
 	// bd.pFrameResources = null;
 	// wgpuQueueRelease(bd.defaultQueue);
@@ -46,7 +46,7 @@ ImGui_ImplWGPU_Shutdown :: (imguiPolygonContext: *ImguiPolygonContext) {
 
 imgui_gui_free :: (imguiPolygonContext: *ImguiPolygonContext){
 	#if FREE_MEMORY {
-		array_reset(*imguiPolygonContext.iwc.draw.vertices);
-		array_reset(*imguiPolygonContext.iwc.draw.indices);
+		array_reset_keeping_memory(*imguiPolygonContext.iwc.draw.vertices);
+		array_reset_keeping_memory(*imguiPolygonContext.iwc.draw.indices);
 	}
 }

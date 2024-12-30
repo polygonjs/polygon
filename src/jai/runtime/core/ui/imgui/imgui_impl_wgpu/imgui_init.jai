@@ -51,7 +51,7 @@ ImGui_ImplWGPU_Init :: (
 	// Create buffers with a default size (they will later be grown as needed)
 	// frame_resources := [..]FrameResources;
 	// bd.pFrameResources = [..]FrameResources; //New(FrameResources[num_frames_in_flight]);
-	array_reset(*bd.pFrameResources);
+	array_reset_keeping_memory(*bd.pFrameResources);
 	for 0..(info.NumFramesInFlight-1) {
 		array_add(*bd.pFrameResources, .{
 			IndexBuffer = null,

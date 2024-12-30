@@ -3,6 +3,8 @@ appSceneInit :: appSceneInit1;
 
 #scope_file
 
+BOX1:*BoxGeoNode;
+
 appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 
 	add1 := createNode(nodesScene, AddGeoNode);
@@ -60,6 +62,16 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 	// nodeSetPosition(editor, transform2, .{0,-2});
 	// nodeSetPosition(editor, noise1, .{0,-2});
 	//
+
+	// selectNode(editor, xx box1);
+	BOX1 = box1;
+	editor.onAfterTick = (using editor: *Editor) {
+		if nodesScene.framesCount == 10 {
+			print("select box node to debug imgui in wasm");
+			selectNode(editor, xx BOX1);
+		}
+	};
+
 	editorFlushCommands(editor);
 }
 

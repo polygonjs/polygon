@@ -4,6 +4,10 @@ ComputablesTree :: struct {
 	outputs: [..][..]NodeId;
 	leaves: [..]NodeId;
 	previousLeavesCount: s64;
+
+	nodesToTraverse:[..]NodeId;
+	traversedNodeIds:[..]NodeId;
+
 }
 
 nodesSceneComputableTreeInit :: (using scene: *NodesScene) {
@@ -12,6 +16,8 @@ nodesSceneComputableTreeInit :: (using scene: *NodesScene) {
 	array_init(*computablesTree.outputs, scene.allocator, reserve=true);
 	array_init(*computablesTree.leaves, scene.allocator, reserve=true);
 
+	array_init(*computablesTree.nodesToTraverse, scene.allocator, reserve=true);
+	array_init(*computablesTree.traversedNodeIds, scene.allocator, reserve=true);
 }
 
 nodesSceneFindFirstOutputNode :: (scene: *NodesScene) -> *OutputGeoNode {
@@ -144,10 +150,9 @@ computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) 
 
 
 buildComputableTree :: (scene: *NodesScene, outputNode: *OutputGeoNode) {
-	nodesToTraverse:[..]NodeId;
-	traversedNodeIds:[..]NodeId;
-	defer array_reset(*nodesToTraverse);
-	defer array_reset(*traversedNodeIds);
+	using scene.computablesTree;
+	array_reset_keeping_memory(*nodesToTraverse);
+	array_reset_keeping_memory(*traversedNodeIds);
 	array_add(*nodesToTraverse, outputNode.nodeId);
 	// print("start:%\n", nodesToTraverse);
 	while nodesToTraverse.count > 0 {
@@ -155,13 +160,13 @@ buildComputableTree :: (scene: *NodesScene, outputNode: *OutputGeoNode) {
 		node := scene.nodes[nodeId];
 		// print("nodeId:%, node: %\n", nodeId, node);
 		// print("node.type: %\n", node.type);
-		generatedNodeComputeInputs(scene, node, *scene.computablesTree.inputs[nodeId]);
-		if scene.computablesTree.inputs[nodeId].count == 0 {
-			array_add_if_unique(*scene.computablesTree.leaves, nodeId);
+		generatedNodeComputeInputs(scene, node, *inputs[nodeId]);
+		if inputs[nodeId].count == 0 {
+			array_add_if_unique(*leaves, nodeId);
 		} else {
-			for inputNodeId: scene.computablesTree.inputs[nodeId] {
+			for inputNodeId: inputs[nodeId] {
 
-				array_add_if_unique(*scene.computablesTree.outputs[inputNodeId], nodeId);
+				array_add_if_unique(*outputs[inputNodeId], nodeId);
 
 				inputNode := scene.nodes[inputNodeId];
 				if(array_find(traversedNodeIds, inputNodeId)==false){
