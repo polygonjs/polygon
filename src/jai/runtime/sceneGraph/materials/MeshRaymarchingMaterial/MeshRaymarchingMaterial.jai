@@ -3,10 +3,10 @@ MeshRaymarchingMaterialUniforms :: struct {
 };
 
 MeshRaymarchingMaterial :: struct {
-	#as using material: MaterialBase(UNIFORM_TYPE);
+	#as using material: MaterialBase(UNIFORM_TYPE, topology = .TriangleList);
 };
 registerMeshRaymarchingMaterial :: () #compile_time {
-	materialRegister(TYPE, topology = .TriangleList);
+	materialRegister(TYPE);
 }
 
 // uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {

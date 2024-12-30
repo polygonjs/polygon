@@ -3,11 +3,11 @@ LineBasicMaterialUniforms :: struct {
 };
 
 LineBasicMaterial :: struct {
-	#as using material: MaterialBase(UNIFORM_TYPE);
+	#as using material: MaterialBase(UNIFORM_TYPE, topology = .LineList);
 };
 
 registerLineBasicMaterial :: () #compile_time {
-	materialRegister(TYPE, topology = .LineList);
+	materialRegister(TYPE);
 }
 
 // uniforms :: (material: *TYPE) -> *UNIFORM_TYPE {

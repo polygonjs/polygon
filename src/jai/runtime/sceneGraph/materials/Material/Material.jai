@@ -1,6 +1,6 @@
 EmptyUniforms :: struct {};
 
-MaterialBase :: struct ($UniformType: Type) {
+MaterialBase :: struct ($UniformType: Type, $topology: WGPUPrimitiveTopology) {
 	allocator: Allocator;
 	type: Type;
 	materialTypeId:u64;
@@ -12,7 +12,7 @@ MaterialBase :: struct ($UniformType: Type) {
 	shader: string;
 	uniforms: UniformType;
 }
-Material :: MaterialBase(Any);
+Material :: MaterialBase(Any, .TriangleList);
 
 
 newMaterial :: (scene: *Scene, $T: Type) -> *T {
@@ -38,7 +38,7 @@ materialDelete :: (material: *$T) {
 	free(material,, material.allocator);
 }
 materialTopology :: (material: *$T) ->WGPUPrimitiveTopology{
-	return MATERIAL_METADATAS[material.materialTypeId].topology;
+	return material.topology;//MATERIAL_METADATAS[material.materialTypeId].topology;
 }
 materialUpdatePipelineControllerLayout :: (material: *Material, pc : *PipelineController) {
 

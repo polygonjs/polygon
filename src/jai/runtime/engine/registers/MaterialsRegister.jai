@@ -1,4 +1,8 @@
-
+generatedMaterialTopology :: (material: *Material)->WGPUPrimitiveTopology {
+	#insert GENERATED_MATERIAL_TOPOLOGY;
+	assert(false, tprint("generatedMaterialTopology: material type '%' is not implemented", material.type));
+	return .TriangleList;
+}
 
 registerMaterials :: () #compile_time {
 
@@ -32,14 +36,6 @@ materialsMetaDatas :: ()->[MATERIAL_METADATAS_COUNT]MaterialMetaData #compile_ti
 	return list;
 }
 
-// registerMaterialsAndGenerateCode :: () -> (materialTopology:string) {
-
-// 	registerNodes();
-
-// 	materialTopology := generateMaterialTopologies();
-
-// 	return 	materialTopology;
-// }
 
 getMaterialTypeId :: (T:Type)->u64 {
 	index := -1;
@@ -57,18 +53,18 @@ getMaterialTypeId :: (T:Type)->u64 {
 }
 
 materialRegister :: (
-	$T:Type,
-	topology:WGPUPrimitiveTopology
+	$T:Type //,
+	// topology:WGPUPrimitiveTopology
 	) #compile_time {
 	array_add(*TMP_METADATAS, .{
-		type = T,
-		topology = topology
+		type = T //,
+		// topology = topology
 	});
 }
 
 MaterialMetaData :: struct {
 	type: Type;
-	topology: WGPUPrimitiveTopology;
+	// topology: WGPUPrimitiveTopology;
 }
 
 #no_reset MATERIAL_METADATAS_COUNT :u64: #run materialsMetaDatasCount();
@@ -79,4 +75,28 @@ MaterialMetaData :: struct {
 
 TMP_METADATAS: [..]MaterialMetaData;
 
+GENERATED_MATERIAL_TOPOLOGY :: #run registerMaterialsAndGenerateCode();
 
+
+registerMaterialsAndGenerateCode :: () -> (materialTopology:string) {
+
+	registerMaterials();
+
+	materialTopology := _forMat("materialTopology");
+
+	return 	materialTopology;
+}
+
+
+_forMat :: (functionName:string)->string #compile_time {
+	builder: String_Builder;
+	print_to_builder(*builder, "if material.type == {\n");
+	for metaData: MATERIAL_METADATAS {
+		materialType := metaData.type;
+		print_to_builder(*builder, tprint("\tcase %; return %(cast(*%) material);\n", materialType, functionName, materialType));
+	}
+	print_to_builder(*builder, "}");
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}

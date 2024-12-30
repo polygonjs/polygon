@@ -37,6 +37,7 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 	setInput(output1, 2, noise2);
 	setInput(output1, 3, plane1);
 	setInput(output1, 4, fileSTL1);
+	setInput(output1, 5, line1);
 	// setInput(output1, 3, transform2);
 	// setInput(transform1, 0, box1);
 	// setInput(transform2, 0, transform1);

@@ -92,7 +92,7 @@ pipelineControllerInit :: (using pc: *PipelineController)-> PipelineController {
 	pipeline_descriptor.vertex = vertex_state;
 
 	pipeline_descriptor.primitive = .{
-		topology= materialTopology(pc.material), //.TriangleList,
+		topology= generatedMaterialTopology(pc.material), //.TriangleList,
 		stripIndexFormat=.Undefined,
 		// frontFace=.CCW,
 		cullMode=.None,

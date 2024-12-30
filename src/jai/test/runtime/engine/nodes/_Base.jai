@@ -7,6 +7,9 @@ testBaseNode :: () {
 
 			assertEqual(box1.minInputsCount, 0);
 			assertEqual(box1.maxInputsCount, 1);
+
+			assertTrue(is_constant(box1.minInputsCount), "minInputsCount is constant");
+			assertTrue(is_constant(box1.maxInputsCount), "minInputsCount is constant");
 			// assertEqual(box1.inputs, .[0,1]);
 			// assertEqual(box1.baseMinInputsCount, 0);
 
@@ -71,9 +74,9 @@ testBaseNode :: () {
 
 }
 
-NODE_TYPE_ID:u16 = 0;
-nextNodeTypeId :: ()->u16 {
-	currentId := NODE_TYPE_ID;
-	NODE_TYPE_ID += 1;
-	return currentId;
-}
+// NODE_TYPE_ID:u16 = 0;
+// nextNodeTypeId :: ()->u16 {
+// 	currentId := NODE_TYPE_ID;
+// 	NODE_TYPE_ID += 1;
+// 	return currentId;
+// }

@@ -3,10 +3,10 @@ MeshIdU32MaterialUniforms :: struct {
 };
 
 MeshIdU32Material :: struct {
-	#as using material: MaterialBase(UNIFORM_TYPE);
+	#as using material: MaterialBase(UNIFORM_TYPE, topology = .TriangleList);
 };
 registerMeshIdU32Material :: () #compile_time {
-	materialRegister(TYPE, topology = .TriangleList);
+	materialRegister(TYPE);
 }
 
 // uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {

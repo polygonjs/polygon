@@ -3,11 +3,11 @@ MeshBasicMaterialUniforms :: struct {
 };
 
 MeshBasicMaterial :: struct {
-	#as using material: MaterialBase(UNIFORM_TYPE);
+	#as using material: MaterialBase(UNIFORM_TYPE, topology = .TriangleList);
 };
 
 registerMeshBasicMaterial :: () #compile_time {
-	materialRegister(TYPE, topology = .TriangleList);
+	materialRegister(TYPE);
 }
 
 // uniforms :: (material: *TYPE) -> *UNIFORM_TYPE {

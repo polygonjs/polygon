@@ -3,10 +3,10 @@ MeshBackgroundBasicMaterialUniforms :: struct {
 };
 
 MeshBackgroundBasicMaterial :: struct {
-	#as using material: MaterialBase(UNIFORM_TYPE);
+	#as using material: MaterialBase(UNIFORM_TYPE, topology = .TriangleList);
 };
 registerMeshBackgroundBasicMaterial :: () #compile_time {
-	materialRegister(TYPE, topology = .TriangleList);
+	materialRegister(TYPE);
 }
 // uniforms :: (material: *MATERIAL_TYPE) -> *UNIFORM_TYPE {
 // 	return cast(*UNIFORM_TYPE)material.uniforms;

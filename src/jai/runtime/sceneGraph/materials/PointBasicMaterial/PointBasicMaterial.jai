@@ -3,11 +3,11 @@ PointBasicMaterialUniforms :: struct {
 };
 
 PointBasicMaterial :: struct {
-	#as using material: MaterialBase(UNIFORM_TYPE);
+	#as using material: MaterialBase(UNIFORM_TYPE, topology = .PointList);
 };
 
 registerPointBasicMaterial :: () #compile_time {
-	materialRegister(TYPE, topology = .PointList);
+	materialRegister(TYPE);
 }
 
 // uniforms :: (material: *TYPE) -> *UNIFORM_TYPE {

@@ -18,15 +18,18 @@ registerTests :: () {
 	testRaycaster();
 	testVector();
 	// - runtime/engine
-	// - runtime/engine/nodes
-	testBaseNode();
-	testFileSTLGeoNode();
-	testNoiseGeoNode();
-	testOutputGeoNode();
-	testTransformGeoNode();
 	// - runtime/engine/scene
 	testNodesBasicDependency();
 	testNodeNames();
 	testNodeSetInput();
+	// - runtime/engine/nodes
+	testBaseNode();
+	// - runtime/engine/nodes/geo
+	testFileSTLGeoNode();
+	testNoiseGeoNode();
+	testOutputGeoNode();
+	testTransformGeoNode();
+	// - runtime/engine/nodes/mat
+	testBaseMatNode();
 }
 

@@ -1,5 +1,5 @@
 MeshNormalMaterial :: struct {
-	#as using material: MaterialBase(EmptyUniforms);
+	#as using material: MaterialBase(EmptyUniforms, topology = .TriangleList);
 };
 
 materialInit :: (material: *TYPE) {
@@ -8,7 +8,7 @@ materialInit :: (material: *TYPE) {
 	material.shader = SHADER_RAW;
 }
 registerMeshNormalMaterial :: () #compile_time {
-	materialRegister(TYPE, topology = .TriangleList);
+	materialRegister(TYPE);
 }
 
 #scope_file
