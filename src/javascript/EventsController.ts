@@ -157,13 +157,13 @@ export function addEvents(canvas: HTMLCanvasElement) {
 				EVENTS_DATA.mouseButton.right == false;
 			EVENTS_DATA.mouseButton.right = true;
 		}
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	function onPointermove(event: PointerEvent) {
 		// console.log(event.clientX, event.clientY)
 		EVENTS_DATA.cursor.x = Math.round(event.clientX);
 		EVENTS_DATA.cursor.y = Math.round(event.clientY);
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	function onPointerup(event: PointerEvent) {
 		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
@@ -185,11 +185,11 @@ export function addEvents(canvas: HTMLCanvasElement) {
 				EVENTS_DATA.mouseButton.right == true;
 			EVENTS_DATA.mouseButton.right = false;
 		}
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	function onWheel(event: WheelEvent) {
 		EVENTS_DATA.wheel = event.deltaY;
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	function onKeydown(event: KeyboardEvent) {
 		if (event.altKey) EVENTS_DATA.modifiers.alt = true;
@@ -206,7 +206,7 @@ export function addEvents(canvas: HTMLCanvasElement) {
 			return;
 		}
 		EVENTS_DATA.textCharCodes.push(event.key.charCodeAt(0));
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	function onKeyup(event: KeyboardEvent) {
 		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
@@ -221,7 +221,7 @@ export function addEvents(canvas: HTMLCanvasElement) {
 				}
 			}
 		}
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	canvas.addEventListener("pointerdown", onPointerdown);
 	canvas.addEventListener("pointermove", onPointermove);
@@ -233,11 +233,11 @@ export function addEvents(canvas: HTMLCanvasElement) {
 export function eventsDataReset() {
 	if (EVENTS_DATA.wheel != 0) {
 		EVENTS_DATA.wheel = 0;
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	if (EVENTS_DATA.textCharCodes.length != 0) {
 		EVENTS_DATA.textCharCodes.length = 0;
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	if (
 		EVENTS_DATA.mouseButtonJustPressed.left == true ||
@@ -247,7 +247,7 @@ export function eventsDataReset() {
 		EVENTS_DATA.mouseButtonJustPressed.left = false;
 		EVENTS_DATA.mouseButtonJustPressed.middle = false;
 		EVENTS_DATA.mouseButtonJustPressed.right = false;
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	if (
 		EVENTS_DATA.mouseButtonJustReleased.left == true ||
@@ -257,7 +257,7 @@ export function eventsDataReset() {
 		EVENTS_DATA.mouseButtonJustReleased.left = false;
 		EVENTS_DATA.mouseButtonJustReleased.middle = false;
 		EVENTS_DATA.mouseButtonJustReleased.right = false;
-		eventsDataDirty = true;
+		markEventsDataDirty();
 	}
 	// EVENTS_DATA.modifiers.alt = false;
 	// EVENTS_DATA.modifiers.ctrl = false;
@@ -391,7 +391,6 @@ export function to_float64_seconds(num: bigint): bigint {
 // }
 export function markEventsDataDirty() {
 	eventsDataDirty = true;
-	// console.warn("markEventsDataDirty");
 }
 let eventsDataDirty = true;
 

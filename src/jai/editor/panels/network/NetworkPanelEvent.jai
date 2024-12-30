@@ -1,68 +1,78 @@
 processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
-	if(eventsData.dirty == false){
+	focused := elementFocused(*rendererColor, eventsData);
+	if focused == false {
 		return;
 	}
-	focused := elementFocused(*rendererColor, eventsData);
-	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
-	if (focused){
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
-			updateOutputNode(panel, eventsData);
 
-			if (eventsData.mouseButtonJustPressed.left == true) {
-				eventHandler.waitingForButtonDownReadPixel = true;
+	// on native, we can get away with just checking eventsData.dirty,
+	// but on wasm we also need to check if we are waiting for the buffer to be mapped
+	processingRequired :=
+		eventsData.dirty == true ||
+		eventHandler.waitingForButtonDownReadPixel == true ||
+		eventHandler.waitingForButtonUpReadPixel == true;
+
+	if(processingRequired == false){
+		return;
+	}
+
+	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
+		updateOutputNode(panel, eventsData);
+
+		if (eventsData.mouseButtonJustPressed.left == true) {
+			eventHandler.waitingForButtonDownReadPixel = true;
+			eventHandler.waitingForButtonUpReadPixel = false;
+			networkPanelCursorDataInit(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
+			worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
+			networkPanelCursorDataInit(*eventHandler.worldData, worldPos);
+		}
+		moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
+		if (eventsData.mouseButtonJustReleased.left == true) {
+			if(moveThresholdCrossed == false){
+				eventHandler.waitingForButtonUpReadPixel = eventHandler.nodeIdOnButtonDownFound == true;
+			}
+			eventHandler.nodeIdOnButtonDownFound = false;
+		}
+		if (eventsData.mouseButton.left == true) {
+			networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
+			worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
+			networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
+			if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
+				moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
+			}
+		}
+		if (eventHandler.waitingForButtonDownReadPixel == true) {
+			eventHandler.nodeIdOnButtonDownFound = false;
+			renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
+			success, result := readPixelIfMapped(*rendererRaycast, eventsData);
+			if success == true {
+				eventHandler.waitingForButtonDownReadPixel = false;
+				found, nodeId := meshIdMaterialUnpackId(result);
+				if found == true && nodeId < editor.nodesScene.nodes.count {
+					node := editor.nodesScene.nodes[nodeId];
+					if node != null {
+						eventHandler.nodeIdOnButtonDownFound = true;
+						eventHandler.nodeIdOnButtonDown = nodeId;
+					}
+				}
+			}
+		} else if (eventHandler.waitingForButtonUpReadPixel == true) {
+			renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
+			success, result := readPixelIfMapped(*rendererRaycast, eventsData);
+			if success == true {
 				eventHandler.waitingForButtonUpReadPixel = false;
-				networkPanelCursorDataInit(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
-				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
-				networkPanelCursorDataInit(*eventHandler.worldData, worldPos);
-			}
-			moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
-			if (eventsData.mouseButtonJustReleased.left == true) {
-				if(moveThresholdCrossed == false){
-					eventHandler.waitingForButtonUpReadPixel = eventHandler.nodeIdOnButtonDownFound == true;
-				}
-				eventHandler.nodeIdOnButtonDownFound = false;
-			}
-			if (eventsData.mouseButton.left == true) {
-				networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
-				worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
-				networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
-				if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
-					moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
+				found, nodeId := meshIdMaterialUnpackId(result);
+				if found == true && nodeId < editor.nodesScene.nodes.count && nodeId == eventHandler.nodeIdOnButtonDown {
+					node := editor.nodesScene.nodes[nodeId];
+					selectNode(panel.editor, node, .REPLACE);
 				}
 			}
-			if (eventHandler.waitingForButtonDownReadPixel == true) {
-				eventHandler.nodeIdOnButtonDownFound = false;
-				renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
-				success, result := readPixelIfMapped(*rendererRaycast, eventsData);
-				if success == true {
-					eventHandler.waitingForButtonDownReadPixel = false;
-					found, nodeId := meshIdMaterialUnpackId(result);
-					if found == true && nodeId < editor.nodesScene.nodes.count {
-						node := editor.nodesScene.nodes[nodeId];
-						if node != null {
-							eventHandler.nodeIdOnButtonDownFound = true;
-							eventHandler.nodeIdOnButtonDown = nodeId;
-						}
-					}
-				}
-			} else if (eventHandler.waitingForButtonUpReadPixel == true) {
-				renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
-				success, result := readPixelIfMapped(*rendererRaycast, eventsData);
-				if success == true {
-					eventHandler.waitingForButtonUpReadPixel = false;
-					found, nodeId := meshIdMaterialUnpackId(result);
-					if found == true && nodeId < editor.nodesScene.nodes.count && nodeId == eventHandler.nodeIdOnButtonDown {
-						node := editor.nodesScene.nodes[nodeId];
-						selectNode(panel.editor, node, .REPLACE);
-					}
-				}
-			}
-			
-		} else {
-			if READ_PIXEL_WARNING_PRINTED == false {
-				print("readPixel deactivated\n");
-				READ_PIXEL_WARNING_PRINTED = true;
-			}
+		}
+		
+	} else {
+		if READ_PIXEL_WARNING_PRINTED == false {
+			print("readPixel deactivated\n");
+			READ_PIXEL_WARNING_PRINTED = true;
 		}
 	}
 }
