@@ -262,7 +262,7 @@ initTestApp :: (app: *PolygonApp){
 	app.testApp.t0 = current_time_monotonic();
 	app.testApp.testsCount = 0;
 	#if WASM == false {
-		headlessInit(*app.testApp.headlessWGPUContext, .{4,4});
+		headlessInit(*app.testApp.headlessWGPUContext, .{128,128});
 		app.testApp.t1 = current_time_monotonic();
 		print("headlessInit in % seconds.\n", to_float64_seconds(app.testApp.t1-app.testApp.t0));
 	}

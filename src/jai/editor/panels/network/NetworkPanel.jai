@@ -53,13 +53,13 @@ NetworkPanelOperation :: enum u8 {
 	NODE_CONNECT;
 }
 
-newNetworkPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
-	panel: *TYPE = New(TYPE);
+// newNetworkPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
+// 	panel: *TYPE = New(TYPE);
 
-	networkPanelInit(panel, editor, ensureWGPUContextValid);
+// 	networkPanelInit(panel, editor, ensureWGPUContextValid);
 
-	return panel;
-}
+// 	return panel;
+// }
 
 networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	allocatorAssign(panel);

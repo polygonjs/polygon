@@ -149,12 +149,12 @@ ImGui_ImplSdl_Shutdown :: () {
 	ImGui_ImplSdl_InvalidateDeviceObjects();
 }
 
-ImGui_ImplSdl_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: EventsData) {
+ImGui_ImplSdl_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: *EventsData, wgpuContext: *WGPUContext) {
 	assert(imguiPolygonContext.windowContext.window != null, "imguiPolygonContext.windowContext.window is null");
+	ImGui_ImplCommon_Checks(imguiPolygonContext);
 	window :*SDL_Window = imguiPolygonContext.windowContext.window;
 	// if !g_FontTexture ImGui_ImplSdl_CreateDeviceObjects();
 	
-	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
 	io := ImGui.GetIO();
 
 	// Setup display size (every frame to accommodate for window resizing)
@@ -166,8 +166,8 @@ ImGui_ImplSdl_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData
 	io.DisplayFramebufferScale = .{cast(float) display_w / w, cast(float) display_h / h};
 
 	// Setup time step
-	frequency := SDL_GetPerformanceFrequency();
-	current_time := SDL_GetPerformanceCounter();
+	// frequency := SDL_GetPerformanceFrequency();
+	// current_time := SDL_GetPerformanceCounter();
 	// if g_Time > 0 {
 	//     io.DeltaTime = cast(float)((cast(float64)(current_time - g_Time)) / frequency);
 	// } else {
@@ -188,6 +188,23 @@ ImGui_ImplSdl_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData
 		io.MousePos = .{-FLOAT32_MAX,-FLOAT32_MAX};
 	}
 
+	ImGui_ImplCommon_NewFrame(imguiPolygonContext, eventsData);
+}
+
+ImGui_ImplHeadless_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: *EventsData, wgpuContext: *WGPUContext) {
+	ImGui_ImplCommon_Checks(imguiPolygonContext);
+	io := ImGui.GetIO();
+	io.DisplaySize = .{xx wgpuContext.windowSize.x, xx wgpuContext.windowSize.y};
+	io.DisplayFramebufferScale = .{1, 1};
+
+}
+
+ImGui_ImplCommon_Checks :: (imguiPolygonContext: *ImguiPolygonContext) {
+	
+	assert(imguiPolygonContext.io != null, "imguiPolygonContext.io is null");
+}
+ImGui_ImplCommon_NewFrame :: (imguiPolygonContext: *ImguiPolygonContext, eventsData: *EventsData) {
+	io := ImGui.GetIO();
 	io.MouseDown[0] = eventsData.mouseButton.left;//(g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0);      // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
 	io.MouseDown[1] = eventsData.mouseButton.right;//(g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0);
 	io.MouseDown[2] = eventsData.mouseButton.middle;//(g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0);

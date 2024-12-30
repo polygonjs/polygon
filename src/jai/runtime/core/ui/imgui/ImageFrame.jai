@@ -1,5 +1,5 @@
 
-renderUIFrameStart :: (renderer:*Renderer, eventsData: EventsData, imguiPolygonContext: *ImguiPolygonContext){
+renderUIFrameStart :: (renderer:*Renderer, eventsData: *EventsData, imguiPolygonContext: *ImguiPolygonContext){
 
 	width := wgpu_texture_get_width_surface(renderer.wgpuContext);
 	height := wgpu_texture_get_height_surface(renderer.wgpuContext);
@@ -14,8 +14,16 @@ renderUIFrameStart :: (renderer:*Renderer, eventsData: EventsData, imguiPolygonC
 		ImGui_ImplWasm_NewFrame(imguiPolygonContext, eventsData, renderer.wgpuContext);
 	} else {
 		assert(renderer.wgpuContext.mode == .HEADLESS || imguiPolygonContext.windowContext.window != null, "imguiPolygonContext.windowContext.window is null");
-		if renderer.wgpuContext.mode == .SURFACE {
-			ImGui_ImplSdl_NewFrame(imguiPolygonContext, eventsData);
+		if #complete renderer.wgpuContext.mode == {
+			case .UNSET; {
+				assert(false, "renderer.wgpuContext.mode is UNSET");
+			}
+			case .SURFACE; {
+				ImGui_ImplSdl_NewFrame(imguiPolygonContext, eventsData, renderer.wgpuContext);
+			}
+			case .HEADLESS; {
+				ImGui_ImplHeadless_NewFrame(imguiPolygonContext, eventsData, renderer.wgpuContext);
+			}
 		}
 	}
 	ImGui.NewFrame();

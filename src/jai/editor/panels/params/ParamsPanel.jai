@@ -11,12 +11,12 @@ ParamsPanel :: struct {
 	renderer: Renderer;
 }
 
-newParamsPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
-	panel: *TYPE = New(TYPE);
-	paramsPanelInit(panel, editor, ensureWGPUContextValid);
+// newParamsPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
+// 	panel: *TYPE = New(TYPE);
+// 	paramsPanelInit(panel, editor, ensureWGPUContextValid);
 
-	return panel;
-}
+// 	return panel;
+// }
 paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	// allocatorAssign(panel);
 
@@ -37,85 +37,13 @@ paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 
 	editor = _editor;
 }
-paramsPanelReset :: (using panel: *TYPE) {
-	#if USE_IMGUI rendererUIDestroy(*panel.editor.imguiPolygonContext);
-	rendererReset(*renderer);
-}
-paramsPanelDelete :: (using panel: *TYPE) {
-	paramsPanelReset(panel);
-	// allocatorReset(panel);
-	free(panel);
-}
-drawDataInit :: (using panel: *TYPE) {
-	// #if WASM == false {
-	// 	if renderer.wgpuContext.mode == .HEADLESS {
-	// 		return;
-	// 	}
-	// }
-	#if USE_IMGUI rendererInitUI(*panel.editor.wgpuContext, *panel.editor.imguiPolygonContext, renderer.use_depth_buffer);
-	// rendererInitPipelines(renderer, editor.nodesScene.worldScene, *camera);
-}
-render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
-	#if WASM == false {
-		if renderer.wgpuContext.mode == .HEADLESS {
-			return;
-		}
-	}
-	// #if USE_IMGUI renderUI(renderCollectionData, renderer);
-	#if USE_IMGUI {
-		cmdEncoder, renderPassEncoder := renderUIStart(renderCollectionData, *renderer);
-		renderUIFrameStart(*renderer, panel.editor.eventsData, *panel.editor.imguiPolygonContext);
-		paramsRender(panel);
-		renderUIFrameEnd(renderPassEncoder, *panel.editor.imguiPolygonContext);
-		renderUIEnd(renderCollectionData, *renderer, cmdEncoder, renderPassEncoder);
-	}
-}
-rendererDestroyBuffers :: (using panel: *TYPE) {
-	rendererDestroyBuffers(*renderer);
-}
+
+
+
 processEvent :: (panel: *TYPE, eventsData:*EventsData) {
 }
-onResize :: (using panel: *TYPE) {
-	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
 
-	renderer.viewport.start = .{ editor.windowSize.x*0, xx (0.5 * xx editor.windowSize.y) };
-	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.5), xx(cast(float32)editor.windowSize.y*0.5) };
-}
-#if USE_IMGUI {
-paramsRender :: (using panel: *TYPE) {
-	mainMenuBarDraw(editor);
 
-	ImGui.SetNextWindowSize(.{xx renderer.viewport.size.x, xx renderer.viewport.size.y}, .Always);
-	ImGui.SetNextWindowPos(.{xx renderer.viewport.start.x, xx renderer.viewport.start.y}, .Always);
-	ImGui.Begin("Params", flags = .NoResize|.NoCollapse);
-
-	{
-		// node name / type / selection count
-		if editor.sceneUiData.selectedNodeIds.count > 0 {
-			nodeId := editor.sceneUiData.selectedNodeIds[0];
-			node := editor.nodesScene.nodes[nodeId];
-
-			// node name and type
-			{
-				selectedNodeName := nodeName(editor.nodesScene, nodeId);
-				nodeNameAndTypeStr := tprint("% (%)", selectedNodeName, node.type);
-				ImGui.TextUnformatted(nodeNameAndTypeStr);
-			}
-			// params
-			generatedNodeParamsRenderUI(node);
-		} else {
-			ImGui.TextUnformatted("No node selected");
-		}
-	}
-	
-
-	ImGui.End();
-
-}
-}
-else {
-	paramsRender :: (using panel: *TYPE) {}
-}
 // panelSetScene :: (panel: *TYPE, nodesScene: *NodesScene) {
 // 	rendererAny: Any = <<panel.renderer;
 // 	sceneAddObserver(nodesScene.worldScene, rendererAny);

@@ -14,12 +14,12 @@ ViewerPanel :: struct {
 	renderer: Renderer;
 }
 
-newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
-	panel: *TYPE = New(TYPE);
-	viewerPanelInit(panel, editor, ensureWGPUContextValid);
+// newViewerPanel :: (editor: *Editor, $ensureWGPUContextValid: bool=true) -> *TYPE {
+// 	panel: *TYPE = New(TYPE);
+// 	viewerPanelInit(panel, editor, ensureWGPUContextValid);
 
-	return panel;
-}
+// 	return panel;
+// }
 viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	// allocatorAssign(panel);
 
