@@ -101,8 +101,10 @@ postTest :: (app: *PolygonApp) {
 	}
 	app.testApp.testEndTime = current_time_monotonic();
 	reset_temporary_storage();
-	assertLeaksCount(0, "no leaks");
-	reset_temporary_storage();
+	#if SKIP_MEM_TEST == false {
+		assertLeaksCount(0, "no leaks");
+		reset_temporary_storage();
+	}
 
 	app.testApp.testTeardownTime = current_time_monotonic();
 	
@@ -127,7 +129,11 @@ postTestSuccessful :: (app: *PolygonApp){
 	#if WASM == true {
 		print("    ✅ completed in %ms\n", testTime);
 	} else {
-		print(" %ms, (teardown: %ms)\n", testTime*1000, teardownTime*1000);
+		#if SKIP_MEM_TEST {
+			print(" %ms, (no teardown)\n", testTime*1000);
+		} else {
+			print(" %ms, (teardown: %ms)\n", testTime*1000, teardownTime*1000);
+		}
 	}
 
 	#if WASM == true { batchRunNextTestOrTerminate(app); }
@@ -250,7 +256,7 @@ initTestApp :: (app: *PolygonApp){
 	#if WASM {
 		#assert(FREE_MEMORY_DEBUG==false); // set FREE_MEMORY_DEBUG :: false in config.jai
 	} else {
-		#assert(FREE_MEMORY_DEBUG==true); // set FREE_MEMORY_DEBUG :: true in config.jai
+		#assert(FREE_MEMORY_DEBUG==true||SKIP_MEM_TEST==true); // set FREE_MEMORY_DEBUG :: true in config.jai
 	}
 	app.testApp.skippedTestsCount = 0;
 	app.testApp.t0 = current_time_monotonic();

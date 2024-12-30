@@ -18,8 +18,8 @@
 		options := get_build_options(w);
 
 		buildArgs := getArgs(*options);
-		print_to_builder(*build_log_builder, tprint("WASM:        [%]\n", _checkbox(buildArgs.wasm)));
-		print_to_builder(*build_log_builder, tprint("DEBUGGER:    [%]\n", _checkbox(buildArgs.debugger)));
+		print_to_builder(*build_log_builder, tprint("WASM:          [%]\n", _checkbox(buildArgs.wasm)));
+		print_to_builder(*build_log_builder, tprint("DEBUGGER:      [%]\n", _checkbox(buildArgs.debugger)));
 		if(buildArgs.wasm){
 			copy_commonly_propagated_fields(get_build_options(), *options);
 
@@ -69,7 +69,7 @@
 
 			compiler_begin_intercept(w);
 
-			add_build_string("FREE_MEMORY_DEBUG :: false; #load \"main.jai\";", w);
+			add_build_string("FREE_MEMORY_DEBUG :: false; SKIP_MEM_TEST :: false; #load \"main.jai\";", w);
 			listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
 
 			compiler_end_intercept(w);
@@ -80,10 +80,11 @@
 
 		options := get_build_options(w);
 		buildArgs := getArgs(*options);
-		print_to_builder(*build_log_builder, tprint("NATIVE:      [%]\n", _checkbox(buildArgs.native)));
-		print_to_builder(*build_log_builder, tprint("RUN_TESTS:   [%]\n", _checkbox(buildArgs.test)));
-		print_to_builder(*build_log_builder, tprint("DEBUGGER:    [%]\n", _checkbox(buildArgs.debugger)));
-		print_to_builder(*build_log_builder, tprint("OPTIMIZED:   [%]\n", _checkbox(buildArgs.optimized)));
+		print_to_builder(*build_log_builder, tprint("NATIVE:        [%]\n", _checkbox(buildArgs.native)));
+		print_to_builder(*build_log_builder, tprint("RUN_TESTS:     [%]\n", _checkbox(buildArgs.test)));
+		print_to_builder(*build_log_builder, tprint("DEBUGGER:      [%]\n", _checkbox(buildArgs.debugger)));
+		print_to_builder(*build_log_builder, tprint("OPTIMIZED:     [%]\n", _checkbox(buildArgs.optimized)));
+		print_to_builder(*build_log_builder, tprint("SKIP_MEM_TEST: [%]\n", _checkbox(buildArgs.skipmemtest)));
 		if(buildArgs.native) {
 			options.output_path = "../../bin/";
 			make_directory_if_it_does_not_exist(options.output_path);
@@ -95,7 +96,7 @@
 
 			compiler_begin_intercept(w);
 
-			add_build_string(tprint("FREE_MEMORY_DEBUG :: %; #load \"main.jai\";", buildArgs.test), w);
+			add_build_string(tprint("FREE_MEMORY_DEBUG :: %; SKIP_MEM_TEST :: %; #load \"main.jai\";", buildArgs.test && !buildArgs.skipmemtest, buildArgs.skipmemtest), w);
 			listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
 
 			compiler_end_intercept(w);
@@ -226,6 +227,7 @@ BuildArgs :: struct {
 	test:bool;
 	optimized:bool;
 	debugger:bool;
+	skipmemtest:bool;
 	// all:[..]string;
 }
 getArgs :: (options: *Build_Options)->BuildArgs {
@@ -239,6 +241,7 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs.native = array_find(args, "native");
 	buildArgs.debugger = array_find(args, "debugger");
 	buildArgs.optimized = array_find(args, "O");
+	buildArgs.skipmemtest = array_find(args, "skipmemtest");
 	if( buildArgs.wasm==false && buildArgs.native==false ) {
 		buildArgs.wasm = true;
 		buildArgs.native = true;
