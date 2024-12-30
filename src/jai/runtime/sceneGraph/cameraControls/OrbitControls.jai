@@ -23,7 +23,7 @@ cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, ele
 		if (eventsData.mouseButtonJustPressed.left) {
 			actionStarted = true;
 			lastPointer.x = cast(s32)eventsData.cursor.x;
-		lastPointer.y = cast(s32)eventsData.cursor.y;
+			lastPointer.y = cast(s32)eventsData.cursor.y;
 		}
 	}
 	if(actionStarted==true){

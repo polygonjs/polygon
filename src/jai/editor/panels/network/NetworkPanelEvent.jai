@@ -17,13 +17,17 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 
 	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
-		updateOutputNode(panel, eventsData);
+		updateOutputNodeCurrentInput(panel, eventsData);
+
+		if (eventsData.cursor != eventsData.prevCursor) {
+			networkPanelFindFirstHoveredNode(panel, eventsData);
+		}
 
 		if (eventsData.mouseButtonJustPressed.left == true) {
 			eventHandler.waitingForButtonDownReadPixel = true;
 			eventHandler.waitingForButtonUpReadPixel = false;
 			networkPanelCursorDataInit(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
-			worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
+			worldPos := networkCursorDataGetCurrentWorldPos(panel, eventsData);
 			networkPanelCursorDataInit(*eventHandler.worldData, worldPos);
 		}
 		moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
@@ -35,7 +39,7 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 		}
 		if (eventsData.mouseButton.left == true) {
 			networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
-			worldPos := networkCursorDataGetWorldPos(eventsData, *eventHandler.screenData, *camera);
+			worldPos := networkCursorDataGetCurrentWorldPos(panel, eventsData);
 			networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
 			if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
 				moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
@@ -84,7 +88,7 @@ READ_PIXEL_WARNING_PRINTED:=false;
 
 MOVE_DIST_THRESHOLD :: 0.05;
 
-updateOutputNode :: (using panel: *TYPE, eventsData:*EventsData) {
+updateOutputNodeCurrentInput :: (using panel: *TYPE, eventsData:*EventsData) {
 	// print("%,%\n", eventsData.text[0], cast(u8)eventsData.text[0]);
 	firstChar := eventsData.text[0];
 	if firstChar == #char "1" nodesSceneSetFirstOutputNodeInput(editor.nodesScene, 0);

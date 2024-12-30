@@ -27,8 +27,22 @@ networkPanelCursorUpdate :: (using cursorData: *NetworkPanelCursorData, pos: Vec
 	distanceMoved += length(delta);
 }
 
-networkCursorDataGetWorldPos :: (eventsData: *EventsData, screenCursorData: *NetworkPanelCursorData, camera: *Camera) -> Vector2 {
+networkCursorDataGetCurrentWorldPos :: (using panel: *TYPE, eventsData: *EventsData) -> Vector2 {
+	// raycaster: Raycaster;
+	// raycasterSetFromCamera(*raycaster, camera, screenCursorData.currentPos);
+	return networkCursorDataGetWorldPos(eventsData, *camera, eventHandler.screenData.currentPos);
+}
+// networkCursorDataGetWorldPos :: (eventsData: *EventsData, camera: *Camera, screenCursorData: *NetworkPanelCursorData) -> Vector2 {
+// 	raycaster: Raycaster;
+// 	raycasterSetFromCamera(*raycaster, camera, screenCursorData.currentPos);
+// 	return .{raycaster.ray.origin.x, raycaster.ray.origin.y};
+// }
+networkCursorDataGetWorldPos :: (eventsData: *EventsData, camera: *Camera, cursor: Vector2) -> Vector2 {
 	raycaster: Raycaster;
-	raycasterSetFromCamera(*raycaster, camera, screenCursorData.currentPos);
+	raycasterSetFromCamera(*raycaster, camera, cursor);
 	return .{raycaster.ray.origin.x, raycaster.ray.origin.y};
 }
+
+#scope_file
+
+TYPE :: NetworkPanel;

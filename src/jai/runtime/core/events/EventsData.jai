@@ -30,6 +30,7 @@ KEYS_INIT:[KEYS_COUNT]bool;
 EventsData :: struct {
 	windowSize :EventsDataWindowSize;
 	cursor :EventsDataCursor;
+	prevCursor :EventsDataCursor;
 	mouseButton :EventsDataMouseButtons;
 	mouseButtonJustPressed :EventsDataMouseButtons;
 	mouseButtonJustReleased :EventsDataMouseButtons;

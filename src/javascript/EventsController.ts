@@ -91,8 +91,13 @@ interface MouseButtons {
 	middle: boolean;
 	right: boolean;
 }
+interface Vector2Like {
+	x: number;
+	y: number;
+}
 interface EventsData {
-	cursor: { x: number; y: number };
+	cursor: Vector2Like;
+	prevCursor: Vector2Like;
 	mouseButton: MouseButtons;
 	mouseButtonJustPressed: MouseButtons;
 	mouseButtonJustReleased: MouseButtons;
@@ -109,6 +114,7 @@ interface EventsData {
 }
 export const EVENTS_DATA: EventsData = {
 	cursor: { x: 0, y: 0 },
+	prevCursor: { x: 0, y: 0 },
 	mouseButton: {
 		left: false,
 		middle: false,
@@ -161,6 +167,8 @@ export function addEvents(canvas: HTMLCanvasElement) {
 	}
 	function onPointermove(event: PointerEvent) {
 		// console.log(event.clientX, event.clientY)
+		EVENTS_DATA.prevCursor.x = EVENTS_DATA.cursor.x;
+		EVENTS_DATA.prevCursor.y = EVENTS_DATA.cursor.y;
 		EVENTS_DATA.cursor.x = Math.round(event.clientX);
 		EVENTS_DATA.cursor.y = Math.round(event.clientY);
 		markEventsDataDirty();
@@ -269,8 +277,10 @@ export function eventsDataReset() {
 export function eventsDataUpdate(
 	windowWidthPointer: bigint,
 	windowHeightPointer: bigint,
-	mxPointer: bigint,
-	myPointer: bigint,
+	cursorXPointer: bigint,
+	cursorYPointer: bigint,
+	prevCursorXPointer: bigint,
+	prevCursorYPointer: bigint,
 	lmbPointer: bigint,
 	mmbPointer: bigint,
 	rmbPointer: bigint,
@@ -302,8 +312,10 @@ export function eventsDataUpdate(
 	setU32(Number(windowHeightPointer), window.WebGPUCanvas.height);
 
 	// mouse
-	setU32(Number(mxPointer), EVENTS_DATA.cursor.x);
-	setU32(Number(myPointer), EVENTS_DATA.cursor.y);
+	setU32(Number(cursorXPointer), EVENTS_DATA.cursor.x);
+	setU32(Number(cursorYPointer), EVENTS_DATA.cursor.y);
+	setU32(Number(prevCursorXPointer), EVENTS_DATA.prevCursor.x);
+	setU32(Number(prevCursorYPointer), EVENTS_DATA.prevCursor.y);
 	setBoolean(Number(lmbPointer), EVENTS_DATA.mouseButton.left);
 	setBoolean(Number(mmbPointer), EVENTS_DATA.mouseButton.middle);
 	setBoolean(Number(rmbPointer), EVENTS_DATA.mouseButton.right);

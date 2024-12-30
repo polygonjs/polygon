@@ -6,6 +6,8 @@ eventsDataUpdate :: (eventsData :*EventsData){
 		*(eventsData.windowSize.h),
 		*(eventsData.cursor.x),
 		*(eventsData.cursor.y),
+		*(eventsData.prevCursor.x),
+		*(eventsData.prevCursor.y),
 		*(eventsData.mouseButton.left),
 		*(eventsData.mouseButton.middle),
 		*(eventsData.mouseButton.right),
@@ -31,6 +33,7 @@ eventsDataUpdate :: (eventsData :*EventsData){
 eventsDataUpdate :: (
 	ww:*u32, wh:*u32,
 	mx: *u32, my: *u32,
+	px: *u32, py: *u32,
 	lmb: *bool, mmb: *bool, rmb: *bool,
 	lmbJustpressed: *bool, mmbJustPressed: *bool, rmbJustPressed: *bool,
 	lmbJustReleased: *bool, mmbJustReleased: *bool, rmbJustReleased: *bool,

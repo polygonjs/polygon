@@ -1,4 +1,5 @@
 NodeId :: u32;
+NodeIdOrNone :: s64;
 NodeTypeId :: u16;
 NodeInputIndex :: u8;
 NodeInputsCount :: NodeInputIndex;

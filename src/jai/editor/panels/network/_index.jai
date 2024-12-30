@@ -6,6 +6,7 @@
 #load "NetworkPanelEvent.jai";
 #load "NetworkPanelNodeConnectionCreateDelete.jai";
 #load "NetworkPanelNodeCreateDelete.jai";
+#load "NetworkPanelNodeHover.jai";
 #load "NetworkPanelNodePosition.jai";
 #load "NetworkPanelNodeSelection.jai";
 #load "NetworkPanelNodesScene.jai";

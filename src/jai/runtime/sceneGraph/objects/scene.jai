@@ -129,7 +129,7 @@ sceneUniformsUpdate :: (scene: *TYPE, time:Time) {
 meshSetMaterial :: (scene: *Scene, mesh: *Mesh, material: *Material) {
 	previousMaterial := mesh.material;
 	mesh.material = material;
-	if previousMaterial != null {
+	if previousMaterial != null && previousMaterial != material {
 		// I don't think we should send an event if the previous material is null
 		// since the mesh would then not be in any pipelineController of the renderer
 		sceneEmitEvent(scene, .RENDERABLE_MATERIAL_CHANGED, mesh, previousMaterial);

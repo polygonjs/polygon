@@ -48,6 +48,8 @@ eventsDataUpdate :: (using eventsData :*EventsData, sdl_event :*SDL_Event){
 			}
 		}
 		case SDL_MOUSEMOTION; {
+			prevCursor.x = cursor.x;
+			prevCursor.y = cursor.y;
 			cursor.x = xx max(0, sdl_event.motion.x);
 			cursor.y = xx max(0, sdl_event.motion.y);
 		}
