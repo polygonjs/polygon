@@ -69,9 +69,10 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 	// selectNode(editor, xx box1);
 	// BOX1 = box1;
 	// editor.onAfterTick = (using editor: *Editor) {
-	// 	if nodesScene.framesCount == 10 {
-	// 		print("select box node to debug imgui in wasm");
-	// 		selectNode(editor, xx BOX1);
+	// 	if nodesScene.framesCount > 0 {
+	// 		// print("select box node to debug imgui in wasm");
+	// 		// selectNode(editor, xx BOX1);
+	// 		editorRequestExit(editor);
 	// 	}
 	// };
 

@@ -28,6 +28,7 @@ NodesScene :: struct {
 		mesh: MeshNormalMaterial;
 		point: PointBasicMaterial;
 		uv: MeshUVMaterial;
+		basicTexture: MeshBasicTextureMaterial;
 	}
 	defaultMaterial:DefaultMaterial;
 
@@ -153,10 +154,15 @@ nodesSceneInit :: (scene: *NodesScene) {
 
 	// scene.worldScene = newScene(scene);
 	worldSceneInit(*scene.worldScene);
-	materialInit(*scene.defaultMaterial.line);
-	materialInit(*scene.defaultMaterial.mesh);
-	materialInit(*scene.defaultMaterial.point);
-	materialInit(*scene.defaultMaterial.uv);
+	{
+		using scene.defaultMaterial;
+		materialInit(*line);
+		materialInit(*mesh);
+		materialInit(*point);
+		materialInit(*uv);
+		materialInit(*basicTexture);
+		setColor(*basicTexture, .{1.0, 1.0, 1.0, 1.0});
+	}
 }
 
 NodesSceneOnNodesComputedCallback :: #type (nodesScene: *NodesScene);

@@ -4,6 +4,7 @@ testBaseMatNode :: () {
 		mat: MeshUVMaterial;
 
 		assertEqual(size_of(type_of(mat)), 72, "material size");
+		printMembers(mat);
 
 		assertTrue(is_constant(mat.topology), "topology is constant");
 

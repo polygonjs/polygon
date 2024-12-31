@@ -3,6 +3,18 @@ generatedMaterialTopology :: (material: *Material)->WGPUPrimitiveTopology {
 	assert(false, tprint("generatedMaterialTopology: material type '%' is not implemented", material.type));
 	return .TriangleList;
 }
+generatedMaterialApplyVertexBufferLayout :: (material: *Material, pc : *PipelineController) {
+	#insert GENERATED_MATERIAL_APPLY_VERTEX_BUFFER_LAYOUT;
+	assert(false, tprint("generatedMaterialApplyVertexBufferLayout: material type '%' is not implemented", material.type));
+}
+generatedMaterialApplyBindGroupLayoutDefault_MaterialUniforms :: (wgpuContext: *WGPUContext, material: *Material, bindGroupLayouts: *[]WGPUBindGroupLayout) {
+	#insert GENERATED_MATERIAL_APPLY_BIND_GROUP_LAYOUT_DEFAULT_MATERIAL_UNIFORMS;
+	assert(false, tprint("generatedMaterialApplyBindGroupLayoutDefault_MaterialUniforms: material type '%' is not implemented", material.type));
+}
+generatedMaterialInitDrawDataMaterialUniforms :: (wgpuContext: *WGPUContext, material: *Material, pc: *PipelineController, drawData: *MeshDrawData) {
+	#insert GENERATED_MATERIAL_INIT_DRAW_DATA_MATERIAL_UNIFORMS;
+	assert(false, tprint("generatedMaterialInitDrawDataMaterialUniforms: material type '%' is not implemented", material.type));
+}
 
 registerMaterials :: () #compile_time {
 
@@ -10,9 +22,10 @@ registerMaterials :: () #compile_time {
 
 	registerLineBasicMaterial();
 
-	registerMeshBasicMaterial();
 	registerMeshBackgroundBasicMaterial();
 	registerMeshBackgroundGridMaterial();
+	registerMeshBasicMaterial();
+	registerMeshBasicTextureMaterial();
 	registerMeshIdMaterial();
 	registerMeshIdU32Material();
 	registerMeshNormalMaterial();
@@ -75,16 +88,30 @@ MaterialMetaData :: struct {
 
 TMP_METADATAS: [..]MaterialMetaData;
 
-GENERATED_MATERIAL_TOPOLOGY :: #run registerMaterialsAndGenerateCode();
+GENERATED_MATERIAL_TOPOLOGY,
+GENERATED_MATERIAL_APPLY_VERTEX_BUFFER_LAYOUT,
+GENERATED_MATERIAL_APPLY_BIND_GROUP_LAYOUT_DEFAULT_MATERIAL_UNIFORMS,
+GENERATED_MATERIAL_INIT_DRAW_DATA_MATERIAL_UNIFORMS :: #run registerMaterialsAndGenerateCode();
 
 
-registerMaterialsAndGenerateCode :: () -> (materialTopology:string) {
+registerMaterialsAndGenerateCode :: () -> (
+	materialTopology:string,
+	materialApplyVertexBufferLayout:string,
+	materialApplyBindGroupLayoutDefault_MaterialUniforms:string,
+	materialInitDrawDataMaterialUniforms:string
+) #compile_time {
 
 	registerMaterials();
 
 	materialTopology := _forMat("materialTopology");
-
-	return 	materialTopology;
+	materialApplyVertexBufferLayout := _forMatPipelineController("materialApplyVertexBufferLayout");
+	materialApplyBindGroupLayoutDefault_MaterialUniforms := _forMatBindGroupLayouts("materialApplyBindGroupLayoutDefault_MaterialUniforms");
+	materialInitDrawDataMaterialUniforms := _forMatDrawData("materialInitDrawDataMaterialUniforms");
+	return
+		materialTopology,
+		materialApplyVertexBufferLayout,
+		materialApplyBindGroupLayoutDefault_MaterialUniforms,
+		materialInitDrawDataMaterialUniforms;
 }
 
 
@@ -94,6 +121,42 @@ _forMat :: (functionName:string)->string #compile_time {
 	for metaData: MATERIAL_METADATAS {
 		materialType := metaData.type;
 		print_to_builder(*builder, tprint("\tcase %; return %(cast(*%) material);\n", materialType, functionName, materialType));
+	}
+	print_to_builder(*builder, "}");
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}
+_forMatPipelineController :: (functionName:string)->string #compile_time {
+	builder: String_Builder;
+	print_to_builder(*builder, "if material.type == {\n");
+	for metaData: MATERIAL_METADATAS {
+		materialType := metaData.type;
+		print_to_builder(*builder, tprint("\tcase %; %(cast(*%) material, pc); return;\n", materialType, functionName, materialType));
+	}
+	print_to_builder(*builder, "}");
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}
+_forMatBindGroupLayouts :: (functionName:string)->string #compile_time {
+	builder: String_Builder;
+	print_to_builder(*builder, "if material.type == {\n");
+	for metaData: MATERIAL_METADATAS {
+		materialType := metaData.type;
+		print_to_builder(*builder, tprint("\tcase %; %(wgpuContext, cast(*%) material, bindGroupLayouts); return;\n", materialType, functionName, materialType));
+	}
+	print_to_builder(*builder, "}");
+	result := builder_to_string(*builder);
+	reset(*builder);
+	return result;
+}
+_forMatDrawData :: (functionName:string)->string #compile_time {
+	builder: String_Builder;
+	print_to_builder(*builder, "if material.type == {\n");
+	for metaData: MATERIAL_METADATAS {
+		materialType := metaData.type;
+		print_to_builder(*builder, tprint("\tcase %; %(wgpuContext, cast(*%) material, pc, drawData); return;\n", materialType, functionName, materialType));
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);

@@ -8,9 +8,6 @@ export function WGPUSamplerBindingLayoutFromBuffer(
 	const m = WGPUSamplerBindingLayout.members;
 	//
 	const type = samplerBindingTypeIntToGPUSamplerBindingType(_num(p, m.type));
-	if (type == null) {
-		return;
-	}
 
 	const layout: GPUSamplerBindingLayout = {
 		type,

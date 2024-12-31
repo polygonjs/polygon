@@ -34,16 +34,18 @@ export function WGPUBindGroupEntryFromBuffer(p: bigint): GPUBindGroupEntry {
 			// textureView,
 		};
 		return entry;
-	} else if (sampler) {
-		const entry: GPUBindGroupEntry = {
-			binding,
-			resource: sampler,
-		};
-		return entry;
 	} else if (textureView) {
 		const entry: GPUBindGroupEntry = {
 			binding,
 			resource: textureView,
+		};
+		// console.log("textureView:", { entry });
+		return entry;
+	} else if (sampler) {
+		// see comment in WGPUBindGroupLayoutEntry.ts for explanation about the order of buffer/texture/sampler
+		const entry: GPUBindGroupEntry = {
+			binding,
+			resource: sampler,
 		};
 		return entry;
 	}

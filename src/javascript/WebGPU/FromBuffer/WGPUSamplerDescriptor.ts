@@ -33,7 +33,7 @@ export function WGPUSamplerDescriptorFromBuffer(
 	const compare = compareFunctionIntToGPUCompareFunction(_num(p, m.compare));
 	const maxAnisotropy = _num(p, m.maxAnisotropy);
 
-	const sampler: GPUSamplerDescriptor = {
+	const samplerDesc: GPUSamplerDescriptor = {
 		label,
 		addressModeU,
 		addressModeV,
@@ -47,6 +47,6 @@ export function WGPUSamplerDescriptorFromBuffer(
 		maxAnisotropy,
 	};
 
-	return sampler;
+	return samplerDesc;
 }
 

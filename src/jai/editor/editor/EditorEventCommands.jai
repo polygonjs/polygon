@@ -171,11 +171,11 @@ doEditorComputeCompletedCommands :: (editor: *Editor, commands: [..]EditorComput
 // node selection
 doEditorNodeSelectionAddedCommands :: (editor: *Editor, commands: [..]EditorNodeSelectionAddedCommand) {
 	for cmd: commands {
-		networkPanelOnNodeSelectionAdded(*editor.networkPanel, cmd.node);
+		#if HAS_NETWORK_PANEL networkPanelOnNodeSelectionAdded(*editor.networkPanel, cmd.node);
 	}
 }
 doEditorNodeSelectionRemovedCommands :: (editor: *Editor, commands: [..]EditorNodeSelectionRemovedCommand) {
 	for cmd: commands {
-		networkPanelOnNodeSelectionRemoved(*editor.networkPanel, cmd.node);
+		#if HAS_NETWORK_PANEL networkPanelOnNodeSelectionRemoved(*editor.networkPanel, cmd.node);
 	}
 }
