@@ -7,13 +7,13 @@ generatedMaterialApplyVertexBufferLayout :: (material: *Material, pc : *Pipeline
 	#insert GENERATED_MATERIAL_APPLY_VERTEX_BUFFER_LAYOUT;
 	assert(false, tprint("generatedMaterialApplyVertexBufferLayout: material type '%' is not implemented", material.type));
 }
-generatedMaterialApplyBindGroupLayoutDefault_MaterialUniforms :: (wgpuContext: *WGPUContext, material: *Material, bindGroupLayouts: *[]WGPUBindGroupLayout) {
-	#insert GENERATED_MATERIAL_APPLY_BIND_GROUP_LAYOUT_DEFAULT_MATERIAL_UNIFORMS;
-	assert(false, tprint("generatedMaterialApplyBindGroupLayoutDefault_MaterialUniforms: material type '%' is not implemented", material.type));
+generatedMaterialApplyBindGroupLayout_MaterialGroup :: (wgpuContext: *WGPUContext, material: *Material, bindGroupLayouts: *[]WGPUBindGroupLayout) {
+	#insert GENERATED_MATERIAL_APPLY_BIND_GROUP_LAYOUT_MATERIAL_GROUP;
+	assert(false, tprint("generatedMaterialApplyBindGroupLayout_MaterialGroup: material type '%' is not implemented", material.type));
 }
-generatedMaterialInitDrawDataMaterialUniforms :: (wgpuContext: *WGPUContext, material: *Material, pc: *PipelineController, drawData: *MeshDrawData) {
-	#insert GENERATED_MATERIAL_INIT_DRAW_DATA_MATERIAL_UNIFORMS;
-	assert(false, tprint("generatedMaterialInitDrawDataMaterialUniforms: material type '%' is not implemented", material.type));
+generatedMaterialInitDrawData_MaterialGroup :: (wgpuContext: *WGPUContext, material: *Material, pc: *PipelineController, drawData: *MeshDrawData) {
+	#insert GENERATED_MATERIAL_INIT_DRAW_DATA_MATERIAL_GROUP;
+	assert(false, tprint("generatedMaterialInitDrawData_MaterialGroup: material type '%' is not implemented", material.type));
 }
 
 registerMaterials :: () #compile_time {
@@ -90,28 +90,28 @@ TMP_METADATAS: [..]MaterialMetaData;
 
 GENERATED_MATERIAL_TOPOLOGY,
 GENERATED_MATERIAL_APPLY_VERTEX_BUFFER_LAYOUT,
-GENERATED_MATERIAL_APPLY_BIND_GROUP_LAYOUT_DEFAULT_MATERIAL_UNIFORMS,
-GENERATED_MATERIAL_INIT_DRAW_DATA_MATERIAL_UNIFORMS :: #run registerMaterialsAndGenerateCode();
+GENERATED_MATERIAL_APPLY_BIND_GROUP_LAYOUT_MATERIAL_GROUP,
+GENERATED_MATERIAL_INIT_DRAW_DATA_MATERIAL_GROUP :: #run registerMaterialsAndGenerateCode();
 
 
 registerMaterialsAndGenerateCode :: () -> (
 	materialTopology:string,
 	materialApplyVertexBufferLayout:string,
-	materialApplyBindGroupLayoutDefault_MaterialUniforms:string,
-	materialInitDrawDataMaterialUniforms:string
+	materialApplyBindGroupLayout_MaterialGroup:string,
+	materialInitDrawData_MaterialGroup:string
 ) #compile_time {
 
 	registerMaterials();
 
 	materialTopology := _forMat("materialTopology");
 	materialApplyVertexBufferLayout := _forMatPipelineController("materialApplyVertexBufferLayout");
-	materialApplyBindGroupLayoutDefault_MaterialUniforms := _forMatBindGroupLayouts("materialApplyBindGroupLayoutDefault_MaterialUniforms");
-	materialInitDrawDataMaterialUniforms := _forMatDrawData("materialInitDrawDataMaterialUniforms");
+	materialApplyBindGroupLayout_MaterialGroup := _forMatBindGroupLayouts("materialApplyBindGroupLayout_MaterialGroup");
+	materialInitDrawData_MaterialGroup := _forMatDrawData("materialInitDrawData_MaterialGroup");
 	return
 		materialTopology,
 		materialApplyVertexBufferLayout,
-		materialApplyBindGroupLayoutDefault_MaterialUniforms,
-		materialInitDrawDataMaterialUniforms;
+		materialApplyBindGroupLayout_MaterialGroup,
+		materialInitDrawData_MaterialGroup;
 }
 
 

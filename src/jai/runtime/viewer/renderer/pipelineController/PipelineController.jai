@@ -1,14 +1,6 @@
 
 
-PipelineUniformData :: struct {
-	buffer: WGPUBuffer;
-	bind_group_entries: []WGPUBindGroupEntry;
-	bind_group: WGPUBindGroup;
-}
-PipelineDataUniform :: struct {
-	object: PipelineUniformData;
-	material: PipelineUniformData;
-}
+
 
 
 PipelineController :: struct {

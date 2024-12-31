@@ -1,8 +1,22 @@
+
+
 MeshDrawData :: struct {
 	mesh: *Mesh;
 	vertex:[..]BufferContainer;
 	index:BufferContainer;
-	uniforms:PipelineDataUniform;
+
+	DrawDataDataUniform :: struct {
+
+		DrawDataUniformData :: struct {
+			bufferContainer: BufferContainer;
+			bind_group_entries: []WGPUBindGroupEntry;
+			bind_group: WGPUBindGroup;
+		}
+
+		object: DrawDataUniformData;
+		material: DrawDataUniformData;
+	}
+	uniforms:DrawDataDataUniform;
 }
 
 
@@ -22,7 +36,9 @@ newDrawData :: (pc: *PipelineController, mesh: *Mesh)-> *MeshDrawData {
 	drawData :*MeshDrawData = New(MeshDrawData,, renderer.allocator);
 	drawData.mesh = mesh;
 	push_allocator(pc.renderer.allocator);
-	materialInitDrawDataBindGroupLayouts(wgpuContext, mesh, pc, drawData);
+	array_init(*drawData.vertex);
+	
+	materialInitDrawData(wgpuContext, mesh, pc, drawData);
 
 	return drawData;
 }
@@ -36,8 +52,7 @@ drawDataBuffersScheduleDestroy :: (using renderer: *Renderer, drawData: *MeshDra
 	array_add(*buffersToDestroy, drawData.index);
 }
 
-drawDataUpdateMeshUniforms :: (using renderer: *Renderer, drawData: *MeshDrawData) {
-	size := cast(u64) max( 16, size_of(TransformableUniforms));
-	buffer := drawData.uniforms.object.buffer;
-	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *drawData.mesh.transformableUniforms, size);
+drawDataUpdateMeshUniforms :: (renderer: *Renderer, drawData: *MeshDrawData) {
+	using drawData.uniforms.object.bufferContainer;
+	wgpuQueueWriteBuffer(renderer.wgpuContext.queue, buffer, 0, *drawData.mesh.transformableUniforms, buffer_size);
 }

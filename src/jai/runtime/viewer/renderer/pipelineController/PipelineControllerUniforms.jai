@@ -68,9 +68,8 @@ pipelineControllerUpdateMaterialUniformBuffers :: (using pc: *PipelineController
 		// 	wgpuQueueWriteBuffer(pc.wgpuContext.queue, buffer, 0, cast(*void) *scene.orbit_controls.camera.uniforms, size);
 		// }
 		{
-			size := cast(u64) max( 16, material.uniformTypeSize);
-			buffer := drawData.uniforms.material.buffer;
-			wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *material.uniforms, size);
+			using drawData.uniforms.material.bufferContainer;
+			wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, *material.uniforms, buffer_size);
 		}
 		// update_object_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.object.buffer, *mesh);
 		// update_camera_uniforms_to_buffer(pc.wgpuContext, draw_data.uniforms.camera.buffer, scene_data);

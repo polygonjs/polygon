@@ -22,6 +22,9 @@ Texture :: struct {
 }
 
 textureInit :: (wgpuContext: *WGPUContext, texture: *Texture) {
+	if texture.initialized==true {
+		return;
+	}
 	texture.wgpuContext = wgpuContext;
 	textureDesc := _textureDescriptor(texture);
 	texture.wgpuTexture = wgpuDeviceCreateTexture(wgpuContext.device, *textureDesc);

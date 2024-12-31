@@ -1,5 +1,5 @@
 
-materialInitDrawDataVertexBuffers :: (wgpuContext: *WGPUContext, mesh: *Mesh, material: *Material, pc: *PipelineController, drawData: *MeshDrawData) {
+materialInitDrawData_CreateVertexBuffers :: (wgpuContext: *WGPUContext, mesh: *Mesh, material: *Material, pc: *PipelineController, drawData: *MeshDrawData) {
 
 	using mesh.geometry.attributes;
 	// if pc.compute_shader_controllers.count > 0 {
@@ -22,12 +22,18 @@ materialInitDrawDataVertexBuffers :: (wgpuContext: *WGPUContext, mesh: *Mesh, ma
 	// 		);
 	// 	}
 	// } else {
-		array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *position, Vector3, "position"));
+	array_add(*drawData.vertex, _wgpuBufferFromGeometryAttribute_Create(wgpuContext, *position, Vector3, "position"));
 	// }
-	array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *normal, Vector3, "normal"));
+	array_add(*drawData.vertex, _wgpuBufferFromGeometryAttribute_Create(wgpuContext, *normal, Vector3, "normal"));
 	// array_add(*draw_data.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *color, Vector3, "color"));
-	array_add(*drawData.vertex, wgpu_buffer_from_geometry_attribute(wgpuContext, *uv, Vector2, "uv"));
+	array_add(*drawData.vertex, _wgpuBufferFromGeometryAttribute_Create(wgpuContext, *uv, Vector2, "uv"));
 
+}
+materialInitDrawData_UploadVertexBuffers :: (wgpuContext: *WGPUContext, mesh: *Mesh, material: *Material, pc: *PipelineController, drawData: *MeshDrawData) {
+	using mesh.geometry.attributes;
+	_wgpuBufferFromGeometryAttribute_Upload(wgpuContext, *position, drawData.vertex[0]);
+	_wgpuBufferFromGeometryAttribute_Upload(wgpuContext, *normal, 	drawData.vertex[1]);
+	_wgpuBufferFromGeometryAttribute_Upload(wgpuContext, *uv, 		drawData.vertex[2]);
 }
 
 materialApplyVertexBufferLayout :: (material: *$T, pc : *PipelineController) {

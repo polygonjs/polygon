@@ -1,49 +1,84 @@
-materialInitDrawDataBindGroupLayouts :: (wgpuContext: *WGPUContext, mesh: *Mesh, pc: *PipelineController, drawData: *MeshDrawData) {
-	array_init(*drawData.vertex);
-	materialInitDrawDataVertexBuffers(wgpuContext, mesh, pc.material, pc, drawData);
-	materialInitDrawDataIndex(wgpuContext, mesh, drawData);
-	materialInitDrawDataObjectUniforms(wgpuContext, mesh, pc, drawData);
-	generatedMaterialInitDrawDataMaterialUniforms(wgpuContext, pc.material, pc, drawData);
+materialInitDrawData :: (wgpuContext: *WGPUContext, mesh: *Mesh, pc: *PipelineController, drawData: *MeshDrawData) {
+
+	// vertex
+	materialInitDrawData_CreateVertexBuffers(wgpuContext, mesh, pc.material, pc, drawData);
+	materialInitDrawData_UploadVertexBuffers(wgpuContext, mesh, pc.material, pc, drawData);
+
+	// index
+	materialInitDrawData_CreateIndexBuffer(wgpuContext, mesh, drawData);
+	materialInitDrawData_UploadIndexBuffer(wgpuContext, mesh, drawData);
+
+	// object uniforms
+	materialInitDrawData_ObjectGroup(wgpuContext, mesh, pc, drawData);
+
+	// material group (uniforms + custom bindings like samplers/textures)
+	generatedMaterialInitDrawData_MaterialGroup(wgpuContext, pc.material, pc, drawData);
+
 }
-materialInitDrawDataIndex :: (wgpuContext: *WGPUContext, mesh: *Mesh, drawData: *MeshDrawData) {
-	using drawData.index;
-	buffer,
-	buffer_size = wgpu_index_array_to_buffer(wgpuContext, mesh.geometry.indices);
-}
-materialInitDrawDataObjectUniforms :: (wgpuContext: *WGPUContext, mesh: *Mesh, pc: *PipelineController, drawData: *MeshDrawData) {
+
+materialInitDrawData_ObjectGroup :: (wgpuContext: *WGPUContext, mesh: *Mesh, pc: *PipelineController, drawData: *MeshDrawData) {
 	using drawData.uniforms.object;
-	buffer,
+	bufferContainer,
 	bind_group,
-	bind_group_entries = _wgpuUniformToBuffer(wgpuContext, pc.pipeline, xx UniformBindingIndex.OBJECT, mesh.transformableUniforms, "object");
+	bind_group_entries = _wgpuUniformToBuffer_Create(wgpuContext, pc.pipeline, xx UniformBindingIndex.OBJECT, *mesh.transformableUniforms, size_of(type_of(mesh.transformableUniforms)), "object");
+
+	_wgpuUniformToBuffer_Upload(wgpuContext, *mesh.transformableUniforms, bufferContainer);
+
+
 }
-materialInitDrawDataMaterialUniforms :: (wgpuContext: *WGPUContext, material: *$T, pc: *PipelineController, drawData: *MeshDrawData) {
+materialInitDrawData_MaterialGroup :: (wgpuContext: *WGPUContext, material: *$T, pc: *PipelineController, drawData: *MeshDrawData) {
 	using drawData.uniforms.material;
-	buffer,
+	bufferContainer,
 	bind_group,
-	bind_group_entries = _wgpuUniformToBufferWithSize(wgpuContext, pc.pipeline, xx UniformBindingIndex.MATERIAL, *pc.material.uniforms, pc.material.uniformTypeSize, "material");
+	bind_group_entries = _wgpuUniformToBuffer_Create(wgpuContext, pc.pipeline, xx UniformBindingIndex.MATERIAL, *pc.material.uniforms, pc.material.uniformTypeSize, "material");
+
+	_wgpuUniformToBuffer_Upload(wgpuContext, *pc.material.uniforms, bufferContainer);
 }
 
 materialApplyBindGroupLayout :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayouts: *[]WGPUBindGroupLayout) {
 	materialApplyBindGroupLayoutDefault(wgpuContext, xx material, bindGroupLayouts);
 }
 
-materialApplyBindGroupLayoutDefault :: (wgpuContext: *WGPUContext, material: *Material, bindGroupLayouts: *[]WGPUBindGroupLayout) {
+materialApplyBindGroupLayoutDefault :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayouts: *[]WGPUBindGroupLayout) {
 	_materialApplyBindGroupLayoutDefault_Scene(wgpuContext, bindGroupLayouts);
 	_materialApplyBindGroupLayoutDefault_Camera(wgpuContext, bindGroupLayouts);
 	_materialApplyBindGroupLayoutDefault_Object(wgpuContext, bindGroupLayouts);
-	generatedMaterialApplyBindGroupLayoutDefault_MaterialUniforms(wgpuContext, material, bindGroupLayouts);
+	generatedMaterialApplyBindGroupLayout_MaterialGroup(wgpuContext, material, bindGroupLayouts);
 }
 
-materialApplyBindGroupLayoutDefault_MaterialUniforms :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayouts: *[]WGPUBindGroupLayout){
-	groupIndex := UniformBindingIndex.MATERIAL;
-	bind_group_layout_entries:[1]WGPUBindGroupLayoutEntry; //:= NewArray(1, WGPUBindGroupLayoutEntry);
+materialApplyBindGroupLayout_MaterialGroup :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayouts: *[]WGPUBindGroupLayout){
+	bindGroupLayoutEntries:[1]WGPUBindGroupLayoutEntry;
+	materialApplyBindGroupLayout_MaterialGroup_addUniforms(wgpuContext, material, *bindGroupLayoutEntries, binding=0);
+	materialApplyBindGroupLayout_MaterialGroup_close(wgpuContext, material, *bindGroupLayoutEntries, bindGroupLayouts);
+}
+materialApplyBindGroupLayout_MaterialGroup_addUniforms :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayoutEntries:*$B, binding:u32){
 	// 	#if FREE_MEMORY defer array_reset(*bind_group_layout_entries);
-	bind_group_layout_entries[0] = WGPUBindGroupLayoutEntry.{
-		binding = 0,
+	(<<bindGroupLayoutEntries)[binding] = WGPUBindGroupLayoutEntry.{
+		binding = binding,
 		visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
 		buffer = .{ type = WGPUBufferBindingType.Uniform },
 	};
-	layout, desc := _wgpuCreateBindGroupLayout(wgpuContext.device, bind_group_layout_entries.count, bind_group_layout_entries.data, "material uniforms");
+}
+materialApplyBindGroupLayout_MaterialGroup_addSampler :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayoutEntries:*$B, texture: *Texture, binding: u32){
+	assert(texture != null, "texture is null");
+	(<<bindGroupLayoutEntries)[binding] = WGPUBindGroupLayoutEntry.{
+		binding = binding,
+		visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
+		sampler = samplerBindingLayout(texture)
+	};
+}
+materialApplyBindGroupLayout_MaterialGroup_addTexture :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayoutEntries:*$B, texture: *Texture, binding: u32){
+	assert(texture != null, "texture is null");
+	(<<bindGroupLayoutEntries)[binding] = WGPUBindGroupLayoutEntry.{
+		binding = binding,
+		visibility = xx WGPUShaderStage.Vertex|WGPUShaderStage.Fragment,
+		texture = textureBindingLayout(material.texture),
+	};
+}
+materialApplyBindGroupLayout_MaterialGroup_close :: (wgpuContext: *WGPUContext, material: *$T, bindGroupLayoutEntries:*$B, bindGroupLayouts: *[]WGPUBindGroupLayout){
+	groupIndex := UniformBindingIndex.MATERIAL;
+
+	layout, desc := _wgpuCreateBindGroupLayout(wgpuContext.device, bindGroupLayoutEntries.count, bindGroupLayoutEntries.data, "material uniforms");
 	(<<bindGroupLayouts)[groupIndex] = layout;
 }
 
@@ -56,6 +91,55 @@ _wgpuCreateBindGroupLayout :: (device: WGPUDevice, entryCount: s64, data: *WGPUB
 	bind_group_layout := wgpuDeviceCreateBindGroupLayout(device, *desc);
 	return bind_group_layout, desc;
 }
+
+_wgpuUniformToBuffer_Create_AddMaterialUniforms :: (wgpuContext: *WGPUContext, uniformTypeSize: u32, entries:*[]WGPUBindGroupEntry, label: string, binding: u32)->BufferContainer {
+	// TODO: This is a hack to make sure the buffer is at least 16 bytes
+	size := cast(u64) max( 16, uniformTypeSize);
+
+	buffer_label := to_c_string_temp(label);
+	// defer free(buffer_label);
+	buffer_desc: WGPUBufferDescriptor = .{
+		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
+		size = size,
+		label = buffer_label,
+	};
+	buffer := wgpuDeviceCreateBuffer(wgpuContext.device, *buffer_desc);
+	assert(buffer != null, "Buffer is not created correctly");
+
+	// wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, uniforms, size);
+
+	(<<entries)[binding] = WGPUBindGroupEntry.{
+		binding=binding,
+		size=size,
+		offset=0,
+		buffer=buffer,
+	};
+
+	bufferContainer :BufferContainer = .{buffer, size, label};
+	return bufferContainer;
+}
+
+_wgpuUniformToBuffer_Create_Close :: (wgpuContext: *WGPUContext, pc: WGPURenderPipeline, bind_group_layout_index: u32, entries:*[]WGPUBindGroupEntry, label: string)-> WGPUBindGroup {
+	bind_group_descriptor_label := tprint("uniforms_bind_group/%", label,, temp);
+	bind_group_descriptor_label_c := to_c_string_temp(bind_group_descriptor_label);
+	// defer free(bind_group_descriptor_label_c);
+	bind_group_descriptor := WGPUBindGroupDescriptor.{
+		label = bind_group_descriptor_label_c,
+		layout = wgpuRenderPipelineGetBindGroupLayout(pc, bind_group_layout_index),
+		entryCount = xx entries.count,
+		entries = entries.data
+	};
+	bindGroup := wgpuDeviceCreateBindGroup(wgpuContext.device, *bind_group_descriptor);
+
+	return bindGroup;
+}
+
+_wgpuUniformToBuffer_Upload :: (wgpuContext: *WGPUContext, uniforms: *void, bufferContainer:BufferContainer) {
+
+	wgpuQueueWriteBuffer(wgpuContext.queue, bufferContainer.buffer, 0, uniforms, bufferContainer.buffer_size);
+
+}
+
 
 #scope_file
 
@@ -100,57 +184,17 @@ _materialApplyBindGroupLayoutDefault_Object :: (wgpuContext: *WGPUContext, bindG
 
 
 
-_wgpuUniformToBuffer :: (
-	wgpuContext: *WGPUContext,
-	pipeline: WGPURenderPipeline,
-	bind_group_layout_index: u32,
-	uniforms: $UniformType,
-	label: string
-) -> WGPUBuffer, WGPUBindGroup, []WGPUBindGroupEntry {
-	buffer, bind_group, entries := _wgpuUniformToBufferWithSize(wgpuContext, pipeline, bind_group_layout_index, *uniforms, size_of(UniformType), label);
-	return buffer, bind_group, entries;
-}
 
-_wgpuUniformToBufferWithSize :: (
-	wgpuContext: *WGPUContext,
-	pipeline: WGPURenderPipeline,
-	bind_group_layout_index: u32,
-	uniforms: *void,
-	uniformTypeSize: u32,
-	label: string
-) -> WGPUBuffer, WGPUBindGroup, []WGPUBindGroupEntry {
-	// TODO: This is a hack to make sure the buffer is at least 16 bytes
-	size := cast(u64) max( 16, uniformTypeSize);
-
-	buffer_label := to_c_string_temp(label);
-	// defer free(buffer_label);
-	buffer_desc: WGPUBufferDescriptor = .{
-		usage = xx (WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst),
-		size = size,
-		label = buffer_label,
-	};
-	buffer := wgpuDeviceCreateBuffer(wgpuContext.device, *buffer_desc);
-	assert(buffer != null, "Buffer is not created correctly");
-
-	wgpuQueueWriteBuffer(wgpuContext.queue, buffer, 0, uniforms, size);
+_wgpuUniformToBuffer_Create :: (wgpuContext: *WGPUContext, pipeline: WGPURenderPipeline, bind_group_layout_index: u32, uniforms: *void, uniformTypeSize: u32, label: string) -> (BufferContainer, WGPUBindGroup, []WGPUBindGroupEntry) {
 
 	entries := NewArray(1, WGPUBindGroupEntry,, temp);
-	entries[0] = WGPUBindGroupEntry.{
-		binding=0,
-		size=size,
-		offset=0,
-		buffer=buffer,
-	};
-	bind_group_descriptor_label := tprint("uniforms_bind_group/%", label,, temp);
-	bind_group_descriptor_label_c := to_c_string_temp(bind_group_descriptor_label);
-	// defer free(bind_group_descriptor_label_c);
-	bind_group_descriptor := WGPUBindGroupDescriptor.{
-		label = bind_group_descriptor_label_c,
-		layout = wgpuRenderPipelineGetBindGroupLayout(pipeline, bind_group_layout_index),
-		entryCount = xx entries.count,
-		entries = entries.data
-	};
-	bind_group := wgpuDeviceCreateBindGroup(wgpuContext.device, *bind_group_descriptor);
 
-	return buffer, bind_group, entries;
+	bufferContainer := _wgpuUniformToBuffer_Create_AddMaterialUniforms(wgpuContext, uniformTypeSize, *entries, label, binding=0);
+	bindGroup := _wgpuUniformToBuffer_Create_Close(wgpuContext, pipeline, bind_group_layout_index, *entries, label);
+
+	return bufferContainer, bindGroup, entries;
 }
+
+
+
+

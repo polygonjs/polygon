@@ -146,10 +146,10 @@ export function webGPURenderControllerCreate(
 		}
 		clockTick(clockData);
 		render();
-		if (framesCount > 2) {
-			animateAllowed = false;
-			console.log("stop render to debug");
-		}
+		// if (framesCount > 2) {
+		// 	animateAllowed = false;
+		// 	console.log("stop render to debug");
+		// }
 		if (animateAllowed) {
 			requestAnimationFrame(animate);
 		}
