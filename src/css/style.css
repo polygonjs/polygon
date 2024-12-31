@@ -10,5 +10,13 @@ body,
 }
 canvas {
 	display: block;
+	/*
+	image-rendering rules 
+	from https://webgpufundamentals.org/webgpu/lessons/webgpu-textures.html
+	to allow crisp low res
+	*/
+	/* image-rendering: auto; */
+	/* image-rendering: pixelated; */
+	/* image-rendering: crisp-edges; */
 }
 

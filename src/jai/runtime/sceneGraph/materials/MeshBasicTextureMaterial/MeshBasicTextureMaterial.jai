@@ -106,32 +106,32 @@ TYPE :: MeshBasicTextureMaterial;
 UNIFORM_TYPE :: MeshBasicTextureMaterialUniforms;
 // MATERIAL_NAME :: #run tprint("%", TYPE);
 
-// TEX_SIZE :[2]u32: .[5, 7];
-TEX_SIZE :[2]u32: .[3, 2];
+TEX_SIZE :[2]u32: .[5, 7];
+// TEX_SIZE :[2]u32: .[3, 2];
 PIXELS_COUNT :: TEX_SIZE[0]*TEX_SIZE[1];
 DATA_SIZE :: PIXELS_COUNT*4;
-COMPONENT_TYPE :: float;
+COMPONENT_TYPE :: u8;
 TEXTURE_DATA :[DATA_SIZE]COMPONENT_TYPE: #run _createTexture();
 _createTexture :: () -> [DATA_SIZE]COMPONENT_TYPE #compile_time {
 
 	z :[4]COMPONENT_TYPE= .[0,   0,   0, 0];  // zero
-	// O :[4]COMPONENT_TYPE= .[1,   0,   0, 1];  // red
-	// y :[4]COMPONENT_TYPE= .[1, 1,   0, 1];  // yellow
-	// b :[4]COMPONENT_TYPE= .[  0,   0, 1, 1];  // blue
-	f :[4]COMPONENT_TYPE= .[  1,   1, 1, 1];  // full
-	// textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
-	// 	z, O, O, O, O,
-	// 	O, y, y, y, O,
-	// 	O, y, O, O, O,
-	// 	O, y, y, O, O,
-	// 	O, y, O, O, O,
-	// 	O, y, O, O, O,
-	// 	O, O, O, O, O,
-	// ];
+	O :[4]COMPONENT_TYPE= .[255,   0,   0, 255];  // red
+	y :[4]COMPONENT_TYPE= .[255, 255,   0, 255];  // yellow
+	b :[4]COMPONENT_TYPE= .[  0,   0, 255, 255];  // blue
+	f :[4]COMPONENT_TYPE= .[  255,   255, 255, 255];  // full
 	textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
-		f,z,z,
-		z,z,f
+		z, O, O, O, O,
+		O, y, y, y, O,
+		O, y, O, O, O,
+		O, y, y, O, O,
+		O, y, O, O, O,
+		O, y, O, O, f,
+		O, O, O, f, b
 	];
+	// textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
+	// 	f,z,z,
+	// 	z,z,f
+	// ];
 	textureData :[DATA_SIZE]COMPONENT_TYPE;
 	for x: 0..(TEX_SIZE[0]-1) {
 		for y: 0..(TEX_SIZE[1]-1) {
