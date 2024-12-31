@@ -1,3 +1,7 @@
+#load "Geometry.jai";
+#load "GeometryAttributes.jai";
+#load "GeometryAttribute.jai";
+
 #load "box.jai";
 #load "icosahedron.jai";
 #load "plane.jai";
