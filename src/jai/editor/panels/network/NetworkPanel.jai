@@ -10,7 +10,8 @@ NetworkPanel :: struct {
 	editor: *Editor;
 	sceneWorld: Scene;
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast: Scene;
-	nodeObjectIndexByNodeId: [..]u32;
+	nodeBodyObjectIndexByNodeId: [..]u32;
+	nodeTextObjectIndexByNodeId: [..]u32;
 	connectionObjectIndexByConnectionId: [..]u32;
 
 	camera: OrthographicCamera;
@@ -97,7 +98,8 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	// allocatorAssign(rendererColor);
 	// allocatorAssign(rendererRaycast);
 	
-	nodeObjectIndexByNodeId.allocator = panel.allocator;
+	nodeBodyObjectIndexByNodeId.allocator = panel.allocator;
+	nodeTextObjectIndexByNodeId.allocator = panel.allocator;
 	connectionObjectIndexByConnectionId.allocator = panel.allocator;
 	editor = _editor;
 	worldSceneInit(*sceneWorld);

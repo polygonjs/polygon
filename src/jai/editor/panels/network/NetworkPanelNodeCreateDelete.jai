@@ -1,10 +1,11 @@
 NETWORK_PANEL_NODE_SIZE :: 1.0;
 NETWORK_PANEL_NODE_HALF_SIZE :: NETWORK_PANEL_NODE_SIZE / 2;
-NETWORK_PANEL_NODE_SIZE_V3 :Vector3: .{NETWORK_PANEL_NODE_SIZE,NETWORK_PANEL_NODE_SIZE,NETWORK_PANEL_NODE_SIZE};
+NETWORK_PANEL_NODE_SIZE_V2 :Vector2: .{NETWORK_PANEL_NODE_SIZE,NETWORK_PANEL_NODE_SIZE};
+NETWORK_PANEL_TEXT_OFFSET :Vector3: .{x = NETWORK_PANEL_NODE_HALF_SIZE+0.1, y = 0.0, z = 1};
 
 networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 	geometry :*Geometry = newGeometry(panel.sceneWorld.allocator);
-	geometryBoxAttributesSet(geometry, .{size=NETWORK_PANEL_NODE_SIZE_V3});
+	geometryPlaneAttributesSet(geometry, .{size=NETWORK_PANEL_NODE_SIZE_V2});
 
 	_addNode(panel, node, geometry, forRaycast=false);
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER _addNode(panel, node, geometry, forRaycast=true);
@@ -27,32 +28,50 @@ _addNode :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:boo
 	} else {
 		scene := *sceneWorld;
 	}
-	mesh := newMesh(scene, Mesh, geometry);
-
-	#if forRaycast {
-		material := newMaterial(MATERIAL_RAYCAST, panel.allocator);
-		material.uniforms.id = node.nodeId;
-		meshSetMaterial(scene, mesh, xx material);
-	} else {
-		meshSetMaterial(scene, mesh, xx *panel.mat.nodeBasic);
-	}
-
-	pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
-	mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
-	transformableUpdateMatrix(mesh);
+	// node body
+	bodyMesh := newMesh(scene, Mesh, geometry);
 	{
-		#if forRaycast==false {
-			if nodeObjectIndexByNodeId.count < node.nodeId {
-				array_resize(*nodeObjectIndexByNodeId, node.nodeId+1);
-			}
-			array_insert_at(*nodeObjectIndexByNodeId, item=xx scene.children.count, index=xx node.nodeId);
+
+		#if forRaycast {
+			material := newMaterial(MATERIAL_RAYCAST, panel.allocator);
+			material.uniforms.id = node.nodeId;
+			meshSetMaterial(scene, bodyMesh, xx material);
+		} else {
+			meshSetMaterial(scene, bodyMesh, xx *panel.mat.nodeBasic);
 		}
-		sceneObjectAdd(scene, mesh);
+
+		pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
+		bodyMesh.position = .{x = pos.x, y = pos.y, z = 0.0};
+		transformableUpdateMatrix(bodyMesh);
+		{
+			#if forRaycast==false {
+				if nodeBodyObjectIndexByNodeId.count < node.nodeId {
+					array_resize(*nodeBodyObjectIndexByNodeId, node.nodeId+1);
+				}
+				array_insert_at(*nodeBodyObjectIndexByNodeId, item=xx scene.children.count, index=xx node.nodeId);
+			}
+			sceneObjectAdd(scene, bodyMesh);
+		}
+	}
+	{
+		// node text
+		textMesh := newMesh(scene, Mesh);
+		name := nodeName(editor.nodesScene, node.nodeId);
+		textMeshUpdate(editor.nodesScene, name, textMesh);
+		textMesh.position = bodyMesh.position + NETWORK_PANEL_TEXT_OFFSET;
+		transformableUpdateMatrix(bodyMesh);
+		#if forRaycast==false {
+			if nodeTextObjectIndexByNodeId.count < node.nodeId {
+				array_resize(*nodeTextObjectIndexByNodeId, node.nodeId+1);
+			}
+			array_insert_at(*nodeTextObjectIndexByNodeId, item=xx scene.children.count, index=xx node.nodeId);
+		}
+		sceneObjectAdd(scene, textMesh);
 	}
 }
 
 _removeNode :: (using panel:*TYPE, node:*$T, $forRaycast:bool) {
-	meshIndex := nodeObjectIndexByNodeId[node.nodeId];
+	meshIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
 	if meshIndex >= 0 {
 		#if forRaycast {
 			scene := *sceneRaycast;
@@ -67,7 +86,7 @@ _removeNode :: (using panel:*TYPE, node:*$T, $forRaycast:bool) {
 		}
 		sceneObjectRemove(scene, object, delete=false);
 		#if forRaycast == true {
-			nodeObjectIndexByNodeId[node.nodeId] = 0;
+			nodeBodyObjectIndexByNodeId[node.nodeId] = 0;
 		}
 	}
 }

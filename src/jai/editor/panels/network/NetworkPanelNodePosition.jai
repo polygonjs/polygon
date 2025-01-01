@@ -12,12 +12,21 @@ networkPanelNodeSetPosition :: (using panel: *TYPE, node: *$T, position: Vector2
 		} else {
 			scene := *sceneWorld;
 		}
-		meshIndex := nodeObjectIndexByNodeId[node.nodeId];
-		if meshIndex >= 0 {
-			mesh := scene.children[meshIndex];
+		bodyMeshIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
+		textMeshIndex := nodeTextObjectIndexByNodeId[node.nodeId];
+		if bodyMeshIndex >= 0 && textMeshIndex >= 0 {
 			pos := panel.editor.sceneUiData.nodePositions[node.nodeId];
-			mesh.position = .{x = pos.x, y = pos.y, z = 0.0};
-			sceneObjectUpdateMatrix(scene, mesh);
+			bodyPos :Vector3= .{x = pos.x, y = pos.y, z = 0.0};
+			{
+				bodyMesh := scene.children[bodyMeshIndex];
+				bodyMesh.position = bodyPos;
+				sceneObjectUpdateMatrix(scene, bodyMesh);
+			}
+			{
+				textMesh := scene.children[textMeshIndex];
+				textMesh.position = bodyPos + NETWORK_PANEL_TEXT_OFFSET;
+				sceneObjectUpdateMatrix(scene, textMesh);
+			}
 		}
 	}
 	_moveNode(panel, node, forRaycast=false);

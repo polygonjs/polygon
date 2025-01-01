@@ -25,7 +25,7 @@ _restoreMaterialToPreviouslyHighlighted :: (using panel: *TYPE) {
 
 _setMaterial :: (using panel: *TYPE, nodeId:NodeId, material: *Material){
 	node := editor.nodesScene.nodes[nodeId];
-	objectIndex := nodeObjectIndexByNodeId[node.nodeId];
+	objectIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
 	mesh := sceneWorld.children[objectIndex];
 	if mesh.type == Mesh {
 		meshSetMaterial(*sceneWorld, xx mesh, material);
@@ -38,7 +38,7 @@ _findHoveredObject :: (using panel: *TYPE, eventsData:*EventsData)-> (found:bool
 	rayPos := networkCursorDataGetWorldPos(eventsData, *camera, cursor);
 	pad := NETWORK_PANEL_NODE_HALF_SIZE;
 	for node, i: editor.nodesScene.nodes {
-		objectIndex := nodeObjectIndexByNodeId[node.nodeId];
+		objectIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
 		object := sceneWorld.children[objectIndex];
 		using object.position;
 		if 	rayPos.x < x+pad &&
