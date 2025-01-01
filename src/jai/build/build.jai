@@ -51,6 +51,7 @@ build :: () #compile_time {
 #import "File";
 #import "File_Utilities";
 #import "String";
+#import "Hash_Table";
 #import "Text_File_Handler";
 
 #load "_index.jai";

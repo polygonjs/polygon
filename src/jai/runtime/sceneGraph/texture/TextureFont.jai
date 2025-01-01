@@ -16,7 +16,7 @@ loadFontImage :: () {
 	}
 	print("FONT IMAGE: %x% _%\n", width, height, components);
 }
-#placeholder FONT_TEXTURE_DATA;
+// #placeholder FONT_TEXTURE_DATA;
 
 
 #scope_file
