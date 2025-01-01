@@ -69,7 +69,7 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 	// 		editorRequestExit(editor);
 	// 	}
 	// };
-	FONT_TEXTURE.data = loadFontImage();
+	// FONT_TEXTURE.data = loadFontImage();
 
 	setTexture(*nodesScene.defaultMaterial.basicTexture, *FONT_TEXTURE);
 

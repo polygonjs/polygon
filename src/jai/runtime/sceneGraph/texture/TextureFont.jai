@@ -1,33 +1,63 @@
 
-FONT_TEXTURE: Texture = .{
-	size = TEXTURE_SIZE,
-	data = null//FONT_TEXTURE_DATA.data,
+#if WASM {
+	FONT_TEXTURE: Texture = .{
+		size = TEXTURE_SIZE,
+		data = TMP_DATA.data
+	};
+} else {
+	FONT_TEXTURE: Texture = .{
+		size = TEXTURE_SIZE,
+		data = null//FONT_TEXTURE_DATA.data,
+	};
 };
 
-loadFontImage :: ()->*u8 {
-	components: s32;
-	width: s32;
-	height: s32;
-	print("FONT DATA: %, %, %, %, %\n", FONT_TEXTURE_DATA.count, FONT_TEXTURE_DATA.data[0], FONT_TEXTURE_DATA.data[1], FONT_TEXTURE_DATA.data[2], FONT_TEXTURE_DATA.data[3]);
-	data := stbi_load_from_memory(FONT_TEXTURE_DATA.data, cast(s32) FONT_TEXTURE_DATA.count, *width, *height, *components, 4);
-	if !data {
-		log_error("Unable to decompress the image data!\n");
-		return null;
-	}
-	print("FONT IMAGE: %x% _%, %, %\n", width, height, components, width*height*components, FONT_TEXTURE.size[0]*FONT_TEXTURE.size[1]*4);
-
+loadFontImage :: () {
 	#if WASM {
-		debugImageDataPng(FONT_TEXTURE_DATA.data, FONT_TEXTURE_DATA.count);
+		loadFontImage_With_web_api();
+	} else {
+		loadFontImage_With_stb_image();
 	}
-
-	return data;
 }
 // #placeholder FONT_TEXTURE_DATA;
 
 
+#if WASM {
+	TMP_DATA :[TEXTURE_DATA_SIZE]u8;
+	loadFontImage_With_web_api :: () {
+		// FONT_TEXTURE.data = TMP_DATA.data;
+		loadFontData(FONT_TEXTURE_DATA.data, FONT_TEXTURE_DATA.count, TMP_DATA.data);
+	}
+} else {
+	loadFontImage_With_stb_image :: () {
+		components: s32;
+		width: s32;
+		height: s32;
+		// print("FONT DATA: %, %, %, %, %\n", FONT_TEXTURE_DATA.count, FONT_TEXTURE_DATA.data[0], FONT_TEXTURE_DATA.data[1], FONT_TEXTURE_DATA.data[2], FONT_TEXTURE_DATA.data[3]);
+		data := stbi_load_from_memory(FONT_TEXTURE_DATA.data, cast(s32) FONT_TEXTURE_DATA.count, *width, *height, *components, 4);
+		if !data {
+			log_error("Unable to decompress the image data!\n");
+			return;
+		}
+		// print("FONT IMAGE: %x% _%, %, %\n", width, height, components, width*height*components, FONT_TEXTURE.size[0]*FONT_TEXTURE.size[1]*4);
+
+		// #if WASM {
+		// 	debugImageDataPng(FONT_TEXTURE_DATA.data, FONT_TEXTURE_DATA.count);
+		// }
+
+		FONT_TEXTURE.data = data;
+
+		// return data;
+	}
+}
+
+
+
 #scope_file
 
-TEXTURE_SIZE: TEXTURE_SIZE_TYPE: .[256, 128];
+TEXTURE_WIDTH: u32: 256;
+TEXTURE_HEIGHT: u32: 128;
+TEXTURE_DATA_SIZE: u32: TEXTURE_WIDTH*TEXTURE_HEIGHT*4;
+TEXTURE_SIZE: TEXTURE_SIZE_TYPE: .[TEXTURE_WIDTH, TEXTURE_HEIGHT];
 // FONT_TEXTURE_DATA_SIZE :s64: #run _getFontTextureDataSize();
 // FONT_TEXTURE_DATA :: #run add_global_data(_createTextureData(), .READ_ONLY);
 

@@ -1,3 +1,4 @@
+import { assetsLoaded } from "./AssetsController";
 import { clockInit, clockTick } from "./Clock";
 import {
 	updateMemoryArrayViews,
@@ -9,6 +10,7 @@ import {
 	eventsDataReset,
 	markEventsDataDirty,
 } from "./EventsController";
+import { waitForCondition } from "./waitFor";
 import {
 	Heap,
 	heapAdd,
@@ -82,7 +84,7 @@ export function webGPURenderControllerCreate(
 	);
 	let _onRequestAnimationFrameInProgress: boolean = false;
 	let framesCount = 0;
-	let animateAllowed: boolean = true;
+	let animateAllowed: boolean = false;
 
 	updateMemoryArrayViews();
 	// (window.wasmFunctions as any).requestRealloc(
@@ -108,6 +110,9 @@ export function webGPURenderControllerCreate(
 		domElement,
 		canvas,
 		() => {
+			if (animateAllowed == false) {
+				return;
+			}
 			markEventsDataDirty();
 			render();
 		}
@@ -168,7 +173,9 @@ export function webGPURenderControllerCreate(
 		// 	});
 		// }
 	}
-	function start() {
+	async function start() {
+		await waitForCondition(() => assetsLoaded() == true);
+		animateAllowed = true;
 		markEventsDataDirty();
 		animate();
 	}

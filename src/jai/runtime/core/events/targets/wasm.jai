@@ -63,4 +63,6 @@ fetchUrl :: (nodeId:NodeId, data: *u8, size: s64) #foreign;
 
 onAllocateReady :: (nodeId:NodeId, data: *u8, size: u64) #foreign;
 onReallocReady :: (data: s64) #foreign;
-debugImageDataPng :: (data: *u8, dataSize: s32) #foreign;
+// debugImageDataPng :: (data: *u8, dataSize: s32) #foreign;
+loadImageDataPng :: (pngData: *u8, dataSize: s32, rawDataDest: *u8) #foreign;
+loadFontData :: (pngData: *u8, dataSize: s32, rawDataDest: *u8) #foreign;
