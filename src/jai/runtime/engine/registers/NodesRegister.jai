@@ -240,7 +240,7 @@ generateNodeComputeInputs :: ()->string #compile_time {
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 	// return _generateSceneNode("nodeComputeInputs");
 }
@@ -260,7 +260,7 @@ generateNodeCook :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 generateSceneNodeDelete :: ()->string #compile_time {
@@ -273,7 +273,7 @@ generateSceneNodeDelete :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 generateNodeCtx :: ()->string #compile_time {
@@ -286,7 +286,7 @@ generateNodeCtx :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 // generateNodeParamsRenderUI :: ()->string {
@@ -313,7 +313,7 @@ _generateSceneNode :: (functionName:string)->string #compile_time {
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 // _generateSceneNodeWithReturn :: (functionName:string)->string {
@@ -375,6 +375,6 @@ _forParams :: (callback:ForParamsCallback)->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }

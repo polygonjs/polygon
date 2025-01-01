@@ -45,7 +45,7 @@ generateWorldObjectDelete :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 generateWorldObjectClone :: ()->string #compile_time {
@@ -57,7 +57,7 @@ generateWorldObjectClone :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 

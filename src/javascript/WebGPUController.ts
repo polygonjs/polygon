@@ -85,6 +85,13 @@ export function webGPURenderControllerCreate(
 	let animateAllowed: boolean = true;
 
 	updateMemoryArrayViews();
+	// (window.wasmFunctions as any).requestRealloc(
+	// 	BigInt(101),
+	// 	BigInt(102),
+	// 	BigInt(103),
+	// 	BigInt(104),
+	// 	BigInt(105)
+	// );
 	window.wasmFunctions.onWebGPUReady(
 		USELESS_ARG0,
 		canvasIndex,

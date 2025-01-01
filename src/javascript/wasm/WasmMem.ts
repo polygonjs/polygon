@@ -1,3 +1,4 @@
+import { USELESS_ARG0 } from "../Common";
 import { jsStringFromJaiString } from "./WasmString";
 
 export function memcmp(
@@ -98,5 +99,35 @@ export function memchr(sPointer: bigint, c: number, n: bigint): bigint {
 	}
 
 	return 0n; // Return 0 (NULL) if the byte is not found
+}
+
+let REALLOC_NEW_POINTER: BigInt = 0n;
+export function onReallocReady(dataPointer: bigint) {
+	REALLOC_NEW_POINTER = dataPointer;
+}
+
+export function realloc(
+	oldDataPointer: bigint,
+	// oldSize: bigint,
+	newSize: bigint
+): BigInt {
+	window.wasmFunctions.requestRealloc(
+		USELESS_ARG0,
+		oldDataPointer,
+		newSize,
+		USELESS_ARG0
+	);
+
+	return REALLOC_NEW_POINTER;
+}
+
+export function calloc() {
+	console.warn("calloc required by stb_image");
+}
+export function ldexp() {
+	console.warn("ldexp required by stb_image");
+}
+export function strtol() {
+	console.warn("strtol required by stb_image");
 }
 

@@ -98,7 +98,7 @@ generateSetBindGroup :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 generateHandleMappedBuffer :: ()->string #compile_time {
@@ -111,7 +111,7 @@ generateHandleMappedBuffer :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 generateEntitiesCount :: ()->string #compile_time {
@@ -125,7 +125,7 @@ generateEntitiesCount :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 

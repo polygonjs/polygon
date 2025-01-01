@@ -14,6 +14,9 @@ listen_to_compiler_messages :: (w: Workspace, wasm:bool, test:bool) {
 					if !generated_code {
 						add_build_string(tprint("WASM :: %;", wasm), w);
 						add_build_string(tprint("RUN_TESTS :: %;", test), w);
+
+						fontData := createTextureDataDeclaration();
+						add_build_string(tprint("FONT_TEXTURE_DATA :%: %;", fontData.type, fontData.value), w);
 						generated_code = true;
 					}
 				}

@@ -39,6 +39,12 @@ export type RequestAllocationFunction = (
 	nodeId: bigint,
 	size: bigint
 ) => void;
+export type RequestReallocFunction = (
+	uselessArg0: bigint,
+	oldDataPointer: bigint,
+	oldSize: bigint,
+	newSize: bigint
+) => bigint;
 export type OnAllocatedMemoryWrittenFunction = (
 	uselessArg0: bigint,
 	nodeId: bigint
@@ -61,6 +67,7 @@ interface WasmFunctions {
 	qsortWrapper: QSortFunctionWrapper;
 	requestAllocation: RequestAllocationFunction;
 	onAllocatedMemoryWritten: OnAllocatedMemoryWrittenFunction;
+	requestRealloc: RequestReallocFunction;
 }
 declare global {
 	interface Window {

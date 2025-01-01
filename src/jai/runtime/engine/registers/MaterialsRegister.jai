@@ -124,7 +124,7 @@ _forMat :: (functionName:string)->string #compile_time {
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 _forMatPipelineController :: (functionName:string)->string #compile_time {
@@ -136,7 +136,7 @@ _forMatPipelineController :: (functionName:string)->string #compile_time {
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 _forMatBindGroupLayouts :: (functionName:string)->string #compile_time {
@@ -148,7 +148,7 @@ _forMatBindGroupLayouts :: (functionName:string)->string #compile_time {
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 _forMatDrawData :: (functionName:string)->string #compile_time {
@@ -160,6 +160,6 @@ _forMatDrawData :: (functionName:string)->string #compile_time {
 	}
 	print_to_builder(*builder, "}");
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }

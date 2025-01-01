@@ -46,6 +46,15 @@ onAllocatedMemoryWritten :: (nodeId: NodeId) {
 	context = call_from_wasm_context;
 	__onAllocatedMemoryWritten(*APP.nodesScene, nodeId);
 }
+requestRealloc :: (oldDataPointer: *u8, newSize: s64)  {
+	context = call_from_wasm_context;
+	size := newSize;//ifx oldSize < newSize then oldSize else newSize;
+	newData := NewArray(size, u8,, temp);
+
+	memcpy(newData.data, oldDataPointer, size);
+
+	onReallocReady(xx newData.data);
+}
 
 #scope_file
 

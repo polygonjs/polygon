@@ -1,7 +1,7 @@
 Texture :: struct {
 
 	label: string;
-	size: [2]u32;
+	size: TEXTURE_SIZE_TYPE;
 	data: *u8;
 
 	wgpuContext: *WGPUContext;
@@ -98,6 +98,7 @@ textureViewDescriptor :: (texture: *Texture)-> WGPUTextureViewDescriptor {
 
 
 
+TEXTURE_SIZE_TYPE :: [2]u32;
 TEXTURE_COMPONENT_TYPE :: u8;
 VALUES_PER_PIXEL :: 4;
 

@@ -1,4 +1,5 @@
 #load "BuildArgs.jai";
+#load "BuildFont.jai";
 #load "BuildListenToCompiler.jai";
 #load "BuildNative.jai";
 #load "BuildOptimisation.jai";

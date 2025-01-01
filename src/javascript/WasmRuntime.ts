@@ -6,6 +6,7 @@ import {
 	QSortFunction,
 	USELESS_ARG0,
 	OnAllocatedMemoryWrittenFunction,
+	RequestReallocFunction,
 } from "./Common";
 import {
 	jsStringFromJaiString,
@@ -23,7 +24,18 @@ import {
 	toupper,
 	strstr,
 } from "./wasm/WasmString";
-import { memchr, memcmp, memcpy, memmove, memset } from "./wasm/WasmMem";
+import {
+	memchr,
+	memcmp,
+	memcpy,
+	memmove,
+	memset,
+	realloc,
+	onReallocReady,
+	calloc,
+	ldexp,
+	strtol,
+} from "./wasm/WasmMem";
 import { writeToConsoleLog } from "./wasm/PrintUtils";
 import {
 	js_wgpu_texture_get_height_surface,
@@ -123,6 +135,11 @@ export function loadWasm(): Promise<void> {
 		},
 		memcmp,
 		memset,
+		realloc,
+		onReallocReady,
+		calloc,
+		ldexp,
+		strtol,
 		memcpy,
 		memmove,
 		memchr,
@@ -219,8 +236,15 @@ export function loadWasm(): Promise<void> {
 			console.log(dummyName);
 		};
 	};
+	const _dummyWithReturn = (dummyName: string) => {
+		return () => {
+			console.log(dummyName);
+			return BigInt(0);
+		};
+	};
 	const dummyRequestAllocation = _dummy("requestAllocation");
 	const dummyOnAllocatedMemoryWritten = _dummy("onAllocatedMemoryWritten");
+	const dummyRequestRealloc = _dummyWithReturn("requestRealloc");
 	window.wasmFunctions = {
 		onWebGPUReady: () => {},
 		onRequestAnimationFrame: () => {},
@@ -236,6 +260,7 @@ export function loadWasm(): Promise<void> {
 		},
 		requestAllocation: dummyRequestAllocation,
 		onAllocatedMemoryWritten: dummyOnAllocatedMemoryWritten,
+		requestRealloc: dummyRequestRealloc,
 	};
 	const WRAPPERS_BY_NAMES: Record<string | symbol, Function> = {
 		qsort: window.wasmFunctions.qsortWrapper,
@@ -397,6 +422,17 @@ export function loadWasm(): Promise<void> {
 								console.warn(
 									"onAllocatedMemoryWritten already linked"
 								);
+							}
+						}
+						if (methodName.startsWith("requestRealloc")) {
+							if (
+								window.wasmFunctions.requestRealloc ==
+								dummyRequestRealloc
+							) {
+								window.wasmFunctions.requestRealloc =
+									method as RequestReallocFunction;
+							} else {
+								console.warn("requestRealloc already linked");
 							}
 						}
 					}

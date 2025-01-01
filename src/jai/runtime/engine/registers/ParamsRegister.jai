@@ -140,7 +140,7 @@ generateParamValueTypeByParamType :: ()->string #compile_time {
 	print_to_builder(*builder, "}");
 
 	result := builder_to_string(*builder);
-	reset(*builder);
+	// reset(*builder);
 	return result;
 }
 // generateParamInit :: ()->string {

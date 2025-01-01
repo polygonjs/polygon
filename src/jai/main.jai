@@ -21,6 +21,7 @@ PolygonApp :: struct {
 APP:PolygonApp;
 
 initSceneAndAttachToEditor :: (app: *PolygonApp) {
+	loadFontImage();
 	coreGraphsReserve(app);
 	editorInit(*app.editor);
 	editorSetScene(*app.editor, *app.nodesScene);
@@ -51,9 +52,13 @@ else #import "Basic";
 #import "Hash_Table";
 #import "Math";
 #import "String";
-#if WASM == true  #import "wgpu_wasm";
-else              #import "wgpu";
-#if WASM == false {
+#if WASM == true {
+	#import "stb_image_wasm";
+	#import "wgpu_wasm";
+} else {
+	#import "stb_image";
+	#import "wgpu";
+
 	#import "SDL";
 	#import "File";
 }
