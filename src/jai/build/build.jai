@@ -1,10 +1,6 @@
 build :: () #compile_time {
-	versionInfo: Version_Info;
-	compiler_get_version_info(*versionInfo);
-	VERSION_ERROR_MESSAGE :: "requires jai version 0.2.4";
-	assert(versionInfo.major == 0, VERSION_ERROR_MESSAGE);
-	assert(versionInfo.minor == 2, VERSION_ERROR_MESSAGE);
-	assert(versionInfo.micro == 4, VERSION_ERROR_MESSAGE);
+
+	buildValidateJaiVersion();
 
 	build_log_builder: String_Builder;
 	set_build_options_dc(.{do_output = false});

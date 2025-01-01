@@ -3,7 +3,7 @@
 		"/home/gui/work/web/games/jai/compiler/main/modules",
 		"src/jai/modules"
 	],
-	"roots": ["src/jai/main.jai"],
-	"build_root": "src/jai/build.jai"
+	"roots": ["src/jai/build/build.jai", "src/jai/main.jai"],
+	"build_root": "src/jai/build/build.jai"
 }
 

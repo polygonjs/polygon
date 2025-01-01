@@ -6,4 +6,5 @@
 #load "BuildShaders.jai";
 #load "BuildUpdateProcedures.jai";
 #load "BuildUtils.jai";
+#load "BuildVersion.jai";
 #load "BuildWasm.jai";
