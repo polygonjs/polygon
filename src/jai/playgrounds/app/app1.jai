@@ -69,8 +69,9 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 	// 		editorRequestExit(editor);
 	// 	}
 	// };
+	FONT_TEXTURE.data = loadFontImage();
 
-	setTexture(*nodesScene.defaultMaterial.basicTexture, *TEXTURE);
+	setTexture(*nodesScene.defaultMaterial.basicTexture, *FONT_TEXTURE);
 
 	editorFlushCommands(editor);
 }
@@ -80,45 +81,45 @@ appSceneInit1 :: (nodesScene: *NodesScene, editor: *Editor) {
 // BOX1:*BoxGeoNode;
 
 
-TEX_SIZE :[2]u32: .[5, 7];
-// TEX_SIZE :[2]u32: .[3, 2];
-PIXELS_COUNT :: TEX_SIZE[0]*TEX_SIZE[1];
-DATA_SIZE :: PIXELS_COUNT*4;
-COMPONENT_TYPE :: TEXTURE_COMPONENT_TYPE;
-TEXTURE: Texture = .{
-	size = TEX_SIZE,
-	data = TEXTURE_DATA.data,
-};
-TEXTURE_DATA :[DATA_SIZE]COMPONENT_TYPE: #run _createTextureData();
-_createTextureData :: () -> [DATA_SIZE]COMPONENT_TYPE #compile_time {
+// TEX_SIZE :[2]u32: .[5, 7];
+// // TEX_SIZE :[2]u32: .[3, 2];
+// PIXELS_COUNT :: TEX_SIZE[0]*TEX_SIZE[1];
+// DATA_SIZE :: PIXELS_COUNT*4;
+// COMPONENT_TYPE :: TEXTURE_COMPONENT_TYPE;
+// TEXTURE: Texture = .{
+// 	size = TEX_SIZE,
+// 	data = TEXTURE_DATA.data,
+// };
+// TEXTURE_DATA :[DATA_SIZE]COMPONENT_TYPE: #run _createTextureData();
+// _createTextureData :: () -> [DATA_SIZE]COMPONENT_TYPE #compile_time {
 
-	z :[4]COMPONENT_TYPE= .[0,   0,   0, 0];  // zero
-	O :[4]COMPONENT_TYPE= .[255,   0,   0, 255];  // red
-	y :[4]COMPONENT_TYPE= .[255, 255,   0, 255];  // yellow
-	b :[4]COMPONENT_TYPE= .[  0,   0, 255, 255];  // blue
-	f :[4]COMPONENT_TYPE= .[  255,   255, 255, 255];  // full
-	textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
-		z, O, O, O, O,
-		O, y, y, y, O,
-		O, y, O, O, O,
-		O, y, y, O, O,
-		O, y, O, O, O,
-		O, y, O, O, f,
-		O, O, O, f, b
-	];
-	// textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
-	// 	f,z,z,
-	// 	z,z,f
-	// ];
-	textureData :[DATA_SIZE]COMPONENT_TYPE;
-	for x: 0..(TEX_SIZE[0]-1) {
-		for y: 0..(TEX_SIZE[1]-1) {
-			i := y*TEX_SIZE[0]+x;
-			textureData[i*4+0] = textureDataPacked[i][0];
-			textureData[i*4+1] = textureDataPacked[i][1];
-			textureData[i*4+2] = textureDataPacked[i][2];
-			textureData[i*4+3] = textureDataPacked[i][3];
-		}
-	}
-	return textureData;
-}
+// 	z :[4]COMPONENT_TYPE= .[0,   0,   0, 0];  // zero
+// 	O :[4]COMPONENT_TYPE= .[255,   0,   0, 255];  // red
+// 	y :[4]COMPONENT_TYPE= .[255, 255,   0, 255];  // yellow
+// 	b :[4]COMPONENT_TYPE= .[  0,   0, 255, 255];  // blue
+// 	f :[4]COMPONENT_TYPE= .[  255,   255, 255, 255];  // full
+// 	textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
+// 		z, O, O, O, O,
+// 		O, y, y, y, O,
+// 		O, y, O, O, O,
+// 		O, y, y, O, O,
+// 		O, y, O, O, O,
+// 		O, y, O, O, f,
+// 		O, O, O, f, b
+// 	];
+// 	// textureDataPacked :[PIXELS_COUNT][4]COMPONENT_TYPE= .[
+// 	// 	f,z,z,
+// 	// 	z,z,f
+// 	// ];
+// 	textureData :[DATA_SIZE]COMPONENT_TYPE;
+// 	for x: 0..(TEX_SIZE[0]-1) {
+// 		for y: 0..(TEX_SIZE[1]-1) {
+// 			i := y*TEX_SIZE[0]+x;
+// 			textureData[i*4+0] = textureDataPacked[i][0];
+// 			textureData[i*4+1] = textureDataPacked[i][1];
+// 			textureData[i*4+2] = textureDataPacked[i][2];
+// 			textureData[i*4+3] = textureDataPacked[i][3];
+// 		}
+// 	}
+// 	return textureData;
+// }

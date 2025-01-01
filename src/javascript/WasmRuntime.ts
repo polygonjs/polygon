@@ -112,6 +112,7 @@ import { wgpuBufferUnmap } from "./WebGPU/FromJs/wgpuBufferUnmap";
 import { wgpuDevicePoll } from "./WebGPU/FromJs/wgpuDevicePoll";
 import { wgpuCommandEncoderInsertDebugMarker } from "./WebGPU/FromJs/wgpuCommandEncoderInsertDebugMarker";
 import { wgpuCommandEncoderCopyTextureToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyTextureToBuffer";
+import { debugImageDataPng } from "./wasm/WasmImage";
 
 export function loadWasm(): Promise<void> {
 	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
@@ -143,6 +144,7 @@ export function loadWasm(): Promise<void> {
 		memcpy,
 		memmove,
 		memchr,
+		debugImageDataPng,
 		strlen,
 		strcmp,
 		sscanf,

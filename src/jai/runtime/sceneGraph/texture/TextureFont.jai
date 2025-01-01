@@ -1,10 +1,10 @@
 
 FONT_TEXTURE: Texture = .{
 	size = TEXTURE_SIZE,
-	data = FONT_TEXTURE_DATA.data,
+	data = null//FONT_TEXTURE_DATA.data,
 };
 
-loadFontImage :: () {
+loadFontImage :: ()->*u8 {
 	components: s32;
 	width: s32;
 	height: s32;
@@ -12,9 +12,15 @@ loadFontImage :: () {
 	data := stbi_load_from_memory(FONT_TEXTURE_DATA.data, cast(s32) FONT_TEXTURE_DATA.count, *width, *height, *components, 4);
 	if !data {
 		log_error("Unable to decompress the image data!\n");
-		return;
+		return null;
 	}
-	print("FONT IMAGE: %x% _%\n", width, height, components);
+	print("FONT IMAGE: %x% _%, %, %\n", width, height, components, width*height*components, FONT_TEXTURE.size[0]*FONT_TEXTURE.size[1]*4);
+
+	#if WASM {
+		debugImageDataPng(FONT_TEXTURE_DATA.data, FONT_TEXTURE_DATA.count);
+	}
+
+	return data;
 }
 // #placeholder FONT_TEXTURE_DATA;
 

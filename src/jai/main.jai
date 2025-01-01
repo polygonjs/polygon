@@ -21,7 +21,6 @@ PolygonApp :: struct {
 APP:PolygonApp;
 
 initSceneAndAttachToEditor :: (app: *PolygonApp) {
-	loadFontImage();
 	coreGraphsReserve(app);
 	editorInit(*app.editor);
 	editorSetScene(*app.editor, *app.nodesScene);
