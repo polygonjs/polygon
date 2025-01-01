@@ -24,11 +24,8 @@ geometryBoxAttributesSet :: (geometry: *Geometry, params: BoxGeometryParams) {
 	indicesCount := (count0.indicesCount + count1.indicesCount + count2.indicesCount) * 2;
 	// print("index_count:u64=%;\n", indices_count);
 
-	array_resize(*geometry.attributes.position.values, pointsCount, false);
-	array_resize(*geometry.attributes.normal.values, pointsCount, false);
-	// array_resize(*geometry.attributes.color.values, points_count, false);
-	array_resize(*geometry.attributes.uv.values, pointsCount, false);
-	array_resize(*geometry.indices, indicesCount, false);
+	geometrySetPointsCount(geometry, pointsCount);
+	geometrySetIndicesCount(geometry, indicesCount);
 
 	offset:BuildPlaneOffset = .{points = 0, indices = 0};
 

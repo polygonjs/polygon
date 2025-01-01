@@ -25,9 +25,7 @@ geometryPlaneAttributesSet :: (geometry: *Geometry, params: PlaneGeometryParams)
 	pointsCount := gridX * gridY;
 	indicesCount := widthSegments * heightSegments * 6;
 
-	array_resize(*geometry.attributes.position.values, pointsCount, false);
-	array_resize(*geometry.attributes.normal.values, pointsCount, false);
-	array_resize(*geometry.attributes.uv.values, pointsCount, false);
+	geometrySetPointsCount(geometry, pointsCount);
 	array_resize(*geometry.indices, indicesCount, false);
 
 	// Generate vertices, normals, and uvs

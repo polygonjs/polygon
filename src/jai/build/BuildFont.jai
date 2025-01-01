@@ -9,8 +9,8 @@ addFontDataPlaceholder :: (w: Workspace) {
 	// uncomment those lines and comment out the line #load "TextureFontData.jai";
 	// The cached data can then later be replaced.
 	//
-	// fontData := createTextureDataDeclaration();
-	// add_build_string(tprint("FONT_TEXTURE_DATA :%: %;", fontData.type, fontData.value), w);
+	fontData := createTextureDataDeclaration();
+	add_build_string(tprint("FONT_TEXTURE_DATA :%: %;", fontData.type, fontData.value), w);
 }
 
 #scope_file
@@ -20,7 +20,7 @@ createTextureDataDeclaration :: () -> FontDataDeclaration #compile_time {
 	data := createTextureData();
 	t1 := current_time_monotonic();
 
-	buildInitSize :: 42138;
+	buildInitSize :: 43841;//40261;42138;
 	comma :: ",";
 	builder: String_Builder;
 	init_string_builder(*builder, buildInitSize);
@@ -44,6 +44,7 @@ createTextureDataDeclaration :: () -> FontDataDeclaration #compile_time {
 
 	t2 := current_time_monotonic();
 	print("font loaded in: %s (%ms + %ms), string size:%, init with:%\n", to_float64_seconds(t2 - t0), to_float64_seconds(t1 - t0), to_float64_seconds(t2 - t1), result.count, buildInitSize);
+	assert(result.count == buildInitSize, "result.count != buildInitSize");
 	return declaration;
 }
 

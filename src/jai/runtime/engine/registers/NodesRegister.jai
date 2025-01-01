@@ -58,6 +58,7 @@ registerNodes :: (label:string) #compile_time {
 	registerPlaneGeoNode();
 	registerOutputGeoNode();
 	registerSwitchGeoNode();
+	registerTextGeoNode();
 	registerTransformGeoNode();
 
 }

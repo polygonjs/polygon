@@ -13,4 +13,5 @@
 #load "Output.jai";
 #load "Sphere.jai";
 #load "Switch.jai";
+#load "Text.jai";
 #load "Transform.jai";

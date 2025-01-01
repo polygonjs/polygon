@@ -12,16 +12,14 @@ SphereGeometryParams :: struct {
 
 geometry_sphere_attributes_set :: (geometry: *Geometry, params: SphereGeometryParams) {
 	// Calculate the number of vertices and indices
-	points_count := (params.widthSegments + 1) * (params.heightSegments + 1);
-	indices_count := params.widthSegments * params.heightSegments * 6;
+	pointsCount := (params.widthSegments + 1) * (params.heightSegments + 1);
+	indicesCount := params.widthSegments * params.heightSegments * 6;
 	// print("points_count:u64=%;\n", points_count);
 	// print("index_count:u64=%;\n", indices_count);
 
 	// Resize geometry arrays
-	array_resize(*geometry.attributes.position.values, points_count, false);
-	array_resize(*geometry.attributes.normal.values, points_count, false);
-	array_resize(*geometry.attributes.uv.values, points_count, false);
-	array_resize(*geometry.indices, indices_count, false);
+	geometrySetPointsCount(geometry, pointsCount);
+	geometrySetIndicesCount(geometry, indicesCount);
 
 	// Generate vertices, normals, and UVs
 	index := 0;

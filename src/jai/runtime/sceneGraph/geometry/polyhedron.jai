@@ -13,9 +13,8 @@ geometry_polyhedron_attributes_set :: (geometry: *Geometry, params: PolyhedronGe
 	subdivide(geometry, params);
 	generate_indices(geometry);
 
-	points_count := geometry.attributes.position.values.count;
-	array_resize(*geometry.attributes.normal.values, points_count);
-	array_resize(*geometry.attributes.uv.values, points_count);
+	pointsCount := geometry.attributes.position.values.count;
+	geometrySetPointsCount(geometry, pointsCount);
 
 	apply_radius(geometry, params.radius);
 	normalize_normals(geometry);

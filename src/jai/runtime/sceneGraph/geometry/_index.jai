@@ -11,3 +11,5 @@
 
 #load "normals_compute.jai";
 #load "perlin_noise.jai";
+
+#load "operations/_index.jai";

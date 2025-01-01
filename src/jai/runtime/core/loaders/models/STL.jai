@@ -21,10 +21,8 @@ parseSTL :: (nodesScene:*NodesScene, fileContent: string)->*Mesh {
 	// print("facesCount %, pointsCount %\n", facesCount, pointsCount);
 
 	{
+		geometrySetPointsCount(mesh.geometry, pointsCount);
 		using mesh.geometry;
-		array_resize(*attributes.position.values, pointsCount, false);
-		array_resize(*attributes.normal.values, pointsCount, false);
-		array_resize(*attributes.uv.values, pointsCount, false);
 		array_resize(*indices, indicesCount, false);
 
 		for 0..(facesCount-1) {
