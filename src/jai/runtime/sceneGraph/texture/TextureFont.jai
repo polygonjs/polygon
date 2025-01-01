@@ -39,8 +39,8 @@ loadFontImage :: () {
 		}
 		print("FONT IMAGE: %x% _%, %, %\n", width, height, components, width*height*components, FONT_TEXTURE.size[0]*FONT_TEXTURE.size[1]*4);
 
-		assert(width==TEXTURE_WIDTH, "width != TEXTURE_WIDTH");
-		assert(height==TEXTURE_HEIGHT, "height != TEXTURE_HEIGHT");
+		assert(width==xx TEXTURE_WIDTH, "width != TEXTURE_WIDTH");
+		assert(height==xx TEXTURE_HEIGHT, "height != TEXTURE_HEIGHT");
 		// #if WASM {
 		// 	debugImageDataPng(FONT_TEXTURE_DATA.data, FONT_TEXTURE_DATA.count);
 		// }
