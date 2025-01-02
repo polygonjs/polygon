@@ -1,6 +1,6 @@
 onResize :: (editor: *Editor, size:Vector2UInt64) {
-	if editor.windowSize == size {return;}
-	editor.windowSize = size;
+	if editor.wgpuContext.windowSize == size {return;}
+	editor.wgpuContext.windowSize = Vector2UInt.{xx size.x, xx size.y};
 	editorPanelsResize(editor);
 }
 

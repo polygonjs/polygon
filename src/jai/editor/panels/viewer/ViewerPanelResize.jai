@@ -1,6 +1,6 @@
 onResize :: (using panel: *TYPE) {
-	windowWidth :float32= xx editor.windowSize.x;
-	windowHeight :float32= xx (editor.windowSize.y - editor.mainMenuBar.computedHeight);
+	windowWidth :float32= xx editor.wgpuContext.windowSize.x;
+	windowHeight :float32= xx (editor.wgpuContext.windowSize.y - editor.mainMenuBar.computedHeight);
 	newAspect:float = windowWidth / windowHeight;
 
 	renderer.viewport.start = .{ 0, xx editor.mainMenuBar.computedHeight };

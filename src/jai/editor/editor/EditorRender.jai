@@ -8,8 +8,8 @@ editorRender :: (editor: *Editor) {
 	// print("-----------editorRender: %\n", editor.nodesScene.framesCount);
 	data :RenderCollectionData= rendererCollectionStart(*editor.wgpuContext);
 	#if HAS_NETWORK_PANEL render(*editor.networkPanel, *data);
-	render(*editor.paramsPanel, *data);
 	#if HAS_VIEWER_PANEL render(*editor.viewerPanel, *data);
+	render(*editor.paramsPanel, *data);
 
 	eventsDataClearText(*editor.eventsData);
 

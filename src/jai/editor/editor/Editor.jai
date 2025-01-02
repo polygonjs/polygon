@@ -20,7 +20,6 @@ Editor :: struct {
 		wgpuContext: WGPUContext;
 	}
 
-	windowSize: Vector2UInt64;
 	#if HAS_VIEWER_PANEL viewerPanel: ViewerPanel;
 	#if HAS_NETWORK_PANEL networkPanel: NetworkPanel;
 	paramsPanel: ParamsPanel;

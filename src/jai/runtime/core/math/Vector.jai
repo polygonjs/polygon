@@ -26,6 +26,9 @@ Vector2All :: Type.[Vector2, Vector2Int, Vector2UInt, Vector2UInt64];
 Vector3All :: Type.[Vector3, Vector3Int, Vector3UInt];
 // VectorAll :: #run array_concat(Vector2All, Vector3All);
 
+operator == :: (a:Vector2UInt, b: Vector2UInt64) -> bool #symmetric {
+	return a.x == b.x && a.y == b.y;
+}
 operator == :: (a:$T/Vector2All, b:T) -> bool {
 	return a.x == b.x && a.y == b.y;
 }
