@@ -12,6 +12,12 @@
 };
 
 loadFontImage :: () {
+
+	FONT_TEXTURE.maxAnisotropy = 16;
+	FONT_TEXTURE.minFilter = .Linear;
+	FONT_TEXTURE.magFilter = .Linear;
+	FONT_TEXTURE.mipmapFilter = .Linear;
+
 	#if WASM {
 		loadFontImage_With_web_api();
 	} else {
@@ -76,17 +82,18 @@ fontTextureCharacterUv :: (char: u8, uvMult: Vector2) -> Vector2 {
 }
 
 
-#placeholder FONT_TEXTURE_DATA;
+// #placeholder FONT_TEXTURE_DATA;
 
 #scope_file
 
+TEXTURE_WIDTH: u32: 1000;//256;
+TEXTURE_HEIGHT: u32: 800;//128;
 CHARACTERS_PER_ROW: float: 10;
-ROWS_COUNT: u32: 10;
+ROWS_COUNT: u32: 8;
+
 CHARACTERS :string: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
 INDEX_PER_CHARACTER: [256]u8 = #run _initIndexPerCharacter();
 
-TEXTURE_WIDTH: u32: 200;//256;
-TEXTURE_HEIGHT: u32: 200;//128;
 TEXTURE_DATA_SIZE: u32: TEXTURE_WIDTH*TEXTURE_HEIGHT*4;
 TEXTURE_SIZE: TEXTURE_SIZE_TYPE: .[TEXTURE_WIDTH, TEXTURE_HEIGHT];
 

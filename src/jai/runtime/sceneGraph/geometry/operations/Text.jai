@@ -1,4 +1,9 @@
-textMeshUpdate :: (nodesScene: *NodesScene, text: string, mesh: *Mesh) {
+TextOperationParams :: struct {
+	text: string;
+	size: float=1;
+}
+
+textMeshUpdate :: (nodesScene: *NodesScene, mesh: *Mesh, using params:TextOperationParams) {
 
 	charsCount := text.count;
 	pointsPerQuad :: 4;
@@ -16,22 +21,22 @@ textMeshUpdate :: (nodesScene: *NodesScene, text: string, mesh: *Mesh) {
 		{
 			using mesh.geometry.attributes;
 			pointIndex := ic*pointsPerQuad + 0;
-			position.values[pointIndex] = .{xx (ic+0), 1, 0};
+			position.values[pointIndex] = .{xx (ic+0)*size, 0.5*size, 0};
 			uv.values[pointIndex] = fontTextureCharacterUv(char, .{0,0});
 			// print("pointIndex=%, uv=%\n", pointIndex, uv.values[pointIndex]);
 
 			pointIndex = ic*pointsPerQuad + 1;
-			position.values[pointIndex] = .{xx (ic+1), 1, 0};
+			position.values[pointIndex] = .{xx (ic+1)*size, 0.5*size, 0};
 			uv.values[pointIndex] = fontTextureCharacterUv(char, .{1,0});
 			// print("pointIndex=%, uv=%\n", pointIndex, uv.values[pointIndex]);
 
 			pointIndex = ic*pointsPerQuad + 2;
-			position.values[pointIndex] = .{xx (ic+1), 0, 0};
+			position.values[pointIndex] = .{xx (ic+1)*size, -0.5*size, 0};
 			uv.values[pointIndex] = fontTextureCharacterUv(char, .{1,1});
 			// print("pointIndex=%, uv=%\n", pointIndex, uv.values[pointIndex]);
 
 			pointIndex = ic*pointsPerQuad + 3;
-			position.values[pointIndex] = .{xx (ic+0), 0, 0};
+			position.values[pointIndex] = .{xx (ic+0)*size, -0.5*size, 0};
 			uv.values[pointIndex] = fontTextureCharacterUv(char, .{0,1});
 			// print("pointIndex=%, uv=%\n", pointIndex, uv.values[pointIndex]);
 		}

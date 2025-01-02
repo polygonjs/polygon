@@ -14,10 +14,13 @@ registerTextGeoNode :: () #compile_time {
 cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	nodesScene := graphNodeScene(node);
 
-	textValue := stringFixedToString(node.p.text.value);
 	mesh := newMesh( *nodesScene.worldScene, Mesh);
-	textMeshUpdate(nodesScene, textValue, mesh);
-	
+	using node.p;
+	textMeshUpdate(nodesScene, mesh, .{
+		text=stringFixedToString(text.value),
+		size=size.value
+	});
+
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformableUpdateMatrix(mesh);
 

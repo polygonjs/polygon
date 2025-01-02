@@ -57,7 +57,10 @@ _addNode :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:boo
 		// node text
 		textMesh := newMesh(scene, Mesh);
 		name := nodeName(editor.nodesScene, node.nodeId);
-		textMeshUpdate(editor.nodesScene, name, textMesh);
+		textMeshUpdate(editor.nodesScene, textMesh, .{
+			text=name,
+			size=0.25
+		});
 		textMesh.position = bodyMesh.position + NETWORK_PANEL_TEXT_OFFSET;
 		transformableUpdateMatrix(bodyMesh);
 		#if forRaycast==false {
