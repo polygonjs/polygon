@@ -2,6 +2,7 @@
 #load "pipelineController/_index.jai";
 
 #load "Renderer.jai";
+#load "RendererBackground.jai";
 #load "RendererCollection.jai";
 #load "RendererDelete.jai";
 #load "RendererEventCommands.jai";

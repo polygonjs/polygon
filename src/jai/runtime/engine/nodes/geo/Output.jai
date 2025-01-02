@@ -29,8 +29,6 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 		if _objectChanged(*nodesScene.worldScene, inputResult) {
 			sceneObjectsClear(*nodesScene.worldScene);
 			sceneObjectsAdd(*nodesScene.worldScene, <<inputResult);
-
-			sceneObjectAdd(*nodesScene.worldScene, *nodesScene.backgroundMeshData.mesh);
 		}
 	} else {
 		sceneObjectsClear(*nodesScene.worldScene);

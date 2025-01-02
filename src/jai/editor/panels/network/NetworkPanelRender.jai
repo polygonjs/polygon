@@ -17,7 +17,18 @@ renderNodeNames :: (using panel: *TYPE) {
 	}
 
 	viewport := rendererColor.viewport;
-	
+	ImGui.SetNextWindowSize(.{xx viewport.size.x, xx viewport.size.y}, .Always);
+	ImGui.SetNextWindowPos(.{xx viewport.start.x, xx viewport.start.y}, .Always);
+	ImGui.Begin(
+		"network panel node names",
+		flags =
+			.NoTitleBar
+			|.NoResize
+			|.NoCollapse
+			|.NoDecoration
+			|.NoBackground
+			|.NoMouseInputs
+			);
 
 	for node: editor.nodesScene.nodes {
 		// do not draw below a zoom level
@@ -38,26 +49,18 @@ renderNodeNames :: (using panel: *TYPE) {
 			// do not draw if out of viewport
 			continue;
 		}
-		screenPos.x = (cast(float32) viewport.start.x) + viewport.size.x*(screenPos.x+1)/2;
-		screenPos.y = (cast(float32) viewport.start.y) + viewport.size.y*(1-(screenPos.y+1)/2);
-		name := nodeName(editor.nodesScene, node.nodeId);
-		// print("%:%\n", name, screenPos);
-		ImGui.SetNextWindowSize(.{xx 100, xx 50}, .Always);
-		ImGui.SetNextWindowPos(.{xx screenPos.x, xx screenPos.y}, .Always);
-		ImGui.Begin(
-			to_c_string_temp(name),
-			flags =
-				.NoTitleBar
-				|.NoResize
-				|.NoCollapse
-				|.NoDecoration
-				|.NoBackground
-				);
 
+		screenPos.x = viewport.size.x*(screenPos.x+1)/2;
+		screenPos.y = viewport.size.y*(1-(screenPos.y+1)/2);
+
+		ImGui.SetCursorPos(.{xx screenPos.x, xx screenPos.y});
+
+		name := nodeName(editor.nodesScene, node.nodeId);
 		ImGui.TextUnformatted(name);
 
-		ImGui.End();
 	}
+
+	ImGui.End();
 
 }
 

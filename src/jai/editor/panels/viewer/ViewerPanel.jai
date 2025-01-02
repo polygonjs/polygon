@@ -23,7 +23,6 @@ ViewerPanel :: struct {
 viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	// allocatorAssign(panel);
 
-	rendererInit(*renderer, *_editor.wgpuContext, ensureWGPUContextValid);
 
 	renderer.label = "ViewerPanelRenderer";
 	renderer.fullScreen = false;
@@ -37,6 +36,9 @@ viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 	renderer.useReadback = false;
 	renderer.clear = false;
 	// renderer.clearViewport = true;
+	renderer.includeBackgroundObject = true;
+
+	rendererInit(*renderer, *_editor.wgpuContext, ensureWGPUContextValid);
 
 	editor = _editor;
 	object3DInit(*camera);

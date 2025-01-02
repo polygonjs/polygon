@@ -26,7 +26,7 @@ geometryPlaneAttributesSet :: (geometry: *Geometry, params: PlaneGeometryParams)
 	indicesCount := widthSegments * heightSegments * 6;
 
 	geometrySetPointsCount(geometry, pointsCount);
-	array_resize(*geometry.indices, indicesCount, false);
+	geometrySetIndicesCount(geometry, indicesCount);
 
 	// Generate vertices, normals, and uvs
 	for iy: 0..gridY-1 {

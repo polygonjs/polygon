@@ -1,5 +1,6 @@
 testNodesBasicDependency :: () {
-	test("NodesBasicDependency", (options:TestProcedureOptions){
+	test("NodesBasicDependency", (options:TestProcedureOptions) {
+		
 		assertLeaksCount(0, "leaks on start");
 		nodesScene :NodesScene;//= newNodesScene();
 		nodesSceneInit(*nodesScene);
@@ -22,7 +23,7 @@ testNodesBasicDependency :: () {
 		// assertLeaksCountBetween(16, 40, "leaks after creating output node");
 		// // assertNotEqual(cast(*void)box1.cook, cast(*void)output1.cook, "cook methods do not point to same method");
 
-		assertEqual(nodesScene.worldScene.children.count, 0);
+		assertEqual(nodesScene.worldScene.children.count, 0, "worldScene children count");
 
 		setInput(output1, 0, box1);
 		setInput(output1, 1, icosahedron1);
@@ -48,7 +49,7 @@ testNodesBasicDependency :: () {
 		// 	expectedLeaksCount := 0;
 		// }
 		// assertLeaksCount(expectedLeaksCount, "leaks on cook 1");
-		assertEqual(nodesScene.worldScene.children.count, 1);
+		assertEqual(nodesScene.worldScene.children.count, 1, "worldScene children count");
 		assertEqual(firstGeometry(*nodesScene).attributes.position.values.count, 24, "points count");
 		box3:Box3 = firstGeometryBbox(*nodesScene);
 		assertEqual(box3Size(*box3).x, 2, "size x");

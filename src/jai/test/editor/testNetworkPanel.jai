@@ -15,34 +15,34 @@ testNetworkPanel :: () {
 		editorInit(*editor, ensureWGPUContextValid=false);
 		editorSetScene(*editor, *nodesScene);
 
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 5, "5 children in sceneWorld");
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5, "5 children in sceneRaycast");
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 3, "3 children in sceneWorld");
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 3, "3 children in sceneRaycast");
 
 		box3 := createNode(*nodesScene, BoxGeoNode);
 		editorFlushCommands(*editor);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 7, "7 children in sceneWorld");
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 7, "7 children in sceneRaycast");
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 4, "4 children in sceneWorld");
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4, "4 children in sceneRaycast");
 
 		box4 := createNode(*nodesScene, BoxGeoNode);
 		editorFlushCommands(*editor);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 9, "9 children in sceneWorld");
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 9, "9 children in sceneRaycast");
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 5, "5 children in sceneWorld");
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5, "5 children in sceneRaycast");
 
 		setInput(box2, 0, box1);
 		editorFlushCommands(*editor);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 10);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 6);
 
 		removeInput(box2, 0);
 		editorFlushCommands(*editor);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 9);
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 9);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 5);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 5);
 
 		nodeDelete(box3);
 		editorFlushCommands(*editor);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 7);
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 7);
-		assertEqual(editor.networkPanel.sceneWorld.children.count, 7);
-		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 7);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
+		assertEqual(editor.networkPanel.sceneWorld.children.count, 4);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER assertEqual(editor.networkPanel.sceneRaycast.children.count, 4);
 
 		editorRemoveScene(*editor);
 		nodesSceneReset(*nodesScene);
@@ -60,18 +60,18 @@ testNetworkPanel :: () {
 		editor.onAfterTick = (using editor: *Editor) {
 			if nodesScene.framesCount == {
 				case 1; {
-					assertEqual(networkPanel.sceneWorld.children.count, 5, "5 children in sceneWorld");
-					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 3, "3 pipelines in rendererColor");
-					assertEqual(_meshesCount(*networkPanel), 5, "5 meshes in rendererColor");
+					assertEqual(networkPanel.sceneWorld.children.count, 3, "3 children in sceneWorld");
+					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2, "2 pipelines in rendererColor");
+					assertEqual(_meshesCount(*networkPanel), 3, "3 meshes in rendererColor");
 				}
 				// add a node
 				case 2; {
 					output1 := createNode(nodesScene, OutputGeoNode);
 				}
 				case 3; {
-					assertEqual(networkPanel.sceneWorld.children.count, 7, "7 children in sceneWorld");
-					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 3, "3 pipelines in rendererColor");
-					assertEqual(_meshesCount(*networkPanel), 7, "7 meshes in rendererColor");
+					assertEqual(networkPanel.sceneWorld.children.count, 4, "4 children in sceneWorld");
+					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2, "2 pipelines in rendererColor");
+					assertEqual(_meshesCount(*networkPanel), 4, "4 meshes in rendererColor");
 				}
 				// connect a node
 				// case 4; {
@@ -90,9 +90,9 @@ testNetworkPanel :: () {
 					nodeDelete(lastNode);
 				}
 				case 7; {
-					assertEqual(networkPanel.sceneWorld.children.count, 5, "5 children in sceneWorld");
-					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 3, "3 pipelines in rendererColor");
-					assertEqual(_meshesCount(*networkPanel), 5, "5 meshes in rendererColor");
+					assertEqual(networkPanel.sceneWorld.children.count, 3, "3 children in sceneWorld");
+					assertEqual(networkPanel.rendererColor.pipelines_by_mat_type.count, 2, "2 pipelines in rendererColor");
+					assertEqual(_meshesCount(*networkPanel), 3, "3 meshes in rendererColor");
 				}
 				case 8; { editorRequestExit(editor); }
 			}

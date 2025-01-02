@@ -12,6 +12,11 @@ newGeometry :: (allocator: Allocator) -> *Geometry {
 	geometry.indices.allocator = allocator;
 	return geometry;
 }
+geometrySetAllocator :: (geometry: *Geometry, allocator:Allocator) {
+	geometry.allocator = allocator;
+	geometryAttributesSetAllocator(*geometry.attributes, allocator);
+	geometry.indices.allocator = allocator;
+}
 geometryClone :: (geometry: *Geometry) -> *Geometry {
 	clone := newGeometry(geometry.allocator);
 	geometryAttributesCopy(*geometry.attributes, *clone.attributes);

@@ -25,10 +25,10 @@ testViewerPanel :: () {
 			if nodesScene.framesCount == {
 				case 1; {
 					#if HAS_VIEWER_PANEL {
-						assertEqual(viewerPanel.renderer.pipelines_by_mat_type.count, 1);
+						assertEqual(viewerPanel.renderer.pipelines_by_mat_type.count, 2, "2 pipelines in renderer");
 						meshesCount := 0;
 						for pc: viewerPanel.renderer.pipelines_by_mat_type { meshesCount += pc.drawDatas.count; }
-						assertEqual(meshesCount, 1);
+						assertEqual(meshesCount, 2, "2 meshes");
 					}
 				}
 				case 2; { output1 := sceneFindNodeByType (editor.nodesScene, OutputGeoNode); paramSetValue(*output1.p.input, xx 1); }

@@ -27,6 +27,12 @@ Renderer :: struct {
 
 	clear:bool=false;
 	// clearViewport:bool=false;
+	includeBackgroundObject:bool=false;
+	backgroundMeshData:BackgroundMeshData;
+	DefaultMaterial :: struct {
+		backgroundBasic: MeshBackgroundBasicMaterial;
+	}
+	defaultMaterial:DefaultMaterial;
 	//
 	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
@@ -75,6 +81,13 @@ rendererInit :: (renderer:*Renderer, wgpuContext: *WGPUContext, $ensureWGPUConte
 		assert(renderer.wgpuContext.device != null, "renderer.wgpuContext.device is null");
 		assert(renderer.wgpuContext.queue != null, "renderer.wgpuContext.queue is null");
 	}
+
+	{
+		using renderer.defaultMaterial;
+		materialInit(*backgroundBasic);
+		setColor(*backgroundBasic, DEFAULT_RENDERER_BG_COLOR);
+	}
+	rendererInitBackgroundMesh(renderer);
 }
 
 
