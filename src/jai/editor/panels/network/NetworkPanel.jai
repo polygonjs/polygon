@@ -1,4 +1,4 @@
-NETWORK_PANEL_USE_RAYCAST_RENDERER :: true;
+NETWORK_PANEL_USE_RAYCAST_RENDERER :: false;
 NetworkPanel :: struct {
 	#if USE_FLAT_POOL {
 		pool: Flat_Pool;
@@ -34,8 +34,10 @@ NetworkPanel :: struct {
 
 NetworkPanelEventHandler :: struct {
 	mode: NetworkPanelOperation = .NONE;
-	waitingForButtonDownReadPixel:bool = false;
-	waitingForButtonUpReadPixel:bool = false;
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
+		waitingForButtonDownReadPixel:bool = false;
+		waitingForButtonUpReadPixel:bool = false;
+	}
 	nodeIdOnButtonDownFound:bool = false;
 	nodeIdOnButtonDown:NodeId = 0;
 

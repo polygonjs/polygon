@@ -8,22 +8,49 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 
 	// on native, we can get away with just checking eventsData.dirty,
 	// but on wasm we also need to check if we are waiting for the buffer to be mapped
-	processingRequired :=
-		eventsData.dirty == true ||
-		eventHandler.waitingForButtonDownReadPixel == true ||
-		eventHandler.waitingForButtonUpReadPixel == true;
-
-	if(processingRequired == false){
-		return;
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER == false {
+		// processingRequired :=
+		// 	eventsData.dirty == true
+	} else {
+		processingRequired :=
+			eventsData.dirty == true ||
+			eventHandler.waitingForButtonDownReadPixel == true ||
+			eventHandler.waitingForButtonUpReadPixel == true;
+		if(processingRequired == false){
+			return;
+		}
 	}
 
 	
-	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
-		updateOutputNodeCurrentInput(panel, eventsData);
 
-		if (eventsData.cursor != eventsData.prevCursor) {
-			networkPanelFindFirstHoveredNode(panel, eventsData);
+	updateOutputNodeCurrentInput(panel, eventsData);
+
+	if (eventsData.cursor != eventsData.prevCursor) {
+		networkPanelFindFirstHoveredNode(panel, eventsData);
+	}
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER == false {
+
+		if (eventsData.mouseButtonJustPressed.left == true) {
+			found, nodeId := findObjectUnderCursor(panel, eventsData);
+			eventHandler.nodeIdOnButtonDownFound = found;
+			if found {
+				eventHandler.nodeIdOnButtonDown = xx nodeId;
+			}
 		}
+		moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
+		if (eventsData.mouseButtonJustReleased.left == true) {
+			eventHandler.nodeIdOnButtonDownFound = false;
+		}
+		if (eventsData.mouseButton.left == true) {
+			networkPanelCursorUpdate(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
+			worldPos := networkCursorDataGetCurrentWorldPos(panel, eventsData);
+			networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
+			if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
+				moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
+			}
+		}
+
+	} else {
 
 		if (eventsData.mouseButtonJustPressed.left == true) {
 			eventHandler.waitingForButtonDownReadPixel = true;
@@ -75,18 +102,33 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 			}
 		}
 		
-	} else {
-		if READ_PIXEL_WARNING_PRINTED == false {
-			print("readPixel deactivated\n");
-			READ_PIXEL_WARNING_PRINTED = true;
+	}
+}
+
+
+findObjectUnderCursor :: (using panel: *TYPE, eventsData:*EventsData)-> (found:bool, nodeId:s64) {
+	// networkPanelCursorDataInit(*eventHandler.screenData, );
+	cursor := cursorForRaycast(eventsData, *rendererColor);
+	rayPos := networkCursorDataGetWorldPos(eventsData, *camera, cursor);
+	pad := NETWORK_PANEL_NODE_HALF_SIZE;
+	for node, i: editor.nodesScene.nodes {
+		objectIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
+		object := sceneWorld.children[objectIndex];
+		using object.position;
+		if 	rayPos.x < x+pad &&
+			rayPos.x > x-pad &&
+			rayPos.y < y+pad &&
+			rayPos.y > y-pad
+		{
+			return true, node.nodeId;
 		}
 	}
+	return false, 0;
 }
 
 #scope_file
 
 TYPE :: NetworkPanel;
-READ_PIXEL_WARNING_PRINTED:=false;
 
 MOVE_DIST_THRESHOLD :: 0.05;
 

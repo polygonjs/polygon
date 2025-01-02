@@ -1,5 +1,5 @@
 networkPanelFindFirstHoveredNode :: (using panel: *TYPE, eventsData:*EventsData) {
-	found, nodeId := _findHoveredObject(panel, eventsData);
+	found, nodeId := findObjectUnderCursor(panel, eventsData);
 	if found == false {
 		_restoreMaterialToPreviouslyHighlighted(panel);
 		panel.eventHandler.hoveredNodeId = -1;
@@ -32,22 +32,3 @@ _setMaterial :: (using panel: *TYPE, nodeId:NodeId, material: *Material){
 	}
 }
 
-_findHoveredObject :: (using panel: *TYPE, eventsData:*EventsData)-> (found:bool, nodeId:s64) {
-	// networkPanelCursorDataInit(*eventHandler.screenData, );
-	cursor := cursorForRaycast(eventsData, *rendererColor);
-	rayPos := networkCursorDataGetWorldPos(eventsData, *camera, cursor);
-	pad := NETWORK_PANEL_NODE_HALF_SIZE;
-	for node, i: editor.nodesScene.nodes {
-		objectIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
-		object := sceneWorld.children[objectIndex];
-		using object.position;
-		if 	rayPos.x < x+pad &&
-			rayPos.x > x-pad &&
-			rayPos.y < y+pad &&
-			rayPos.y > y-pad
-		{
-			return true, node.nodeId;
-		}
-	}
-	return false, 0;
-}
