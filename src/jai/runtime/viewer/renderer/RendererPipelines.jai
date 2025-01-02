@@ -18,7 +18,7 @@ rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*CameraAny){
 
 	rendererCameraUpdateMatrix(renderer, camera);
 
-	rendererAddBackgroundMesh(renderer);
+	// rendererAddBackgroundMesh(renderer);
 	
 	// for object: scene.children {
 	// 	rendererObjectAdd(renderer, object);

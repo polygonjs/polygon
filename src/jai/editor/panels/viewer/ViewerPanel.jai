@@ -36,7 +36,7 @@ viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 	renderer.useReadback = false;
 	renderer.clear = false;
 	// renderer.clearViewport = true;
-	renderer.includeBackgroundObject = true;
+	// renderer.includeBackgroundObject = false;
 
 	rendererInit(*renderer, *_editor.wgpuContext, ensureWGPUContextValid);
 
