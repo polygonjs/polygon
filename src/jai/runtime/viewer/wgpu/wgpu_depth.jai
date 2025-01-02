@@ -1,11 +1,4 @@
-DEPTH_TEXTURE_FORMAT :: WGPUTextureFormat.Depth24Plus;
-// DEPTH_STENCIL_STATE :: WGPUDepthStencilState.{
-// 	depthWriteEnabled = true,
-// 	depthCompare = WGPUCompareFunction.Less, //"less",
-// 	format = DEPTH_TEXTURE_FORMAT,
-// 	stencilReadMask = 0,
-// 	stencilWriteMask = 0,
-// };
+
 
 stencil_face_state_set_default :: (stencil_face_state: *WGPUStencilFaceState) {
 	stencil_face_state.compare = WGPUCompareFunction.Always;
@@ -26,8 +19,6 @@ depth_stencil_state_set_default :: (depth_stencil_state: *WGPUDepthStencilState)
 	stencil_face_state_set_default(*depth_stencil_state.stencilFront);
 	stencil_face_state_set_default(*depth_stencil_state.stencilBack);
 }
-
-
 
 
 wgpu_update_pipeline_descriptor_depth :: (renderer:*Renderer, pipeline_descriptor: *WGPURenderPipelineDescriptor, depth_stencil_state: *WGPUDepthStencilState) {
@@ -78,7 +69,7 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 	};
 	renderer.depth_texture = wgpuDeviceCreateTexture(renderer.wgpuContext.device, *texture_descriptor);
 
-	renderer.depth_texture_view = wgpuTextureCreateView(renderer.depth_texture, *depth_texture_view_descriptor);
+	renderer.depth_texture_view = wgpuTextureCreateView(renderer.depth_texture, *DEPTH_TEXTURE_VIEW_DESCRIPTOR);
 	renderer.depth_texture_stencil_attachment = WGPURenderPassDepthStencilAttachment.{
 		view = renderer.depth_texture_view,
 		depthClearValue = 1.0,
@@ -96,13 +87,6 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 		// stencilReadOnly = xx true,
 	};
 }
-
-depth_texture_view_descriptor :: WGPUTextureViewDescriptor.{
-	label = "depth_texture_view_descriptor",
-	mipLevelCount = 1,
-	arrayLayerCount = 1,
-	// format = DEPTH_TEXTURE_FORMAT,
-};
 
 update_render_pass_descriptor_depth :: (
 	renderer: *Renderer,
@@ -127,7 +111,24 @@ update_render_pass_descriptor_depth :: (
 // 	}
 // }
 
+DEPTH_TEXTURE_FORMAT :: WGPUTextureFormat.Depth24Plus;
+
 #scope_file
+
+DEPTH_TEXTURE_VIEW_DESCRIPTOR :: WGPUTextureViewDescriptor.{
+	label = "depth_texture_view_descriptor",
+	mipLevelCount = 1,
+	arrayLayerCount = 1,
+	// format = DEPTH_TEXTURE_FORMAT,
+};
+
+// DEPTH_STENCIL_STATE :: WGPUDepthStencilState.{
+// 	depthWriteEnabled = true,
+// 	depthCompare = WGPUCompareFunction.Less, //"less",
+// 	format = DEPTH_TEXTURE_FORMAT,
+// 	stencilReadMask = 0,
+// 	stencilWriteMask = 0,
+// };
 
 depth_stencil_state_prepare :: (depth_stencil_state: *WGPUDepthStencilState) {
 	depth_stencil_state_set_default(depth_stencil_state);

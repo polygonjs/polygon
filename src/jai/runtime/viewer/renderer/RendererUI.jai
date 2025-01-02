@@ -21,7 +21,7 @@ renderUIStart :: (data:*RenderCollectionData, renderer: *Renderer)->(cmdEncoder:
 		clearValue = wgpu_color_create(renderer.bgColor),
 	};
 
-	update_render_pass_descriptor_multisample(renderer, *colorAttachment, *data.frame);
+	updateRenderPassDescriptorMultisample(renderer, *colorAttachment, data.frame);
 
 	cmdEncoder :WGPUCommandEncoder= wgpuDeviceCreateCommandEncoder(
 		renderer.wgpuContext.device,

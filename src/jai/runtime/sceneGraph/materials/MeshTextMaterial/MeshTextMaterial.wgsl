@@ -52,5 +52,6 @@ fn vertex(model: VertexInput) -> VertexOutput {
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
 	// return vec4<f32>(0.2, in.uv.x, 0.0, 0.0) + textureSample(map, mapSampler, in.uv);
 	// return vec4<f32>(1.0, 0.0, 0.0, 1.2);
-	return textureSample(map, mapSampler, in.uv);
+	var c = textureSample(map, mapSampler, in.uv);
+	return vec4<f32>(c.rgb, c.r);
 }

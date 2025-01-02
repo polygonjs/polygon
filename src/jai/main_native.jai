@@ -1,4 +1,5 @@
 main :: () {
+	loadFontImage();
 
 	#if RUN_TESTS {
 		runTests(*APP);

@@ -74,7 +74,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 				size = .{1,1}
 			};
 		rendererColor.bgColor = DEFAULT_RENDERER_BG_COLOR;
-		rendererColor.use_msaa = false;
+		rendererColor.use_msaa = true;
 		rendererColor.use_depth_buffer = true;
 		rendererColor.useReadback = false;
 		rendererColor.clear = false;
@@ -126,7 +126,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	materialInit(*mat.connectionCurrent);
 	setColor(*mat.nodeBasic, .{1.0, 0.5, 0.25, 1.0});
 	setColor(*mat.nodeSelected, .{0, 1, 0, 1});
-	setColor(*mat.nodeHovered, .{1.0, 0.7, 0.2, 0.1});
+	setColor(*mat.nodeHovered, .{1.0, 0.7, 0.2, 1.0});
 	setColor(*mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
 	setColor(*mat.connectionCurrent, .{0.9, 1, 0.9, 1});
 	cameraControls.camera = *camera;

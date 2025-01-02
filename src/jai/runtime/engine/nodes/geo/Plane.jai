@@ -24,7 +24,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 	geometryAttributesValidate(mesh.geometry);
 	normals_compute(mesh.geometry);
 
-	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.fontTexture);//.uv);
+	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.mesh);//.uv);
 	mesh.position = .{x = 0.0, y = 0.0, z = 0.0};
 	transformableUpdateMatrix(mesh);
 

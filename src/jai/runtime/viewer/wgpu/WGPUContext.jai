@@ -18,4 +18,8 @@ WGPUContext :: struct {
 		config: WGPUSurfaceConfiguration;
 	}
 	windowSize: Vector2UInt;
+	//
+	multisampleTexture: WGPUTexture;
+	multisampleTextureView: WGPUTextureView=null;
+
 };

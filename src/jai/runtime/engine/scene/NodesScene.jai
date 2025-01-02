@@ -29,7 +29,7 @@ NodesScene :: struct {
 		point: PointBasicMaterial;
 		uv: MeshUVMaterial;
 		basicTexture: MeshBasicTextureMaterial;
-		fontTexture: MeshBasicTextureMaterial;
+		text: MeshTextMaterial;
 	}
 	defaultMaterial:DefaultMaterial;
 
@@ -162,12 +162,11 @@ nodesSceneInit :: (scene: *NodesScene) {
 		materialInit(*point);
 		materialInit(*uv);
 		materialInit(*basicTexture);
-		materialInit(*fontTexture);
+		materialInit(*text);
 		setColor(*basicTexture, .{1.0, 1.0, 1.0, 1.0});
-		setColor(*fontTexture, .{1.0, 1.0, 1.0, 1.0});
+		setColor(*text, .{1.0, 1.0, 1.0, 1.0});
 
 		setTexture(*basicTexture, *FONT_TEXTURE);
-		setTexture(*fontTexture, *FONT_TEXTURE);
 	}
 }
 

@@ -61,6 +61,6 @@ textMeshUpdate :: (nodesScene: *NodesScene, mesh: *Mesh, using params:TextOperat
 
 	geometryAttributesValidate(mesh.geometry);
 
-	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.fontTexture);
+	meshSetMaterial(*nodesScene.worldScene, mesh, xx *nodesScene.defaultMaterial.text);
 
 }

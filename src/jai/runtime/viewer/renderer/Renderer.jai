@@ -30,10 +30,10 @@ Renderer :: struct {
 	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
 	useReadback: bool=false;
-	//
-	multisample_texture_descriptor : WGPUTextureDescriptor;
-	multisample_texture: WGPUTexture;
-	multisample_texture_view: WGPUTextureView=null;
+	// //
+	// multisample_texture_descriptor : WGPUTextureDescriptor;
+	// multisample_texture: WGPUTexture;
+	// multisample_texture_view: WGPUTextureView=null;
 	//
 	depth_texture_stencil_attachment: WGPURenderPassDepthStencilAttachment;
 	depth_texture: WGPUTexture;

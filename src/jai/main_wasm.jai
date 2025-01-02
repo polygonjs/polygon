@@ -6,6 +6,8 @@ main :: () {
 on_wgpu_device_ready :: ( canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQueue, preferred_texture_format: WGPUTextureFormat, width: u64, height: u64 ) {
 	context = call_from_wasm_context;
 
+	loadFontImage();
+
 	#if RUN_TESTS {
 
 		wgpuContextInit(*APP.testApp.headlessWGPUContext, canvas, device, queue, preferred_texture_format, width, height);

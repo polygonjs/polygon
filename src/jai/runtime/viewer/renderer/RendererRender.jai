@@ -16,7 +16,7 @@ render :: (data:*RenderCollectionData, renderer: *Renderer, scene:*Scene, camera
 		clearValue = wgpu_color_create(renderer.bgColor),
 	};
 
-	update_render_pass_descriptor_multisample(renderer, *colorAttachment, *data.frame);
+	updateRenderPassDescriptorMultisample(renderer, *colorAttachment, data.frame);
 
 	cmdEncoderLabel := tprint("Command Encoder %", renderer.label,, temp);
 	cmdEncoderLabel_c := to_c_string_temp(cmdEncoderLabel);

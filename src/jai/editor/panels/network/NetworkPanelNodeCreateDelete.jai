@@ -74,20 +74,23 @@ _addNode :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:boo
 }
 
 _removeNode :: (using panel:*TYPE, node:*$T, $forRaycast:bool) {
-	meshIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
-	if meshIndex >= 0 {
+	bodyObjectIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
+	textObjectIndex := nodeTextObjectIndexByNodeId[node.nodeId];
+	if bodyObjectIndex >= 0 && textObjectIndex >= 0 {
 		#if forRaycast {
 			scene := *sceneRaycast;
 		} else {
 			scene := *sceneWorld;
 		}
-		object := scene.children[meshIndex];
+		bodyObject := scene.children[bodyObjectIndex];
+		textObject := scene.children[textObjectIndex];
 		#if forRaycast {
-			mesh := cast(*Mesh)object;
-			materialDelete(cast(*MATERIAL_RAYCAST)mesh.material);
-			geometryDelete(mesh.geometry);
+			bodyMesh := cast(*Mesh)bodyObject;
+			materialDelete(cast(*MATERIAL_RAYCAST)bodyMesh.material);
+			geometryDelete(bodyMesh.geometry);
 		}
-		sceneObjectRemove(scene, object, delete=false);
+		sceneObjectRemove(scene, bodyObject, delete=false);
+		sceneObjectRemove(scene, textObject, delete=false);
 		#if forRaycast == true {
 			nodeBodyObjectIndexByNodeId[node.nodeId] = 0;
 		}

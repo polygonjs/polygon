@@ -5,7 +5,7 @@
 #load "wgpu_msaa.jai";
 #load "wgpu_surface.jai";
 
-#load "wgpuContext.jai";
+#load "WGPUContext.jai";
 
 #if WASM #load "targets/wasm.jai";
 else     #load "targets/native.jai";
