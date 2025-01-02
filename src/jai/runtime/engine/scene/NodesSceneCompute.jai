@@ -59,7 +59,7 @@ nodesSceneDisposeCookResults :: (scene: *NodesScene) {
 	scene.cookResultsToDispose.count = 0;
 }
 
-GeoNodeCookOutputOrObject :[2]Type: .[Object3D, Object3DArray];
+GeoNodeCookOutputOrObject :[2]Type: .[Object3DAny, Object3DArray];
 completeCookWithResult :: (using scene:*NodesScene, node: *$T, objects: *$O/GeoNodeCookOutputOrObject) {
 	cooksCount[node.nodeId] += 1;
 	//

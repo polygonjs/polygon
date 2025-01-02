@@ -86,9 +86,14 @@ transformDirection :: ( v: $T/Vector3All, m:Matrix4 ) -> T {
 
 	return v2;
 }
-unproject :: ( v: $T/Vector3All, camera:*Camera ) -> T {
+ndcToWorld :: ( v: $T/Vector3All, camera:*CameraAny ) -> T {
 	v2 := applyMatrix4( v, camera.projectionMatrixInverse );
 	v3 := applyMatrix4( v2, camera.matrix ); // .matrixWorld
+	return v3;
+}
+worldToNDC :: ( v: $T/Vector3All, camera:*CameraAny ) -> T {
+	v2 := applyMatrix4( v, camera.matrixInverse );
+	v3 := applyMatrix4( v2, camera.projectionMatrix );
 	return v3;
 }
 

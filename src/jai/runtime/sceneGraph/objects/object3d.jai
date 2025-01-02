@@ -16,6 +16,7 @@ Object3D :: struct {
 
 	transformableUniforms: TransformableUniforms;
 }
+Object3DAny :: Object3D;
 
 TransformOrder :: enum u8 {
 	TRS :: 0;
@@ -135,6 +136,18 @@ nextWorldObjectId :: ()->WorldObjectId{
 	currentId := NEXT_OBJECT3D_ID;
 	NEXT_OBJECT3D_ID += 1;
 	return currentId;
+}
+
+object3DCopy :: (src: *TYPE, using target: *TYPE) {
+	// allocator = src.allocator;
+	position = src.position;
+	quaternion = src.quaternion;
+	scale = src.scale;
+	transformOrder = src.transformOrder;
+	matrix = src.matrix;
+	matrixInverse = src.matrixInverse;
+
+	transformableUniforms = src.transformableUniforms;
 }
 
 #scope_file

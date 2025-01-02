@@ -35,10 +35,10 @@ viewerPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 	renderer.use_msaa = true;
 	renderer.use_depth_buffer = true;
 	renderer.useReadback = false;
-	renderer.clear = true;
+	renderer.clear = false;
+	// renderer.clearViewport = true;
 
 	editor = _editor;
-	camera.type = PerspectiveCamera;
 	object3DInit(*camera);
 	cameraControls.camera = *camera;
 

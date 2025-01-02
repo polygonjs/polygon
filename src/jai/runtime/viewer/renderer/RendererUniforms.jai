@@ -28,14 +28,14 @@ renderer_uniform_buffer_create :: (renderer: *Renderer, buffer_data: *RendererBu
 renderer_scene_uniform_buffer_create :: (renderer: *Renderer, scene:*Scene) {
 	renderer_uniform_buffer_create(renderer, *renderer.scene_data, scene.sceneUniforms, "scene");
 }
-renderer_camera_uniform_buffer_create :: (renderer: *Renderer, camera:*Camera) {
+renderer_camera_uniform_buffer_create :: (renderer: *Renderer, camera:*CameraAny) {
 	renderer_uniform_buffer_create(renderer, *renderer.camera_data, camera.cameraUniforms, "camera");
 }
 
-renderer_scene_uniform_buffer_update :: (renderer: *Renderer, scene:*Scene, uniforms: $UniformType){
+rendererSceneUniformBufferUpdate :: (renderer: *Renderer, scene:*Scene, uniforms: $UniformType){
 	wgpuQueueWriteBuffer(renderer.wgpuContext.queue, renderer.scene_data.buffer_container.buffer, 0, *scene.sceneUniforms, size_of(UniformType));
 }
-renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*Camera, uniforms: $UniformType){
+renderer_camera_uniform_buffer_update :: (renderer: *Renderer, camera:*CameraAny, uniforms: $UniformType){
 	wgpuQueueWriteBuffer(renderer.wgpuContext.queue, renderer.camera_data.buffer_container.buffer, 0, *camera.cameraUniforms, size_of(UniformType));
 }
 

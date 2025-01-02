@@ -1,5 +1,5 @@
 
-pipeline_controller_update_render_pass :: (using pc: *PipelineController, renderPassEncoder: WGPURenderPassEncoder) {
+pipelineControllerUpdateRenderPass :: (using pc: *PipelineController, renderPassEncoder: WGPURenderPassEncoder) {
 	wgpuRenderPassEncoderSetPipeline(renderPassEncoder, pipeline);
 
 	for drawData: drawDatas {

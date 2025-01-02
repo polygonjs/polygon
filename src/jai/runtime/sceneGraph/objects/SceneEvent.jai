@@ -29,7 +29,7 @@ sceneEmitEvent :: (using scene: *Scene, $event: SceneEvent, object: *$T) {
 		case .OBJECT_ADDED; 	{for o:observers sceneObserverOnObjectAdded(o, scene, object);return;}
 		case .OBJECT_BEFORE_REMOVE; 	{for o:observers sceneObserverOnObjectBeforeRemove(o, scene, object);return;}
 		case .OBJECT_MATRIX_UPDATED; {for o:observers sceneObserverOnObjectMatrixUpdated(o, scene, object);return;}
-		case .CAMERA_MATRIX_UPDATED; {for o:observers sceneObserverOnCameraMatrixUpdated(o, scene, cast(*Camera)object);return;}
+		case .CAMERA_MATRIX_UPDATED; {for o:observers sceneObserverOnCameraMatrixUpdated(o, scene, cast(*CameraAny)object);return;}
 	}
 }
 sceneEmitEvent :: (using scene: *Scene, $event: SceneEvent, objects: []*$T) {

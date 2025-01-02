@@ -47,7 +47,7 @@ createPixelReadbackResources :: (renderer: *Renderer)->bool {
 	renderer.readback_buffer = wgpuDeviceCreateBuffer(device, *READ_PIXEL_BUFFER_DESC);
 	return true;
 }
-renderPixel :: (renderer: *Renderer, scene: *Scene, camera: *Camera, pos:Vector2UInt) {
+renderPixel :: (renderer: *Renderer, scene: *Scene, camera: *CameraAny, pos:Vector2UInt) {
 	if WAITING_FOR_BUFFER_MAPPED_STATE == true {
 		return;
 	}
@@ -57,7 +57,7 @@ renderPixel :: (renderer: *Renderer, scene: *Scene, camera: *Camera, pos:Vector2
 			return;
 		}
 	}
-	rendererPreRender(renderer, camera);
+	rendererPreRender(renderer);
 
 	// create_multi_sample_texture_if_needed( renderer );
 	create_depth_texture_if_needed( renderer );
@@ -96,8 +96,8 @@ renderPixel :: (renderer: *Renderer, scene: *Scene, camera: *Camera, pos:Vector2
 		set_scissor_rect(render_pass_encoder, scissor_pos.x, scissor_pos.y, 1, 1);
 	}
 	
-	renderer_scene_uniform_buffer_update(renderer, scene, scene.sceneUniforms);
-	for renderer.pipelines_by_mat_type pipeline_controller_update_render_pass(it, render_pass_encoder);
+	rendererSceneUniformBufferUpdate(renderer, scene, scene.sceneUniforms);
+	for renderer.pipelines_by_mat_type pipelineControllerUpdateRenderPass(it, render_pass_encoder);
 
 	wgpuRenderPassEncoderEnd(render_pass_encoder);
 

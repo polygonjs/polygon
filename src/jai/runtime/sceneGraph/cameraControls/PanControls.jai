@@ -4,8 +4,8 @@ PanControls :: struct {
 	#as using cameraControls: CameraControls;
 
 	position:Vector3 = .{x=0.0,y=0.0,z=0.0};
-	zoom:float = ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE;
-	sensitivity:float = 0.025;
+	zoom:float = 10;
+	zoomSensitivity:float = 2.;
 
 	zoomBound :[2]float = .[DEFAULT_ZOOM_MIN, DEFAULT_ZOOM_MAX];
 
@@ -13,31 +13,39 @@ PanControls :: struct {
 	zoomStarted: bool = false;
 	middleButtonPressed: bool = false;
 	startCameraPos: Vector2;
-	startPointer: Vector2Int;
+	startPanPos: Vector2;
 }
 
 
 
 
-cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, elementFocused:bool){
+cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, cursorForRaycast:Vector2, elementFocused:bool){
 
 	if(panStarted == false && elementFocused==true){
 		if (eventsData.mouseButtonJustPressed.middle) {
-			cursor :Vector2Int= .{ cast(s32)eventsData.cursor.x, cast(s32)eventsData.cursor.y};
 			panStarted = true;
-			startCameraPos.x = controls.camera.position.x;
-			startCameraPos.y = controls.camera.position.y;
-			startPointer.x = cursor.x;
-			startPointer.y = cursor.y;
+			startCameraPos.x = camera.position.x;
+			startCameraPos.y = camera.position.y;
+			if camera.type == OrthographicCamera {
+				orthographicCamera := cast(*OrthographicCamera)camera;
+				object3DCopy(orthographicCamera, *dummyOrthographicCamera);
+			} else {
+				assert(false, "panControls currently only supports orthographic cameras");
+			}
+			cursorForRaycast3D :Vector3= .{cursorForRaycast.x, cursorForRaycast.y, 0.5};
+			startPanPos3D := ndcToWorld(cursorForRaycast3D, camera);
+			startPanPos.x = startPanPos3D.x;
+			startPanPos.y = startPanPos3D.y;
 			delta = .{0,0};
 		}
 	}
 	if(panStarted==true){
-		cursor :Vector2Int= .{ cast(s32)eventsData.cursor.x, cast(s32)eventsData.cursor.y};
-		delta.x = cursor.x - startPointer.x;
-		delta.y = cursor.y - startPointer.y;
-		position.x=startCameraPos.x + xx delta.x * sensitivity * -1;
-		position.y=startCameraPos.y + xx delta.y * sensitivity;
+		cursorForRaycast3D :Vector3= .{cursorForRaycast.x, cursorForRaycast.y, 0.5};
+		startPanPos3D := ndcToWorld(cursorForRaycast3D, *dummyOrthographicCamera);
+		delta.x = startPanPos3D.x - startPanPos.x;
+		delta.y = startPanPos3D.y - startPanPos.y;
+		position.x = startCameraPos.x - delta.x;
+		position.y = startCameraPos.y - delta.y;
 		if (eventsData.mouseButton.middle==false) {
 			panStarted = false;
 		}
@@ -45,7 +53,7 @@ cameraControlsProcessEvent :: (using controls:*TYPE, eventsData:*EventsData, ele
 
 	if(elementFocused && eventsData.wheel != 0){
 		previousZoom := zoom;
-		zoom = clamp(zoom - eventsData.wheel * 0.1, zoomBound[0], zoomBound[1]);
+		zoom = clamp(zoom - eventsData.wheel * zoomSensitivity, zoomBound[0], zoomBound[1]);
 		if previousZoom != zoom {
 			zoomStarted = true;
 		}
@@ -80,7 +88,8 @@ cameraControlsCommit :: (using controls:*TYPE){
 
 TYPE :: PanControls;
 
-delta:Vector2Int;
+delta:Vector2;
+dummyOrthographicCamera:OrthographicCamera;
 DEPTH:float:5;
 DEFAULT_ZOOM_MIN :: 1;
 DEFAULT_ZOOM_MAX :: 100.0;

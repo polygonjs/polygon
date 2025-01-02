@@ -108,19 +108,19 @@ members :: (using object: *RendererCommands, body: Code, flags: For_Flags) #expa
 #scope_file
 
 RendererObjectCommand :: struct {
-	object: *Object3D;
+	object: *Object3DAny;
 }
 RendererCameraCommand :: struct {
-	camera: *Camera;
+	camera: *CameraAny;
 }
 RendererObjectAddCommand :: RendererObjectCommand;
 RendererObjectBeforeRemoveCommand :: RendererObjectCommand;
 
 RendererObjectsBeforeRemoveCommand :: struct {
-	objects: []*Object3D;
+	objects: []*Object3DAny;
 }
 RendererRenderableMaterialChangedCommand :: struct {
-	object: *Object3D;
+	object: *Object3DAny;
 	previousMaterial: *Material;
 }
 RendererObjectMatrixUpdatedCommand :: RendererObjectCommand;

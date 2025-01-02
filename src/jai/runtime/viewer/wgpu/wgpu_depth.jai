@@ -33,16 +33,17 @@ wgpu_update_pipeline_descriptor_depth :: (renderer:*Renderer, pipeline_descripto
 
 create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 	assert(renderer.wgpuContext!=null, "renderer.wgpuContext is null\n");
-	size := rendererTargetSize(renderer);
+	using renderer.wgpuContext;
+	size := windowSize;
 
-	if( renderer.depth_texture != null) {
+	if( depthTexture != null) {
 		if(
-			wgpuTextureGetWidth(renderer.depth_texture) == size.x &&
-			wgpuTextureGetHeight(renderer.depth_texture) == size.y
+			wgpuTextureGetWidth(depthTexture) == size.x &&
+			wgpuTextureGetHeight(depthTexture) == size.y
 		){
 			return;
 		}
-		wgpuTextureRelease(renderer.depth_texture);
+		wgpuTextureRelease(depthTexture);
 		// texture_create_required = true;
 	}
 
@@ -52,7 +53,7 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 
 	sampleCount :u32= xx (ifx renderer.use_msaa then MULTISAMPLE_SAMPLES_COUNT else 1);
 	viewFormats :[1]WGPUTextureFormat = .[DEPTH_TEXTURE_FORMAT];
-	texture_descriptor := WGPUTextureDescriptor.{
+	textureDescriptor := WGPUTextureDescriptor.{
 		label = "Depth Texture",
 		size = .{
 			width = xx size.x,
@@ -67,11 +68,15 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 		viewFormatCount = viewFormats.count,
 		viewFormats = viewFormats.data,
 	};
-	renderer.depth_texture = wgpuDeviceCreateTexture(renderer.wgpuContext.device, *texture_descriptor);
+	renderer.wgpuContext.depthTexture = wgpuDeviceCreateTexture(renderer.wgpuContext.device, *textureDescriptor);
 
-	renderer.depth_texture_view = wgpuTextureCreateView(renderer.depth_texture, *DEPTH_TEXTURE_VIEW_DESCRIPTOR);
-	renderer.depth_texture_stencil_attachment = WGPURenderPassDepthStencilAttachment.{
-		view = renderer.depth_texture_view,
+	renderer.wgpuContext.depthTextureView = wgpuTextureCreateView(renderer.wgpuContext.depthTexture, *DEPTH_TEXTURE_VIEW_DESCRIPTOR);
+	renderer.wgpuContext.depthTextureStencilAttachment = depthStencilAttachment(renderer);
+}
+
+depthStencilAttachment :: (renderer: *Renderer)->WGPURenderPassDepthStencilAttachment {
+	return WGPURenderPassDepthStencilAttachment.{
+		view = renderer.wgpuContext.depthTextureView,
 		depthClearValue = 1.0,
 		depthLoadOp = WGPULoadOp.Clear,
 		depthStoreOp = WGPUStoreOp.Store,
@@ -90,8 +95,8 @@ create_depth_texture_if_needed :: ( renderer: *Renderer ) {
 
 update_render_pass_descriptor_depth :: (
 	renderer: *Renderer,
-	render_pass_descriptor: *WGPURenderPassDescriptor
-	// we need #expand here, to ensure that the pointer to depth_texture_stencil_attachment
+	renderPassDescriptor: *WGPURenderPassDescriptor
+	// we need #expand here, to ensure that the pointer to depthTextureStencilAttachment
 	// remains in the caller stack
 ) #expand {
 	// if(render_pass_descriptor.depthStencilAttachment.view){
@@ -99,9 +104,9 @@ update_render_pass_descriptor_depth :: (
 	// }
 
 	if(renderer.use_depth_buffer){
-		render_pass_descriptor.depthStencilAttachment = *renderer.depth_texture_stencil_attachment;
+		renderPassDescriptor.depthStencilAttachment = *renderer.wgpuContext.depthTextureStencilAttachment;
 	} else {
-		render_pass_descriptor.depthStencilAttachment = null;
+		renderPassDescriptor.depthStencilAttachment = null;
 	}
 }
 

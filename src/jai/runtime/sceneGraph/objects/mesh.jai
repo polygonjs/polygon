@@ -35,7 +35,7 @@ worldObjectClone :: (object: *TYPE)->*TYPE {
 // 	object3DInit(mesh, null, null);
 // }
 object3DInit :: (mesh: *TYPE) {
-	object3DInit(cast(*Object3D)mesh);
+	object3DInit(cast(*Object3DAny)mesh);
 
 
 	// geometryBoxUpdate(mesh.geometry, .{2,2,2});
@@ -47,7 +47,7 @@ worldObjectDelete :: (object: *TYPE) {
 	if object.geometry != null {
 		geometryDelete(object.geometry);
 	}
-	worldObjectDelete(cast(*Object3D)object);
+	worldObjectDelete(cast(*Object3DAny)object);
 }
 
 #scope_file

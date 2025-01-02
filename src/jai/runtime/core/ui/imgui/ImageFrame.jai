@@ -28,6 +28,8 @@ renderUIFrameStart :: (renderer:*Renderer, eventsData: *EventsData, imguiPolygon
 	}
 	ImGui.NewFrame();
 }
+
+
 renderUIFrameEnd :: (renderPass: WGPURenderPassEncoder, imguiPolygonContext: *ImguiPolygonContext){
 	ImGui.EndFrame();
 	ImGui.Render();

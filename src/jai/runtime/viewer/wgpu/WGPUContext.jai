@@ -21,5 +21,9 @@ WGPUContext :: struct {
 	//
 	multisampleTexture: WGPUTexture;
 	multisampleTextureView: WGPUTextureView=null;
+	//
+	depthTextureStencilAttachment: WGPURenderPassDepthStencilAttachment;
+	depthTexture: WGPUTexture;
+	depthTextureView: WGPUTextureView=null;
 
 };

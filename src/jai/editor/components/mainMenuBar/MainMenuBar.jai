@@ -1,3 +1,6 @@
+MainMenuBar :: struct {
+	computedHeight: float = 0;
+}
 
 mainMenuBarDraw :: (using editor: *Editor) {
 	#if USE_IMGUI if (ImGui.BeginMainMenuBar()) {
@@ -24,6 +27,11 @@ mainMenuBarDraw :: (using editor: *Editor) {
 				frameRateStr := tprint("FPS:%", editor.nodesScene.fps);
 				ImGui.TextUnformatted(frameRateStr);
 			// }
+		}
+		newComputedHeight := ImGui.GetWindowHeight();
+		if (newComputedHeight != mainMenuBar.computedHeight) {
+			mainMenuBar.computedHeight = newComputedHeight;
+			editorPanelsResize(editor);
 		}
 		ImGui.EndMainMenuBar();
 	}

@@ -11,7 +11,7 @@ CameraUniforms :: struct {
 	projectionMatrixInverse: Matrix4x4Buffer;
 };
 
-Camera :: struct {
+Camera :: struct  {
 	#as using object3D: Object3D;
 
 	near: float32 = 0.1;
@@ -22,19 +22,20 @@ Camera :: struct {
 	// cameraMatrices: CameraMatrices;
 	cameraUniforms: CameraUniforms;
 }
+CameraAny :: Camera;
 
-object3DInit :: (camera: *Camera) {
+object3DInit :: (camera: *CameraAny) {
 	camera.transformOrder = .RTS;
 
 	identity(*camera.matrix);
 	translate(*camera.matrix, .{x = 0.0, y = 0.0, z = 5.0});
 }
 
-cameraProjectionMatrixInverseUpdate :: (camera: *Camera) {
+cameraProjectionMatrixInverseUpdate :: (camera: *CameraAny) {
 	camera.projectionMatrixInverse = inverse(camera.projectionMatrix);
 }
 
-cameraUniformsUpdate :: (camera: *Camera) {
+cameraUniformsUpdate :: (camera: *CameraAny) {
 	camera.cameraUniforms.worldPos.x = camera.matrix._14;
 	camera.cameraUniforms.worldPos.y = camera.matrix._24;
 	camera.cameraUniforms.worldPos.z = camera.matrix._34;
@@ -44,4 +45,16 @@ cameraUniformsUpdate :: (camera: *Camera) {
 	matrix4x4_to_buffer(*transformMatrixInverse, *camera.cameraUniforms.transformMatrixInverse);
 	matrix4x4_to_buffer(*projectionMatrix, *camera.cameraUniforms.projectionMatrix);
 	matrix4x4_to_buffer(*inverse(projectionMatrix), *camera.cameraUniforms.projectionMatrixInverse);
+}
+
+object3DCopy :: (src: *CameraAny, using target: *CameraAny) {
+	object3DCopy(cast(*Object3D)src, cast(*Object3D)target);
+
+	near = src.near;
+	far = src.far;
+	aspect = src.aspect;
+	projectionMatrix = src.projectionMatrix;
+	projectionMatrixInverse = src.projectionMatrixInverse;
+
+	cameraUniforms = src.cameraUniforms;
 }

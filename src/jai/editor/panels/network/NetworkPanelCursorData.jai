@@ -37,7 +37,7 @@ networkCursorDataGetCurrentWorldPos :: (using panel: *TYPE, eventsData: *EventsD
 // 	raycasterSetFromCamera(*raycaster, camera, screenCursorData.currentPos);
 // 	return .{raycaster.ray.origin.x, raycaster.ray.origin.y};
 // }
-networkCursorDataGetWorldPos :: (eventsData: *EventsData, camera: *Camera, cursor: Vector2) -> Vector2 {
+networkCursorDataGetWorldPos :: (eventsData: *EventsData, camera: *$T, cursor: Vector2) -> Vector2 {
 	raycaster: Raycaster;
 	raycasterSetFromCamera(*raycaster, camera, cursor);
 	return .{raycaster.ray.origin.x, raycaster.ray.origin.y};

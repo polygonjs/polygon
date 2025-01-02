@@ -2,7 +2,7 @@ CAMERA_CONTROL_MAX_SCENES_COUNT :: 2; // set to 2 because NetWorkPanel has 2 sce
 
 CameraControls :: struct {
 	scenes:[CAMERA_CONTROL_MAX_SCENES_COUNT]*Scene;
-	camera:*Camera=null;
+	camera:*CameraAny=null;
 }
 
 cameraControlsSetScenes :: (using controls:*CameraControls, newScenes:[]*Scene){

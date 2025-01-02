@@ -11,7 +11,7 @@ NetworkPanel :: struct {
 	sceneWorld: Scene;
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneRaycast: Scene;
 	nodeBodyObjectIndexByNodeId: [..]u32;
-	nodeTextObjectIndexByNodeId: [..]u32;
+	// nodeTextObjectIndexByNodeId: [..]u32;
 	connectionObjectIndexByConnectionId: [..]u32;
 
 	camera: OrthographicCamera;
@@ -77,7 +77,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 		rendererColor.use_msaa = true;
 		rendererColor.use_depth_buffer = true;
 		rendererColor.useReadback = false;
-		rendererColor.clear = false;
+		rendererColor.clear = true;
 	}
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
 		rendererInit(*rendererRaycast, *_editor.wgpuContext, ensureWGPUContextValid);
@@ -99,7 +99,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	// allocatorAssign(rendererRaycast);
 	
 	nodeBodyObjectIndexByNodeId.allocator = panel.allocator;
-	nodeTextObjectIndexByNodeId.allocator = panel.allocator;
+	// nodeTextObjectIndexByNodeId.allocator = panel.allocator;
 	connectionObjectIndexByConnectionId.allocator = panel.allocator;
 	editor = _editor;
 	worldSceneInit(*sceneWorld);
@@ -108,6 +108,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	object3DInit(*camera);
 	camera.near = 0;
 	camera.far = 10;
+	camera.size = 10;
 	cameraProjectionUpdate(*camera);
 	// camera.type = OrthographicCamera;
 	// object3DInit(*camera);
@@ -130,7 +131,11 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	setColor(*mat.connectionBasic, .{0.25, 0.5, 0.75, 1.0});
 	setColor(*mat.connectionCurrent, .{0.9, 1, 0.9, 1});
 	cameraControls.camera = *camera;
-	cameraControlsSetScenes(*cameraControls, .[*sceneWorld, *sceneRaycast]);
+	#if NETWORK_PANEL_USE_RAYCAST_RENDERER {
+		cameraControlsSetScenes(*cameraControls, .[*sceneWorld, *sceneRaycast]);
+	} else {
+		cameraControlsSetScenes(*cameraControls, .[*sceneWorld]);
+	}
 	cameraControlsCommit(*cameraControls);
 
 

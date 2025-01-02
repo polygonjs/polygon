@@ -43,7 +43,7 @@ loadFontImage :: () {
 			log_error("Unable to decompress the image data!\n");
 			return;
 		}
-		print("FONT IMAGE: %x% _%, %, %\n", width, height, components, width*height*components, FONT_TEXTURE.size[0]*FONT_TEXTURE.size[1]*4);
+		// print("FONT IMAGE: %x% _%, %, %\n", width, height, components, width*height*components, FONT_TEXTURE.size[0]*FONT_TEXTURE.size[1]*4);
 
 		assert(width==xx TEXTURE_WIDTH, "width != TEXTURE_WIDTH");
 		assert(height==xx TEXTURE_HEIGHT, "height != TEXTURE_HEIGHT");

@@ -24,6 +24,7 @@ Editor :: struct {
 	#if HAS_VIEWER_PANEL viewerPanel: ViewerPanel;
 	#if HAS_NETWORK_PANEL networkPanel: NetworkPanel;
 	paramsPanel: ParamsPanel;
+	mainMenuBar: MainMenuBar;
 
 	SceneUiData :: struct {
 		nodePositions:[..]Vector2;

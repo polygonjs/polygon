@@ -29,6 +29,8 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 		if _objectChanged(*nodesScene.worldScene, inputResult) {
 			sceneObjectsClear(*nodesScene.worldScene);
 			sceneObjectsAdd(*nodesScene.worldScene, <<inputResult);
+
+			sceneObjectAdd(*nodesScene.worldScene, *nodesScene.backgroundMeshData.mesh);
 		}
 	} else {
 		sceneObjectsClear(*nodesScene.worldScene);
@@ -44,7 +46,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 TYPE :: OutputGeoNode;
 MAX_INPUTS_COUNT :: 10;
 
-_objectChanged :: (worldScene:*Scene, objects: *[..]*Object3D)->bool {
+_objectChanged :: (worldScene:*Scene, objects: *[..]*Object3DAny)->bool {
 	if worldScene.children.count != objects.count {
 		return true;
 	}

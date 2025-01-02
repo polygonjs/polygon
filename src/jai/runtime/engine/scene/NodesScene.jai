@@ -19,7 +19,7 @@ NodesScene :: struct {
 	worldScene: Scene;
 	cookResults:[..]GeoNodeCookOutput;
 	nodeInputCookResults:[..][NODES_MAX_INPUTS_COUNT]GeoNodeCookOutput;
-	cookResultsToDispose:[..]*Object3D;
+	cookResultsToDispose:[..]*Object3DAny;
 	cooksCount:[..]u32;
 	connections: NodeConnectionList;
 
@@ -30,8 +30,10 @@ NodesScene :: struct {
 		uv: MeshUVMaterial;
 		basicTexture: MeshBasicTextureMaterial;
 		text: MeshTextMaterial;
+		backgroundBasic: MeshBackgroundBasicMaterial;
 	}
 	defaultMaterial:DefaultMaterial;
+	backgroundMeshData:BackgroundMeshData;
 
 	// #if NODES_SCENE_EMIT_EVENTS { // maybe let's keep this in the struct until we have tested serializing
 		// observers:[..]Any;
@@ -163,11 +165,14 @@ nodesSceneInit :: (scene: *NodesScene) {
 		materialInit(*uv);
 		materialInit(*basicTexture);
 		materialInit(*text);
+		materialInit(*backgroundBasic);
 		setColor(*basicTexture, .{1.0, 1.0, 1.0, 1.0});
 		setColor(*text, .{1.0, 1.0, 1.0, 1.0});
+		setColor(*backgroundBasic, DEFAULT_RENDERER_BG_COLOR);
 
 		setTexture(*basicTexture, *FONT_TEXTURE);
 	}
+	nodesSceneInitBackgroundMesh(scene);
 }
 
 NodesSceneOnNodesComputedCallback :: #type (nodesScene: *NodesScene);

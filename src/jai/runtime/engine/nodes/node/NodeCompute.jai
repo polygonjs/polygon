@@ -152,7 +152,7 @@ nodeDisposePreviousCookResults :: (using scene:*NodesScene, node: *$T) {
 // 	// 	cookResults[node.nodeId] = result;
 // 	// }
 // }
-completeGeoCookWithObject :: (nodesScene:*NodesScene, node: *BaseNodeAny, object: *Object3D) {
+completeGeoCookWithObject :: (nodesScene:*NodesScene, node: *BaseNodeAny, object: *Object3DAny) {
 	// _storeResult(nodesScene, node, .[object]);
 	// nodeOutput :[..]*Object3D;
 	// array_init(nodeOutput, temp);
@@ -166,7 +166,7 @@ completeGeoCookWithObjects :: (nodesScene:*NodesScene, node: *BaseNodeAny, objec
 	// }
 	// return objects;
 }
-_storeResult :: (using nodesScene:*NodesScene, node: *BaseNodeAny, objects: []*Object3D) {
+_storeResult :: (using nodesScene:*NodesScene, node: *BaseNodeAny, objects: []*Object3DAny) {
 	previousObjects := cookResults[node.nodeId];
 	// if previousObjects == null {
 	// 	cookResults[node.nodeId] = New(Object3DArray,,nodesScene.allocator);

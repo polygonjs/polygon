@@ -6,13 +6,13 @@ OrthographicCamera :: struct {
 
 object3DInit :: (camera: *TYPE) {
 	worldObjectInit(camera);
-	object3DInit(cast(*Camera)camera);
+	object3DInit(cast(*CameraAny)camera);
 
 	camera.size = ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE;
 
 	assert(camera.aspect != 0.0, "camera.aspect is 0.0");
 	cameraProjectionUpdate(camera);
-	cameraUniformsUpdate(camera);
+	cameraUniformsUpdate(xx camera);
 }
 
 cameraProjectionUpdate :: (camera:*TYPE) {
@@ -26,25 +26,30 @@ cameraProjectionUpdate :: (camera:*TYPE) {
 		far    = camera.far,
 		true
 	);
-	cameraProjectionMatrixInverseUpdate(camera);
+	cameraProjectionMatrixInverseUpdate(xx camera);
 }
 
 cameraSetRaycaster :: (camera: *TYPE, raycaster: *Raycaster, coords: Vector2) {
-	origin :Vector3= .{
+	originNDC :Vector3= .{
 		coords.x,
 		coords.y,
 		( camera.near + camera.far ) / ( camera.near - camera.far )
 	};
 
-	origin2 := unproject( origin, camera );
-	raycaster.ray.origin = origin2;
+	raycaster.ray.origin = ndcToWorld( originNDC, xx camera );
 
 	direction :Vector3=.{ 0, 0, - 1 };
 	transformDirection( *direction, camera.matrix ); // .matrixWorld
 	raycaster.ray.direction = direction;
 }
 
-ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE :: 10.0;
+object3DCopy :: (src: *TYPE, using target: *TYPE) {
+	object3DCopy(cast(*CameraAny)src, cast(*CameraAny)target);
+
+	size = src.size;
+}
+
+ORTHOGRAPHIC_CAMERA_DEFAULT_SIZE :: 1.0;
 
 #scope_file
 

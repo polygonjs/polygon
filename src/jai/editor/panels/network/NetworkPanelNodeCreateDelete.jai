@@ -1,7 +1,7 @@
 NETWORK_PANEL_NODE_SIZE :: 1.0;
 NETWORK_PANEL_NODE_HALF_SIZE :: NETWORK_PANEL_NODE_SIZE / 2;
 NETWORK_PANEL_NODE_SIZE_V2 :Vector2: .{NETWORK_PANEL_NODE_SIZE,NETWORK_PANEL_NODE_SIZE};
-NETWORK_PANEL_TEXT_OFFSET :Vector3: .{x = NETWORK_PANEL_NODE_HALF_SIZE+0.1, y = 0.0, z = 1};
+NETWORK_PANEL_TEXT_OFFSET :Vector3: .{x = NETWORK_PANEL_NODE_HALF_SIZE+0.1, y = NETWORK_PANEL_NODE_HALF_SIZE*.6, z = 1};
 
 networkPanelAddNode :: (panel: *TYPE, node: *$T) {
 	geometry :*Geometry = newGeometry(panel.sceneWorld.allocator);
@@ -53,44 +53,44 @@ _addNode :: (using panel: *TYPE, node: *$T, geometry: *Geometry, $forRaycast:boo
 			sceneObjectAdd(scene, bodyMesh);
 		}
 	}
-	{
-		// node text
-		textMesh := newMesh(scene, Mesh);
-		name := nodeName(editor.nodesScene, node.nodeId);
-		textMeshUpdate(editor.nodesScene, textMesh, .{
-			text=name,
-			size=0.25
-		});
-		textMesh.position = bodyMesh.position + NETWORK_PANEL_TEXT_OFFSET;
-		transformableUpdateMatrix(bodyMesh);
-		#if forRaycast==false {
-			if nodeTextObjectIndexByNodeId.count < node.nodeId {
-				array_resize(*nodeTextObjectIndexByNodeId, node.nodeId+1);
-			}
-			array_insert_at(*nodeTextObjectIndexByNodeId, item=xx scene.children.count, index=xx node.nodeId);
-		}
-		sceneObjectAdd(scene, textMesh);
-	}
+	// {
+	// 	// node text
+	// 	textMesh := newMesh(scene, Mesh);
+	// 	name := nodeName(editor.nodesScene, node.nodeId);
+	// 	textMeshUpdate(editor.nodesScene, textMesh, .{
+	// 		text=name,
+	// 		size=0.25
+	// 	});
+	// 	textMesh.position = bodyMesh.position + NETWORK_PANEL_TEXT_OFFSET;
+	// 	transformableUpdateMatrix(bodyMesh);
+	// 	#if forRaycast==false {
+	// 		if nodeTextObjectIndexByNodeId.count < node.nodeId {
+	// 			array_resize(*nodeTextObjectIndexByNodeId, node.nodeId+1);
+	// 		}
+	// 		array_insert_at(*nodeTextObjectIndexByNodeId, item=xx scene.children.count, index=xx node.nodeId);
+	// 	}
+	// 	sceneObjectAdd(scene, textMesh);
+	// }
 }
 
 _removeNode :: (using panel:*TYPE, node:*$T, $forRaycast:bool) {
 	bodyObjectIndex := nodeBodyObjectIndexByNodeId[node.nodeId];
-	textObjectIndex := nodeTextObjectIndexByNodeId[node.nodeId];
-	if bodyObjectIndex >= 0 && textObjectIndex >= 0 {
+	// textObjectIndex := nodeTextObjectIndexByNodeId[node.nodeId];
+	if bodyObjectIndex >= 0 {
 		#if forRaycast {
 			scene := *sceneRaycast;
 		} else {
 			scene := *sceneWorld;
 		}
 		bodyObject := scene.children[bodyObjectIndex];
-		textObject := scene.children[textObjectIndex];
+		// textObject := scene.children[textObjectIndex];
 		#if forRaycast {
 			bodyMesh := cast(*Mesh)bodyObject;
 			materialDelete(cast(*MATERIAL_RAYCAST)bodyMesh.material);
 			geometryDelete(bodyMesh.geometry);
 		}
 		sceneObjectRemove(scene, bodyObject, delete=false);
-		sceneObjectRemove(scene, textObject, delete=false);
+		// sceneObjectRemove(scene, textObject, delete=false);
 		#if forRaycast == true {
 			nodeBodyObjectIndexByNodeId[node.nodeId] = 0;
 		}

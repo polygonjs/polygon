@@ -1,4 +1,4 @@
-Object3DArray :: [..]*Object3D;
+Object3DArray :: [..]*Object3DAny;
 GeoNodeCookOutput :: *Object3DArray;
 GeoNodeCookInput  :: []GeoNodeCookOutput;
 GeoNodeCookMethod :: #type (node: $T, inputResults:GeoNodeCookInput);

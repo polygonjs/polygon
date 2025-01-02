@@ -7,11 +7,11 @@ PerspectiveCamera :: struct {
 
 object3DInit :: (camera: *TYPE) {
 	worldObjectInit(camera);
-	object3DInit(cast(*Camera)camera);
+	object3DInit(cast(*CameraAny)camera);
 	camera.fov_in_degrees = DEFAULT_FOV_IN_DEGREES;
 
 	cameraProjectionUpdate(camera);
-	cameraUniformsUpdate(camera);
+	cameraUniformsUpdate(xx camera);
 }
 
 cameraProjectionUpdate :: (camera:*TYPE) {
@@ -22,7 +22,7 @@ cameraProjectionUpdate :: (camera:*TYPE) {
 		camera.near,
 		camera.far
 	);
-	cameraProjectionMatrixInverseUpdate(camera);
+	cameraProjectionMatrixInverseUpdate(xx camera);
 }
 
 cameraSetRaycaster :: (camera: *TYPE, raycaster: *Raycaster, coords: Vector2) {

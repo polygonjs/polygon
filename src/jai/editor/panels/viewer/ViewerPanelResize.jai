@@ -1,8 +1,10 @@
 onResize :: (using panel: *TYPE) {
-	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
+	windowWidth :float32= xx editor.windowSize.x;
+	windowHeight :float32= xx (editor.windowSize.y - editor.mainMenuBar.computedHeight);
+	newAspect:float = windowWidth / windowHeight;
 
-	renderer.viewport.start = .{ editor.windowSize.x*0, editor.windowSize.y*0 };
-	renderer.viewport.size = .{ xx(cast(float32)editor.windowSize.x*0.49), xx(cast(float32)editor.windowSize.y*0.49) };
+	renderer.viewport.start = .{ 0, xx editor.mainMenuBar.computedHeight };
+	renderer.viewport.size = .{ xx(windowWidth*0.5), xx(windowHeight*0.5) };
 
 	previousAspect := camera.aspect;
 	if(renderer.fullScreen == true) {

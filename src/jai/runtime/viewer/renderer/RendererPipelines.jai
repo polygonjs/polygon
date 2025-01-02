@@ -1,5 +1,5 @@
 
-rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*Camera){
+rendererInitPipelines :: (renderer:*Renderer, scene:*Scene, camera:*CameraAny){
 
 	// #if WASM==true context = call_from_wasm_context;
 	// device := renderer.wgpuContext.device;

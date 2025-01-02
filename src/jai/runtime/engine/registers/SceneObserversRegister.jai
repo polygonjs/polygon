@@ -1,29 +1,29 @@
 
-sceneObserverOnObjectAdded :: (observer: Any, scene: *Scene, object:*Object3D) {
+sceneObserverOnObjectAdded :: (observer: Any, scene: *Scene, object:*Object3DAny) {
 	#insert ON_OBJECT_ADDED;
 	assert(false, tprint("sceneObserverOnObjectAdded: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-sceneObserverOnObjectsAdded :: (observer: Any, scene: *Scene, objects: []*Object3D) {
+sceneObserverOnObjectsAdded :: (observer: Any, scene: *Scene, objects: []*Object3DAny) {
 	#insert ON_OBJECTS_ADDED;
 	assert(false, tprint("sceneObserverOnObjectsAdded: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-sceneObserverOnObjectBeforeRemove :: (observer: Any, scene: *Scene, object:*Object3D) {
+sceneObserverOnObjectBeforeRemove :: (observer: Any, scene: *Scene, object:*Object3DAny) {
 	#insert ON_OBJECT_BEFORE_REMOVE;
 	assert(false, tprint("sceneObserverOnObjectBeforeRemove: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-sceneObserverOnObjectsBeforeRemove :: (observer: Any, scene: *Scene, objects: []*Object3D) {
+sceneObserverOnObjectsBeforeRemove :: (observer: Any, scene: *Scene, objects: []*Object3DAny) {
 	#insert ON_OBJECTS_BEFORE_REMOVE;
 	assert(false, tprint("sceneObserverOnObjectsBeforeRemove: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-sceneObserverOnRenderableMaterialChanged :: (observer: Any, scene: *Scene, object:*Object3D, previousMaterial:*Material) {
+sceneObserverOnRenderableMaterialChanged :: (observer: Any, scene: *Scene, object:*Object3DAny, previousMaterial:*Material) {
 	#insert ON_RENDERABLE_MATERIAL_CHANGED;
 	assert(false, tprint("sceneObserverOnRenderableMaterialChanged: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-sceneObserverOnObjectMatrixUpdated :: (observer: Any, scene: *Scene, object:*Object3D) {
+sceneObserverOnObjectMatrixUpdated :: (observer: Any, scene: *Scene, object:*Object3DAny) {
 	#insert ON_OBJECT_MATRIX_UPDATED;
 	assert(false, tprint("sceneObserverOnObjectMatrixUpdated: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }
-sceneObserverOnCameraMatrixUpdated :: (observer: Any, scene: *Scene, camera:*Camera) {
+sceneObserverOnCameraMatrixUpdated :: (observer: Any, scene: *Scene, camera:*CameraAny) {
 	#insert ON_CAMERA_MATRIX_UPDATED;
 	assert(false, tprint("sceneObserverOnCameraMatrixUpdated: observer type '%' is not implemented", cast(*Type_Info_Struct)observer.type));
 }

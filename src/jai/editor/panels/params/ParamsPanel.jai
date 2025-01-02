@@ -29,8 +29,8 @@ paramsPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVali
 		size = .{1,1}
 	};
 	renderer.bgColor = DEFAULT_RENDERER_BG_COLOR;
-	renderer.use_msaa = false;
-	renderer.use_depth_buffer = false;
+	renderer.use_msaa = true;
+	renderer.use_depth_buffer = true;
 	renderer.useReadback = false;
 	// renderer.render_ui = true;
 	renderer.clear = false;

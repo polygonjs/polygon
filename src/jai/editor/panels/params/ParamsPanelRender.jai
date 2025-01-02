@@ -26,13 +26,14 @@ render :: (using panel: *TYPE, renderCollectionData: *RenderCollectionData) {
 
 #if USE_IMGUI {
 paramsRender :: (using panel: *TYPE) {
-	mainMenuBarDraw(editor);
-
-	ImGui.SetNextWindowSize(.{xx renderer.viewport.size.x, xx renderer.viewport.size.y}, .Always);
-	ImGui.SetNextWindowPos(.{xx renderer.viewport.start.x, xx renderer.viewport.start.y}, .Always);
-	ImGui.Begin("Params", flags = .NoTitleBar|.NoResize|.NoCollapse|.NoDecoration);
+	renderNodeNames(*editor.networkPanel);
 
 	{
+		viewport := renderer.viewport;
+		ImGui.SetNextWindowSize(.{xx viewport.size.x, xx viewport.size.y}, .Always);
+		ImGui.SetNextWindowPos(.{xx viewport.start.x, xx viewport.start.y}, .Always);
+		ImGui.Begin("Params", flags = .NoTitleBar|.NoResize|.NoCollapse|.NoDecoration);
+
 		// node name / type / selection count
 		if editor.sceneUiData.selectedNodeIds.count > 0 {
 			nodeId := editor.sceneUiData.selectedNodeIds[0];
@@ -49,10 +50,10 @@ paramsRender :: (using panel: *TYPE) {
 		} else {
 			ImGui.TextUnformatted("No node selected");
 		}
+		ImGui.End();
 	}
-	
 
-	ImGui.End();
+	mainMenuBarDraw(editor);
 
 }
 }

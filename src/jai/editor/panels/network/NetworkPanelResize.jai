@@ -1,10 +1,12 @@
 
 onResize :: (using panel: *TYPE) {
-	newAspect:float = (cast(float32) editor.windowSize.x) / (cast(float32) editor.windowSize.y);
+	windowWidth :float32= xx editor.windowSize.x;
+	windowHeight :float32= xx (editor.windowSize.y - editor.mainMenuBar.computedHeight);
+	newAspect:float = windowWidth / windowHeight;
 
-	rendererColor.viewport.start = .{ cast(u64) (cast(float) editor.windowSize.x*0.5), editor.windowSize.y*0 };
+	rendererColor.viewport.start = .{ xx (windowWidth*0.5), xx editor.mainMenuBar.computedHeight };
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast.viewport.start = rendererColor.viewport.start;
-	rendererSetSize(*rendererColor, .{ cast(u64) (cast(float)editor.windowSize.x*0.5), editor.windowSize.y*1 });
+	rendererSetSize(*rendererColor, .{ xx (windowWidth*0.5), xx windowHeight });
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererCopySize(*rendererColor, *rendererRaycast);
 
 	previousAspect := camera.aspect;
@@ -15,7 +17,7 @@ onResize :: (using panel: *TYPE) {
 	}
 	if(previousAspect != camera.aspect) {
 		sceneCameraUpdateProjectionMatrix(*sceneWorld, *camera);
-		sceneCameraUpdateProjectionMatrix(*sceneRaycast, *camera);
+		#if NETWORK_PANEL_USE_RAYCAST_RENDERER sceneCameraUpdateProjectionMatrix(*sceneRaycast, *camera);
 	}
 }
 

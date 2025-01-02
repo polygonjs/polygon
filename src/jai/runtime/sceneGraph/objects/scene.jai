@@ -20,7 +20,7 @@ Scene :: struct {
 		pool: Pool;
 	}
 
-	children: [..]*Object3D;
+	children: [..]*Object3DAny;
 
 	sceneUniforms: SceneUniforms;
 
@@ -62,22 +62,22 @@ worldObjectClone :: (object: *TYPE)->*TYPE {
 }
 
 object3DInit :: (scene: *TYPE) {
-	object3DInit(cast(*Object3D)scene);
+	object3DInit(cast(*Object3DAny)scene);
 }
 
 sceneObjectsClear :: (scene: *TYPE) {
 	sceneEmitEvent(scene, .OBJECTS_BEFORE_REMOVE, scene.children);
 	array_set_count_and_maybe_grow(*scene.children, 0);
 }
-sceneObjectAdd :: (scene: *TYPE, object: *Object3D) {
+sceneObjectAdd :: (scene: *TYPE, object: *Object3DAny) {
 	array_add(*scene.children, object);
 	sceneEmitEvent(scene, .OBJECT_ADDED, object);
 }
-sceneObjectsAdd :: (scene: *TYPE, objects: [..]*Object3D) {
+sceneObjectsAdd :: (scene: *TYPE, objects: [..]*Object3DAny) {
 	array_add(*scene.children, ..objects);
 	sceneEmitEvent(scene, .OBJECTS_ADDED, objects);
 }
-sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
+sceneObjectRemove :: (scene: *TYPE, object: *Object3DAny, $delete:bool) {
 	for child, i: scene.children {
 		if child == object {
 			sceneEmitEvent(scene, .OBJECT_BEFORE_REMOVE, object);
@@ -89,15 +89,15 @@ sceneObjectRemove :: (scene: *TYPE, object: *Object3D, $delete:bool) {
 		}
 	}
 }
-sceneObjectUpdateMatrix :: (scene: *TYPE, object: *Object3D) {
+sceneObjectUpdateMatrix :: (scene: *TYPE, object: *Object3DAny) {
 	transformableUpdateMatrix(object);
 	sceneEmitEvent(scene, .OBJECT_MATRIX_UPDATED, object);
 }
-sceneCameraUpdateMatrix :: (scene: *TYPE, camera: *Camera) {
+sceneCameraUpdateMatrix :: (scene: *TYPE, camera: *CameraAny) {
 	transformableUpdateMatrix(camera);
 	sceneEmitEvent(scene, .CAMERA_MATRIX_UPDATED, camera);
 }
-sceneCameraUpdateProjectionMatrix :: (scene: *TYPE, camera: *$T/Camera) {
+sceneCameraUpdateProjectionMatrix :: (scene: *TYPE, camera: *$T) {
 	cameraProjectionUpdate(camera);
 	// we could emit a .CAMERA_PROJECTION_MATRIX_UPDATED event
 	// but for now, we just emit the same event as .CAMERA_MATRIX_UPDATED

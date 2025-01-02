@@ -1,6 +1,7 @@
 processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 	focused := elementFocused(*rendererColor, eventsData);
-	cameraControlsProcessEvent(*cameraControls, eventsData, focused);
+	panControlsCursor := cursorForRaycast(eventsData, *rendererColor);
+	cameraControlsProcessEvent(*cameraControls, eventsData, panControlsCursor, focused);
 	if focused == false {
 		return;
 	}
@@ -48,7 +49,7 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 		}
 		if (eventHandler.waitingForButtonDownReadPixel == true) {
 			eventHandler.nodeIdOnButtonDownFound = false;
-			renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
+			renderPixel(*rendererRaycast, *sceneRaycast, xx *camera, eventsData.cursor);
 			success, result := readPixelIfMapped(*rendererRaycast, eventsData);
 			if success == true {
 				eventHandler.waitingForButtonDownReadPixel = false;
@@ -62,7 +63,7 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 				}
 			}
 		} else if (eventHandler.waitingForButtonUpReadPixel == true) {
-			renderPixel(*rendererRaycast, *sceneRaycast, *camera, eventsData.cursor);
+			renderPixel(*rendererRaycast, *sceneRaycast, xx *camera, eventsData.cursor);
 			success, result := readPixelIfMapped(*rendererRaycast, eventsData);
 			if success == true {
 				eventHandler.waitingForButtonUpReadPixel = false;

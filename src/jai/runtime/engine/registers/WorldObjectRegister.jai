@@ -1,7 +1,7 @@
 
 
 
-generatedWorldObjectDelete :: (object: *Object3D) {
+generatedWorldObjectDelete :: (object: *Object3DAny) {
 	#insert GENERATED_CODE_WORLD_OBJECT_DELETE;
 	assert(false, tprint("generatedWorldObjectDelete: object type '%' is not implemented", object.type));
 }

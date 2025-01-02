@@ -25,19 +25,12 @@ Renderer :: struct {
 	scene_data: RendererBufferData;
 	camera_data: RendererBufferData;
 
-	clear:bool=true;
+	clear:bool=false;
+	// clearViewport:bool=false;
 	//
 	use_msaa: bool=true;
 	use_depth_buffer: bool=true;
 	useReadback: bool=false;
-	// //
-	// multisample_texture_descriptor : WGPUTextureDescriptor;
-	// multisample_texture: WGPUTexture;
-	// multisample_texture_view: WGPUTextureView=null;
-	//
-	depth_texture_stencil_attachment: WGPURenderPassDepthStencilAttachment;
-	depth_texture: WGPUTexture;
-	depth_texture_view: WGPUTextureView=null;
 	//
 	readback_buffer: WGPUBuffer;
 	readback_texture: WGPUTexture;
@@ -87,7 +80,7 @@ rendererInit :: (renderer:*Renderer, wgpuContext: *WGPUContext, $ensureWGPUConte
 
 
 
-rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
+rendererObjectAdd :: (renderer:*Renderer, object:*Object3DAny) {
 	if object.type != Mesh {
 		print("unknown object type %\n", object.type);
 		return;
@@ -104,7 +97,7 @@ rendererObjectAdd :: (renderer:*Renderer, object:*Object3D) {
 		pipelineControllerAddMesh(pc, mesh);
 	}
 }
-rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
+rendererObjectRemove :: (renderer:*Renderer, object:*Object3DAny) {
 	if object.type != Mesh {
 		print("unknown object type %\n", object.type);
 		return;
@@ -122,7 +115,7 @@ rendererObjectRemove :: (renderer:*Renderer, object:*Object3D) {
 	// 	}
 	// }
 }
-rendererRenderableMaterialChanged :: (renderer:*Renderer, object:*Object3D, previousMaterial:*Material) {
+rendererRenderableMaterialChanged :: (renderer:*Renderer, object:*Object3DAny, previousMaterial:*Material) {
 	if object.type != Mesh {
 		print("unknown object type %\n", object.type);
 		return;
@@ -142,7 +135,7 @@ rendererTransformableUpdateMatrix :: (renderer:*Renderer, mesh:*Mesh) {
 		print("pipeline controller not found\n");
 	}
 }
-rendererCameraUpdateMatrix :: (renderer: *Renderer, camera:*Camera) {
+rendererCameraUpdateMatrix :: (renderer: *Renderer, camera:*CameraAny) {
 	cameraUniformsUpdate(camera);
 	renderer_camera_uniform_buffer_update(renderer, camera, camera.cameraUniforms);
 }
