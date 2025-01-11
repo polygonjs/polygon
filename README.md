@@ -6,17 +6,17 @@ This is very early days, and only tested on linux so far.
 
 ## For Desktop
 
-compile: `jai src/jai/build.jai - native`
+compile: `jai src/jai/build/build.jai - native`
 
 run: `bin/polygon-next`
 
 ## For Web
 
-compile: `jai src/jai/build.jai - wasm`
+compile: `jai src/jai/build/build.jai - wasm`
 
 run: `yarn dev`
 
 # Run test suite
 
-`jai src/jai/build.jai - native test && bin/polygon-next`
+`jai src/jai/build/build.jai - native test && bin/polygon-next`
 
