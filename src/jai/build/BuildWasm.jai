@@ -9,6 +9,7 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 	options.backtrace_on_crash                  = .OFF; // Runtime_Support_Crash_Handler doesn’t support WASM (yet?)
 	options.output_path                         = "../../../public/";
 	options.output_executable_name              = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
+	#if #exists(JAILS_DIAGNOSTICS_BUILD) options.output_type = .NO_OUTPUT;
 	options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
 	options.llvm_options.enable_split_modules   = false;
 	options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"

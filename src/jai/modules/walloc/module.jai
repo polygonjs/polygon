@@ -22,6 +22,11 @@ allocator_proc :: (mode: Allocator_Mode, requested_size: s64, old_size: s64, old
 
         case .ALLOCATE; #through;
         case .RESIZE;
+            min :: (a: $T, b: T) -> T {
+                if a < b return a;
+                return b;
+            }
+
             // @TODO: Can we support proper realloc?
             result := walloc_malloc(requested_size);
             if mode == .RESIZE {
@@ -67,5 +72,3 @@ allocator_proc :: (mode: Allocator_Mode, requested_size: s64, old_size: s64, old
 #scope_file
 
 CAPS_VERSION_STRING :: "Walloc";
-
-#import "Basic";

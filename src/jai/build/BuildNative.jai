@@ -2,6 +2,7 @@ buildNative :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 	options.output_path = "../../../bin/";
 	make_directory_if_it_does_not_exist(options.output_path);
 	options.output_executable_name = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
+	#if #exists(JAILS_DIAGNOSTICS_BUILD) options.output_type = .NO_OUTPUT;
 
 	setOptimisation(options, buildArgs, wasm=false);
 

@@ -1,8 +1,14 @@
 buildValidateJaiVersion :: () {
 	versionInfo: Version_Info;
 	compiler_get_version_info(*versionInfo);
-	VERSION_ERROR_MESSAGE :: "requires jai version 0.2.4";
-	assert(versionInfo.major == 0, VERSION_ERROR_MESSAGE);
-	assert(versionInfo.minor == 2, VERSION_ERROR_MESSAGE);
-	assert(versionInfo.micro == 6, VERSION_ERROR_MESSAGE);
+	VERSION_ERROR_MESSAGE := tprint("requires jai version %.%.%", VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
+	assert(versionInfo.major == VERSION_MAJOR, VERSION_ERROR_MESSAGE);
+	assert(versionInfo.minor == VERSION_MINOR, VERSION_ERROR_MESSAGE);
+	assert(versionInfo.micro == VERSION_MICRO, VERSION_ERROR_MESSAGE);
 }
+
+#scope_file
+
+VERSION_MAJOR :: 0;
+VERSION_MINOR :: 2;
+VERSION_MICRO :: 7;

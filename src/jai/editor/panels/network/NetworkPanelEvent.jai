@@ -36,6 +36,10 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 			if found {
 				eventHandler.nodeIdOnButtonDown = xx nodeId;
 			}
+
+			networkPanelCursorDataInit(*eventHandler.screenData, cursorForRaycast(eventsData, *rendererColor));
+			worldPos := networkCursorDataGetCurrentWorldPos(panel, eventsData);
+			networkPanelCursorDataInit(*eventHandler.worldData, worldPos);
 		}
 		moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
 		if (eventsData.mouseButtonJustReleased.left == true) {
@@ -47,6 +51,9 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 			networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
 			if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
 				moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
+			} else {
+				node := editor.nodesScene.nodes[eventHandler.nodeIdOnButtonDown];
+				selectNode(panel.editor, node, .REPLACE);
 			}
 		}
 
