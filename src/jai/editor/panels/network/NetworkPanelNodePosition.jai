@@ -1,9 +1,40 @@
+NetworkPanelNodeMoveData :: struct {
+	moveInProgress:bool = false;
+	items:[..]NodeMoveCommandItem;
+}
+
+nodeMoveDataInit :: (using panel: *NetworkPanel) {
+	push_allocator(panel.allocator);
+	array_init(*nodeMoveData.items, panel.allocator);
+}
+
 moveCapturedNodes :: (using panel: *NetworkPanel, nodeId: NodeId, startPos: Vector2, currentPos: Vector2) {
+	if nodeMoveData.moveInProgress==false {
+		nodeMoveData.moveInProgress = true;
+		array_add(*nodeMoveData.items, .{
+			nodeId = nodeId,
+			startPos = startPos
+		});
+	}
 	editor.sceneUiData.nodePositions[nodeId] = currentPos;
 
 	node := editor.nodesScene.nodes[nodeId];
 	onNodeSetPosition(editor, editor.nodesScene, node, currentPos);
 }
+completeNodesMove :: (using panel: *NetworkPanel) {
+	if nodeMoveData.moveInProgress == false {
+		return;
+	}
+	nodeMoveData.moveInProgress = false;
+
+	for i: 0..(nodeMoveData.items.count-1) {
+		nodeId := nodeMoveData.items[i].nodeId;
+		nodeMoveData.items[i].endPos = editor.sceneUiData.nodePositions[nodeId];
+	}
+	newNodeMoveCommand(editor, nodeMoveData.items, push=true);
+	array_reset_keeping_memory(*nodeMoveData.items);
+}
+
 
 networkPanelNodeSetPosition :: (using panel: *TYPE, node: *$T, position: Vector2) {
 	_moveNode :: (using panel:*TYPE, node:*T, $forRaycast:bool) {

@@ -44,19 +44,14 @@ EventsData :: struct {
 
 eventsDataReset :: (using eventsData :*EventsData){
 	wheel = 0;
-	modifiers = .{};
 	mouseButtonJustPressed.left = false;
 	mouseButtonJustPressed.middle = false;
 	mouseButtonJustPressed.right = false;
 	mouseButtonJustReleased.left = false;
 	mouseButtonJustReleased.middle = false;
 	mouseButtonJustReleased.right = false;
-	dirty = false;
-	// events_data.modifiers.alt = false;
-	// events_data.modifiers.ctrl = false;
-	// events_data.modifiers.shift = false;
-	// events_data.modifiers.meta = false;
 	memcpy(keys.data, KEYS_INIT.data, KEYS_COUNT);
+	dirty = false;
 }
 EMPTY_TEXT :[TEXTINPUTEVENT_TEXT_SIZE] s8;
 eventsDataClearText :: (eventsData :*EventsData){

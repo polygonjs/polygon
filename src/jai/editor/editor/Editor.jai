@@ -20,6 +20,7 @@ Editor :: struct {
 		wgpuContext: WGPUContext;
 	}
 
+	history: EditorHistory;
 	#if HAS_VIEWER_PANEL viewerPanel: ViewerPanel;
 	#if HAS_NETWORK_PANEL networkPanel: NetworkPanel;
 	paramsPanel: ParamsPanel;
@@ -70,6 +71,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 	array_init(*editor.sceneUiData.selectedNodeIds, editor.allocator, reserve=true);
 	editorCommandsSetAllocator(editor);
 
+	editorHistoryInit(editor);
 	#if HAS_VIEWER_PANEL viewerPanelInit(*editor.viewerPanel, editor, ensureWGPUContextValid);
 	#if HAS_NETWORK_PANEL networkPanelInit(*editor.networkPanel, editor, ensureWGPUContextValid);
 	paramsPanelInit(*editor.paramsPanel, editor, ensureWGPUContextValid);

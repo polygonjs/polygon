@@ -9,6 +9,8 @@
 #load "EditorRender.jai";
 #load "EditorResize.jai";
 
+#load "history/_index.jai";
+
 
 #if WASM { #load "targets/EditorWasm.jai"; }
 else { #load "targets/EditorNative.jai"; }

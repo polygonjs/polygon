@@ -21,8 +21,6 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 		}
 	}
 
-	
-
 	updateOutputNodeCurrentInput(panel, eventsData);
 
 	if (eventsData.cursor != eventsData.prevCursor) {
@@ -43,6 +41,10 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 		}
 		moveThresholdCrossed := eventHandler.screenData.distanceMoved >= MOVE_DIST_THRESHOLD;
 		if (eventsData.mouseButtonJustReleased.left == true) {
+			completeNodesMove(panel);
+			if moveThresholdCrossed == false {
+				newNodeSelectCommand(panel.editor, .[eventHandler.nodeIdOnButtonDown], .REPLACE, push=true);
+			}
 			eventHandler.nodeIdOnButtonDownFound = false;
 		}
 		if (eventsData.mouseButton.left == true) {
@@ -51,9 +53,6 @@ processEvent :: (using panel: *TYPE, eventsData:*EventsData) {
 			networkPanelCursorUpdate(*eventHandler.worldData, worldPos);
 			if( eventHandler.nodeIdOnButtonDownFound == true && moveThresholdCrossed == true){
 				moveCapturedNodes(panel, eventHandler.nodeIdOnButtonDown, eventHandler.worldData.startPos, eventHandler.worldData.currentPos);
-			} else {
-				node := editor.nodesScene.nodes[eventHandler.nodeIdOnButtonDown];
-				selectNode(panel.editor, node, .REPLACE);
 			}
 		}
 

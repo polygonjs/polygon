@@ -144,10 +144,10 @@ export const EVENTS_DATA: EventsData = {
 
 export function addEvents(canvas: HTMLCanvasElement) {
 	function onPointerdown(event: PointerEvent) {
-		if (event.altKey) EVENTS_DATA.modifiers.alt = true;
-		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = true;
-		if (event.metaKey) EVENTS_DATA.modifiers.meta = true;
-		if (event.shiftKey) EVENTS_DATA.modifiers.shift = true;
+		EVENTS_DATA.modifiers.alt = event.altKey;
+		EVENTS_DATA.modifiers.ctrl = event.ctrlKey;
+		EVENTS_DATA.modifiers.meta = event.metaKey;
+		EVENTS_DATA.modifiers.shift = event.shiftKey;
 		if (event.button === 0) {
 			EVENTS_DATA.mouseButtonJustPressed.left =
 				EVENTS_DATA.mouseButton.left == false;
@@ -166,7 +166,6 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		markEventsDataDirty();
 	}
 	function onPointermove(event: PointerEvent) {
-		// console.log(event.clientX, event.clientY)
 		EVENTS_DATA.prevCursor.x = EVENTS_DATA.cursor.x;
 		EVENTS_DATA.prevCursor.y = EVENTS_DATA.cursor.y;
 		EVENTS_DATA.cursor.x = Math.round(event.clientX);
@@ -174,10 +173,10 @@ export function addEvents(canvas: HTMLCanvasElement) {
 		markEventsDataDirty();
 	}
 	function onPointerup(event: PointerEvent) {
-		if (event.altKey) EVENTS_DATA.modifiers.alt = false;
-		if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = false;
-		if (event.metaKey) EVENTS_DATA.modifiers.meta = false;
-		if (event.shiftKey) EVENTS_DATA.modifiers.shift = false;
+		// if (event.altKey) EVENTS_DATA.modifiers.alt = false;
+		// if (event.ctrlKey) EVENTS_DATA.modifiers.ctrl = false;
+		// if (event.metaKey) EVENTS_DATA.modifiers.meta = false;
+		// if (event.shiftKey) EVENTS_DATA.modifiers.shift = false;
 		if (event.button === 0) {
 			EVENTS_DATA.mouseButtonJustReleased.left =
 				EVENTS_DATA.mouseButton.left == true;
@@ -370,7 +369,6 @@ export function eventsDataUpdate(
 	setU8(Number(readPixelValuePointer) + 3, EVENTS_DATA.readPixelValue[3]);
 
 	setBoolean(Number(dirtyPointer), true);
-	// console.log("eventsDataDirty", eventsDataDirty);
 
 	eventsDataDirty = false;
 }

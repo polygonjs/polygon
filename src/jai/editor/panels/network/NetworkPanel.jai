@@ -30,6 +30,7 @@ NetworkPanel :: struct {
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER rendererRaycast: Renderer;
 
 	eventHandler: NetworkPanelEventHandler;
+	nodeMoveData: NetworkPanelNodeMoveData;
 }
 
 NetworkPanelEventHandler :: struct {
@@ -144,6 +145,7 @@ networkPanelInit :: (using panel: *TYPE, _editor: *Editor, $ensureWGPUContextVal
 	networkPanelAddBgMesh(panel, *sceneWorld, .{0.2, 0.2, 0.2, 1.0});
 	#if NETWORK_PANEL_USE_RAYCAST_RENDERER networkPanelAddBgMesh(panel, *sceneRaycast, .{0, 0, 0, 0});
 
+	nodeMoveDataInit(panel);
 }
 
 
