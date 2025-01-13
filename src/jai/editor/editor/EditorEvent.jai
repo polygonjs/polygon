@@ -1,16 +1,18 @@
 processEvent :: (editor: *Editor, eventsData:*EventsData) {
 	#if USE_IMGUI {
 		if(editor.imguiPolygonContext.io != null){
-			if(ImGui.GetIO().WantCaptureMouse == false) processEventPanels(editor, eventsData);
+			if(ImGui.GetIO().WantCaptureMouse == false) {
+				_processEvent(editor, eventsData);
+			}
 		}
 	} else {
-		processEventPanels(editor, eventsData);
+		_processEvent(editor, eventsData);
 	}
 }
 
 #scope_file
 
-processEventPanels :: (editor: *Editor, eventsData:*EventsData) {
+_processEvent :: (editor: *Editor, eventsData:*EventsData) {
 
 	if eventsData.modifiers.ctrl {
 		text :string= cast(string)(eventsData.text);

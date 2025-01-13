@@ -19,6 +19,27 @@
 
 eventsDataUpdate :: (using eventsData :*EventsData, sdl_event :*SDL_Event){
 	if sdl_event.type == {
+		case SDL_KEYDOWN; {
+			event := cast(*SDL_KeyboardEvent) sdl_event;
+			keysym :SDL_Keysym= event.keysym;
+			code :SDL_Keycode= keysym.sym;
+			modifier: SDL_Keymod= keysym.mod;
+			eventsData.modifiers.ctrl = (modifier & (KMOD_LCTRL | KMOD_RCTRL)) != 0;
+
+			if code == {
+				case SDLK_a; eventsData.text[0] = #char "a";
+				case SDLK_y; eventsData.text[0] = #char "y";
+				case SDLK_z; eventsData.text[0] = #char "z";
+			}
+		}
+		case SDL_KEYUP; {
+			event := cast(*SDL_KeyboardEvent) sdl_event;
+			keysym := event.keysym;
+			code :SDL_Keycode= keysym.sym;
+			modifier: SDL_Keymod= keysym.mod;
+
+			eventsData.modifiers.ctrl = (modifier & (KMOD_LCTRL | KMOD_RCTRL)) == 0;
+		}
 		case SDL_MOUSEBUTTONDOWN; {
 			if (sdl_event.button.button == SDL_BUTTON_LEFT) {
 				mouseButtonJustPressed.left = mouseButton.left == false;
