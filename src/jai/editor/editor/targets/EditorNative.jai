@@ -55,7 +55,7 @@ editorStart :: (editor: *Editor) {
 			}
 		}
 
-		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.config.width, editor.wgpuContext.config.height*2);
+		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.config.width, editor.wgpuContext.config.height);
 	}
 	editorReset(editor);
 }
