@@ -14,12 +14,7 @@ wgpu_texture_get_height_surface :: (wgpuContext: *WGPUContext) -> u32 {
 
 
 
-print_c :: (format: string, args: ..Any, to_standard_error := false) #expand {
-	new_context: #Context;
-	push_context new_context {
-		print(format, ..args, to_standard_error);
-	}
-} @PrintLike
+
 
 request_adapter :: (instance: WGPUInstance, _surface: WGPUSurface, powerPreference: WGPUPowerPreference, forceFallbackAdapter := false, $headless := false) -> WGPUAdapter {
 	adapter: WGPUAdapter;
@@ -229,14 +224,11 @@ wgpuContextInit :: (window: *SDL_Window, wgpuContext: *WGPUContext, size: Vector
 	};
 	wgpuSurfaceConfigure(wgpuContext.surface, *wgpuContext.config);
 
-	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
-		print_c("Uncaptured Error (type=%), message=%\n", type, to_string(msg));
-		push_context {
-			assert(false, "we have an uncaptured wgpu error");
-		}
-	}, null);
+	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, onUncapturedError, null);
 
 	wgpuContext.windowSize = size;
+	wgpuContext.config.width = wgpuContext.windowSize.x;
+	wgpuContext.config.height = wgpuContext.windowSize.y;
 }
 
 wgpuContextInit :: (wgpuContext: *WGPUContext, size: Vector2UInt) {
@@ -258,13 +250,13 @@ wgpuContextInit :: (wgpuContext: *WGPUContext, size: Vector2UInt) {
 	wgpuContext.queue = wgpuDeviceGetQueue(wgpuContext.device);
 	assert(wgpuContext.queue != null, "Queue is not created correctly");
 
-	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
-		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
-	}, null);
+	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, onUncapturedError, null);
 
 	wgpuContext.surface_texture.texture = create_offscreen_texture(wgpuContext.device, size.x, size.y, wgpuContext.preferred_texture_format);
 
 	wgpuContext.windowSize = size;
+	wgpuContext.config.width = wgpuContext.windowSize.x;
+	wgpuContext.config.height = wgpuContext.windowSize.y;
 }
 
 create_offscreen_texture :: (device: WGPUDevice, width: u32, height: u32, format: WGPUTextureFormat) -> WGPUTexture {

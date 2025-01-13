@@ -44,7 +44,7 @@ assertInDelta :: (actual: $T, expected: T, eps:float, name: string="assertInDelt
 	}
 	ASSERTIONS_COUNT += 1;
 }
-assertMoreThan ::  (current_value: $T, comparison: T, name: string) {
+assertMoreThan ::  (current_value: $T, comparison: T, name: string="assertMoreThan") {
 	if(current_value <= comparison) {
 		print("current_value: %\n", current_value);
 		print("comparison: %\n", comparison);
@@ -52,7 +52,7 @@ assertMoreThan ::  (current_value: $T, comparison: T, name: string) {
 	}
 	ASSERTIONS_COUNT += 1;
 }
-assertLessThan ::  (current_value: $T, comparison: T, name: string) {
+assertLessThan ::  (current_value: $T, comparison: T, name: string="assertLessThan") {
 	if(current_value >= comparison) {
 		print("current_value: %\n", current_value);
 		print("comparison: %\n", comparison);

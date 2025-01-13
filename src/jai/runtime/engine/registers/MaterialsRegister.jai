@@ -26,6 +26,7 @@ registerMaterials :: () #compile_time {
 	registerMeshBackgroundGridMaterial();
 	registerMeshBasicMaterial();
 	registerMeshBasicTextureMaterial();
+	registerMeshErrorMaterial();
 	registerMeshIdMaterial();
 	registerMeshIdU32Material();
 	registerMeshNormalMaterial();

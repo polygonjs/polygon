@@ -8,6 +8,8 @@ editorStart :: (editor: *Editor) {
 
 	assert(editor.wgpuContext.windowSize.x > 0, "editor.wgpuContext.windowSize.x is zero");
 	assert(editor.wgpuContext.windowSize.y > 0, "editor.wgpuContext.windowSize.y is zero");
+	assert(editor.wgpuContext.config.width == editor.wgpuContext.windowSize.x, "editor.wgpuContext.config.width is different to windowSize.x");
+	assert(editor.wgpuContext.config.height == editor.wgpuContext.windowSize.y, "editor.wgpuContext.config.height is different to windowSize.y");
 	assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
 	assert(editor.wgpuContext.queue != null, "editor.wgpuContext.device is null");
 

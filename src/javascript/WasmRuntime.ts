@@ -7,6 +7,7 @@ import {
 	USELESS_ARG0,
 	OnAllocatedMemoryWrittenFunction,
 	RequestReallocFunction,
+	OnPopErrorScopeCompletedFunction,
 } from "./Common";
 import {
 	jsStringFromJaiString,
@@ -84,9 +85,6 @@ import { wgpuRenderPassEncoderSetViewport } from "./WebGPU/FromJs/wgpuRenderPass
 import { wgpuRenderPipelineRelease } from "./WebGPU/FromJs/wgpuRenderPipelineRelease";
 import { wgpuSamplerRelease } from "./WebGPU/FromJs/wgpuSamplerRelease";
 import { wgpuShaderModuleRelease } from "./WebGPU/FromJs/wgpuShaderModuleRelease";
-import { WASM_MATH } from "./wasm/WasmMath";
-import { __assert_fail } from "./wasm/WasmImgui";
-import { mapFunctionName } from "./wasm/WasmFunctionMapper";
 import { wgpuCommandEncoderBeginComputePass } from "./WebGPU/FromJs/wgpuCommandEncoderBeginComputePass";
 import { wgpuComputePassEncoderDispatchWorkgroups } from "./WebGPU/FromJs/wgpuComputePassEncoderDispatchWorkgroups";
 import { wgpuComputePassEncoderEnd } from "./WebGPU/FromJs/wgpuComputePassEncoderEnd";
@@ -95,6 +93,11 @@ import { wgpuComputePassEncoderSetBindGroup } from "./WebGPU/FromJs/wgpuComputeP
 import { wgpuComputePassEncoderSetPipeline } from "./WebGPU/FromJs/wgpuComputePassEncoderSetPipeline";
 import { wgpuComputePipelineGetBindGroupLayout } from "./WebGPU/FromJs/wgpuComputePipelineGetBindGroupLayout";
 import { wgpuDeviceCreateComputePipeline } from "./WebGPU/FromJs/wgpuDeviceCreateComputePipeline";
+import { wgpuDevicePopErrorScope } from "./WebGPU/FromJs/wgpuDevicePopErrorScope";
+import { wgpuDevicePushErrorScope } from "./WebGPU/FromJs/wgpuDevicePushErrorScope";
+import { WASM_MATH } from "./wasm/WasmMath";
+import { __assert_fail } from "./wasm/WasmImgui";
+import { mapFunctionName } from "./wasm/WasmFunctionMapper";
 import {
 	eventsDataUpdate,
 	eventsSetCursor,
@@ -189,6 +192,8 @@ export function loadWasm(): Promise<void> {
 		wgpuDeviceCreateBindGroup,
 		wgpuRenderPipelineGetBindGroupLayout,
 		wgpuDeviceCreateBuffer,
+		wgpuDevicePopErrorScope,
+		wgpuDevicePushErrorScope,
 		wgpuRenderPassEncoderSetPipeline,
 		wgpuRenderPassEncoderSetBindGroup,
 		wgpuRenderPassEncoderSetVertexBuffer,
@@ -249,6 +254,9 @@ export function loadWasm(): Promise<void> {
 	const dummyRequestAllocation = _dummy("requestAllocation");
 	const dummyOnAllocatedMemoryWritten = _dummy("onAllocatedMemoryWritten");
 	const dummyRequestRealloc = _dummyWithReturn("requestRealloc");
+	const dummyOnPopErrorScopeCompleted = _dummyWithReturn(
+		"onPopErrorScopeCompleted"
+	);
 	window.wasmFunctions = {
 		onWebGPUReady: () => {},
 		onRequestAnimationFrame: () => {},
@@ -265,6 +273,7 @@ export function loadWasm(): Promise<void> {
 		requestAllocation: dummyRequestAllocation,
 		onAllocatedMemoryWritten: dummyOnAllocatedMemoryWritten,
 		requestRealloc: dummyRequestRealloc,
+		onPopErrorScopeCompleted: dummyOnPopErrorScopeCompleted,
 	};
 	const WRAPPERS_BY_NAMES: Record<string | symbol, Function> = {
 		qsort: window.wasmFunctions.qsortWrapper,
@@ -437,6 +446,19 @@ export function loadWasm(): Promise<void> {
 									method as RequestReallocFunction;
 							} else {
 								console.warn("requestRealloc already linked");
+							}
+						}
+						if (methodName.startsWith("onPopErrorScopeCompleted")) {
+							if (
+								window.wasmFunctions.onPopErrorScopeCompleted ==
+								dummyOnPopErrorScopeCompleted
+							) {
+								window.wasmFunctions.onPopErrorScopeCompleted =
+									method as OnPopErrorScopeCompletedFunction;
+							} else {
+								console.warn(
+									"onPopErrorScopeCompleted already linked"
+								);
 							}
 						}
 					}

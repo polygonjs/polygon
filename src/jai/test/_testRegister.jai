@@ -31,5 +31,7 @@ registerTests :: () {
 	testTransformGeoNode();
 	// - runtime/engine/nodes/mat
 	testBaseMatNode();
+	testMeshErrorMaterial();
+	testMeshNormalMaterial();
 }
 

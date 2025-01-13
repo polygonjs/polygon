@@ -25,5 +25,21 @@ WGPUContext :: struct {
 	depthTextureStencilAttachment: WGPURenderPassDepthStencilAttachment;
 	depthTexture: WGPUTexture;
 	depthTextureView: WGPUTextureView=null;
+	//
+	capturedError:string;
+	#if WASM {
+		onPopErrorScopeCompleted: OnPopErrorScopeCompletedCallback = DEFAULT_ON_POP_ERROR_SCOPE_COMPLETED;
+	}
 
 };
+
+
+wgpuContextReset :: (wgpuContext:*WGPUContext){
+	wgpuContext.capturedError = "";
+}
+
+#if WASM {
+	OnPopErrorScopeCompletedCallback :: #type (errorSize: u64);
+	DEFAULT_ON_POP_ERROR_SCOPE_COMPLETED :OnPopErrorScopeCompletedCallback: (errorSize: u64) {}
+}
+

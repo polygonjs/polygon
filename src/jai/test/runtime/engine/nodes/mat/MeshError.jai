@@ -1,7 +1,8 @@
-testMeshNormalMaterial :: () {
+testMeshErrorMaterial :: () {
 
-	testHeadless("mat/MeshNormal", (using options:TestProcedureOptions) {
-		mat: MeshNormalMaterial;
+	testHeadless("mat/MeshError", (using options:TestProcedureOptions) {
+		MIN_EXPECTED_ERROR_SIZE :: 12;
+		mat: MeshErrorMaterial;
 		materialInit(*mat);
 
 		wgpuDevicePushErrorScope(editor.wgpuContext.device, .Validation);
@@ -10,14 +11,15 @@ testMeshNormalMaterial :: () {
 
 		#if WASM {
 			setOnPopErrorScopeCompletedCallback(*editor.wgpuContext, (errorSize:u64){
-				assertEqual(errorSize, 0);
+				assertMoreThan(errorSize, MIN_EXPECTED_ERROR_SIZE);
 
 				endTest();
 			});
 		} else {
-			assertEqual(editor.wgpuContext.capturedError.count, 0);
+			assertMoreThan(editor.wgpuContext.capturedError.count, MIN_EXPECTED_ERROR_SIZE);
 			endTest();
 		}
+
 	});
 
 }

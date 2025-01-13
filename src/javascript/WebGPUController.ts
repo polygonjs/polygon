@@ -86,6 +86,14 @@ export function webGPURenderControllerCreate(
 	let framesCount = 0;
 	let animateAllowed: boolean = false;
 
+	webGPURequestResponse.device.addEventListener(
+		"uncapturederror",
+		(event) => {
+			console.log("uncaptured error:", (event as any).error.message);
+			animateAllowed = false;
+		}
+	);
+
 	updateMemoryArrayViews();
 	// (window.wasmFunctions as any).requestRealloc(
 	// 	BigInt(101),

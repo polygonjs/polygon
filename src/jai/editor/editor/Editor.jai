@@ -67,6 +67,7 @@ editorInit :: (editor: *Editor, $ensureWGPUContextValid: bool=true) {
 		assert(editor.wgpuContext.device != null, "editor.wgpuContext.device is null");
 		assert(editor.wgpuContext.queue != null, "editor.wgpuContext.queue is null");
 	}
+	wgpuContextReset(*editor.wgpuContext);
 	array_init(*editor.sceneUiData.nodePositions, editor.allocator, reserve=true);
 	array_init(*editor.sceneUiData.selectedNodeIds, editor.allocator, reserve=true);
 	editorCommandsSetAllocator(editor);

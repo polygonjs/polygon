@@ -57,7 +57,11 @@ requestRealloc :: (oldDataPointer: *u8, newSize: s64)  {
 
 	onReallocReady(xx newData.data);
 }
+onPopErrorScopeCompleted :: (errorSize: u64) {
+	onCapturedErrorWasm(errorSize, *APP.editor.wgpuContext);
+}
 
 #scope_file
 
 call_from_wasm_context :#Context;
+

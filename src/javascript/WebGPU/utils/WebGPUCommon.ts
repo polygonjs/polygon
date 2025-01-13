@@ -24,3 +24,31 @@ export function wgpuSurfaceGetCurrentTexture() {
 	return index;
 }
 
+export function gpuMappedStateToWGPU(mapState: GPUBufferMapState) {
+	switch (mapState) {
+		case "mapped": {
+			return 2;
+		}
+		case "pending": {
+			return 1;
+		}
+		case "unmapped": {
+			return 0;
+		}
+	}
+	return 0;
+}
+export function wgpuErrorScopeFilterToGPU(filter: bigint): GPUErrorFilter {
+	switch (filter) {
+		case 0n: {
+			return "validation";
+		}
+		case 1n: {
+			return "out-of-memory";
+		}
+		case 2n: {
+			return "internal";
+		}
+	}
+	return "validation";
+}

@@ -67,6 +67,8 @@ wgpuDeviceCreateComputePipeline :: (device: WGPUDevice, descriptor: *WGPUCompute
 wgpuDeviceCreateSampler :: (device: WGPUDevice, descriptor: *WGPUSamplerDescriptor) -> WGPUSampler #foreign;
 wgpuDeviceCreateShaderModule :: (device: WGPUDevice, descriptor: *WGPUShaderModuleDescriptor) -> WGPUShaderModule #foreign;
 wgpuDeviceGetQueue :: (device: WGPUDevice) -> WGPUQueue #foreign;
+wgpuDevicePopErrorScope :: (device: WGPUDevice, callback: WGPUErrorCallback, userdata: *void) -> void #foreign;
+wgpuDevicePushErrorScope :: (device: WGPUDevice, filter: WGPUErrorFilter) -> void #foreign;
 
 // Methods of Queue
 wgpuDeviceCreateBindGroupLayout :: (device: WGPUDevice, descriptor: *WGPUBindGroupLayoutDescriptor) -> WGPUBindGroupLayout #foreign;

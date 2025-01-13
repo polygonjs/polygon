@@ -49,6 +49,10 @@ export type OnAllocatedMemoryWrittenFunction = (
 	uselessArg0: bigint,
 	nodeId: bigint
 ) => void;
+export type OnPopErrorScopeCompletedFunction = (
+	uselessArg0: bigint,
+	errorSize: bigint
+) => void;
 
 export interface Vector2 {
 	x: number;
@@ -68,6 +72,7 @@ interface WasmFunctions {
 	requestAllocation: RequestAllocationFunction;
 	onAllocatedMemoryWritten: OnAllocatedMemoryWrittenFunction;
 	requestRealloc: RequestReallocFunction;
+	onPopErrorScopeCompleted: OnPopErrorScopeCompletedFunction;
 }
 declare global {
 	interface Window {

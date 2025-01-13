@@ -6,6 +6,7 @@
 #load "MeshBackgroundGridMaterial/MeshBackgroundGridMaterial.jai";
 #load "MeshBasicMaterial/MeshBasicMaterial.jai";
 #load "MeshBasicTextureMaterial/MeshBasicTextureMaterial.jai";
+#load "MeshErrorMaterial/MeshErrorMaterial.jai";
 #load "MeshIdMaterial/MeshIdMaterial.jai";
 #load "MeshIdU32Material/MeshIdU32Material.jai";
 #load "MeshNormalMaterial/MeshNormalMaterial.jai";

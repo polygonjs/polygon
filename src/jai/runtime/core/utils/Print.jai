@@ -57,3 +57,10 @@ tprintGreen :: (content:string)->string{
 tprintRed :: (content:string)->string{
 	return tprintColor(content, ANSI_RED_BACKGROUND );
 }
+
+print_c :: (format: string, args: ..Any, to_standard_error := false) #expand {
+	new_context: #Context;
+	push_context new_context {
+		print(format, ..args, to_standard_error);
+	}
+} @PrintLike
