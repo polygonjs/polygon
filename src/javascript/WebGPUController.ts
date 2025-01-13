@@ -1,4 +1,4 @@
-import { assetsLoaded } from "./AssetsController";
+// import { assetsLoaded } from "./AssetsController";
 import { clockInit, clockTick } from "./Clock";
 import {
 	updateMemoryArrayViews,
@@ -10,7 +10,7 @@ import {
 	eventsDataReset,
 	markEventsDataDirty,
 } from "./EventsController";
-import { waitForCondition } from "./waitFor";
+// import { waitForCondition } from "./waitFor";
 import {
 	Heap,
 	heapAdd,
@@ -182,7 +182,9 @@ export function webGPURenderControllerCreate(
 		// }
 	}
 	async function start() {
-		await waitForCondition(() => assetsLoaded() == true);
+		// await waitForCondition(() => assetsLoaded() == true, {
+		// 	label: "waiting for assets to be loaded",
+		// });
 		animateAllowed = true;
 		markEventsDataDirty();
 		animate();

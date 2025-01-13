@@ -306,9 +306,10 @@ export function loadWasm(): Promise<void> {
 	return new Promise((resolve) => {
 		// console.log("wasm load START");
 		WebAssembly.instantiateStreaming(
-			fetch("/polygon-next.wasm"),
+			fetch("/polygon-next32.wasm"),
 			imports
 		).then((obj) => {
+			console.log("wasm loaded");
 			if (unassignedFunctionNames.length > 0) {
 				unassignedFunctionNames.sort();
 				console.error("unassignedFunctionNames:");

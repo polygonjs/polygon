@@ -14,7 +14,7 @@
 		"preview": "vite preview",
 		"jai_dev": "jai src/jai/build.jai",
 		"clean_dist": "rm -rf dist/jails.wasm",
-		"optimize_wasm": "wasm-opt -Oz --dce --strip-debug dist/polygon-next.wasm -o dist/polygon-next.wasm"
+		"optimize_wasm": "wasm-opt -Oz --dce --strip-debug public/polygon-next64.wasm -o public/polygon-next64o.wasm"
 	},
 	"devDependencies": {
 		"@types/node": "^20.14.9",
