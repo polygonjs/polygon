@@ -126,7 +126,6 @@ wgpuContextResize :: (wgpuContext: *WGPUContext, size: Vector2UInt){
 	wgpuContext.config.width = size.x;
 	wgpuContext.config.height = size.y;
 	wgpuSurfaceConfigure(wgpuContext.surface, *wgpuContext.config);
-	wgpuContext.windowSize = size;
 }
 
 wgpuContextInitHeadless :: (wgpuContext: *WGPUContext, size: Vector2UInt){
@@ -231,7 +230,10 @@ wgpuContextInit :: (window: *SDL_Window, wgpuContext: *WGPUContext, size: Vector
 	wgpuSurfaceConfigure(wgpuContext.surface, *wgpuContext.config);
 
 	wgpuDeviceSetUncapturedErrorCallback(wgpuContext.device, (type: WGPUErrorType, msg: *u8, user_data: *void) #c_call {
-		print_c("Uncaptured Error (%d), %s\n", type, to_string(msg));
+		print_c("Uncaptured Error (type=%), message=%\n", type, to_string(msg));
+		push_context {
+			assert(false, "we have an uncaptured wgpu error");
+		}
 	}, null);
 
 	wgpuContext.windowSize = size;

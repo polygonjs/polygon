@@ -55,8 +55,7 @@ editorStart :: (editor: *Editor) {
 			}
 		}
 
-		// editor.exitRequested = true;
-		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.windowSize.x, editor.wgpuContext.windowSize.y);
+		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.config.width, editor.wgpuContext.config.height*2);
 	}
 	editorReset(editor);
 }
