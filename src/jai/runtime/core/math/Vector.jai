@@ -61,6 +61,9 @@ mult :: inline (a: $T/Vector3All, s: float) -> Vector3 {
 length :: (a: $T/Vector2All) -> float {
 	return sqrt(a.x*a.x + a.y*a.y);
 }
+round :: (a: $T/Vector2All) -> T {
+	return .{ round(a.x), round(a.y) };
+}
 
 // 0 1 2 3
 // 4 5 6 7

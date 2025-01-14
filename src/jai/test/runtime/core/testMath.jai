@@ -26,5 +26,18 @@ testMath :: () {
 		assertEqual(nextPowerOf2(513), 1024);
 		endTest();
 	});
+	test("round", (options:TestProcedureOptions) {
+		assertEqual(round(1.4), 1);
+		assertEqual(round(1.8), 2);
+		assertEqual(round(0.4), 0);
+		assertEqual(round(0.7), 1);
+
+		assertEqual(round(-0.4), 0);
+		assertEqual(round(-0.7), -1);
+		assertEqual(round(-1.4), -1);
+		assertEqual(round(-1.8), -2);
+
+		assertEqual(round(Vector2.{1.2, 3.8}), Vector2.{1, 4});
+	});
 }
 

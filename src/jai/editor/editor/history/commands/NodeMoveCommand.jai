@@ -10,7 +10,7 @@ NodeMoveCommandItem :: struct {
 
 newNodeMoveCommand :: (editor: *Editor, items: []NodeMoveCommandItem, $push:bool)->*NodeMoveCommand {
 	if items.count == 0 {return null;}
-	
+
 	push_allocator(editor.allocator);
 	cmd := New(NodeMoveCommand);
 	cmd.items.allocator = editor.allocator;
@@ -18,6 +18,7 @@ newNodeMoveCommand :: (editor: *Editor, items: []NodeMoveCommandItem, $push:bool
 	maybe_grow(*cmd.items);
 	for item, i: items {
 		cmd.items[i] = item;
+		cmd.items[i].endPos = round(cmd.items[i].endPos);
 	}
 
 	#if push pushCommand(editor, cmd);
