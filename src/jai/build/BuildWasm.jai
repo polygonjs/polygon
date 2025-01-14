@@ -28,7 +28,7 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 	// We should probably port this allocator to Jai instead…
 	//  -rluba, 2023-11-15
 	walloc_object_file_path := "../modules/walloc/walloc.o";
-	EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
+	// EMSDK_PATH :: "/home/gui/work/web/games/emsdk";
 
 	STACK_SIZE :: 512 * 1024 * 1024;
 	// STACK_SIZE :: 65 * 1024;
@@ -38,7 +38,7 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 		tprint("stack-size=%", STACK_SIZE),
 		walloc_object_file_path,
 		// tprint("-L%/upstream/lib", EMSDK_PATH)
-		tprint("-L%/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten/", EMSDK_PATH)
+		// tprint("-L%/upstream/emscripten/cache/sysroot/lib/wasm64-emscripten/", EMSDK_PATH)
 	];
 
 	set_build_options(options, w);
