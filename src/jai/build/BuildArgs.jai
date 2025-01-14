@@ -8,6 +8,8 @@ BuildArgs :: struct {
 	debugger:bool;
 	skipmemtest:bool;
 	// all:[..]string;
+	no_bulk_mem:bool;
+	empty_main:bool;
 }
 getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs: BuildArgs;
@@ -26,6 +28,8 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 		buildArgs.native = false;
 		buildArgs.test = true;
 	}
+	buildArgs.no_bulk_mem = array_find(args, "no_bulk_mem");
+	buildArgs.empty_main = array_find(args, "empty_main");
 
 	// array_resize(*COMPILE_TIME_ARGS, args.count);
 	// for arg, i: args {

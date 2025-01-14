@@ -10,7 +10,9 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 	options.output_path                         = "../../../public/";
 	options.output_executable_name              = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
 	#if #exists(JAILS_DIAGNOSTICS_BUILD) options.output_type = .NO_OUTPUT;
-	options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
+	if buildArgs.no_bulk_mem == false {
+		options.llvm_options.target_system_features = "+bulk-memory"; // "This options is needed so that "memcpy" and "memset" are mapped to "memory.copy" and "memory.fill" instructions in WASM.
+	}
 	options.llvm_options.enable_split_modules   = false;
 	options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
 	options.dead_code_elimination				= .MODULES_ONLY;
@@ -48,7 +50,11 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 
 	compiler_begin_intercept(w);
 
-	add_build_string("FREE_MEMORY_DEBUG :: false; SKIP_MEM_TEST :: false; #load \"../main.jai\";", w);
+	if buildArgs.empty_main {
+		add_build_string("main::(){}", w);
+	} else {
+		add_build_string("FREE_MEMORY_DEBUG :: false; SKIP_MEM_TEST :: false; #load \"../main.jai\";", w);
+	}
 	listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
 
 	compiler_end_intercept(w);

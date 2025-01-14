@@ -30,6 +30,8 @@ build :: () #compile_time {
 		print_to_builder(*build_log_builder, tprint("DEBUGGER:      [%]\n", _checkbox(buildArgs.debugger)));
 		print_to_builder(*build_log_builder, tprint("OPTIMIZED:     [%]\n", _checkbox(buildArgs.optimized)));
 		print_to_builder(*build_log_builder, tprint("SKIP_MEM_TEST: [%]\n", _checkbox(buildArgs.skipmemtest)));
+		print_to_builder(*build_log_builder, tprint("NO_BULK_MEM:   [%]\n", _checkbox(buildArgs.no_bulk_mem)));
+		print_to_builder(*build_log_builder, tprint("EMPTY_MAIN:    [%]\n", _checkbox(buildArgs.empty_main)));
 		print("\n");
 		build_log :string= builder_to_string(*build_log_builder);
 		print("\n");
