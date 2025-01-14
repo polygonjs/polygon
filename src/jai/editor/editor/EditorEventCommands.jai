@@ -21,9 +21,23 @@ onComputeCompleted :: (editor: *Editor, scene: *NodesScene) {
 }
 onNodeSelectionAdded :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	array_add(*editor.commands.nodeSelectionAdded, .{node=xx node});
+
+	for addCmd, i: editor.commands.nodeSelectionRemoved {
+		if addCmd.node == node {
+			array_unordered_remove_by_index(*editor.commands.nodeSelectionRemoved, i);
+			return;
+		}
+	}
 }
 onNodeSelectionRemoved :: (editor: *Editor, scene: *NodesScene, node: *$T) {
 	array_add(*editor.commands.nodeSelectionRemoved, .{node=xx node});
+
+	for addCmd, i: editor.commands.nodeSelectionAdded {
+		if addCmd.node == node {
+			array_unordered_remove_by_index(*editor.commands.nodeSelectionAdded, i);
+			return;
+		}
+	}
 }
 
 editorFlushCommands :: (editor: *Editor) {
