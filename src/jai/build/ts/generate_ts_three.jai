@@ -1,5 +1,4 @@
-#load "generate_ts_common.jai";
-#load "../../runtime/engine/scene/NodesSceneThreeReportCommon.jai";
+
 
 
 
@@ -9,7 +8,7 @@ generate_ts :: () {
     file_path := join(#filepath, "../../../javascript/three/ThreeReportStructInfos.ts");
     builder: String_Builder;
     append(*builder, "// Auto-generated struct information for WebGPU bindings\n\n");
-    append(*builder, "import { GetArrayFunction, getU64 } from \"../Common\";\n");
+    append(*builder, "import { GetArrayFunction, getU8, getU64 } from \"../Common\";\n");
     append(*builder, "import { WASM_DATA_SIZE } from \"../wasm/WasmDataSize\";\n\n");
     append(*builder, "export interface MemberInfo {\n");
     append(*builder, "  size: bigint;\n");
@@ -23,6 +22,7 @@ generate_ts :: () {
 
 
     print_type_info(*builder, NodesSceneThreeReportBufferItem);
+    print_type_info(*builder, NodesSceneThreeReportObjectItem);
     print_type_info(*builder, NodesSceneThreeReport);
     
     content := builder_to_string(*builder);
@@ -40,4 +40,11 @@ generate_ts :: () {
     generate_ts();
 }
 
-#import "Compiler";
+#scope_file
+
+print_type_info :: (builder: *String_Builder, $T: Type){
+    print_type_info(builder, T, prefix="NodesSceneThree");
+}
+
+#load "../../runtime/engine/scene/NodesSceneThreeReportCommon.jai";
+#load "generate_ts_common.jai";

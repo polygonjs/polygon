@@ -1,4 +1,4 @@
-import { Scene, PerspectiveCamera, GridHelper, WebGLRenderer } from "three";
+import { PerspectiveCamera, GridHelper, WebGLRenderer } from "three";
 // @ts-ignore
 import { OrbitControls } from "three/addons/controls/OrbitControls";
 // @ts-ignore
@@ -9,6 +9,7 @@ import {
 	USELESS_ARG0,
 } from "../Common";
 import { clockInit, clockTick } from "../Clock";
+import { POLYGON_THREE_REPORT } from "./threeWasm";
 
 export interface ThreeController {
 	start: () => void;
@@ -23,15 +24,13 @@ export function threeControllerCreate(): ThreeController {
 	const canvas = renderer.domElement;
 	domElement.appendChild(canvas);
 
-	const scene = new Scene();
-
 	const camera = new PerspectiveCamera(
 		40,
 		window.innerWidth / window.innerHeight,
 		1,
 		100
 	);
-	camera.position.set(0, 1, 4);
+	camera.position.set(0, 1, 8);
 
 	const controls = new OrbitControls(camera, renderer.domElement);
 	controls.target.set(0, 0.5, 0);
@@ -39,7 +38,8 @@ export function threeControllerCreate(): ThreeController {
 	controls.enableDamping = true;
 
 	const gridHelper = new GridHelper();
-	scene.add(gridHelper);
+	POLYGON_THREE_REPORT.scene.add(gridHelper);
+	(window as any).scene = POLYGON_THREE_REPORT.scene;
 
 	function onResize() {
 		camera.aspect = window.innerWidth / window.innerHeight;
@@ -70,7 +70,7 @@ export function threeControllerCreate(): ThreeController {
 
 		controls.update();
 		stats.update();
-		renderer.render(scene, camera);
+		renderer.render(POLYGON_THREE_REPORT.scene, camera);
 
 		requestAnimationFrame(animate);
 	}

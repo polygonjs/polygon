@@ -1,5 +1,4 @@
-#load "generate_ts_common.jai";
-#load "../../modules/wgpu_wasm/module.jai";
+
 
 // jai src/jai/build/ts/generate_ts_wgpu.jai
 
@@ -78,4 +77,14 @@ generate_ts :: () {
     generate_ts();
 }
 
-#import "Compiler";
+
+
+#scope_file
+
+print_type_info :: (builder: *String_Builder, $T: Type){
+    print_type_info(builder, T, prefix="WGPU");
+}
+
+
+#load "../../modules/wgpu_wasm/module.jai";
+#load "generate_ts_common.jai";

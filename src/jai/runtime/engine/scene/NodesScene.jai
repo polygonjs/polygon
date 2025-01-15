@@ -53,7 +53,7 @@ NodesScene :: struct {
 
 	#if FOR_THREE {
 		threeReport: NodesSceneThreeReport;
-		threeReportBuffers: [..]NodesSceneThreeReportBufferItem;
+		threeReportObjects: [..]NodesSceneThreeReportObjectItem;
 	}
 }
 
