@@ -15,7 +15,7 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 	options.llvm_options.function_sections      = true; // To get around "LLVM ERROR: section already has a defining function: .text"
 	options.dead_code_elimination				= .MODULES_ONLY;
 
-	setOptimisation(options, buildArgs, wasm=true);
+	updateBuildOptions(options, buildArgs, wasm=true);
 
 
 	import_paths: [..]string;
@@ -48,7 +48,18 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 
 	compiler_begin_intercept(w);
 
-	add_build_string("FREE_MEMORY_DEBUG :: false; SKIP_MEM_TEST :: false; #load \"../main.jai\";", w);
+	// freeMemory := "FREE_MEMORY_DEBUG :: false;";
+	// skipMemTest := "SKIP_MEM_TEST :: false;";
+	// sceneOnly := tprint("SCENE_ONLY :: %;", buildArgs.sceneOnly);
+	// globalVars := tprint("% % %", freeMemory, skipMemTest, sceneOnly);
+	globalVars := buildGlobals(.{
+		freeMemory = false,
+		skipMemTest = false,
+		useEditor = buildArgs.noEditor==false
+	});
+	buildString := tprint("% #load \"../main.jai\";", globalVars);
+	// print("buildString (wasm):%\n", buildString);
+	add_build_string(buildString, w);
 	listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
 
 	compiler_end_intercept(w);

@@ -118,7 +118,11 @@ import { wgpuCommandEncoderCopyTextureToBuffer } from "./WebGPU/FromJs/wgpuComma
 import { loadImageDataPng } from "./wasm/WasmImage";
 import { loadFontData } from "./AssetsController";
 
-export function loadWasm(): Promise<void> {
+export interface LoadWasmOptions {
+	url: string;
+}
+export function loadWasm(wasmLoadOptions: LoadWasmOptions): Promise<void> {
+	// const url = options.url
 	const EXPORTED_JS_FUNCTIONS: Record<string, Function> = {
 		wasm_write_string: (
 			s_count: bigint,
@@ -306,7 +310,7 @@ export function loadWasm(): Promise<void> {
 	return new Promise((resolve) => {
 		// console.log("wasm load START");
 		WebAssembly.instantiateStreaming(
-			fetch("/polygon-next.wasm"),
+			fetch(wasmLoadOptions.url),
 			imports
 		).then((obj) => {
 			if (unassignedFunctionNames.length > 0) {

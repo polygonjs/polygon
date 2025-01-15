@@ -1,4 +1,4 @@
-setOptimisation :: (options: *Build_Options, buildArgs: *BuildArgs, wasm:bool) {
+updateBuildOptions :: (options: *Build_Options, buildArgs: *BuildArgs, wasm:bool) {
 	if buildArgs.optimized {
 		set_optimization(options, .VERY_OPTIMIZED); // OPTIMIZED_VERY_SMALL
 	} else {

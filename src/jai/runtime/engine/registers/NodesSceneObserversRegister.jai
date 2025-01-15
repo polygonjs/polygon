@@ -51,7 +51,10 @@ registerNodesSceneObserver :: ()-> (
 	onNodeConnectionRemoved:string,
 	onComputeStarted:string,
 	onComputeCompleted:string) #compile_time {
-	nodesSceneObserverRegister(Editor);
+
+	#if USE_EDITOR {
+		nodesSceneObserverRegister(Editor);
+	}
 
 
 	NodesSceneObserverGeneratedCode :: struct {

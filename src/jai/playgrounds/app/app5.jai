@@ -24,4 +24,3 @@ appSceneInit5 :: (nodesScene: *NodesScene, editor: *Editor) {
 	editorFlushCommands(editor);
 }
 
-#scope_file

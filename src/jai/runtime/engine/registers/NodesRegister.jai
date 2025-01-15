@@ -25,9 +25,11 @@ generatedNodeCtx :: (node: *BaseNodeAny)->NodeContext {
 	assert(false, tprint("generatedNodeDelete: node type '%' is not implemented", node.type));
 	return .ANY;
 }
-generatedNodeParamsRenderUI :: (node: *BaseNodeAny) {
-	#insert GENERATED_CODE_PARAMS_RENDER_UI;
-	assert(false, tprint("generatedNodeParamsRenderUI: node type '%' is not implemented", node.type));
+#if USE_EDITOR {
+	generatedNodeParamsRenderUI :: (node: *BaseNodeAny) {
+		#insert GENERATED_CODE_PARAMS_RENDER_UI;
+		assert(false, tprint("generatedNodeParamsRenderUI: node type '%' is not implemented", node.type));
+	}
 }
 generatedParamsInit :: (node: *BaseNodeAny) #expand {
 	#insert GENERATED_CODE_PARAMS_INIT;

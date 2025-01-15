@@ -2,12 +2,12 @@
 BuildArgs :: struct {
 	wasm:bool;
 	native:bool;
+	noEditor:bool;
 	jailsDiagnostics: bool;
 	test:bool;
 	optimized:bool;
 	debugger:bool;
 	skipmemtest:bool;
-	// all:[..]string;
 }
 getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs: BuildArgs;
@@ -18,6 +18,7 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs.test = array_find(args, "test");
 	buildArgs.wasm = array_find(args, "wasm");
 	buildArgs.native = array_find(args, "native");
+	buildArgs.noEditor = array_find(args, "noeditor");
 	buildArgs.debugger = array_find(args, "debugger");
 	buildArgs.optimized = array_find(args, "O");
 	buildArgs.skipmemtest = array_find(args, "skipmemtest");
@@ -26,11 +27,6 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 		buildArgs.native = false;
 		buildArgs.test = true;
 	}
-
-	// array_resize(*COMPILE_TIME_ARGS, args.count);
-	// for arg, i: args {
-	// 	COMPILE_TIME_ARGS[i] = arg;
-	// }
 
 	return buildArgs;
 }

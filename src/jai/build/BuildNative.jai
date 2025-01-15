@@ -4,7 +4,7 @@ buildNative :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 	options.output_executable_name = ifx buildArgs.jailsDiagnostics then "jails" else "polygon-next";
 	#if #exists(JAILS_DIAGNOSTICS_BUILD) options.output_type = .NO_OUTPUT;
 
-	setOptimisation(options, buildArgs, wasm=false);
+	updateBuildOptions(options, buildArgs, wasm=false);
 
 	import_paths: [..]string;
 	// Add our own modules folder first so that we can override modules with our own version, if necessary.
@@ -16,7 +16,17 @@ buildNative :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 
 	compiler_begin_intercept(w);
 
-	add_build_string(tprint("FREE_MEMORY_DEBUG :: %; SKIP_MEM_TEST :: %; #load \"../main.jai\";", buildArgs.test && !buildArgs.skipmemtest, buildArgs.skipmemtest), w);
+	// freeMemory := tprint("FREE_MEMORY_DEBUG :: %;", buildArgs.test && !buildArgs.skipmemtest);
+	// skipMemTest := tprint("SKIP_MEM_TEST :: %;", buildArgs.skipmemtest);
+	// sceneOnly := tprint("SCENE_ONLY :: %;", buildArgs.sceneOnly);
+	globalVars := buildGlobals(.{
+		freeMemory = buildArgs.test && !buildArgs.skipmemtest,
+		skipMemTest = buildArgs.skipmemtest,
+		useEditor = buildArgs.noEditor==false
+	});
+	buildString := tprint("% #load \"../main.jai\";", globalVars);
+	// print("buildString (native):%\n", buildString);
+	add_build_string(buildString, w);
 	listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);
 
 	compiler_end_intercept(w);

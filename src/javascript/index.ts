@@ -1,7 +1,7 @@
 import "../css/style.css";
-import { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
+import type { WebGPURequestResponse } from "./WebGPU/utils/WebGPUCommon";
 import { logBlueBg, logGreenBg } from "./Logger";
-import { loadWasm } from "./WasmRuntime";
+import { loadWasm, LoadWasmOptions } from "./WasmRuntime";
 import { webGPURequest } from "./WebGPURequest";
 import {
 	WebGPURenderController,
@@ -9,11 +9,13 @@ import {
 } from "./WebGPUController";
 import { ViteHotReloadEvent } from "./config/ViteHotReloadEvent";
 
+const wasmLoadOptions: LoadWasmOptions = { url: "/polygon-next.wasm" };
+
 let webGPURequestResponse: WebGPURequestResponse | undefined;
 let webGPUController: WebGPURenderController | undefined;
 
 document.addEventListener("DOMContentLoaded", async () => {
-	const wasmPromise = loadWasm();
+	const wasmPromise = loadWasm(wasmLoadOptions);
 	const webGPURequestPromise = webGPURequest();
 	const results = await Promise.all([wasmPromise, webGPURequestPromise]);
 	webGPURequestResponse = results[1];
@@ -28,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 if (import.meta.hot) {
-	let wamsRebuildCount = 0;
+	let wasmRebuildCount = 0;
 	let buildStartAt = 0;
 	import.meta.hot.on(ViteHotReloadEvent.BUILD_START, async () => {
 		buildStartAt = performance.now();
@@ -40,10 +42,10 @@ if (import.meta.hot) {
 	import.meta.hot.on(ViteHotReloadEvent.BUILD_SUCCESS, async () => {
 		const buildTime = (performance.now() - buildStartAt).toFixed(0);
 		logGreenBg(
-			`------------ WASM HOT RELOAD ------------ #${wamsRebuildCount++} in ${buildTime}ms`
+			`------------ WASM HOT RELOAD ------------ #${wasmRebuildCount++} in ${buildTime}ms`
 		);
 		webGPUController?.stop();
-		await loadWasm();
+		await loadWasm(wasmLoadOptions);
 		if (!webGPURequestResponse) {
 			return;
 		}

@@ -16,21 +16,32 @@ on_wgpu_device_ready :: ( canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQu
 	} else {
 
 		nodesSceneInit(*APP.nodesScene);
-		wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format, width, height);
+		#if USE_EDITOR {
+			// TODO: the scene should have access to the wgpuContext when we don't have an editor (or always).
+			wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format, width, height);
+		}
 		initSceneAndAttachToEditor(*APP);
-		editorStart(*APP.editor);
+		#if USE_EDITOR {
+			editorStart(*APP.editor);
+		}
 
 	}
 }
 
-on_request_animation_frame :: ( newTime: u64, width: u64, height: u64 ) {
+on_request_animation_frame :: ( newTimeInMs: u64, width: u64, height: u64 ) {
 	context = call_from_wasm_context;
 
-	if( nodesSceneValid(*APP.nodesScene) && editorValid(*APP.editor) ){
-		if(APP.editor.exitRequested==true){
-			editorReset(*APP.editor);
+	newTimeInSeconds :Time= xx (newTimeInMs / 1000.0);
+
+	if appValid(*APP) {
+		#if USE_EDITOR {
+			if(APP.editor.exitRequested==true){
+				editorReset(*APP.editor);
+			} else {
+				editorOnTick(*APP.editor, newTimeInSeconds, width, height);
+			}
 		} else {
-			editorOnTick(*APP.editor, newTime, width, height);
+			sceneOnTick(*APP.nodesScene, newTimeInSeconds);
 		}
 	} else {
 		// print("nodesSceneValid(APP.nodesScene):% editorValid(APP.editor):% (APP.editor=%, APP=%, initialized=% disposed=%)\n", nodesSceneValid(*APP.nodesScene), editorValid(*APP.editor), *APP.editor, *APP, APP.editor.initialized, APP.editor.disposed);
@@ -58,10 +69,27 @@ requestRealloc :: (oldDataPointer: *u8, newSize: s64)  {
 	onReallocReady(xx newData.data);
 }
 onPopErrorScopeCompleted :: (errorSize: u64) {
-	onCapturedErrorWasm(errorSize, *APP.editor.wgpuContext);
+	#if USE_EDITOR {
+		// TODO: ideally we should:
+		// - build be able to build without wgpu, and in that case no include the onPopErrorScopeCompleted function
+		// - the scene should still be able to be loaded without editor, with wgpu, and therefore have access to the wgpuContext
+	 	onCapturedErrorWasm(errorSize, *APP.editor.wgpuContext);
+	}
 }
 
 #scope_file
 
 call_from_wasm_context :#Context;
+
+appValid :: (app:*PolygonApp)->bool {
+	if nodesSceneValid(*APP.nodesScene) == false {
+		return false;
+	}
+	#if USE_EDITOR {
+		if editorValid(*APP.editor) == false {
+			return false;
+		}
+	}
+	return true;
+}
 

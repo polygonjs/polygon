@@ -1,7 +1,7 @@
 
-appSceneInit :: appSceneInit5;
+appSceneInit :: appSceneInit6;
 
 #scope_file
 
 
-#load "playgrounds/app/app5.jai";
+#load "playgrounds/app/app6.jai";

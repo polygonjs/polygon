@@ -1,4 +1,4 @@
-editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
+editorOnTick :: (editor: *Editor, newTime: Time, width: u64, height: u64) {
 	onResize(editor, .{width, height});
 
 	if USE_IMGUI_DEBUG return;
@@ -10,12 +10,11 @@ editorOnTick :: (editor: *Editor, newTime: u64, width: u64, height: u64) {
 	} else {
 	}
 
-	// print("time:%\n", newTime / 1000.0);
-	sceneOnTick(editor.nodesScene, newTime / 1000.0);
+	sceneOnBeforeTick(editor.nodesScene, newTime);
 	editorFlushCommands(editor);
 	editorRender(editor);
 	reset_temporary_storage();
-	editor.nodesScene.framesCount += 1;
+	sceneOnAfterTick(editor.nodesScene);
 	editor.onAfterTick(editor);
 
 

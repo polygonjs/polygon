@@ -45,6 +45,7 @@ NodesScene :: struct {
 	computablesTree:ComputablesTree;
 	nodeRequests:[..]NodeSceneRequest;
 
+	onBeforeTick: NodesSceneOnBeforeTickCallback=DEFAULT_NODES_SCENE_ON_BEFORE_TICK;
 	onNodesComputed:NodesSceneOnNodesComputedCallback = DEFAULT_NODES_SCENE_ON_NODES_COMPUTED;
 
 	initialized:bool = false;
@@ -175,10 +176,14 @@ nodesSceneInit :: (scene: *NodesScene) {
 	// nodesSceneInitBackgroundMesh(scene);
 }
 
+NodesSceneOnBeforeTickCallback :: #type (nodesScene: *NodesScene);
 NodesSceneOnNodesComputedCallback :: #type (nodesScene: *NodesScene);
 
 #scope_file
 
 INIT_NEXT_NODE_ID :NodeId: 0;
+
+
+DEFAULT_NODES_SCENE_ON_BEFORE_TICK :NodesSceneOnBeforeTickCallback: (nodesScene: *NodesScene) {}
 DEFAULT_NODES_SCENE_ON_NODES_COMPUTED :NodesSceneOnNodesComputedCallback: (nodesScene: *NodesScene) {}
 

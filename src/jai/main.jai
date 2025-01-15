@@ -9,7 +9,9 @@ else           #load "main_native.jai";
 // as they seem reset to null after main().
 // but wrapping them in a PolygonApp struct seems to fix the problem.
 PolygonApp :: struct {
-	editor:Editor;
+	#if USE_EDITOR {
+		editor:Editor;
+	}
 	nodesScene:NodesScene;
 	coreGraphs:[..]*CoreGraph;
 
@@ -22,9 +24,11 @@ APP:PolygonApp;
 
 initSceneAndAttachToEditor :: (app: *PolygonApp) {
 	coreGraphsReserve(app);
-	editorInit(*app.editor);
-	editorSetScene(*app.editor, *app.nodesScene);
-	appSceneInit(*app.nodesScene, *app.editor);
+	#if USE_EDITOR {
+		editorInit(*app.editor);
+		editorSetScene(*app.editor, *app.nodesScene);
+	}
+	appSceneInit(app);
 }
 coreGraphsReserve :: (app: *PolygonApp) {
 	array_reserve(*app.coreGraphs, 2048);
@@ -63,7 +67,9 @@ else #import "Basic";
 }
 
 #load "app.jai";
-#load "editor/_index.jai";
+#if USE_EDITOR == true {
+	#load "editor/_index.jai";
+}
 #load "runtime/_index.jai";
 
 #if RUN_TESTS {

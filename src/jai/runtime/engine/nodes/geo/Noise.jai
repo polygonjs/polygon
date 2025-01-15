@@ -26,6 +26,7 @@ cook :GeoNodeCookMethod: (node: *TYPE, inputResults:GeoNodeCookInput) {
 					freq = freq.value,
 					offset = offset.value
 				});
+				print("noise computed: %\n", offset.value.x);
 			}
 		}
 	}

@@ -1,8 +1,9 @@
 #load "BuildArgs.jai";
+#load "BuildGlobals.jai";
 #load "BuildFont.jai";
 #load "BuildListenToCompiler.jai";
 #load "BuildNative.jai";
-#load "BuildOptimisation.jai";
+#load "BuildOptions.jai";
 #load "BuildShaders.jai";
 #load "BuildUpdateProcedures.jai";
 #load "BuildUtils.jai";
