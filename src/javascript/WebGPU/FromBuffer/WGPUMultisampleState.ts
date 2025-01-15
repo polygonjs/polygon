@@ -1,4 +1,4 @@
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUMultisampleState } from "../utils/WGPUStructInfos";
 
 export function WGPUMultisampleStateFromBuffer(p: bigint): GPUMultisampleState {

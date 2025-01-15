@@ -3,6 +3,7 @@ BuildArgs :: struct {
 	wasm:bool;
 	native:bool;
 	noEditor:bool;
+	three:bool;
 	jailsDiagnostics: bool;
 	test:bool;
 	optimized:bool;
@@ -19,6 +20,7 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 	buildArgs.wasm = array_find(args, "wasm");
 	buildArgs.native = array_find(args, "native");
 	buildArgs.noEditor = array_find(args, "noeditor");
+	buildArgs.three = array_find(args, "three");
 	buildArgs.debugger = array_find(args, "debugger");
 	buildArgs.optimized = array_find(args, "O");
 	buildArgs.skipmemtest = array_find(args, "skipmemtest");
@@ -26,6 +28,12 @@ getArgs :: (options: *Build_Options)->BuildArgs {
 		buildArgs.wasm = true;
 		buildArgs.native = false;
 		buildArgs.test = true;
+	}
+	#if #exists(JAILS_DIAGNOSTICS_BUILD){
+		buildArgs.wasm = true;
+		buildArgs.native = false;
+		buildArgs.test = true;
+		buildArgs.three = true;
 	}
 
 	return buildArgs;

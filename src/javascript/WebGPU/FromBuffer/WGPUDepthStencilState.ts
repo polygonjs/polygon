@@ -2,7 +2,7 @@ import {
 	compareFunctionIntToGPUCompareFunction,
 	textureFormatIntToGPUTextureFormat,
 } from "../utils/WebGPUMap";
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUDepthStencilState } from "../utils/WGPUStructInfos";
 import { WGPUStencilFaceStateFromBuffer } from "./WGPUStencilFaceState";
 

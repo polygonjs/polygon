@@ -1,4 +1,4 @@
-import { _big, _num } from "../utils/WebGPUUtils";
+import { _big, _num } from "../../wasm/WasmUtils";
 import { WGPUTextureDataLayout } from "../utils/WGPUStructInfos";
 
 export function WGPUTextureDataLayoutFromBuffer(p: bigint): GPUImageDataLayout {

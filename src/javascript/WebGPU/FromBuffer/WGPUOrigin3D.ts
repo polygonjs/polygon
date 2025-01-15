@@ -1,4 +1,4 @@
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUOrigin3D } from "../utils/WGPUStructInfos";
 
 export function WGPUOrigin3DFromBuffer(p: bigint): GPUOrigin3D {

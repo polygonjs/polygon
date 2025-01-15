@@ -3,14 +3,14 @@ import {
 	textureDimensionIntToGPUTextureDimension,
 	textureFormatIntToGPUTextureFormat,
 } from "../utils/WebGPUMap";
-import { WGPU_SIZE } from "../utils/WebGPUOffset";
+import { WASM_DATA_SIZE } from "../../wasm/WasmDataSize";
 import {
 	_big,
 	_label,
 	_num,
 	_pointerValue,
-	createWGPUItemsByPointer,
-} from "../utils/WebGPUUtils";
+	createItemsByPointer,
+} from "../../wasm/WasmUtils";
 import { WGPUTextureDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUExtent3DFromBuffer } from "./WGPUExtent3D";
 
@@ -36,10 +36,10 @@ export function WGPUTextureDescriptorFromBuffer(
 	const sampleCount = _num(p, m.sampleCount);
 	const viewFormatCount = _big(p, m.viewFormatCount);
 
-	const viewFormats = createWGPUItemsByPointer<GPUTextureFormat>({
+	const viewFormats = createItemsByPointer<GPUTextureFormat>({
 		pointer: p,
 		itemsCount: viewFormatCount,
-		itemSize: WGPU_SIZE.u32,
+		itemSize: WASM_DATA_SIZE.u32,
 		memberInfo: m.viewFormats,
 		callback: (itemPointer) => {
 			const itemFormatb = getU32(Number(itemPointer));

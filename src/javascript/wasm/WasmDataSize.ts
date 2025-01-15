@@ -1,4 +1,4 @@
-export const WGPU_SIZE = {
+export const WASM_DATA_SIZE = {
 	bool: BigInt(1),
 	u8: BigInt(1),
 	u16: BigInt(2),
@@ -10,5 +10,5 @@ export const WGPU_SIZE = {
 	float64: BigInt(8),
 };
 
-export const ENUM_SIZE = WGPU_SIZE.u32;
+export const ENUM_SIZE = WASM_DATA_SIZE.u32;
 

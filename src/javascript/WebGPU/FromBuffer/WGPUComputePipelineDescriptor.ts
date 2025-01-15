@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _big, _label, _pointerValue } from "../utils/WebGPUUtils";
+import { _big, _label, _pointerValue } from "../../wasm/WasmUtils";
 import { WGPUComputePipelineDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUProgrammableStageDescriptorFromBuffer } from "./WGPUProgrammableStageDescriptor";
 

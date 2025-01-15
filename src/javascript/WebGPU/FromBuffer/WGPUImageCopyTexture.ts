@@ -1,6 +1,6 @@
 import { heapGet } from "../../WasmHeap";
 import { textureAspectIntToGPUTextureAspect } from "../utils/WebGPUMap";
-import { _num, _pointerValue } from "../utils/WebGPUUtils";
+import { _num, _pointerValue } from "../../wasm/WasmUtils";
 import { WGPUImageCopyTexture } from "../utils/WGPUStructInfos";
 import { WGPUOrigin3DFromBuffer } from "./WGPUOrigin3D";
 

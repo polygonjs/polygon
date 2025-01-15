@@ -2,7 +2,7 @@ import {
 	compareFunctionIntToGPUCompareFunction,
 	stencilOperationIntToGPUStencilOperation,
 } from "../utils/WebGPUMap";
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUStencilFaceState } from "../utils/WGPUStructInfos";
 
 export function WGPUStencilFaceStateFromBuffer(p: bigint): GPUStencilFaceState {

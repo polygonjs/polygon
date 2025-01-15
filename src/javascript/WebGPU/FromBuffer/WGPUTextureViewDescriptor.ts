@@ -3,7 +3,7 @@ import {
 	textureFormatIntToGPUTextureFormat,
 	textureViewDimentionIntToGPUTextureViewDimension,
 } from "../utils/WebGPUMap";
-import { _label, _num } from "../utils/WebGPUUtils";
+import { _label, _num } from "../../wasm/WasmUtils";
 import { WGPUTextureViewDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUTextureViewDescriptorFromBuffer(

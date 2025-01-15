@@ -13,3 +13,8 @@
 #load "NodesSceneNodeCreate.jai";
 #load "NodesSceneNodeDelete.jai";
 #load "NodesSceneNodesGet.jai";
+
+#if FOR_THREE {
+	#load "NodesSceneThreeReport.jai";
+	#load "NodesSceneThreeReportCommon.jai";
+}

@@ -7,7 +7,7 @@ main :: () {
 	}
 	nodesSceneInit(*APP.nodesScene);
 	windowInit(*APP.editor);
-	initSceneAndAttachToEditor(*APP);
+	appInit(*APP);
 	editorStart(*APP.editor);
 
 	reset_temporary_storage();

@@ -1,4 +1,4 @@
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUBindGroupLayoutEntry } from "../utils/WGPUStructInfos";
 import { WGPUBufferBindingLayoutFromBuffer } from "./WGPUBufferBindingLayout";
 import { WGPUSamplerBindingLayoutFromBuffer } from "./WGPUSamplerBindingLayout";

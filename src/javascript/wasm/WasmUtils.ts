@@ -1,7 +1,7 @@
-import { getU64, updateMemoryArrayViewsIfNeeded } from "../../Common";
-import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
-import { WGPU_SIZE } from "./WebGPUOffset";
-import { MemberInfo } from "./WGPUStructInfos";
+import { getU64, updateMemoryArrayViewsIfNeeded } from "../Common";
+import { jsStringFromJaiStringWithoutLength } from "./WasmString";
+import { WASM_DATA_SIZE } from "./WasmDataSize";
+import { MemberInfo } from "../WebGPU/utils/WGPUStructInfos";
 
 interface LabelOffsetContainer {
 	label: bigint;
@@ -19,7 +19,7 @@ export function stringFromBuffer(
 	u64: BigUint64Array
 ) {
 	const labelOffset = stringOffset;
-	const labelSize = WGPU_SIZE.u64;
+	const labelSize = WASM_DATA_SIZE.u64;
 	const labelStart = (pointer + labelOffset) / labelSize;
 	const labelPointer = u64[Number(labelStart)];
 	const label = jsStringFromJaiStringWithoutLength(BigInt(labelPointer));
@@ -126,21 +126,21 @@ export function _label(
 	);
 }
 
-interface CreateWGPUItemsByPointerOptions<T> {
+interface CreateItemsByPointerOptions<T> {
 	pointer: bigint;
 	itemsCount: bigint;
 	itemSize: bigint;
 	memberInfo: MemberInfo;
 	callback: (itemPointer: bigint) => T;
 }
-interface CreateWGPUItemsByHeapIndexOptions<T> {
+interface CreateItemsByHeapIndexOptions<T> {
 	pointer: bigint;
 	itemsCount: bigint;
 	memberInfo: MemberInfo;
 	callback: (itemHeapIndex: bigint) => T;
 }
-export function createWGPUItemsByPointer<T>(
-	options: CreateWGPUItemsByPointerOptions<T>
+export function createItemsByPointer<T>(
+	options: CreateItemsByPointerOptions<T>
 ) {
 	const { pointer, itemsCount, memberInfo, itemSize, callback } = options;
 	const arrayPointer = _big(pointer, memberInfo);
@@ -149,8 +149,8 @@ export function createWGPUItemsByPointer<T>(
 		return callback(itemPointer);
 	});
 }
-export function createWGPUItemsByHeapIndex<T>(
-	options: CreateWGPUItemsByHeapIndexOptions<T>
+export function createItemsByHeapIndex<T>(
+	options: CreateItemsByHeapIndexOptions<T>
 ) {
 	const { pointer, itemsCount, memberInfo, callback } = options;
 	const arrayPointer = _pointerValue(pointer + memberInfo.offset);

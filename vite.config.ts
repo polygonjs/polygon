@@ -10,21 +10,34 @@ interface BuildArgs {
 	wasm: boolean;
 	native: boolean;
 	noeditor: boolean;
+	three: boolean;
 	test: boolean;
+	//
+	wasm32: boolean;
 }
 const BUILD_ARGS: BuildArgs = {
 	wasm: true,
 	native: false,
-	noeditor: false,
+	noeditor: true,
+	three: true,
 	test: false,
+	//
+	wasm32: false,
 };
 const CMD_BUILD_ARGS: string[] = [];
-if (BUILD_ARGS.wasm) CMD_BUILD_ARGS.push("wasm");
+if (BUILD_ARGS.wasm || BUILD_ARGS.wasm32) CMD_BUILD_ARGS.push("wasm");
 if (BUILD_ARGS.native) CMD_BUILD_ARGS.push("native");
 if (BUILD_ARGS.noeditor) CMD_BUILD_ARGS.push("noeditor");
+if (BUILD_ARGS.three) CMD_BUILD_ARGS.push("three");
 if (BUILD_ARGS.test) CMD_BUILD_ARGS.push("test");
 
-const CMD_BUILD = `jai src/jai/build/build.jai - ${CMD_BUILD_ARGS.join(" ")}`;
+const CMD_WASM64232 = "yarn wasm64232";
+const CMD_JAI = `jai src/jai/build/build.jai - ${CMD_BUILD_ARGS.join(" ")}`;
+const CMD_ELEMENTS = [CMD_JAI];
+if (BUILD_ARGS.wasm32) {
+	CMD_ELEMENTS.push(CMD_WASM64232);
+}
+const CMD_BUILD = CMD_ELEMENTS.join(" && ");
 
 function logRedBg(message: string) {
 	logStyled(message, {

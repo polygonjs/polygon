@@ -1,4 +1,4 @@
-import { _str } from "../utils/WebGPUUtils";
+import { _str } from "../../wasm/WasmUtils";
 import { WGPUShaderModuleWGSLDescriptor } from "../utils/WGPUStructInfos";
 
 interface Mock_GPUShaderModuleWGSLDescriptor {

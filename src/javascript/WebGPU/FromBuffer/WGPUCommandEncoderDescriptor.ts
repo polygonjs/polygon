@@ -1,4 +1,4 @@
-import { _label } from "../utils/WebGPUUtils";
+import { _label } from "../../wasm/WasmUtils";
 import { WGPUCommandEncoderDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUCommandEncoderDescriptorFromBuffer(

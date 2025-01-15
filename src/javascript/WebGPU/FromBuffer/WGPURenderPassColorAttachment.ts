@@ -3,7 +3,7 @@ import {
 	loadOpIntToGPULoadOp,
 	storeOpIntToGPUStoreOp,
 } from "../utils/WebGPUMap";
-import { _big, _num, _pointerValue } from "../utils/WebGPUUtils";
+import { _big, _num, _pointerValue } from "../../wasm/WasmUtils";
 import { WGPURenderPassColorAttachment } from "../utils/WGPUStructInfos";
 import { WGPUColorFromBuffer } from "./WGPUColor";
 

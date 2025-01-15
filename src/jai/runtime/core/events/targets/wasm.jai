@@ -66,3 +66,7 @@ onReallocReady :: (data: s64) #foreign;
 // debugImageDataPng :: (data: *u8, dataSize: s32) #foreign;
 loadImageDataPng :: (pngData: *u8, dataSize: s32, rawDataDest: *u8) #foreign;
 loadFontData :: (pngData: *u8, dataSize: s32, rawDataDest: *u8) #foreign;
+
+#if FOR_THREE {
+	onThreeReportUpdated :: (data: *u8) #foreign;
+}

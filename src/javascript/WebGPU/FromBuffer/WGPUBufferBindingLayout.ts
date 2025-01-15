@@ -1,5 +1,5 @@
 import { bufferTypeIntToGPUBufferBindingType } from "../utils/WebGPUMap";
-import { _big, _num } from "../utils/WebGPUUtils";
+import { _big, _num } from "../../wasm/WasmUtils";
 import { WGPUBufferBindingLayout } from "../utils/WGPUStructInfos";
 
 export function WGPUBufferBindingLayoutFromBuffer(

@@ -1,5 +1,5 @@
 import { stepModeIntToGPUVertexStepMode } from "../utils/WebGPUMap";
-import { _big, _num, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
+import { _big, _num, createItemsByPointer } from "../../wasm/WasmUtils";
 import {
 	WGPUVertexAttribute,
 	WGPUVertexBufferLayout,
@@ -20,7 +20,7 @@ export function WGPUVertexBufferLayoutFromBuffer(
 	//
 	const attributesCount = _big(p, m.attributeCount);
 	//
-	const attributes: GPUVertexAttribute[] = createWGPUItemsByPointer({
+	const attributes: GPUVertexAttribute[] = createItemsByPointer({
 		pointer: p,
 		itemsCount: attributesCount,
 		itemSize: WGPUVertexAttribute.size,

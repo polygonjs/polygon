@@ -4,7 +4,7 @@ import {
 	indexFormatIntToGPUIndexFormat,
 	topologyIntToGPUPrimitiveTopology,
 } from "../utils/WebGPUMap";
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUPrimitiveState } from "../utils/WGPUStructInfos";
 
 export function WGPUPrimitiveStateFromBuffer(p: bigint): GPUPrimitiveState {

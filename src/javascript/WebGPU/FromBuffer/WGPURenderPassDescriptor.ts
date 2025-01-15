@@ -1,4 +1,4 @@
-import { _big, _label, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
+import { _big, _label, createItemsByPointer } from "../../wasm/WasmUtils";
 import {
 	WGPURenderPassColorAttachment,
 	WGPURenderPassDescriptor,
@@ -14,8 +14,8 @@ export function WGPURenderPassDescriptorFromBuffer(
 	const label = _label(p, m);
 	//
 	const colorAttachmentCount = _big(p, m.colorAttachmentCount);
-	const colorAttachments =
-		createWGPUItemsByPointer<GPURenderPassColorAttachment>({
+	const colorAttachments = createItemsByPointer<GPURenderPassColorAttachment>(
+		{
 			pointer: p,
 			itemsCount: colorAttachmentCount,
 			itemSize: WGPURenderPassColorAttachment.size,
@@ -23,7 +23,8 @@ export function WGPURenderPassDescriptorFromBuffer(
 			callback: (itemPointer) => {
 				return WGPURenderPassColorAttachmentFromBuffer(itemPointer);
 			},
-		});
+		}
+	);
 	//
 
 	const depthStencilAttachment =

@@ -2,7 +2,7 @@ import {
 	blendFactorIntToGPUBlendFactor,
 	blendOperationIntToGPUBlendOperation,
 } from "../utils/WebGPUMap";
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUBlendComponent } from "../utils/WGPUStructInfos";
 
 export function WGPUBlendComponentFromBuffer(p: bigint): GPUBlendComponent {

@@ -1,5 +1,10 @@
 main :: () {
 	call_from_wasm_context = context;
+
+	#if FOR_THREE {
+		nodesSceneInit(*APP.nodesScene);
+		appInit(*APP);
+	}
 }
 
 
@@ -20,7 +25,7 @@ on_wgpu_device_ready :: ( canvas: WGPUSurface, device: WGPUDevice, queue: WGPUQu
 			// TODO: the scene should have access to the wgpuContext when we don't have an editor (or always).
 			wgpuContextInit(*APP.editor.wgpuContext, canvas, device, queue, preferred_texture_format, width, height);
 		}
-		initSceneAndAttachToEditor(*APP);
+		appInit(*APP);
 		#if USE_EDITOR {
 			editorStart(*APP.editor);
 		}
@@ -44,7 +49,11 @@ on_request_animation_frame :: ( newTimeInMs: u64, width: u64, height: u64 ) {
 			sceneOnTick(*APP.nodesScene, newTimeInSeconds);
 		}
 	} else {
-		// print("nodesSceneValid(APP.nodesScene):% editorValid(APP.editor):% (APP.editor=%, APP=%, initialized=% disposed=%)\n", nodesSceneValid(*APP.nodesScene), editorValid(*APP.editor), *APP.editor, *APP, APP.editor.initialized, APP.editor.disposed);
+		// #if USE_EDITOR {
+		// 	print("nodesSceneValid(APP.nodesScene):% editorValid(APP.editor):% (APP.editor=%, APP=%, initialized=% disposed=%)\n", nodesSceneValid(*APP.nodesScene), editorValid(*APP.editor), *APP.editor, *APP, APP.editor.initialized, APP.editor.disposed);
+		// } else {
+		// 	print("nodesSceneValid(APP.nodesScene):%", nodesSceneValid(*APP.nodesScene));
+		// }
 	}
 	#if RUN_TESTS {
 		batchRunNextTestOrTerminate(*APP);
@@ -59,7 +68,7 @@ onAllocatedMemoryWritten :: (nodeId: NodeId) {
 	context = call_from_wasm_context;
 	__onAllocatedMemoryWritten(*APP.nodesScene, nodeId);
 }
-requestRealloc :: (oldDataPointer: *u8, newSize: s64)  {
+requestRealloc :: (oldDataPointer: *u8, newSize: s64) {
 	context = call_from_wasm_context;
 	size := newSize;//ifx oldSize < newSize then oldSize else newSize;
 	newData := NewArray(size, u8,, temp);

@@ -3,7 +3,11 @@ import { Scene, PerspectiveCamera, GridHelper, WebGLRenderer } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls";
 // @ts-ignore
 import Stats from "three/addons/libs/stats.module.js";
-import { USELESS_ARG0 } from "../Common";
+import {
+	updateMemoryArrayViews,
+	updateMemoryArrayViewsIfNeeded,
+	USELESS_ARG0,
+} from "../Common";
 import { clockInit, clockTick } from "../Clock";
 
 export interface ThreeController {
@@ -44,14 +48,17 @@ export function threeControllerCreate(): ThreeController {
 		renderer.setSize(window.innerWidth, window.innerHeight);
 	}
 
-	window.onresize = onResize;
+	window.addEventListener("resize", onResize);
 	onResize();
+	updateMemoryArrayViews();
 
 	const clockData = clockInit();
+	let animateAllowed: boolean = true;
 	function animate() {
-		// const delta = clock.getDelta();
-
-		// mixer.update( delta );
+		if (animateAllowed == false) {
+			return;
+		}
+		updateMemoryArrayViewsIfNeeded();
 
 		clockTick(clockData);
 		window.wasmFunctions.onRequestAnimationFrame(
@@ -62,16 +69,18 @@ export function threeControllerCreate(): ThreeController {
 		);
 
 		controls.update();
-
 		stats.update();
-
 		renderer.render(scene, camera);
+
+		requestAnimationFrame(animate);
 	}
 	function start() {
-		renderer.setAnimationLoop(animate);
+		requestAnimationFrame(animate);
 	}
 	function stop() {
-		console.warn("threeController.stop() not implemented yet");
+		window.removeEventListener("resize", onResize);
+		domElement.removeChild(canvas);
+		animateAllowed = false;
 	}
 	return {
 		start,

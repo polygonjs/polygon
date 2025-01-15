@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _big, _label, createWGPUItemsByHeapIndex } from "../utils/WebGPUUtils";
+import { _big, _label, createItemsByHeapIndex } from "../../wasm/WasmUtils";
 import { WGPUPipelineLayoutDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUPipelineLayoutDescriptorFromBuffer(
@@ -11,7 +11,7 @@ export function WGPUPipelineLayoutDescriptorFromBuffer(
 	const label = _label(p, m);
 	const bindGroupLayoutCount = _big(p, m.bindGroupLayoutCount);
 	//
-	const bindGroupLayouts: GPUBindGroupLayout[] = createWGPUItemsByHeapIndex({
+	const bindGroupLayouts: GPUBindGroupLayout[] = createItemsByHeapIndex({
 		pointer: p,
 		itemsCount: bindGroupLayoutCount,
 		memberInfo: m.bindGroupLayouts,

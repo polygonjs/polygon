@@ -1,5 +1,5 @@
 import { textureFormatIntToGPUTextureFormat } from "../utils/WebGPUMap";
-import { _big, _num } from "../utils/WebGPUUtils";
+import { _big, _num } from "../../wasm/WasmUtils";
 import { WGPUColorTargetState } from "../utils/WGPUStructInfos";
 import { WGPUBlendStateFromBuffer } from "./WGPUBlendState";
 

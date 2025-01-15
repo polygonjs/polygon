@@ -8,6 +8,7 @@ import {
 	OnAllocatedMemoryWrittenFunction,
 	RequestReallocFunction,
 	OnPopErrorScopeCompletedFunction,
+	updateMemoryArrayViews,
 } from "./Common";
 import {
 	jsStringFromJaiString,
@@ -117,6 +118,7 @@ import { wgpuCommandEncoderInsertDebugMarker } from "./WebGPU/FromJs/wgpuCommand
 import { wgpuCommandEncoderCopyTextureToBuffer } from "./WebGPU/FromJs/wgpuCommandEncoderCopyTextureToBuffer";
 import { loadImageDataPng } from "./wasm/WasmImage";
 import { loadFontData } from "./AssetsController";
+import { onThreeReportUpdated } from "./three/threeWasm";
 
 export interface LoadWasmOptions {
 	url: string;
@@ -243,6 +245,8 @@ export function loadWasm(wasmLoadOptions: LoadWasmOptions): Promise<void> {
 		// onMemoryResize,
 		fetchUrl,
 		onAllocateReady,
+		// three
+		onThreeReportUpdated,
 	};
 	const _dummy = (dummyName: string) => {
 		return () => {
@@ -370,6 +374,7 @@ export function loadWasm(wasmLoadOptions: LoadWasmOptions): Promise<void> {
 			// which seems necessary at times (but really may not be, I'm not sure yet)
 			const mainFunc: Function = obj.instance.exports["main"] as Function;
 			mainFunc(0, BigInt(0));
+			updateMemoryArrayViews();
 
 			function mapFunction(
 				functionName: string,

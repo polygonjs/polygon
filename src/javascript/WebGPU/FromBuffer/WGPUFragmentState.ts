@@ -1,6 +1,6 @@
 import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
-import { _big, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
+import { _big, createItemsByPointer } from "../../wasm/WasmUtils";
 import {
 	WGPUColorTargetState,
 	WGPUFragmentState,
@@ -26,13 +26,15 @@ export function WGPUFragmentStateFromBuffer(p: bigint): GPUFragmentState {
 	//
 	const targetCount = _big(p, m.targetCount);
 
-	const targets: GPUColorTargetState[] = createWGPUItemsByPointer({
-		pointer: p,
-		itemsCount: targetCount,
-		itemSize: WGPUColorTargetState.size,
-		memberInfo: m.targets,
-		callback: (itemPointer) => WGPUColorTargetStateFromBuffer(itemPointer),
-	});
+	const targets: GPUColorTargetState[] =
+		createItemsByPointer<GPUColorTargetState>({
+			pointer: p,
+			itemsCount: targetCount,
+			itemSize: WGPUColorTargetState.size,
+			memberInfo: m.targets,
+			callback: (itemPointer) =>
+				WGPUColorTargetStateFromBuffer(itemPointer),
+		});
 
 	//
 	const fragment: GPUFragmentState = {

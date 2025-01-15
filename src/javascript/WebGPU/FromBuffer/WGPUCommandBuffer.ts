@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _pointerValue } from "../utils/WebGPUUtils";
+import { _pointerValue } from "../../wasm/WasmUtils";
 
 export function WGPUCommandBufferFromBuffer(pointer: bigint): GPUCommandBuffer {
 	const pointerValue = _pointerValue(pointer); //u64[Number(pointer / WGPU_SIZE.u64)];

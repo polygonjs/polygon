@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _big, _str } from "../utils/WebGPUUtils";
+import { _big, _str } from "../../wasm/WasmUtils";
 import { WGPUProgrammableStageDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUProgrammableStageDescriptorFromBuffer(

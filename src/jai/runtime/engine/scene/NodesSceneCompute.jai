@@ -42,7 +42,7 @@ nodesSceneOutputNodesCompute :: (scene: *NodesScene) {
 	if outputNode != null {
 		buildAndComputeComputableTree(scene, outputNode);
 	}
-	
+
 }
 nodesSceneSetFirstOutputNodeInput :: (scene: *NodesScene, input: u8) {
 	outputNode := nodesSceneFindFirstOutputNode(scene);
@@ -123,6 +123,9 @@ computeComputableNodes :: (using scene: *NodesScene, callingNode: *BaseNodeAny) 
 			nodesSceneEmitEvent(scene, .COMPUTE_COMPLETED);
 			if nodesSceneValid(scene) {
 				scene.onNodesComputed(scene);
+				#if FOR_THREE {
+					nodesSceneUpdateThreeReport(scene);
+				}
 			}
 		}
 		return;

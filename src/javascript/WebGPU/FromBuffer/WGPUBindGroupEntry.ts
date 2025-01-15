@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _big, _num } from "../utils/WebGPUUtils";
+import { _big, _num } from "../../wasm/WasmUtils";
 import { WGPUBindGroupEntry } from "../utils/WGPUStructInfos";
 
 export function WGPUBindGroupEntryFromBuffer(p: bigint): GPUBindGroupEntry {

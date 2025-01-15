@@ -7,13 +7,18 @@ import {
 	threeControllerCreate,
 } from "./three/threeController";
 
-const wasmLoadOptions: LoadWasmOptions = { url: "/polygon-next.32.wasm" };
+const WASM32 = false;
+const WASM_URL = WASM32 ? "/polygon-next.32.wasm" : "/polygon-next.wasm";
+const wasmLoadOptions: LoadWasmOptions = { url: WASM_URL };
 let threeController: ThreeController | null = null;
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function _start() {
 	await loadWasm(wasmLoadOptions);
 	threeController = threeControllerCreate();
 	threeController.start();
+}
+document.addEventListener("DOMContentLoaded", async () => {
+	_start();
 });
 
 if (import.meta.hot) {
@@ -28,7 +33,8 @@ if (import.meta.hot) {
 		logGreenBg(
 			`------------ WASM HOT RELOAD ------------ #${wasmRebuildCount++} in ${buildTime}ms`
 		);
-		await loadWasm(wasmLoadOptions);
+		threeController?.stop();
+		_start();
 	});
 	import.meta.hot.on(ViteHotReloadEvent.BUILD_ERROR, (d) => {
 		console.error("Jai WASM error", d);

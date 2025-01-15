@@ -1,4 +1,4 @@
-import { _label } from "../utils/WebGPUUtils";
+import { _label } from "../../wasm/WasmUtils";
 import { WGPUCommandBufferDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUCommandBufferDescriptorFromBuffer(

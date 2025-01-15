@@ -2,7 +2,7 @@ import {
 	textureSampleTypeIntToGPUTextureSampleType,
 	textureViewDimentionIntToGPUTextureViewDimension,
 } from "../utils/WebGPUMap";
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUTextureBindingLayout } from "../utils/WGPUStructInfos";
 
 export function WGPUTextureBindingLayoutFromBuffer(

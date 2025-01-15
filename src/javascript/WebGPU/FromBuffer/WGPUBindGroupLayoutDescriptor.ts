@@ -1,4 +1,4 @@
-import { _big, createWGPUItemsByPointer, _label } from "../utils/WebGPUUtils";
+import { _big, createItemsByPointer, _label } from "../../wasm/WasmUtils";
 import {
 	WGPUBindGroupLayoutDescriptor,
 	WGPUBindGroupLayoutEntry,
@@ -12,7 +12,7 @@ export function WGPUBindGroupLayoutDescriptorFromBuffer(
 	//
 	const label = _label(p, m);
 	const entriesCount = _big(p, m.entryCount);
-	const entries = createWGPUItemsByPointer<GPUBindGroupLayoutEntry>({
+	const entries = createItemsByPointer<GPUBindGroupLayoutEntry>({
 		pointer: p,
 		itemsCount: entriesCount,
 		itemSize: WGPUBindGroupLayoutEntry.size,

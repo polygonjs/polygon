@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _big, _label, _pointerValue } from "../utils/WebGPUUtils";
+import { _big, _label, _pointerValue } from "../../wasm/WasmUtils";
 import { WGPURenderPipelineDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUDepthStencilStateFromBuffer } from "./WGPUDepthStencilState";
 import { WGPUFragmentStateFromBuffer } from "./WGPUFragmentState";

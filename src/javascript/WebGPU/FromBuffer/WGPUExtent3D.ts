@@ -1,4 +1,4 @@
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUExtent3D } from "../utils/WGPUStructInfos";
 
 export function WGPUExtent3DFromBuffer(p: bigint): GPUExtent3D {

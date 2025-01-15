@@ -22,7 +22,7 @@ PolygonApp :: struct {
 
 APP:PolygonApp;
 
-initSceneAndAttachToEditor :: (app: *PolygonApp) {
+appInit :: (app: *PolygonApp) {
 	coreGraphsReserve(app);
 	#if USE_EDITOR {
 		editorInit(*app.editor);

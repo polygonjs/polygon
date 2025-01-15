@@ -4,7 +4,7 @@ import {
 	filterModeIntToGPUFilterMode,
 	mipmapFilterModeIntToGPUMipmapFilterMode,
 } from "../utils/WebGPUMap";
-import { _label, _num } from "../utils/WebGPUUtils";
+import { _label, _num } from "../../wasm/WasmUtils";
 import { WGPUSamplerDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUSamplerDescriptorFromBuffer(

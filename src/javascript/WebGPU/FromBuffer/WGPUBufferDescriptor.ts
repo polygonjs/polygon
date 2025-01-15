@@ -1,4 +1,4 @@
-import { _big, _label, _num } from "../utils/WebGPUUtils";
+import { _big, _label, _num } from "../../wasm/WasmUtils";
 import { WGPUBufferDescriptor } from "../utils/WGPUStructInfos";
 
 export function WGPUBufferDescriptorFromBuffer(p: bigint): GPUBufferDescriptor {

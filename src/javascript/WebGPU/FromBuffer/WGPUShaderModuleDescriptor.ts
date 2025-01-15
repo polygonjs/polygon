@@ -1,4 +1,4 @@
-import { _big, _label } from "../utils/WebGPUUtils";
+import { _big, _label } from "../../wasm/WasmUtils";
 import { WGPUShaderModuleDescriptor } from "../utils/WGPUStructInfos";
 import { WGPUShaderModuleWGSLDescriptorFromBuffer } from "./WGPUShaderModuleWGSLDescriptor";
 

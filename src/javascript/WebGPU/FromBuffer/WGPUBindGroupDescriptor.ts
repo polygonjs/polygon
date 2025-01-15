@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _big, _label, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
+import { _big, _label, createItemsByPointer } from "../../wasm/WasmUtils";
 import {
 	WGPUBindGroupDescriptor,
 	WGPUBindGroupEntry,
@@ -22,7 +22,7 @@ export function WGPUBindGroupDescriptorFromBuffer(
 	//
 	const entriesCount = _big(p, m.entryCount);
 	//
-	const entries: GPUBindGroupEntry[] = createWGPUItemsByPointer({
+	const entries: GPUBindGroupEntry[] = createItemsByPointer({
 		pointer: p,
 		itemsCount: entriesCount,
 		itemSize: WGPUBindGroupEntry.size,

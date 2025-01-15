@@ -50,6 +50,11 @@ NodesScene :: struct {
 
 	initialized:bool = false;
 	disposed:bool = false;
+
+	#if FOR_THREE {
+		threeReport: NodesSceneThreeReport;
+		threeReportBuffers: [..]NodesSceneThreeReportBufferItem;
+	}
 }
 
 
@@ -155,6 +160,9 @@ nodesSceneInit :: (scene: *NodesScene) {
 	nodesSceneComputableTreeInit(scene);
 
 	array_init(*scene.nodeRequests, scene.allocator, reserve=true);
+	#if FOR_THREE {
+		nodesSceneInitThreeReport(scene);
+	}
 
 	// scene.worldScene = newScene(scene);
 	worldSceneInit(*scene.worldScene);

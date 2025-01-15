@@ -1,6 +1,6 @@
 import { jsStringFromJaiStringWithoutLength } from "../../wasm/WasmString";
 import { heapGet } from "../../WasmHeap";
-import { _big, createWGPUItemsByPointer } from "../utils/WebGPUUtils";
+import { _big, createItemsByPointer } from "../../wasm/WasmUtils";
 import {
 	WGPUVertexBufferLayout,
 	WGPUVertexState,
@@ -30,7 +30,7 @@ export function WGPUVertexStateFromBuffer(p: bigint): GPUVertexState {
 	//
 	const bufferCount = _big(p, m.bufferCount);
 
-	const buffers: GPUVertexBufferLayout[] = createWGPUItemsByPointer({
+	const buffers: GPUVertexBufferLayout[] = createItemsByPointer({
 		pointer: p,
 		itemsCount: bufferCount,
 		itemSize: WGPUVertexBufferLayout.size,

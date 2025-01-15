@@ -1,5 +1,5 @@
 import { samplerBindingTypeIntToGPUSamplerBindingType } from "../utils/WebGPUMap";
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUSamplerBindingLayout } from "../utils/WGPUStructInfos";
 
 export function WGPUSamplerBindingLayoutFromBuffer(

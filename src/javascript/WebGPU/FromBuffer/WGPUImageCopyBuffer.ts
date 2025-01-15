@@ -1,5 +1,5 @@
 import { heapGet } from "../../WasmHeap";
-import { _num, _pointerValue } from "../utils/WebGPUUtils";
+import { _num, _pointerValue } from "../../wasm/WasmUtils";
 import { WGPUImageCopyBuffer } from "../utils/WGPUStructInfos";
 // import { WGPUTextureDataLayoutFromBuffer } from "./WGPUTextureDataLayout";
 

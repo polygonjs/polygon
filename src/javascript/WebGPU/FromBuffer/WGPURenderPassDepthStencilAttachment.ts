@@ -3,7 +3,7 @@ import {
 	loadOpIntToGPULoadOp,
 	storeOpIntToGPUStoreOp,
 } from "../utils/WebGPUMap";
-import { _big, _num } from "../utils/WebGPUUtils";
+import { _big, _num } from "../../wasm/WasmUtils";
 import { WGPURenderPassDepthStencilAttachment } from "../utils/WGPUStructInfos";
 export function WGPURenderPassDepthStencilAttachmentFromBuffer(
 	p: bigint

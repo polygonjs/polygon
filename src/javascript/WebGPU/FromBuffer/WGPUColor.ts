@@ -1,4 +1,4 @@
-import { _num } from "../utils/WebGPUUtils";
+import { _num } from "../../wasm/WasmUtils";
 import { WGPUColor } from "../utils/WGPUStructInfos";
 
 export function WGPUColorFromBuffer(p: bigint): GPUColorDict /*GPUColor*/ {

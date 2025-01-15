@@ -16,13 +16,11 @@ buildNative :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 
 	compiler_begin_intercept(w);
 
-	// freeMemory := tprint("FREE_MEMORY_DEBUG :: %;", buildArgs.test && !buildArgs.skipmemtest);
-	// skipMemTest := tprint("SKIP_MEM_TEST :: %;", buildArgs.skipmemtest);
-	// sceneOnly := tprint("SCENE_ONLY :: %;", buildArgs.sceneOnly);
 	globalVars := buildGlobals(.{
 		freeMemory = buildArgs.test && !buildArgs.skipmemtest,
 		skipMemTest = buildArgs.skipmemtest,
-		useEditor = buildArgs.noEditor==false
+		useEditor = buildArgs.noEditor==false,
+		forThree = buildArgs.three
 	});
 	buildString := tprint("% #load \"../main.jai\";", globalVars);
 	// print("buildString (native):%\n", buildString);
