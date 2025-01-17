@@ -33,6 +33,8 @@ This is an example where geometries are generated in jai/wasm and threejs meshes
 
 You may also want to change the `vite.config.ts` options `noeditor: true`, `three:true` and `wasm32: true` if you want the hot reload to trigger a re-compile with the correct options. Obviously hot reload is now much slower than with wasm64.
 
+[live demo](https://polygon-next-three.netlify.app/three)
+
 # Run test suite
 
 on Desktop:
