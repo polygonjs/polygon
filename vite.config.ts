@@ -18,8 +18,8 @@ interface BuildArgs {
 const BUILD_ARGS: BuildArgs = {
 	wasm: true,
 	native: false,
-	noeditor: true,
-	three: true,
+	noeditor: false,
+	three: false,
 	test: false,
 	//
 	wasm32: false,
