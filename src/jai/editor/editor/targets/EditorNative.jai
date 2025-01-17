@@ -17,6 +17,9 @@ editorStart :: (editor: *Editor) {
 		drawDataInit(editor);
 	}
 
+	startTime := current_time_monotonic();
+	startTimeInMilliSeconds := to_milliseconds(startTime);
+
 	while editor.exitRequested==false {
 
 		time := current_time_monotonic();
@@ -57,7 +60,10 @@ editorStart :: (editor: *Editor) {
 			}
 		}
 
-		editorOnTick(editor, xx to_microseconds(time), editor.wgpuContext.config.width, editor.wgpuContext.config.height);
+
+		delta := to_milliseconds(time) - startTimeInMilliSeconds;
+		sceneTime:Time=delta / 1000.0;
+		editorOnTick(editor, sceneTime, editor.wgpuContext.config.width, editor.wgpuContext.config.height);
 	}
 	editorReset(editor);
 }

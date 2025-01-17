@@ -55,6 +55,7 @@ buildWasm :: (w: Workspace, options: *Build_Options, buildArgs: *BuildArgs) {
 		forThree = buildArgs.three
 	});
 	buildString := tprint("% #load \"../main.jai\";", globalVars);
+	// buildString :: "main::(){}";
 	// print("buildString (wasm):%\n", buildString);
 	add_build_string(buildString, w);
 	listen_to_compiler_messages(w, wasm=buildArgs.wasm, test=buildArgs.test);

@@ -27,6 +27,7 @@ dist-ssr
 src/jai/.build
 bin/
 public/*.wasm
+public/*.wat
 imgui.ini
 wgpu_wasm/generate_ts
 analyse.html

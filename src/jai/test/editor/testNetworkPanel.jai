@@ -148,7 +148,6 @@ testNetworkPanel :: () {
 					assertEqual(editor.commands.nodeSelectionRemoved.count, 1);
 					assertEqual(editor.commands.nodeSelectionAdded.count, 1);
 
-					print("last undo\n");
 					editorUndo(editor);
 					assertEqual(editor.history.commands.count, 2);
 					assertEqual(editor.history.index, -1);

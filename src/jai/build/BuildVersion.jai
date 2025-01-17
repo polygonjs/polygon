@@ -11,4 +11,4 @@ buildValidateJaiVersion :: () {
 
 VERSION_MAJOR :: 0;
 VERSION_MINOR :: 2;
-VERSION_MICRO :: 7;
+VERSION_MICRO :: 8;

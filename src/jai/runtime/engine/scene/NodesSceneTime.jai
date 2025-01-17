@@ -18,6 +18,8 @@ sceneOnAfterTick :: (scene: *NodesScene) {
 	scene.framesCount += 1;
 }
 
+#scope_file
+
 sceneSetTime :: (scene: *NodesScene, time:Time) {
 	scene.time = time;
 	setDirty(*scene.timeGraphNode);
