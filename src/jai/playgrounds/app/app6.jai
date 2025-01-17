@@ -11,7 +11,7 @@ appSceneInit6 :: (using app: *PolygonApp) {
 	paramSetValue(*output1.p.input, 0);
 	paramSetValue(*box1.p.scale, 2.0);
 	paramSetValue(*box1.p.segments, .{4,4,4});
-	paramSetValue(*box1.p.segments, .{10,10,10});
+	// paramSetValue(*box1.p.segments, .{10,10,10});
 	// paramSetValue(*box1.p.segments, .{20,20,20});
 	paramSetValue(*noise1.p.offset, .{1,0,0});
 

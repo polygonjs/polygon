@@ -7,7 +7,7 @@ import {
 	threeControllerCreate,
 } from "./three/threeController";
 
-const WASM32 = false;
+const WASM32 = true;
 const WASM_URL = WASM32 ? "/polygon-next.32.wasm" : "/polygon-next.wasm";
 const wasmLoadOptions: LoadWasmOptions = { url: WASM_URL };
 let threeController: ThreeController | null = null;
